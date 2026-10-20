@@ -18,24 +18,14 @@ REPO = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(REPO))
 
 from dynapm.eval.metrics import count_unique_refresh_timestamps  # noqa: E402
+from dynapm.eval.replay import CAUSAL_PROTOCOL
 from dynapm.eval.runner_v2 import run_method_on_vm  # noqa: E402
-from dynapm.methods.baselines_v2 import PeriodicPredictorPolicyV2  # noqa: E402
-from dynapm.methods.dynapm_v3 import DynAPMPolicyV3  # noqa: E402
-
-
-def _fact_pp(p, c, m, **k):
-    return PeriodicPredictorPolicyV2(p, c, m, period_hours=6.0, **k)
-
-
-def _fact_v3(p, c, m, **k):
-    return DynAPMPolicyV3(p, c, m, period_hours=6.0, drift_delta=0.002, **k)
+from dynapm.methods.factories import policy_factory  # noqa: E402
 
 
 PP = "periodic_predictor_6h_v2"
 V3 = "dynapm_v3_v2"
-FACTORIES = {PP: _fact_pp, V3: _fact_v3}
-
-RESID_FULL = REPO / "dynapm/results/residuals_full"
+FACTORIES = {name: policy_factory(name) for name in (PP, V3)}
 GT_DIR = REPO / "dynapm/results/ground_truth"
 OUT_JSON = REPO / "dynapm/results/eval_full_corpus_with_log"
 PARQUET_OUT = REPO / "dynapm/data/normalized_refresh_counts_corpus.parquet"
@@ -45,10 +35,6 @@ def _precheck_vm(trace: str, vm_id: str) -> str | None:
     vm_id = str(vm_id)
     if not (REPO / "data/raw" / trace / f"{vm_id}.csv").is_file():
         return "MissingRawCsv"
-    if not (RESID_FULL / f"{trace}__{vm_id}__cpu.parquet").is_file():
-        return "MissingResidualCpu"
-    if not (RESID_FULL / f"{trace}__{vm_id}__mem.parquet").is_file():
-        return "MissingResidualMem"
     if not (GT_DIR / f"{trace}__{vm_id}.parquet").is_file():
         return "MissingGroundTruth"
     return None
@@ -65,7 +51,8 @@ def _run_one(method: str, trace: str, vm_id: str) -> tuple[str, float | None]:
             ul = data.get("update_log")
             cc = data.get("cpu_class_accuracy")
             if (
-                isinstance(ul, list)
+                data.get("causal_protocol") == CAUSAL_PROTOCOL
+                and isinstance(ul, list)
                 and len(ul) > 0
                 and isinstance(cc, (int, float))
                 and math.isfinite(float(cc))
@@ -140,6 +127,8 @@ def row_from_json(path: Path) -> dict | None:
         data = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError):
         return None
+    if data.get("causal_protocol") != CAUSAL_PROTOCOL:
+        return None
     if data.get("run_status") in ("skipped", "failed"):
         return None
     ul = data.get("update_log")
@@ -172,6 +161,7 @@ def row_from_json(path: Path) -> dict | None:
         nd = int(data.get("n_drift_refreshes", 0))
 
     return {
+        "causal_protocol": CAUSAL_PROTOCOL,
         "method": meth,
         "trace": trace_nm,
         "vm_id": str(vm_id),

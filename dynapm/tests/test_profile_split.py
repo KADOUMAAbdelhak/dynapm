@@ -1,8 +1,6 @@
 """Tests for profile schema, bootstrap split, provisioning, patterns, ground truth."""
 from __future__ import annotations
 
-import json
-from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -14,20 +12,15 @@ from dynapm.core.schema import (
     MEMORY_CLASSES,
 )
 from dynapm.data.bootstrap import LOCKED_BOOTSTRAP_FRACTION, compute_split
-from dynapm.data.loader import load_vm_csv
 from dynapm.core.discretization import classify_value, compute_thresholds
 from dynapm.data.provisioning import extract_provisioning
-
-REPO = Path(__file__).resolve().parents[2]
-TRACE1_501 = REPO / "data/raw/Materna-Trace-1/501.csv"
-KEPT_VMS = REPO / "dynapm/data/kept_vms.json"
 
 CPU_M = "CPU usage [%]"
 MEM_M = "Memory usage [%]"
 
 
-def test_compute_split_70_30():
-    df = load_vm_csv(str(TRACE1_501))
+def test_compute_split_70_30(synthetic_frame):
+    df = synthetic_frame
     n_total = len(df)
     df_b, df_s, info = compute_split(df)
     n_boot = info["n_bootstrap"]
@@ -42,8 +35,8 @@ def test_compute_split_70_30():
     assert df.index[n_boot] == info["streaming_start"]
 
 
-def test_provisioning_extraction():
-    df = load_vm_csv(str(TRACE1_501))
+def test_provisioning_extraction(synthetic_frame):
+    df = synthetic_frame
     prov = extract_provisioning(df)
     assert prov == {"provisioned_cpu_cores": 2, "provisioned_ram_gb": 4.0}
 
@@ -94,16 +87,12 @@ def test_derive_burst_profile_thresholds():
     assert derive_burst_profile(s_freq, p95) == "frequent"
 
 
-def test_ground_truth_returns_all_fields():
-    with open(KEPT_VMS, encoding="utf-8") as f:
-        kept = json.load(f)
-    item = kept[0]
-    path = REPO / "data/raw" / item["trace"] / f'{item["vm_id"]}.csv'
-    df = load_vm_csv(str(path))
+def test_ground_truth_returns_all_fields(synthetic_frame):
+    df = synthetic_frame
     df_b, _, _ = compute_split(df)
     cpu_th = compute_thresholds(df_b, CPU_M)
     mem_th = compute_thresholds(df_b, MEM_M)
-    t = pd.Timestamp(df.index[3000])
+    t = pd.Timestamp(df.index[350])
     out = derive_ground_truth_at_t(
         df,
         t,
@@ -124,16 +113,12 @@ def test_ground_truth_returns_all_fields():
 
 
 
-def test_derive_ground_truth_v2_returns_4_keys():
-    with open(KEPT_VMS, encoding="utf-8") as f:
-        kept = json.load(f)
-    item = kept[0]
-    path = REPO / "data/raw" / item["trace"] / f'{item["vm_id"]}.csv'
-    df = load_vm_csv(str(path))
+def test_derive_ground_truth_v2_returns_4_keys(synthetic_frame):
+    df = synthetic_frame
     df_b, _, _ = compute_split(df)
     cpu_th = compute_thresholds(df_b, CPU_M)
     mem_th = compute_thresholds(df_b, MEM_M)
-    t = pd.Timestamp(df.index[3000])
+    t = pd.Timestamp(df.index[350])
     out = derive_ground_truth_at_t_v2(
         df,
         t,

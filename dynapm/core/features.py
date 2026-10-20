@@ -24,6 +24,8 @@ def build_features(df: pd.DataFrame, target: str) -> pd.DataFrame:
     if target not in VALID_TARGETS:
         raise ValueError(f"Unsupported target {target!r}; expected one of {VALID_TARGETS}")
 
+    if not isinstance(df.index, pd.DatetimeIndex) or not df.index.is_monotonic_increasing or not df.index.is_unique:
+        raise ValueError("features require unique, increasing datetime timestamps")
     s = df[target].astype(float)
     # Past-only series: value known at t is u_{t-1}.
     s_past = s.shift(1)

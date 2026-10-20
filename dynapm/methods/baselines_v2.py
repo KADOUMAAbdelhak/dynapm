@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import pandas as pd
 
+from dynapm.core.predictor import HorizonPredictor, forecast_at_origin
 from dynapm.core.forecasting import forecast_class_from_window, forecast_p95_from_window
 
 
@@ -13,7 +14,10 @@ def _window_last_hours(series: pd.Series, t: pd.Timestamp, hours: float) -> pd.S
 
 
 class _BasePolicyV2:
-    def __init__(self, profile, cpu_thresholds, mem_thresholds, **kwargs):
+    requires_predictors = False
+    requires_residuals = False
+
+    def __init__(self, profile, cpu_thresholds, mem_thresholds):
         self.profile = profile
         self.cpu_thresholds = cpu_thresholds
         self.mem_thresholds = mem_thresholds
@@ -57,35 +61,37 @@ class _BasePolicyV2:
                 }
             )
 
-    def step(self, t, cpu_obs_window, mem_obs_window, cpu_pred_window, mem_pred_window):
+    def step(self, t, cpu_obs_window, mem_obs_window):
         raise NotImplementedError
 
 
 class StaticPolicyV2(_BasePolicyV2):
-    def __init__(self, profile, cpu_thresholds, mem_thresholds, **kwargs):
-        super().__init__(profile, cpu_thresholds, mem_thresholds, **kwargs)
-        cpu_boot = kwargs["bootstrap_cpu_series"]
-        mem_boot = kwargs["bootstrap_mem_series"]
+    def __init__(self, profile, cpu_thresholds, mem_thresholds, *,
+                 bootstrap_cpu_series, bootstrap_mem_series):
+        super().__init__(profile, cpu_thresholds, mem_thresholds)
+        cpu_boot = bootstrap_cpu_series
+        mem_boot = bootstrap_mem_series
         self._set_initial_forecast(cpu_boot, mem_boot, t=profile.static.bootstrap_end)
 
-    def step(self, t, cpu_obs_window, mem_obs_window, cpu_pred_window, mem_pred_window):
+    def step(self, t, cpu_obs_window, mem_obs_window):
         return
 
 
 class PeriodicPolicyV2(_BasePolicyV2):
-    def __init__(self, profile, cpu_thresholds, mem_thresholds, **kwargs):
-        super().__init__(profile, cpu_thresholds, mem_thresholds, **kwargs)
-        self._period_hours = float(kwargs["period_hours"])
+    def __init__(self, profile, cpu_thresholds, mem_thresholds, *,
+                 bootstrap_cpu_series, bootstrap_mem_series, period_hours=6.0):
+        super().__init__(profile, cpu_thresholds, mem_thresholds)
+        self._period_hours = float(period_hours)
         self._period = pd.Timedelta(hours=self._period_hours)
-        cpu_boot = kwargs["bootstrap_cpu_series"]
-        mem_boot = kwargs["bootstrap_mem_series"]
+        cpu_boot = bootstrap_cpu_series
+        mem_boot = bootstrap_mem_series
         t0 = pd.Timestamp(cpu_boot.index[-1])
         cpu_init = _window_last_hours(cpu_boot, t0, self._period_hours)
         mem_init = _window_last_hours(mem_boot, t0, self._period_hours)
         self._set_initial_forecast(cpu_init, mem_init, t=t0)
         self._last_refresh = t0
 
-    def step(self, t, cpu_obs_window, mem_obs_window, cpu_pred_window, mem_pred_window):
+    def step(self, t, cpu_obs_window, mem_obs_window):
         t = pd.Timestamp(t)
         if (t - self._last_refresh) < self._period:
             return
@@ -94,16 +100,17 @@ class PeriodicPolicyV2(_BasePolicyV2):
 
 
 class ReactiveThresholdPolicyV2(_BasePolicyV2):
-    def __init__(self, profile, cpu_thresholds, mem_thresholds, **kwargs):
-        super().__init__(profile, cpu_thresholds, mem_thresholds, **kwargs)
-        cpu_boot = kwargs["bootstrap_cpu_series"]
-        mem_boot = kwargs["bootstrap_mem_series"]
+    def __init__(self, profile, cpu_thresholds, mem_thresholds, *,
+                 bootstrap_cpu_series, bootstrap_mem_series):
+        super().__init__(profile, cpu_thresholds, mem_thresholds)
+        cpu_boot = bootstrap_cpu_series
+        mem_boot = bootstrap_mem_series
         t0 = pd.Timestamp(cpu_boot.index[-1])
         cpu_init = _window_last_hours(cpu_boot, t0, 24.0)
         mem_init = _window_last_hours(mem_boot, t0, 24.0)
         self._set_initial_forecast(cpu_init, mem_init, t=t0)
 
-    def step(self, t, cpu_obs_window, mem_obs_window, cpu_pred_window, mem_pred_window):
+    def step(self, t, cpu_obs_window, mem_obs_window):
         t = pd.Timestamp(t)
         cpu_candidate = _window_last_hours(cpu_obs_window, t, 6.0)
         mem_candidate = _window_last_hours(mem_obs_window, t, 6.0)
@@ -118,16 +125,17 @@ class ReactiveThresholdPolicyV2(_BasePolicyV2):
 
 
 class FullRewritePolicyV2(_BasePolicyV2):
-    def __init__(self, profile, cpu_thresholds, mem_thresholds, **kwargs):
-        super().__init__(profile, cpu_thresholds, mem_thresholds, **kwargs)
-        cpu_boot = kwargs["bootstrap_cpu_series"]
-        mem_boot = kwargs["bootstrap_mem_series"]
+    def __init__(self, profile, cpu_thresholds, mem_thresholds, *,
+                 bootstrap_cpu_series, bootstrap_mem_series):
+        super().__init__(profile, cpu_thresholds, mem_thresholds)
+        cpu_boot = bootstrap_cpu_series
+        mem_boot = bootstrap_mem_series
         t0 = pd.Timestamp(cpu_boot.index[-1])
         cpu_init = _window_last_hours(cpu_boot, t0, 24.0)
         mem_init = _window_last_hours(mem_boot, t0, 24.0)
         self._set_initial_forecast(cpu_init, mem_init, t=t0)
 
-    def step(self, t, cpu_obs_window, mem_obs_window, cpu_pred_window, mem_pred_window):
+    def step(self, t, cpu_obs_window, mem_obs_window):
         t = pd.Timestamp(t)
         cpu_now = _window_last_hours(cpu_obs_window, t, 24.0)
         mem_now = _window_last_hours(mem_obs_window, t, 24.0)
@@ -141,37 +149,41 @@ class PeriodicPredictorPolicyV2(_BasePolicyV2):
     ``{û_{t+k|t}}_{k=1..288}``, not from recent observed windows.
     """
 
-    def __init__(self, profile, cpu_thresholds, mem_thresholds, **kwargs):
-        super().__init__(profile, cpu_thresholds, mem_thresholds, **kwargs)
-        self._cpu_predictor = kwargs["cpu_predictor"]
-        self._mem_predictor = kwargs["mem_predictor"]
-        self._cpu_obs_full = kwargs["cpu_obs_full"]
-        self._mem_obs_full = kwargs["mem_obs_full"]
-        self._period_hours = float(kwargs["period_hours"])
+    requires_predictors = True
+
+    def __init__(
+        self, profile, cpu_thresholds, mem_thresholds, *,
+        bootstrap_cpu_series: pd.Series, bootstrap_mem_series: pd.Series,
+        cpu_predictor: HorizonPredictor, mem_predictor: HorizonPredictor,
+        cpu_obs_full: pd.Series, mem_obs_full: pd.Series,
+        period_hours: float = 6.0,
+    ):
+        super().__init__(profile, cpu_thresholds, mem_thresholds)
+        self._cpu_predictor = cpu_predictor
+        self._mem_predictor = mem_predictor
+        self._cpu_obs_full = cpu_obs_full
+        self._mem_obs_full = mem_obs_full
+        self._period_hours = float(period_hours)
         self._period = pd.Timedelta(hours=self._period_hours)
-        cpu_boot = kwargs["bootstrap_cpu_series"]
-        mem_boot = kwargs["bootstrap_mem_series"]
-        t0 = pd.Timestamp(cpu_boot.index[-1])
-        cpu_init = _window_last_hours(cpu_boot, t0, self._period_hours)
-        mem_init = _window_last_hours(mem_boot, t0, self._period_hours)
+        t0 = pd.Timestamp(bootstrap_cpu_series.index[-1])
+        cpu_init = _window_last_hours(bootstrap_cpu_series, t0, self._period_hours)
+        mem_init = _window_last_hours(bootstrap_mem_series, t0, self._period_hours)
         self._set_initial_forecast(cpu_init, mem_init, t=t0)
         self._last = t0
 
     def _causal_windows(self, t: pd.Timestamp):
-        hist_cpu = self._cpu_obs_full.loc[:t]
-        hist_mem = self._mem_obs_full.loc[:t]
         return (
-            self._cpu_predictor.predict_causal_horizon(hist_cpu, n_steps=288),
-            self._mem_predictor.predict_causal_horizon(hist_mem, n_steps=288),
+            forecast_at_origin(self._cpu_predictor, self._cpu_obs_full, t),
+            forecast_at_origin(self._mem_predictor, self._mem_obs_full, t),
         )
 
-    def step(self, t, cpu_obs_window, mem_obs_window, cpu_pred_window, mem_pred_window):
+    def step(self, t, cpu_obs_window, mem_obs_window):
         t = pd.Timestamp(t)
         if (t - self._last) < self._period:
             return
 
         cpu_lookahead, mem_lookahead = self._causal_windows(t)
-        if len(cpu_lookahead) == 0:
+        if len(cpu_lookahead) == 0 or len(mem_lookahead) == 0:
             return
 
         old_cpu_cls = self.profile.dynamic.cpu_class
@@ -234,4 +246,3 @@ class PeriodicPredictorPolicyV2(_BasePolicyV2):
                 "p_commit": 1.0,
             }
         )
-

@@ -22,7 +22,7 @@ The following tests use synthetic inputs and do not train models or require the 
 python -m pytest dynapm/tests/test_drift.py dynapm/tests/test_evaluation_clock.py dynapm/tests/test_forecasting.py dynapm/tests/test_provisioning.py
 ```
 
-Run `python -m pytest dynapm/tests/test_dynapm_v3.py` to see the currently known constructor-integration failures. The full suite also contains data-dependent and model-training tests; review [development notes](docs/development.md) before running it.
+The full suite (`python -m pytest`) includes small synthetic policy replays and tiny RandomForest fixtures. Two CSV-loader checks additionally use local raw traces. No test runs a corpus experiment. See the [causal dependency contract and development notes](docs/development.md).
 
 ## Layout
 

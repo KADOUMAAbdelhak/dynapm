@@ -19,38 +19,14 @@ from dynapm.scripts import _matplotlib_setup  # noqa: F401
 
 import matplotlib.pyplot as plt  # noqa: E402
 
+from dynapm.eval.replay import require_causal_protocol
 from dynapm.eval.provisioning import (  # noqa: E402
     OVER_THRESHOLD,
     SAFETY_FACTOR,
     collect_verified_p95_pairs,
     rows_to_provisioning_df,
 )
-from dynapm.methods.baselines_v2 import (  # noqa: E402
-    FullRewritePolicyV2,
-    PeriodicPolicyV2,
-    PeriodicPredictorPolicyV2,
-    ReactiveThresholdPolicyV2,
-    StaticPolicyV2,
-)
-from dynapm.methods.dynapm_v3 import DynAPMPolicyV3  # noqa: E402
-
-
-def _factory(method: str):
-    if method == "static_v2":
-        return lambda p, c, m, **k: StaticPolicyV2(p, c, m, **k)
-    if method == "periodic_6h_v2":
-        return lambda p, c, m, **k: PeriodicPolicyV2(p, c, m, period_hours=6.0, **k)
-    if method == "reactive_v2":
-        return lambda p, c, m, **k: ReactiveThresholdPolicyV2(p, c, m, **k)
-    if method == "full_rewrite_v2":
-        return lambda p, c, m, **k: FullRewritePolicyV2(p, c, m, **k)
-    if method == "periodic_predictor_6h_v2":
-        return lambda p, c, m, **k: PeriodicPredictorPolicyV2(p, c, m, period_hours=6.0, **k)
-    if method == "dynapm_v3_v2":
-        return lambda p, c, m, **k: DynAPMPolicyV3(
-            p, c, m, period_hours=6.0, drift_delta=0.002, **k
-        )
-    raise ValueError(method)
+from dynapm.methods.factories import policy_factory as _factory
 
 
 def enrich_rates(df: pd.DataFrame, sf: float) -> pd.DataFrame:
@@ -343,23 +319,18 @@ def main() -> int:
     report_path = repo / "dynapm/reports/task_17b_provisioning.md"
 
     summary = pd.read_parquet(summary_path)
+    require_causal_protocol(summary)
     summary["vm_id"] = summary["vm_id"].astype(str)
 
-    avail_note = ""
-    samp = repo / "dynapm/results/eval_full_corpus/periodic_predictor_6h_v2__Materna-Trace-1__504.json"
-    sj = json.loads(samp.read_text(encoding="utf-8")) if samp.is_file() else {}
-    if "per_eval_records" not in sj:
-        avail_note = (
-            "Existing corpus JSON omit per-eval payloads (only headline metrics): "
-            "**replayed the runner_v2 stream inside `dynapm/eval/provisioning.collect_verified_p95_pairs`** "
-            "rather than patching `runner_v2` (~20 min wall with 8 workers, one-time parquet cache). "
-            "This is cheaper than a full runner format migration and reproducible offline."
-        )
-    else:
-        avail_note = "Corpus JSON already exposed `per_eval_records`; ingestion could short-circuit (not exercised)."
+    avail_note = (
+        "Provisioning pairs use the shared causal replay and only snapshots "
+        "verified after their 24-hour horizons. Cached records must identify "
+        "the current causal protocol; --force-collect builds a fresh generation."
+    )
 
     if out_records.is_file() and not args.force_collect:
         raw = pd.read_parquet(out_records)
+        require_causal_protocol(raw)
     else:
         raw = collect_all(summary, repo, args.n_jobs)
         out_records.parent.mkdir(parents=True, exist_ok=True)

@@ -1,43 +1,46 @@
-# Development and validation
+# Causal policy interface and validation
 
-## Scientific state
+## Dependency contract
 
-Causal feature construction, predictor training interfaces, recursive forecasting, policy refresh, and the evaluation runner are preserved as the current development baseline. Cleanup does not change their scientific behavior.
+Policies declare `requires_predictors` and `requires_residuals` on their classes. Use `dynapm.methods.factories.policy_factory(method)` or a policy class / `functools.partial` of that class. Opaque callable factories are rejected; requirements are never inferred from function names.
 
-The DynAPM-V3 unit tests still use the earlier constructor signature. They currently omit `cpu_predictor`, `mem_predictor`, `cpu_obs_full`, and `mem_obs_full`. Provisioning policy construction also needs reconciliation with the corrected predictor interfaces. Address these together with new causal validation before starting a new full experiment.
+Every constructor receives a profile, CPU/memory thresholds, and keyword-only bootstrap CPU/memory series. Observation-only policies require no predictors or prediction artifacts.
 
-The full-corpus runner supports selecting methods, but its cached summaries need explicit generation checks when methods are rerun separately. Do not combine measurements from different source revisions or forecast-origin protocols.
+Periodic-Predictor and DynAPM-V3 additionally require four explicit keyword-only dependencies:
 
-## Checks and expensive tests
-
-For lightweight checks with local raw data available:
-
-```sh
-python -m pytest dynapm/tests --ignore=dynapm/tests/test_runner_v2.py --ignore=dynapm/tests/test_periodic_predictor_integration.py -k 'not test_predictor_fits_and_predicts and not test_predictor_residuals_finite and not test_predictor_train_test_separation'
+```python
+cpu_predictor=cpu_predictor,
+mem_predictor=mem_predictor,
+cpu_obs_full=cpu_observations,
+mem_obs_full=memory_observations,
 ```
 
-This deliberately excludes three predictor-training tests and four runner/policy integration tests. Integration runs can fit forests and perform recursive multi-step forecasting. They require local selection, bootstrap, residual, and ground-truth artifacts. Run them only as separately authorized scientific jobs.
+Each target has its own fitted predictor. `forecast_at_origin` filters observations to timestamps at or before the refresh origin. The predictor recursively appends predictions for its 288 future steps. Initialization uses bootstrap observations; refreshes use the causal horizon. Short histories without 96 observations produce no horizon.
 
-The extracted `test_periodic_predictor_integration.py` is retained without changing its assertions. The remaining unit tests preserve their existing assertions as well.
+All policies implement `step(t, cpu_obs_window, mem_obs_window)`. DynAPM-V3 additionally requires keyword-only `cpu_prediction` and `mem_prediction`: the current causal one-step predictions, not future arrays. Its ADWIN inputs are `observation(t) - prediction(t|t-1)`.
 
-The safe CLI help entry points are:
+## Shared replay
+
+Evaluation and provisioning both call `prepare_vm_replay` and `iter_verified_snapshots` in `dynapm/eval/replay.py`. Preparation fits CPU/memory predictors once per replay, on the first 30% bootstrap segment. Thresholds and provisioning capacity are derived from bootstrap data directly. Observation-only policies fit no models. V3 recomputes causal one-step predictions with the same fitted models; replay does not load cached residuals.
+
+The replay grid preserves streaming-only feature warmup. Snapshot copies are verified only once their 24-hour horizons have elapsed. Forward ground truth never enters policy construction or policy steps. `repo_root` supports isolated fixtures; `predictor_factory` supports lightweight test doubles or explicitly configured predictors.
+
+Task 15, provisioning, and event-log orchestration use the same factories. New outputs identify `causal-policy-v1`; unversioned JSONs/tables are not accepted as current causal measurements. This protocol marker is a compatibility guard, not a complete input/source/environment provenance manifest. Do not mix source revisions or experimental generations. Corpus-level provenance and performance validation remain separate research work.
+
+## Lightweight validation
 
 ```sh
+python -m pytest
 python -m dynapm.scripts.task17b_provisioning --help
 python -m dynapm.scripts.task18b_corpus_churn_rerun --help
 ```
 
-Other orchestration scripts execute work from `main()` and may not implement `--help`; do not invoke them as smoke checks.
+Policy integration tests use one 720-row synthetic VM and a deterministic causal test double. Predictor tests use tiny forests. The two loader checks require the local Materna CSV fixtures described in `data/README.md`; other tests use synthetic data. No test runs full Task 15, provisioning corpus replay, or production model training.
 
-## Implementation entry points
+Full corpus jobs, production-size forests, and extensive recursive inference require separate authorization. Some orchestration scripts execute `main()` without a help parser; do not invoke them as smoke checks.
 
-- Loading and filtering: `dynapm.data.loader.load_vm_csv`, `iter_corpus`, `dynapm.data.filter.filter_corpus`.
-- Bootstrap: `dynapm.scripts.run_bootstrap_characterization.main`.
-- Features and predictor: `dynapm.core.features.build_features`, `dynapm.core.predictor.VMPredictor`.
-- Policies: `dynapm.methods.baselines_v2`, `dynapm.methods.dynapm_v3.DynAPMPolicyV3`.
-- Evaluation: `dynapm.eval.runner_v2.run_method_on_vm`, `dynapm.scripts.task15_full_corpus`.
-- Ground truth: `dynapm.core.ground_truth`, `dynapm.scripts.task04_ground_truth`.
-- Provisioning: `dynapm.eval.provisioning`, `dynapm.scripts.task17b_provisioning`.
-- Statistical aggregation: `dynapm.eval.metrics`, `dynapm.scripts.task18_paper_packaging`, `dynapm.scripts.task18b_corpus_churn_rerun`.
+## Scientific state
 
-Existing module names are retained for import compatibility. Statistical aggregation scripts include table/plot generation and sample-oriented entry points; use their reusable functions with explicitly validated current inputs. No generated tables or figures are version-controlled.
+Feature vectors for a target timestamp exclude that timestamp's actual utilization. Refresh snapshots can use actual observations through their origin, recursive predictions thereafter, and deterministic calendar information. CPU and memory models do not share utilization features. These properties are covered by invariance tests.
+
+Small-fixture correctness does not establish corpus-level accuracy, drift effectiveness, or operating cost. Historical publication measurements are not an acceptance target for causal development.

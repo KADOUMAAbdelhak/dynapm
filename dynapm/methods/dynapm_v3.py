@@ -1,7 +1,11 @@
 """DynAPM v3: periodic predictor refresh + drift-augmented extra refreshes."""
 from __future__ import annotations
 
+import math
+
 import pandas as pd
+
+from dynapm.core.predictor import HorizonPredictor, forecast_at_origin
 
 from dynapm.core.drift import ADWINDetector
 from dynapm.core.forecasting import forecast_class_from_window, forecast_p95_from_window
@@ -17,25 +21,25 @@ class DynAPMPolicyV3(_BasePolicyV2):
     multi-step predictor horizon. No decision head, churn, or alpha.
     """
 
+    requires_predictors = True
+    requires_residuals = True
+
     def __init__(
         self,
         profile,
         cpu_thresholds,
         mem_thresholds,
+        *,
         bootstrap_cpu_series,
         bootstrap_mem_series,
-        cpu_pred_full,
-        mem_pred_full,
-        cpu_predictor,
-        mem_predictor,
+        cpu_predictor: HorizonPredictor,
+        mem_predictor: HorizonPredictor,
         cpu_obs_full,
         mem_obs_full,
         period_hours: float = 6.0,
         drift_delta: float = 0.002,
     ):
         super().__init__(profile, cpu_thresholds, mem_thresholds)
-        self._cpu_pred_full = cpu_pred_full
-        self._mem_pred_full = mem_pred_full
         self._cpu_predictor = cpu_predictor
         self._mem_predictor = mem_predictor
         self._cpu_obs_full = cpu_obs_full
@@ -56,17 +60,15 @@ class DynAPMPolicyV3(_BasePolicyV2):
             self.profile.last_updated[f] = t0
 
     def _causal_windows(self, t: pd.Timestamp):
-        hist_cpu = self._cpu_obs_full.loc[:t]
-        hist_mem = self._mem_obs_full.loc[:t]
         return (
-            self._cpu_predictor.predict_causal_horizon(hist_cpu, n_steps=288),
-            self._mem_predictor.predict_causal_horizon(hist_mem, n_steps=288),
+            forecast_at_origin(self._cpu_predictor, self._cpu_obs_full, t),
+            forecast_at_origin(self._mem_predictor, self._mem_obs_full, t),
         )
 
     def _refresh_from_predictor(self, t: pd.Timestamp, reason: str) -> None:
         t = pd.Timestamp(t)
         cpu_lookahead, mem_lookahead = self._causal_windows(t)
-        if len(cpu_lookahead) == 0:
+        if len(cpu_lookahead) == 0 or len(mem_lookahead) == 0:
             return
 
         old = (
@@ -99,11 +101,16 @@ class DynAPMPolicyV3(_BasePolicyV2):
             {**meta, "field": "predicted_mem_p95_next_24h", "old_value": old[3], "new_value": new_mem_p95}
         )
 
-    def step(self, t, cpu_obs_window, mem_obs_window, cpu_pred_window, mem_pred_window):
+    def step(self, t, cpu_obs_window, mem_obs_window, *, cpu_prediction: float, mem_prediction: float):
+        """Consume current yhat(t|t-1) scalars only; refreshes never use them."""
         t = pd.Timestamp(t)
 
-        cpu_resid = float(cpu_obs_window.iloc[-1]) - float(cpu_pred_window.iloc[-1])
-        mem_resid = float(mem_obs_window.iloc[-1]) - float(mem_pred_window.iloc[-1])
+        if cpu_obs_window.index[-1] != t or mem_obs_window.index[-1] != t:
+            raise ValueError("residual observations must be aligned to the current timestamp")
+        if not math.isfinite(cpu_prediction) or not math.isfinite(mem_prediction):
+            raise ValueError("residual predictions must be finite")
+        cpu_resid = float(cpu_obs_window.iloc[-1]) - float(cpu_prediction)
+        mem_resid = float(mem_obs_window.iloc[-1]) - float(mem_prediction)
         cpu_drift = self._cpu_drift.update(cpu_resid)
         mem_drift = self._mem_drift.update(mem_resid)
 

@@ -21,54 +21,19 @@ import matplotlib.pyplot as plt
 
 from scipy import stats as scipy_stats
 
+from dynapm.eval.replay import CAUSAL_PROTOCOL, require_causal_protocol
 from dynapm.eval.runner_v2 import run_method_on_vm
-from dynapm.methods.baselines_v2 import (
-    FullRewritePolicyV2,
-    PeriodicPolicyV2,
-    PeriodicPredictorPolicyV2,
-    ReactiveThresholdPolicyV2,
-    StaticPolicyV2,
-)
-from dynapm.methods.dynapm_v3 import DynAPMPolicyV3
+from dynapm.methods.factories import policy_factory
 from dynapm.data.bootstrap import compute_split
 from dynapm.data.loader import load_vm_csv
 
-RESID_FULL = REPO / "dynapm/results/residuals_full"
 GT_DIR = REPO / "dynapm/results/ground_truth"
 
 
-def _fact_static_v2(p, c, m, **k):
-    return StaticPolicyV2(p, c, m, **k)
-
-
-def _fact_periodic_6h(p, c, m, **k):
-    return PeriodicPolicyV2(p, c, m, period_hours=6.0, **k)
-
-
-def _fact_reactive(p, c, m, **k):
-    return ReactiveThresholdPolicyV2(p, c, m, **k)
-
-
-def _fact_full_rewrite(p, c, m, **k):
-    return FullRewritePolicyV2(p, c, m, **k)
-
-
-def _fact_periodic_predictor(p, c, m, **k):
-    return PeriodicPredictorPolicyV2(p, c, m, period_hours=6.0, **k)
-
-
-def _fact_dynapm_v3_v2(p, c, m, **k):
-    return DynAPMPolicyV3(p, c, m, period_hours=6.0, drift_delta=0.002, **k)
-
-
-FACTORIES = {
-    "static_v2": _fact_static_v2,
-    "periodic_6h_v2": _fact_periodic_6h,
-    "reactive_v2": _fact_reactive,
-    "full_rewrite_v2": _fact_full_rewrite,
-    "periodic_predictor_6h_v2": _fact_periodic_predictor,
-    "dynapm_v3_v2": _fact_dynapm_v3_v2,
-}
+FACTORIES = {name: policy_factory(name) for name in (
+    "static_v2", "periodic_6h_v2", "reactive_v2", "full_rewrite_v2",
+    "periodic_predictor_6h_v2", "dynapm_v3_v2",
+)}
 
 METHOD_ORDER = [
     "static_v2",
@@ -108,10 +73,6 @@ def _precheck_vm(trace: str, vm_id: str) -> str | None:
     vm_id = str(vm_id)
     if not (REPO / "data/raw" / trace / f"{vm_id}.csv").is_file():
         return "MissingRawCsv"
-    if not (RESID_FULL / f"{trace}__{vm_id}__cpu.parquet").is_file():
-        return "MissingResidualCpu"
-    if not (RESID_FULL / f"{trace}__{vm_id}__mem.parquet").is_file():
-        return "MissingResidualMem"
     if not (GT_DIR / f"{trace}__{vm_id}.parquet").is_file():
         return "MissingGroundTruth"
     return None
@@ -119,6 +80,7 @@ def _precheck_vm(trace: str, vm_id: str) -> str | None:
 
 def _empty_row(method: str, trace: str, vm_id: str, tier: str, status: str, reason: str) -> dict:
     return {
+        "causal_protocol": CAUSAL_PROTOCOL,
         "method": method,
         "trace": trace,
         "vm_id": str(vm_id),
@@ -141,6 +103,7 @@ def _empty_row(method: str, trace: str, vm_id: str, tier: str, status: str, reas
 
 def _success_row(method: str, tier: str, out: dict) -> dict:
     return {
+        "causal_protocol": CAUSAL_PROTOCOL,
         "method": method,
         "trace": out["trace"],
         "vm_id": str(out["vm_id"]),
@@ -168,7 +131,7 @@ def _run_one(method: str, trace: str, vm_id: str, tier: str, out_dir: Path) -> d
     if pre is None and outp.is_file():
         try:
             data = json.loads(outp.read_text(encoding="utf-8"))
-            if data.get("trace") == trace and str(data.get("vm_id")) == str(vm_id):
+            if data.get("causal_protocol") == CAUSAL_PROTOCOL and data.get("trace") == trace and str(data.get("vm_id")) == str(vm_id):
                 cc = data.get("cpu_class_accuracy")
                 if isinstance(cc, (int, float)) and math.isfinite(float(cc)):
                     return _success_row(method, tier, data)
@@ -267,6 +230,7 @@ def main() -> int:
     df_new = pd.DataFrame(rows)
     if summary_path.is_file() and set(methods) != set(METHOD_ORDER):
         df_old = pd.read_parquet(summary_path)
+        require_causal_protocol(df_old)
         df_old = df_old[~df_old["method"].isin(methods)]
         df = pd.concat([df_old, df_new], ignore_index=True)
     else:
@@ -676,7 +640,7 @@ def main() -> int:
         "- Corpus JSON omit `update_log` to limit disk footprint; parquet holds all headline metrics.\n"
         "- **`task15_full_corpus.py` resume:** if a per-run JSON already exists and parses with finite "
         "`cpu_class_accuracy`, that VM–method pair is reloaded instead of recomputing.\n"
-        '- **Skipped** runs are precondition failures (`failure_reason` e.g. `MissingResidualCpu`);\n'
+        '- **Skipped** runs are precondition failures (`failure_reason` e.g. `MissingGroundTruth`);\n'
         '- **Wilcoxon** uses `zero_method="wilcox"`; ill-conditioned cases return `nan` *p*-value.\n'
     )
 

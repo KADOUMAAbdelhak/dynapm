@@ -1,11 +1,29 @@
 """Per-VM random-forest predictor and residual stream generation."""
 from __future__ import annotations
 
+from typing import Protocol
+
 import numpy as np
 import pandas as pd
 from sklearn.ensemble import RandomForestRegressor
 
 from dynapm.core.features import LAGS, MAX_CONTEXT, ROLL_WINDOWS, build_features
+
+
+class HorizonPredictor(Protocol):
+    """A fitted target-specific predictor used by refresh policies."""
+
+    def predict_causal_horizon(
+        self, history: pd.Series, n_steps: int = 288,
+    ) -> pd.Series: ...
+
+
+def forecast_at_origin(
+    predictor: HorizonPredictor, observations: pd.Series, origin: pd.Timestamp,
+) -> pd.Series:
+    """Expose only observations available at origin to recursive inference."""
+    history = observations.loc[observations.index <= pd.Timestamp(origin)].sort_index()
+    return predictor.predict_causal_horizon(history, n_steps=288)
 
 
 def _causal_feature_row(values: np.ndarray, ts: pd.Timestamp) -> np.ndarray:
@@ -104,10 +122,13 @@ class VMPredictor:
         """
         if self.feature_names_ is None:
             raise ValueError("model must be fit before predict_causal_horizon")
-        if len(history) < 2:
-            return pd.Series(dtype=float, name="y_pred")
-
+        if not isinstance(history.index, pd.DatetimeIndex) or not history.index.is_unique:
+            raise ValueError("history requires unique datetime timestamps")
+        if n_steps <= 0:
+            raise ValueError("n_steps must be positive")
         hist = history.astype(float).dropna().sort_index()
+        if len(hist) < MAX_CONTEXT:
+            return pd.Series(dtype=float, name="y_pred")
         if step is None:
             step = pd.Timedelta(hist.index[1] - hist.index[0])
             if step <= pd.Timedelta(0):
