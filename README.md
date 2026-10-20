@@ -1,6 +1,6 @@
 # DynAPM
 
-DynAPM is a research implementation for adaptive application-profile maintenance. It includes predictor-grounded and drift-augmented profile refresh. The current development version uses causal feature construction and causal multi-step forecasting. Development is ongoing, and policy integration is still being validated.
+DynAPM is a research implementation for adaptive application-profile maintenance. It includes predictor-grounded and drift-augmented profile refresh. The current development version uses causal feature construction and causal multi-step forecasting. Development is ongoing. Causal interface, timeline and refresh-accounting correctness passed their lightweight validation gates; scientific benefit and system-level validation remain open.
 
 Datasets and generated outputs are external or untracked. Historical publication results are not stored in this repository.
 
@@ -34,3 +34,11 @@ The full suite (`python -m pytest`) includes small synthetic policy replays and 
 - `dynapm/tests/`: unit and integration tests, including Periodic-Predictor integration.
 
 See [the temporal protocol](docs/protocol.md), [data setup](data/README.md), [output handling](results/README.md), and [development notes](docs/development.md). Keep each new experiment's configuration and provenance with its external outputs.
+
+## Project authority and research gates
+
+The sole authoritative active project for current code, experiments and development is `/Users/fgtek002/dynapm`. Use repository-relative paths and configuration in runtime code; this workstation identity is documentation only.
+
+Historical TOCS material is retained as an immutable external archive, not a second working project. The separately frozen original publication directory remains reference-only. Runtime code must never reference or automatically load that archive/publication material. Archive identity, integrity checks and the scoped duplicate search are documented in the [consolidation record](docs/consolidation_record.md).
+
+Follow the [validation strategy](docs/validation_strategy.md) and [gated roadmap](docs/validation_roadmap.md). V0 (causal protocol) and V1A (uniform accounting) passed. **V1B / Phase 2C experiment provenance is next and has not started.** No new full-corpus claim-generating run is permitted before provenance and bounded-pilot gates. Implementation completion, statistical significance and offline accuracy alone do not establish a systems contribution. Manuscript drafting follows the evidence/claim audit, not implementation completion.

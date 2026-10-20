@@ -52,3 +52,11 @@ Every policy delegates initialization and runtime assignments to `ProfileCommitt
 Use `dynapm.eval.metrics.summarize_accounting` on per-VM summary rows for counter means and medians. It validates the accounting schema, nonnegative integer counters, write counts, and trigger decompositions. Do not reconstruct counts from event traces or sum repeated per-evaluation provisioning outcome rows. Provisioning executes the same policy commit path and exposes per-VM counters in `pairs.attrs["policy_accounting"]`; its per-evaluation outcome rows remain distinct from per-VM accounting summaries. These attributes are not summed across outcome rows; concatenated corpus outcome tables should use the separate canonical per-VM summary for accounting.
 
 See [Refresh Accounting](protocol.md#refresh-accounting) and [the reference audit](accounting-audit.md). Old counter schemas require fresh, separately authorized experimental generations; this phase does not regenerate outputs.
+
+## Single-project governance
+
+The sole authoritative active repository is `/Users/fgtek002/dynapm`, branch `dynapm`. This absolute location identifies the workstation project only. Scientific code must use repository-relative paths or explicit configuration and must not hard-code the user's home directory.
+
+Historical TOCS evidence exists as an immutable external archive, not an alternate implementation tree. The frozen original publication reference is also inactive. Neither may be loaded automatically by current experiments, used as a fallback cache, or described as current causal results. See the [consolidation record](consolidation_record.md) for archive identity and verification; historical provenance paths must not be rewritten into runtime defaults.
+
+The [validation strategy](validation_strategy.md) governs intended claims, corpus selection, fair controls, statistics, overhead, real systems evidence and reproducibility. The [roadmap](validation_roadmap.md) records V0/V1A PASS and V1B (Phase 2C) NEXT. This governance update does not implement Phase 2C. Before a new full-corpus run, implement and test complete manifests/fingerprint-based cache rejection, then obtain a bounded-pilot scope and freeze its confirmation criteria. No scientific benefit is inferred from the passing lightweight suite.
