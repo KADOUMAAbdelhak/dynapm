@@ -17,8 +17,10 @@ def test_evaluation_and_provisioning_share_construction(method, replay_repo, lag
     out = run_method_on_vm("TestTrace", "1", factory, **opts)
     pairs = collect_verified_p95_pairs("TestTrace", "1", factory, **opts)
     assert out["n_eval_points_verified"] == len(pairs) == 1
-    assert out["snapshots_dropped_unverified"] == 1
+    assert out["snapshots_dropped_unverified"] == 0
     assert out["n_streaming_steps"] == 408
+    assert out["n_refresh_events"] == len(out["refresh_log"])
+    assert out["n_periodic_refreshes"] + out["n_drift_refreshes"] <= out["n_refresh_events"]
     if method == "static_v2":
         assert out["total_updates"] == 0
     else:
@@ -98,7 +100,7 @@ def test_script_cache_rejects_unversioned_measurements(script, replay_repo, lag_
     assert len(calls) == 1  # A matching causal generation can be reused.
 
 
-@pytest.mark.parametrize("protocol", [None, "old-generation", "causal-policy-v1"])
+@pytest.mark.parametrize("protocol", [None, "causal-policy-v1", "causal-timeline-v2"])
 def test_table_protocol_guard(protocol):
     import pandas as pd
     from dynapm.eval.replay import require_causal_protocol, CAUSAL_PROTOCOL

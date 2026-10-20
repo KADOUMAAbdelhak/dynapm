@@ -23,9 +23,9 @@ All policies implement `step(t, cpu_obs_window, mem_obs_window)`. DynAPM-V3 addi
 
 Evaluation and provisioning both call `prepare_vm_replay` and `iter_verified_snapshots` in `dynapm/eval/replay.py`. Preparation fits CPU/memory predictors once per replay, on the first 30% bootstrap segment. Thresholds and provisioning capacity are derived from bootstrap data directly. Observation-only policies fit no models. V3 recomputes causal one-step predictions with the same fitted models; replay does not load cached residuals.
 
-The replay grid preserves streaming-only feature warmup. Snapshot copies are verified only once their 24-hour horizons have elapsed. Forward ground truth never enters policy construction or policy steps. `repo_root` supports isolated fixtures; `predictor_factory` supports lightweight test doubles or explicitly configured predictors.
+See [the temporal protocol](protocol.md) for the shared periodic grid, ordering, missing-observation rules, and exact forecast/label boundaries. The replay grid preserves streaming-only feature warmup. Labels are derived in memory under the current convention; cached ground-truth files are not read. Snapshot copies are verified only once their 24-hour horizons have elapsed. Forward ground truth never enters policy construction or policy steps. `repo_root` supports isolated fixtures; `predictor_factory` supports lightweight test doubles or explicitly configured predictors.
 
-Task 15, provisioning, and event-log orchestration use the same factories. New outputs identify `causal-policy-v1`; unversioned JSONs/tables are not accepted as current causal measurements. This protocol marker is a compatibility guard, not a complete input/source/environment provenance manifest. Do not mix source revisions or experimental generations. Corpus-level provenance and performance validation remain separate research work.
+Task 15, provisioning, and event-log orchestration use the same factories. New outputs identify `causal-timeline-v2`; unversioned JSONs/tables are not accepted as current causal measurements. This protocol marker is a compatibility guard, not a complete input/source/environment provenance manifest. Do not mix source revisions or experimental generations. Corpus-level provenance and performance validation remain separate research work.
 
 ## Lightweight validation
 

@@ -3,6 +3,8 @@ from __future__ import annotations
 
 import pandas as pd
 
+from dynapm.core.temporal import MIN_OBSERVATIONS, forward_observations
+
 
 def _compute_candidate_timestamps(
     streaming_index: pd.DatetimeIndex,
@@ -35,10 +37,15 @@ def compute_data_aware_evaluation_timestamps(
     streaming_index: pd.DatetimeIndex,
     period_hours: int = 12,
     window_hours: int = 24,
-    min_observations_in_window: int = 200,
+    min_observations_in_window: int = MIN_OBSERVATIONS,
 ) -> tuple[pd.DatetimeIndex, dict]:
     """
-    Data-aware clock: keeps only candidate eval times with enough observed rows in [t, t+window_hours).
+    Fixed evaluation grid, with an observed origin and enough (t, t+window] targets.
+
+    Missing evaluation origins are dropped (not deferred); periodic refreshes
+    have a separate delivery rule. The candidate grid stays anchored at the
+    first streaming timestamp. The complete wall-clock horizon must fit.
+
     """
     cand = _compute_candidate_timestamps(
         streaming_index,
@@ -48,9 +55,8 @@ def compute_data_aware_evaluation_timestamps(
     keep = []
     for t in cand:
         t0 = pd.Timestamp(t)
-        t1 = t0 + pd.Timedelta(hours=window_hours)
-        n = int(((df.index >= t0) & (df.index < t1)).sum())
-        if n >= min_observations_in_window:
+        n = len(forward_observations(df, t0, window_hours))
+        if t0 in streaming_index and t0 in df.index and n >= min_observations_in_window:
             keep.append(t0)
 
     out = pd.DatetimeIndex(keep).sort_values()

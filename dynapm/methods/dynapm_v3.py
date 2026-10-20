@@ -5,6 +5,7 @@ import math
 
 import pandas as pd
 
+from dynapm.core.temporal import PeriodicGrid
 from dynapm.core.predictor import HorizonPredictor, forecast_at_origin
 
 from dynapm.core.drift import ADWINDetector
@@ -44,10 +45,9 @@ class DynAPMPolicyV3(_BasePolicyV2):
         self._mem_predictor = mem_predictor
         self._cpu_obs_full = cpu_obs_full
         self._mem_obs_full = mem_obs_full
-        self._period = pd.Timedelta(hours=float(period_hours))
+        self.periodic_grid = PeriodicGrid(profile.static.bootstrap_end, period_hours)
         self._cpu_drift = ADWINDetector(delta=float(drift_delta))
         self._mem_drift = ADWINDetector(delta=float(drift_delta))
-        self._last: pd.Timestamp | None = None
         self._set_initial_forecast(bootstrap_cpu_series, bootstrap_mem_series)
 
     def _set_initial_forecast(self, boot_cpu, boot_mem):
@@ -65,12 +65,13 @@ class DynAPMPolicyV3(_BasePolicyV2):
             forecast_at_origin(self._mem_predictor, self._mem_obs_full, t),
         )
 
-    def _refresh_from_predictor(self, t: pd.Timestamp, reason: str) -> None:
+    def _refresh_from_predictor(self, t: pd.Timestamp, reason: str, nominal=None) -> None:
         t = pd.Timestamp(t)
         cpu_lookahead, mem_lookahead = self._causal_windows(t)
         if len(cpu_lookahead) == 0 or len(mem_lookahead) == 0:
             return
 
+        log_start = len(self._update_log)
         old = (
             self.profile.dynamic.cpu_class,
             self.profile.dynamic.memory_class,
@@ -101,6 +102,8 @@ class DynAPMPolicyV3(_BasePolicyV2):
             {**meta, "field": "predicted_mem_p95_next_24h", "old_value": old[3], "new_value": new_mem_p95}
         )
 
+        self._record_refresh(t, reason, nominal, log_start)
+
     def step(self, t, cpu_obs_window, mem_obs_window, *, cpu_prediction: float, mem_prediction: float):
         """Consume current yhat(t|t-1) scalars only; refreshes never use them."""
         t = pd.Timestamp(t)
@@ -114,11 +117,10 @@ class DynAPMPolicyV3(_BasePolicyV2):
         cpu_drift = self._cpu_drift.update(cpu_resid)
         mem_drift = self._mem_drift.update(mem_resid)
 
-        periodic_due = self._last is None or (t - self._last) >= self._period
-        drift_event = cpu_drift or mem_drift
-
-        if periodic_due:
-            self._refresh_from_predictor(t, reason="periodic")
-            self._last = t
-        elif drift_event:
+        # ADWIN has consumed r_t before triggers are resolved. A periodic tick
+        # wins on coincidence; a drift refresh never changes the wall-clock grid.
+        nominal = self.periodic_grid.pop_due(t)
+        if nominal is not None:
+            self._refresh_from_predictor(t, reason="periodic", nominal=nominal)
+        elif cpu_drift or mem_drift:
             self._refresh_from_predictor(t, reason="drift")

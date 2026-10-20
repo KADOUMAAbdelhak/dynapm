@@ -16,6 +16,7 @@ sys.path.insert(0, str(REPO))
 
 from dynapm.core.evaluation_clock import compute_data_aware_evaluation_timestamps
 from dynapm.core.ground_truth import derive_ground_truth_at_t_v2
+from dynapm.core.temporal import TEMPORAL_PROTOCOL
 from dynapm.data.bootstrap import compute_split
 from dynapm.data.loader import load_vm_csv
 
@@ -72,7 +73,7 @@ def _process(item: dict, tmap: dict) -> dict:
                     cpu_thresholds=th["cpu"],
                     mem_thresholds=th["mem"],
                 )
-                rows.append({"eval_timestamp": pd.Timestamp(t), **gt})
+                rows.append({"eval_timestamp": pd.Timestamp(t), "causal_protocol": TEMPORAL_PROTOCOL, **gt})
             except ValueError:
                 skipped_empty += 1
 
@@ -110,6 +111,7 @@ def main() -> int:
         json.dump(fail, f, indent=2)
 
     meta = {
+        "causal_protocol": TEMPORAL_PROTOCOL,
         "n_total": len(kept),
         "n_ok": len(ok),
         "n_failed": len(fail),

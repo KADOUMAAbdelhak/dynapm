@@ -33,4 +33,4 @@ The full suite (`python -m pytest`) includes small synthetic policy replays and 
 - `dynapm/scripts/`: experiment orchestration, provisioning analysis, and result aggregation.
 - `dynapm/tests/`: unit and integration tests, including Periodic-Predictor integration.
 
-See [data setup](data/README.md), [output handling](results/README.md), and [development notes](docs/development.md). Keep each new experiment's configuration and provenance with its external outputs.
+See [the temporal protocol](docs/protocol.md), [data setup](data/README.md), [output handling](results/README.md), and [development notes](docs/development.md). Keep each new experiment's configuration and provenance with its external outputs.

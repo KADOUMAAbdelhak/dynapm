@@ -12,6 +12,9 @@ from typing import Callable
 import pandas as pd
 
 from dynapm.core.discretization import compute_thresholds
+from dynapm.core.evaluation_clock import compute_data_aware_evaluation_timestamps
+from dynapm.core.ground_truth import derive_ground_truth_at_t_v2
+from dynapm.core.temporal import HORIZON, TEMPORAL_PROTOCOL
 from dynapm.core.features import build_features
 from dynapm.core.predictor import VMPredictor
 from dynapm.core.schema import DynamicFields, ProfileInstance, StaticFields
@@ -24,7 +27,7 @@ from dynapm.methods.baselines_v2 import _BasePolicyV2
 CPU_T = "CPU usage [%]"
 MEM_T = "Memory usage [%]"
 REPO = Path(__file__).resolve().parents[2]
-CAUSAL_PROTOCOL = "causal-policy-v1"
+CAUSAL_PROTOCOL = TEMPORAL_PROTOCOL
 
 
 def require_causal_protocol(frame: pd.DataFrame) -> None:
@@ -99,11 +102,15 @@ def prepare_vm_replay(
         idx = build_features(stream, CPU_T).index.intersection(
             build_features(stream, MEM_T).index).sort_values()
     observations = stream.loc[idx, [CPU_T, MEM_T]]
-    gt = pd.read_parquet(root / "dynapm/results/ground_truth" / f"{trace}__{vm_id}.parquet")
-    gt["eval_timestamp"] = pd.to_datetime(gt["eval_timestamp"])
-    gt = gt.set_index("eval_timestamp").sort_index()
-    if not gt.index.is_unique:
-        raise ValueError("ground-truth evaluation timestamps must be unique")
+    # Derive labels in memory under the current convention. Cached ground-truth
+    # files can have incompatible boundaries; replay never consumes them.
+    candidates, _ = compute_data_aware_evaluation_timestamps(df, stream.index)
+    rows = [{"eval_timestamp": t, **derive_ground_truth_at_t_v2(
+        df, t, cpu_thresholds=cpu_th, mem_thresholds=mem_th)}
+        for t in candidates if t in idx]
+    gt = pd.DataFrame(rows, columns=["eval_timestamp", "cpu_class", "memory_class",
+                                    "p95_cpu_next_24h", "p95_mem_next_24h"])
+    gt = gt.set_index("eval_timestamp")
     stream_days = (stream.index[-1] - stream.index[0]).total_seconds() / 86400.0
     return VMReplay(method, observations, predictions, gt, stream_days)
 
@@ -119,6 +126,8 @@ def iter_verified_snapshots(replay: VMReplay, lookback_steps: int = 288):
     obs = replay.observations
     pending = []
     for pos, t in enumerate(obs.index):
+        # Prepared yhat(t|past) uses no u_t; the observation is now visible.
+        # step consumes r_t, updates drift, resolves triggers, then commits once.
         window = obs.iloc[max(0, pos - lookback_steps + 1):pos + 1]
         residual_inputs = {}
         if replay.method.requires_residuals:
@@ -126,11 +135,12 @@ def iter_verified_snapshots(replay: VMReplay, lookback_steps: int = 288):
                                    mem_prediction=float(replay.predictions.at[t, "mem"]))
         replay.method.step(t=t, cpu_obs_window=window[CPU_T],
                            mem_obs_window=window[MEM_T], **residual_inputs)
+        # Refresh-before-read: a coincident evaluation sees the committed state.
         if t in replay.ground_truth.index:
             pending.append((pd.Timestamp(t), deepcopy(replay.method.profile.dynamic)))
         keep = []
         for origin, snapshot in pending:
-            if t < origin + pd.Timedelta(hours=24):
+            if t < origin + HORIZON:
                 keep.append((origin, snapshot))
             else:
                 yield origin, snapshot, replay.ground_truth.loc[origin]

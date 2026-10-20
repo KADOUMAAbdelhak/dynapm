@@ -17,7 +17,6 @@ from scipy.stats import wilcoxon
 REPO = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(REPO))
 
-from dynapm.eval.metrics import count_unique_refresh_timestamps  # noqa: E402
 from dynapm.eval.replay import CAUSAL_PROTOCOL
 from dynapm.eval.runner_v2 import run_method_on_vm  # noqa: E402
 from dynapm.methods.factories import policy_factory  # noqa: E402
@@ -26,7 +25,6 @@ from dynapm.methods.factories import policy_factory  # noqa: E402
 PP = "periodic_predictor_6h_v2"
 V3 = "dynapm_v3_v2"
 FACTORIES = {name: policy_factory(name) for name in (PP, V3)}
-GT_DIR = REPO / "dynapm/results/ground_truth"
 OUT_JSON = REPO / "dynapm/results/eval_full_corpus_with_log"
 PARQUET_OUT = REPO / "dynapm/data/normalized_refresh_counts_corpus.parquet"
 
@@ -35,8 +33,6 @@ def _precheck_vm(trace: str, vm_id: str) -> str | None:
     vm_id = str(vm_id)
     if not (REPO / "data/raw" / trace / f"{vm_id}.csv").is_file():
         return "MissingRawCsv"
-    if not (GT_DIR / f"{trace}__{vm_id}.parquet").is_file():
-        return "MissingGroundTruth"
     return None
 
 
@@ -150,7 +146,10 @@ def row_from_json(path: Path) -> dict | None:
         return None
     trace_nm, vm_id = trace_vm[0], trace_vm[1]
 
-    n_ref = count_unique_refresh_timestamps(ul)
+    events = data.get("refresh_log")
+    if not isinstance(events, list):
+        return None
+    n_ref = len(events)
 
     np_per = nd = 0
     if meth == PP:

@@ -50,6 +50,6 @@ def test_dynapm_v3_drift_adds_extra_refreshes(lag_predictor_factory):
     for ts in cpu.index:
         policy.step(ts, cpu.loc[:ts], mem.loc[:ts], cpu_prediction=10.0, mem_prediction=10.0)
     reasons = [r["reason"] for r in policy.update_log]
-    assert reasons.count("periodic") == 4  # Initial refresh, four fields.
+    assert reasons.count("periodic") == 0  # Bootstrap initialization is not a scheduled tick.
     assert "drift" in reasons
     assert policy.profile.dynamic.predicted_cpu_p95_next_24h == 95.0

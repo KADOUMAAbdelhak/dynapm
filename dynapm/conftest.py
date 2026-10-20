@@ -55,23 +55,10 @@ def lag_predictor_factory():
 
 @pytest.fixture
 def replay_repo(tmp_path, synthetic_frame):
-    """Write one tiny VM and GT into a temporary, isolated replay repository."""
-    from dynapm.core.ground_truth import derive_ground_truth_at_t_v2
-    from dynapm.core.discretization import compute_thresholds
-    from dynapm.data.bootstrap import compute_split
+    """Write one tiny raw VM into a temporary, isolated replay repository."""
     raw = tmp_path / "data/raw/TestTrace/1.csv"
     raw.parent.mkdir(parents=True)
     frame = synthetic_frame.copy()
     frame.insert(0, "Timestamp", frame.index.strftime("%d.%m.%Y %H:%M:%S"))
     frame.to_csv(raw, sep=";", index=False)
-    boot, stream, _ = compute_split(synthetic_frame)
-    cpu = compute_thresholds(boot, "CPU usage [%]")
-    mem = compute_thresholds(boot, "Memory usage [%]")
-    rows = []
-    for ts in [stream.index[96], stream.index[-10]]:
-        g = derive_ground_truth_at_t_v2(synthetic_frame, ts, cpu_thresholds=cpu, mem_thresholds=mem)
-        rows.append({"eval_timestamp": ts, **g})
-    path = tmp_path / "dynapm/results/ground_truth/TestTrace__1.parquet"
-    path.parent.mkdir(parents=True)
-    pd.DataFrame(rows).to_parquet(path, index=False)
     return tmp_path

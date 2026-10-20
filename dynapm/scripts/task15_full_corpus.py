@@ -27,7 +27,6 @@ from dynapm.methods.factories import policy_factory
 from dynapm.data.bootstrap import compute_split
 from dynapm.data.loader import load_vm_csv
 
-GT_DIR = REPO / "dynapm/results/ground_truth"
 
 
 FACTORIES = {name: policy_factory(name) for name in (
@@ -73,8 +72,6 @@ def _precheck_vm(trace: str, vm_id: str) -> str | None:
     vm_id = str(vm_id)
     if not (REPO / "data/raw" / trace / f"{vm_id}.csv").is_file():
         return "MissingRawCsv"
-    if not (GT_DIR / f"{trace}__{vm_id}.parquet").is_file():
-        return "MissingGroundTruth"
     return None
 
 
@@ -94,6 +91,9 @@ def _empty_row(method: str, trace: str, vm_id: str, tier: str, status: str, reas
         "n_cpu_p95_updates": np.nan,
         "n_mem_p95_updates": np.nan,
         "total_updates": np.nan,
+        "n_refresh_events": np.nan,
+        "n_periodic_refreshes": np.nan,
+        "n_drift_refreshes": np.nan,
         "n_eval_points_verified": np.nan,
         "snapshots_dropped_unverified": np.nan,
         "run_status": status,
@@ -117,6 +117,9 @@ def _success_row(method: str, tier: str, out: dict) -> dict:
         "n_cpu_p95_updates": out["n_cpu_p95_updates"],
         "n_mem_p95_updates": out["n_mem_p95_updates"],
         "total_updates": out["total_updates"],
+        "n_refresh_events": out["n_refresh_events"],
+        "n_periodic_refreshes": out["n_periodic_refreshes"],
+        "n_drift_refreshes": out["n_drift_refreshes"],
         "n_eval_points_verified": out["n_eval_points_verified"],
         "snapshots_dropped_unverified": out["snapshots_dropped_unverified"],
         "run_status": "ok",
@@ -640,7 +643,7 @@ def main() -> int:
         "- Corpus JSON omit `update_log` to limit disk footprint; parquet holds all headline metrics.\n"
         "- **`task15_full_corpus.py` resume:** if a per-run JSON already exists and parses with finite "
         "`cpu_class_accuracy`, that VM–method pair is reloaded instead of recomputing.\n"
-        '- **Skipped** runs are precondition failures (`failure_reason` e.g. `MissingGroundTruth`);\n'
+        '- **Skipped** runs are precondition failures (`failure_reason` e.g. `MissingRawCsv`);\n'
         '- **Wilcoxon** uses `zero_method="wilcox"`; ill-conditioned cases return `nan` *p*-value.\n'
     )
 

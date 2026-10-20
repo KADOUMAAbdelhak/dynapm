@@ -1,8 +1,8 @@
 """Evaluation runner v2: snapshot-then-verify protocol.
 
 Return dict includes optional policy audit fields: ``update_log`` (list of entries from
-``method.update_log``), ``n_periodic_refreshes``, ``n_drift_refreshes`` when the log records
-reasons; ``decision_head_stats`` when the policy exposes a ``decision_head`` with ``stats()``.
+``method.update_log``), logical ``refresh_log`` events, and periodic/drift counts;
+``decision_head_stats`` when the policy exposes a ``decision_head`` with ``stats()``.
 Forward ground truth is exposed only after the verification horizon; it is
 never passed back to a refresh policy."""
 from __future__ import annotations
@@ -52,12 +52,8 @@ def run_method_on_vm(
             return 0
         return int((log_df["field"] == field).sum())
 
-    n_periodic = 0
-    n_drift = 0
-    if len(log_df) > 0 and "reason" in log_df.columns:
-        rr = log_df[["timestamp", "reason"]].drop_duplicates()
-        n_periodic = int((rr["reason"] == "periodic").sum())
-        n_drift = int((rr["reason"] == "drift").sum())
+    n_periodic = sum(r["reason"] == "periodic" for r in method.refresh_log)
+    n_drift = sum(r["reason"] == "drift" for r in method.refresh_log)
 
     out = {
         "causal_protocol": CAUSAL_PROTOCOL,
@@ -69,11 +65,13 @@ def run_method_on_vm(
         "n_cpu_p95_updates": n_field("predicted_cpu_p95_next_24h"),
         "n_mem_p95_updates": n_field("predicted_mem_p95_next_24h"),
         "total_updates": int(len(log_df)),
+        "n_refresh_events": len(method.refresh_log),
         "n_eval_points_verified": int(len(rec_df)),
         "snapshots_dropped_unverified": int(replay.snapshots_dropped_unverified),
         "n_streaming_steps": int(len(replay.observations)),
         "stream_days": replay.stream_days,
         "update_log": list(method.update_log),
+        "refresh_log": list(method.refresh_log),
         "n_periodic_refreshes": n_periodic,
         "n_drift_refreshes": n_drift,
     }

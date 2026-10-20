@@ -8,6 +8,7 @@ import pandas as pd
 from sklearn.ensemble import RandomForestRegressor
 
 from dynapm.core.features import LAGS, MAX_CONTEXT, ROLL_WINDOWS, build_features
+from dynapm.core.temporal import SAMPLE_STEP, forecast_targets
 
 
 class HorizonPredictor(Protocol):
@@ -23,7 +24,12 @@ def forecast_at_origin(
 ) -> pd.Series:
     """Expose only observations available at origin to recursive inference."""
     history = observations.loc[observations.index <= pd.Timestamp(origin)].sort_index()
-    return predictor.predict_causal_horizon(history, n_steps=288)
+    if history.empty or history.index[-1] != pd.Timestamp(origin):
+        raise ValueError("refresh origin must have an available observation")
+    forecast = predictor.predict_causal_horizon(history, n_steps=288)
+    if not forecast.index.equals(forecast_targets(origin)):
+        raise ValueError("forecast must cover exactly the 288 targets in (origin, origin+24h]")
+    return forecast
 
 
 def _causal_feature_row(values: np.ndarray, ts: pd.Timestamp) -> np.ndarray:
@@ -129,19 +135,16 @@ class VMPredictor:
         hist = history.astype(float).dropna().sort_index()
         if len(hist) < MAX_CONTEXT:
             return pd.Series(dtype=float, name="y_pred")
-        if step is None:
-            step = pd.Timedelta(hist.index[1] - hist.index[0])
-            if step <= pd.Timedelta(0):
-                step = pd.Timedelta(minutes=5)
+        if step is not None and pd.Timedelta(step) != SAMPLE_STEP:
+            raise ValueError("the canonical forecast cadence is five minutes")
+        targets = forecast_targets(hist.index[-1], n_steps)
 
         keep = MAX_CONTEXT + max(LAGS) + 8
         buf = hist.iloc[-keep:].to_numpy(dtype=float).copy()
-        last_ts = pd.Timestamp(hist.index[-1])
         preds: list[float] = []
         index: list[pd.Timestamp] = []
         predict = self.model.predict
-        for _ in range(int(n_steps)):
-            next_t = last_ts + step
+        for next_t in targets:
             # Append dummy contemporaneous value (ignored by causal features).
             buf = np.concatenate([buf, [buf[-1]]])
             if len(buf) > keep + 2:
@@ -151,6 +154,5 @@ class VMPredictor:
             buf[-1] = yhat
             preds.append(yhat)
             index.append(next_t)
-            last_ts = next_t
 
         return pd.Series(preds, index=pd.DatetimeIndex(index), name="y_pred")

@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import pandas as pd
 
+from dynapm.core.temporal import PeriodicGrid
 from dynapm.core.predictor import HorizonPredictor, forecast_at_origin
 from dynapm.core.forecasting import forecast_class_from_window, forecast_p95_from_window
 
@@ -22,10 +23,19 @@ class _BasePolicyV2:
         self.cpu_thresholds = cpu_thresholds
         self.mem_thresholds = mem_thresholds
         self._update_log = []
+        self.refresh_log = []
 
     @property
     def update_log(self):
         return self._update_log
+
+    def _record_refresh(self, t, reason, nominal_scheduled_time, log_start):
+        """One event per logical refresh; field changes remain a separate log."""
+        event = {"timestamp": pd.Timestamp(t), "actual_commit_time": pd.Timestamp(t),
+                 "nominal_scheduled_time": nominal_scheduled_time, "reason": reason}
+        self.refresh_log.append(event)
+        for row in self._update_log[log_start:]:
+            row.update(event)
 
     def _set_initial_forecast(self, cpu_values, mem_values, t: pd.Timestamp):
         self.profile.dynamic.cpu_class = forecast_class_from_window(cpu_values, self.cpu_thresholds)
@@ -37,8 +47,9 @@ class _BasePolicyV2:
         self.profile.last_updated["predicted_cpu_p95_next_24h"] = pd.Timestamp(t)
         self.profile.last_updated["predicted_mem_p95_next_24h"] = pd.Timestamp(t)
 
-    def _commit_forecast(self, t: pd.Timestamp, cpu_values, mem_values):
+    def _commit_forecast(self, t: pd.Timestamp, cpu_values, mem_values, *, reason, nominal_scheduled_time=None):
         t = pd.Timestamp(t)
+        log_start = len(self._update_log)
         new_vals = {
             "cpu_class": forecast_class_from_window(cpu_values, self.cpu_thresholds),
             "memory_class": forecast_class_from_window(mem_values, self.mem_thresholds),
@@ -61,6 +72,8 @@ class _BasePolicyV2:
                 }
             )
 
+        self._record_refresh(t, reason, nominal_scheduled_time, log_start)
+
     def step(self, t, cpu_obs_window, mem_obs_window):
         raise NotImplementedError
 
@@ -82,21 +95,22 @@ class PeriodicPolicyV2(_BasePolicyV2):
                  bootstrap_cpu_series, bootstrap_mem_series, period_hours=6.0):
         super().__init__(profile, cpu_thresholds, mem_thresholds)
         self._period_hours = float(period_hours)
-        self._period = pd.Timedelta(hours=self._period_hours)
+        self.periodic_grid = PeriodicGrid(profile.static.bootstrap_end, self._period_hours)
         cpu_boot = bootstrap_cpu_series
         mem_boot = bootstrap_mem_series
         t0 = pd.Timestamp(cpu_boot.index[-1])
         cpu_init = _window_last_hours(cpu_boot, t0, self._period_hours)
         mem_init = _window_last_hours(mem_boot, t0, self._period_hours)
         self._set_initial_forecast(cpu_init, mem_init, t=t0)
-        self._last_refresh = t0
 
     def step(self, t, cpu_obs_window, mem_obs_window):
         t = pd.Timestamp(t)
-        if (t - self._last_refresh) < self._period:
-            return
-        self._commit_forecast(t, cpu_obs_window, mem_obs_window)
-        self._last_refresh = t
+        nominal = self.periodic_grid.pop_due(t)
+        if nominal is not None:
+            self._commit_forecast(t,
+                cpu_obs_window.loc[cpu_obs_window.index <= t],
+                mem_obs_window.loc[mem_obs_window.index <= t],
+                reason="periodic", nominal_scheduled_time=nominal)
 
 
 class ReactiveThresholdPolicyV2(_BasePolicyV2):
@@ -121,7 +135,7 @@ class ReactiveThresholdPolicyV2(_BasePolicyV2):
             candidate_cpu_class != self.profile.dynamic.cpu_class
             or candidate_mem_class != self.profile.dynamic.memory_class
         ):
-            self._commit_forecast(t, cpu_candidate, mem_candidate)
+            self._commit_forecast(t, cpu_candidate, mem_candidate, reason="reactive")
 
 
 class FullRewritePolicyV2(_BasePolicyV2):
@@ -139,7 +153,7 @@ class FullRewritePolicyV2(_BasePolicyV2):
         t = pd.Timestamp(t)
         cpu_now = _window_last_hours(cpu_obs_window, t, 24.0)
         mem_now = _window_last_hours(mem_obs_window, t, 24.0)
-        self._commit_forecast(t, cpu_now, mem_now)
+        self._commit_forecast(t, cpu_now, mem_now, reason="full_rewrite")
 
 
 class PeriodicPredictorPolicyV2(_BasePolicyV2):
@@ -164,12 +178,11 @@ class PeriodicPredictorPolicyV2(_BasePolicyV2):
         self._cpu_obs_full = cpu_obs_full
         self._mem_obs_full = mem_obs_full
         self._period_hours = float(period_hours)
-        self._period = pd.Timedelta(hours=self._period_hours)
+        self.periodic_grid = PeriodicGrid(profile.static.bootstrap_end, self._period_hours)
         t0 = pd.Timestamp(bootstrap_cpu_series.index[-1])
         cpu_init = _window_last_hours(bootstrap_cpu_series, t0, self._period_hours)
         mem_init = _window_last_hours(bootstrap_mem_series, t0, self._period_hours)
         self._set_initial_forecast(cpu_init, mem_init, t=t0)
-        self._last = t0
 
     def _causal_windows(self, t: pd.Timestamp):
         return (
@@ -179,8 +192,10 @@ class PeriodicPredictorPolicyV2(_BasePolicyV2):
 
     def step(self, t, cpu_obs_window, mem_obs_window):
         t = pd.Timestamp(t)
-        if (t - self._last) < self._period:
+        nominal = self.periodic_grid.pop_due(t)
+        if nominal is None:
             return
+        log_start = len(self._update_log)
 
         cpu_lookahead, mem_lookahead = self._causal_windows(t)
         if len(cpu_lookahead) == 0 or len(mem_lookahead) == 0:
@@ -205,8 +220,6 @@ class PeriodicPredictorPolicyV2(_BasePolicyV2):
         self.profile.last_updated["memory_class"] = t
         self.profile.last_updated["predicted_cpu_p95_next_24h"] = t
         self.profile.last_updated["predicted_mem_p95_next_24h"] = t
-
-        self._last = t
 
         if old_cpu_cls != new_cpu_cls:
             self._update_log.append(
@@ -246,3 +259,4 @@ class PeriodicPredictorPolicyV2(_BasePolicyV2):
                 "p_commit": 1.0,
             }
         )
+        self._record_refresh(t, "periodic", nominal, log_start)
