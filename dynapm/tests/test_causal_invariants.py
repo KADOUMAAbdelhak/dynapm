@@ -106,7 +106,7 @@ def test_refresh_snapshot_ignores_future_observations(method, replay_repo, lag_p
             assert p.histories[-1].index.max() <= t
             assert len(p.histories[-1]) >= MAX_CONTEXT
     assert first.method.profile.dynamic == second.method.profile.dynamic
-    assert first.method.update_log == second.method.update_log
+    assert first.method.refresh_log == second.method.refresh_log
 
 
 def test_v3_residual_is_current_observation_minus_current_one_step_prediction(replay_repo, lag_predictor_factory):

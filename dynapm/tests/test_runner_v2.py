@@ -19,12 +19,15 @@ def test_evaluation_and_provisioning_share_construction(method, replay_repo, lag
     assert out["n_eval_points_verified"] == len(pairs) == 1
     assert out["snapshots_dropped_unverified"] == 0
     assert out["n_streaming_steps"] == 408
+    from dynapm.core.accounting import ACCOUNTING_METRICS
+    for metric in ACCOUNTING_METRICS:
+        assert pairs.attrs["policy_accounting"][metric] == out[metric]
     assert out["n_refresh_events"] == len(out["refresh_log"])
     assert out["n_periodic_refreshes"] + out["n_drift_refreshes"] <= out["n_refresh_events"]
     if method == "static_v2":
-        assert out["total_updates"] == 0
+        assert out["n_refresh_events"] == 0
     else:
-        assert out["total_updates"] > 0
+        assert out["n_refresh_events"] > 0
     assert out["cpu_p95_mae"] == pytest.approx(
         (pairs.snapshot_cpu_p95 - pairs.gt_cpu_p95).abs().mean())
     assert out["mem_p95_mae"] == pytest.approx(
@@ -65,7 +68,8 @@ def test_all_script_factories_share_contract():
 
 
 @pytest.mark.parametrize("script", ["task15_full_corpus", "task18b_corpus_churn_rerun"])
-def test_script_cache_rejects_unversioned_measurements(script, replay_repo, lag_predictor_factory, monkeypatch):
+@pytest.mark.parametrize("missing", ["causal_protocol", "accounting_schema"])
+def test_script_cache_rejects_unversioned_measurements(script, missing, replay_repo, lag_predictor_factory, monkeypatch):
     import importlib
     import json
     from dynapm.eval.replay import CAUSAL_PROTOCOL
@@ -76,7 +80,7 @@ def test_script_cache_rejects_unversioned_measurements(script, replay_repo, lag_
     out_dir = replay_repo / "outputs"
     out_dir.mkdir()
     output = out_dir / f"{method}__TestTrace__1.json"
-    old = {k: v for k, v in fresh.items() if k != "causal_protocol"}
+    old = {k: v for k, v in fresh.items() if k != missing}
     output.write_text(json.dumps(old, default=str))
     if script == "task18b_corpus_churn_rerun":
         assert module.row_from_json(output) is None
@@ -123,7 +127,7 @@ def test_small_real_forest_policy_path(method, replay_repo):
     out = run_method_on_vm("TestTrace", "1", factory, repo_root=replay_repo,
         predictor_factory=partial(VMPredictor, n_estimators=3, max_depth=3))
     assert out["n_eval_points_verified"] == 1
-    assert out["total_updates"] > 0
+    assert out["n_refresh_events"] > 0
     assert out["n_streaming_steps"] == 408
 
 

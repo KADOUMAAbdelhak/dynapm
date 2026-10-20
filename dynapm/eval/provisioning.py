@@ -6,6 +6,7 @@ from typing import Callable
 import math
 import pandas as pd
 
+from dynapm.core.accounting import ACCOUNTING_SCHEMA
 from dynapm.eval.replay import CAUSAL_PROTOCOL, prepare_vm_replay, iter_verified_snapshots
 
 SAFETY_FACTOR = 1.2
@@ -69,8 +70,11 @@ def collect_verified_p95_pairs(
             "gt_cpu_p95": float(gt["p95_cpu_next_24h"]),
             "gt_mem_p95": float(gt["p95_mem_next_24h"]),
         })
-    return pd.DataFrame(rows, columns=["eval_timestamp", "snapshot_cpu_p95",
+    pairs = pd.DataFrame(rows, columns=["eval_timestamp", "snapshot_cpu_p95",
         "snapshot_mem_p95", "gt_cpu_p95", "gt_mem_p95"])
+    pairs.attrs["policy_accounting"] = {"accounting_schema": ACCOUNTING_SCHEMA,
+                                        **replay.method.accounting_metrics()}
+    return pairs
 
 
 def rows_to_provisioning_df(
@@ -116,4 +120,7 @@ def rows_to_provisioning_df(
                 "mem_well": mem["well_provisioned"],
             }
         )
-    return pd.DataFrame(rows)
+    result = pd.DataFrame(rows)
+    if "policy_accounting" in pairs.attrs:
+        result.attrs["policy_accounting"] = dict(pairs.attrs["policy_accounting"])
+    return result

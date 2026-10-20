@@ -25,7 +25,7 @@ Evaluation and provisioning both call `prepare_vm_replay` and `iter_verified_sna
 
 See [the temporal protocol](protocol.md) for the shared periodic grid, ordering, missing-observation rules, and exact forecast/label boundaries. The replay grid preserves streaming-only feature warmup. Labels are derived in memory under the current convention; cached ground-truth files are not read. Snapshot copies are verified only once their 24-hour horizons have elapsed. Forward ground truth never enters policy construction or policy steps. `repo_root` supports isolated fixtures; `predictor_factory` supports lightweight test doubles or explicitly configured predictors.
 
-Task 15, provisioning, and event-log orchestration use the same factories. New outputs identify `causal-timeline-v2`; unversioned JSONs/tables are not accepted as current causal measurements. This protocol marker is a compatibility guard, not a complete input/source/environment provenance manifest. Do not mix source revisions or experimental generations. Corpus-level provenance and performance validation remain separate research work.
+Task 15, provisioning, and event-log orchestration use the same factories. New outputs identify `causal-timeline-v2`; unversioned JSONs/tables are not accepted as current causal measurements. The separate `refresh-accounting-v1` schema is also required on per-VM results and summaries. These compatibility markers are not a complete input/source/environment provenance manifest. Do not mix source revisions or experimental generations. Corpus-level provenance and performance validation remain separate research work.
 
 ## Lightweight validation
 
@@ -44,3 +44,11 @@ Full corpus jobs, production-size forests, and extensive recursive inference req
 Feature vectors for a target timestamp exclude that timestamp's actual utilization. Refresh snapshots can use actual observations through their origin, recursive predictions thereafter, and deterministic calendar information. CPU and memory models do not share utilization features. These properties are covered by invariance tests.
 
 Small-fixture correctness does not establish corpus-level accuracy, drift effectiveness, or operating cost. Historical publication measurements are not an acceptance target for causal development.
+
+## Accounting and analysis
+
+Every policy delegates initialization and runtime assignments to `ProfileCommitter`. Read `accounting_metrics()` or the counters in `run_method_on_vm` results. Use `n_refresh_events` for runtime maintenance cost; field writes and actual changes are independent secondary quantities. Initialization is excluded from runtime counts.
+
+Use `dynapm.eval.metrics.summarize_accounting` on per-VM summary rows for counter means and medians. It validates the accounting schema, nonnegative integer counters, write counts, and trigger decompositions. Do not reconstruct counts from event traces or sum repeated per-evaluation provisioning outcome rows. Provisioning executes the same policy commit path and exposes per-VM counters in `pairs.attrs["policy_accounting"]`; its per-evaluation outcome rows remain distinct from per-VM accounting summaries. These attributes are not summed across outcome rows; concatenated corpus outcome tables should use the separate canonical per-VM summary for accounting.
+
+See [Refresh Accounting](protocol.md#refresh-accounting) and [the reference audit](accounting-audit.md). Old counter schemas require fresh, separately authorized experimental generations; this phase does not regenerate outputs.

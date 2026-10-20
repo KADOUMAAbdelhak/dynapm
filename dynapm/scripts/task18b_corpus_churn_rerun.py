@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Task 18B: rerun PP + DynAPM-V3 on full corpus with update_log persisted (separate dir)."""
+"""Optional PP/V3 replay and direct aggregation of canonical accounting counters."""
 from __future__ import annotations
 
 import argparse
@@ -17,6 +17,8 @@ from scipy.stats import wilcoxon
 REPO = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(REPO))
 
+from dynapm.core.accounting import ACCOUNTING_SCHEMA, ACCOUNTING_METRICS, require_accounting_metrics
+from dynapm.eval.metrics import summarize_accounting
 from dynapm.eval.replay import CAUSAL_PROTOCOL
 from dynapm.eval.runner_v2 import run_method_on_vm  # noqa: E402
 from dynapm.methods.factories import policy_factory  # noqa: E402
@@ -26,7 +28,7 @@ PP = "periodic_predictor_6h_v2"
 V3 = "dynapm_v3_v2"
 FACTORIES = {name: policy_factory(name) for name in (PP, V3)}
 OUT_JSON = REPO / "dynapm/results/eval_full_corpus_with_log"
-PARQUET_OUT = REPO / "dynapm/data/normalized_refresh_counts_corpus.parquet"
+PARQUET_OUT = REPO / "dynapm/data/accounting_corpus.parquet"
 
 
 def _precheck_vm(trace: str, vm_id: str) -> str | None:
@@ -44,12 +46,10 @@ def _run_one(method: str, trace: str, vm_id: str) -> tuple[str, float | None]:
     if pre is None and outp.is_file():
         try:
             data = json.loads(outp.read_text(encoding="utf-8"))
-            ul = data.get("update_log")
+            require_accounting_metrics(pd.DataFrame([{**data, "method": method}]))
             cc = data.get("cpu_class_accuracy")
             if (
                 data.get("causal_protocol") == CAUSAL_PROTOCOL
-                and isinstance(ul, list)
-                and len(ul) > 0
                 and isinstance(cc, (int, float))
                 and math.isfinite(float(cc))
             ):
@@ -127,50 +127,24 @@ def row_from_json(path: Path) -> dict | None:
         return None
     if data.get("run_status") in ("skipped", "failed"):
         return None
-    ul = data.get("update_log")
-    if not isinstance(ul, list):
-        return None
-    stem = path.stem
-    meth = None
-    rest = None
-    for candidate in (PP, V3):
-        pref = candidate + "__"
-        if stem.startswith(pref):
-            meth = candidate
-            rest = stem[len(pref) :]
-            break
-    if meth is None or rest is None:
-        return None
-    trace_vm = rest.rsplit("__", 1)
-    if len(trace_vm) != 2:
-        return None
-    trace_nm, vm_id = trace_vm[0], trace_vm[1]
-
-    events = data.get("refresh_log")
-    if not isinstance(events, list):
-        return None
-    n_ref = len(events)
-
-    np_per = nd = 0
-    if meth == PP:
-        np_per = n_ref
-        nd = 0
-    elif meth == V3:
-        np_per = int(data.get("n_periodic_refreshes", 0))
-        nd = int(data.get("n_drift_refreshes", 0))
-
-    return {
-        "causal_protocol": CAUSAL_PROTOCOL,
-        "method": meth,
-        "trace": trace_nm,
-        "vm_id": str(vm_id),
-        "n_refresh_events": int(n_ref),
-        "n_periodic_refreshes": np_per,
-        "n_drift_refreshes": nd,
-    }
+    for method in (PP, V3):
+        prefix = method + "__"
+        if path.stem.startswith(prefix):
+            parts = path.stem[len(prefix):].rsplit("__", 1)
+            if len(parts) != 2:
+                return None
+            trace, vm_id = parts
+            try:
+                require_accounting_metrics(pd.DataFrame([{**data, "method": method}]))
+            except (ValueError, TypeError):
+                return None
+            return {"method": method, "trace": trace, "vm_id": str(vm_id),
+                    "causal_protocol": CAUSAL_PROTOCOL, "accounting_schema": ACCOUNTING_SCHEMA,
+                    **{k: data[k] for k in ACCOUNTING_METRICS}}
+    return None
 
 
-def aggregate_to_parquet() -> pd.DataFrame:
+def aggregate_accounting_records() -> pd.DataFrame:
     rows = []
     for p in sorted(OUT_JSON.glob(f"{PP}__*.json")):
         r = row_from_json(p)
@@ -188,6 +162,7 @@ def aggregate_to_parquet() -> pd.DataFrame:
 
 
 def summarize(df: pd.DataFrame) -> dict:
+    require_accounting_metrics(df)
     pp = df[df["method"] == PP].set_index(["trace", "vm_id"]).sort_index()
     v3 = df[df["method"] == V3].set_index(["trace", "vm_id"]).sort_index()
     j = pd.concat(
@@ -206,14 +181,17 @@ def summarize(df: pd.DataFrame) -> dict:
 
     wp = _wilcox(delta)
 
+    accounting = summarize_accounting(df).to_dict(orient="records")
     stats_pp = df[df["method"] == PP]["n_refresh_events"]
     stats_v3 = df[df["method"] == V3]["n_refresh_events"]
     drift_m = float(df[df["method"] == V3]["n_drift_refreshes"].mean())
 
     return {
+        "accounting_by_method": accounting,
         "pp_mean": float(stats_pp.mean()),
         "pp_med": float(stats_pp.median()),
         "pp_mean_periodic": float(df[df["method"] == PP]["n_periodic_refreshes"].mean()),
+        "pp_mean_drift": float(df[df["method"] == PP]["n_drift_refreshes"].mean()),
         "v3_mean": float(stats_v3.mean()),
         "v3_med": float(stats_v3.median()),
         "v3_mean_periodic": float(df[df["method"] == V3]["n_periodic_refreshes"].mean()),
@@ -236,13 +214,13 @@ def main() -> int:
         wall, n_ok, n_cached, n_fail = run_corpus(args.n_jobs)
         print(json.dumps({"wall_clock_s_total": round(wall, 2), "fresh_ok": n_ok, "cached": n_cached, "failed": n_fail}))
 
-    df = aggregate_to_parquet()
+    df = aggregate_accounting_records()
     summ = summarize(df)
 
     lines = (
         "| method | mean_refresh_events | median | mean_periodic | mean_drift |\n"
         "| ------ | -------------------:| -----: | ------------: | ---------: |\n"
-        f"| PP | {summ['pp_mean']:.4f} | {summ['pp_med']:.1f} | {summ['pp_mean_periodic']:.4f} | 0 |\n"
+        f"| PP | {summ['pp_mean']:.4f} | {summ['pp_med']:.1f} | {summ['pp_mean_periodic']:.4f} | {summ['pp_mean_drift']:.4f} |\n"
         f"| V3 | {summ['v3_mean']:.4f} | {summ['v3_med']:.1f} | {summ['v3_mean_periodic']:.4f} | {summ['v3_mean_drift']:.4f} |\n"
     )
     print(lines)

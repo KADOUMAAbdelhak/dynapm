@@ -48,6 +48,7 @@ class PeriodicGrid:
             raise ValueError("anchor and positive finite period are required")
         self.next_tick = self.anchor + self.period
         self._previous_observation = None
+        self.nominal_ticks_due = 0
 
     def pop_due(self, observation_time):
         t = pd.Timestamp(observation_time)
@@ -57,5 +58,6 @@ class PeriodicGrid:
         if t < self.next_tick:
             return None
         latest = self.anchor + ((t - self.anchor) // self.period) * self.period
+        self.nominal_ticks_due += int((latest - self.next_tick) // self.period) + 1
         self.next_tick = latest + self.period
         return latest

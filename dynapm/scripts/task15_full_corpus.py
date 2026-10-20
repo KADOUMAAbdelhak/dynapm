@@ -21,6 +21,7 @@ import matplotlib.pyplot as plt
 
 from scipy import stats as scipy_stats
 
+from dynapm.core.accounting import ACCOUNTING_SCHEMA, ACCOUNTING_METRICS, FIELD_CHANGE_METRICS, require_accounting_metrics
 from dynapm.eval.replay import CAUSAL_PROTOCOL, require_causal_protocol
 from dynapm.eval.runner_v2 import run_method_on_vm
 from dynapm.methods.factories import policy_factory
@@ -86,14 +87,8 @@ def _empty_row(method: str, trace: str, vm_id: str, tier: str, status: str, reas
         "memory_class_accuracy": np.nan,
         "cpu_p95_mae": np.nan,
         "mem_p95_mae": np.nan,
-        "n_cpu_class_updates": np.nan,
-        "n_memory_class_updates": np.nan,
-        "n_cpu_p95_updates": np.nan,
-        "n_mem_p95_updates": np.nan,
-        "total_updates": np.nan,
-        "n_refresh_events": np.nan,
-        "n_periodic_refreshes": np.nan,
-        "n_drift_refreshes": np.nan,
+        "accounting_schema": ACCOUNTING_SCHEMA,
+        **{k: np.nan for k in (*ACCOUNTING_METRICS, *FIELD_CHANGE_METRICS)},
         "n_eval_points_verified": np.nan,
         "snapshots_dropped_unverified": np.nan,
         "run_status": status,
@@ -112,14 +107,8 @@ def _success_row(method: str, tier: str, out: dict) -> dict:
         "memory_class_accuracy": out["memory_class_accuracy"],
         "cpu_p95_mae": out["cpu_p95_mae"],
         "mem_p95_mae": out["mem_p95_mae"],
-        "n_cpu_class_updates": out["n_cpu_class_updates"],
-        "n_memory_class_updates": out["n_memory_class_updates"],
-        "n_cpu_p95_updates": out["n_cpu_p95_updates"],
-        "n_mem_p95_updates": out["n_mem_p95_updates"],
-        "total_updates": out["total_updates"],
-        "n_refresh_events": out["n_refresh_events"],
-        "n_periodic_refreshes": out["n_periodic_refreshes"],
-        "n_drift_refreshes": out["n_drift_refreshes"],
+        "accounting_schema": ACCOUNTING_SCHEMA,
+        **{k: out[k] for k in (*ACCOUNTING_METRICS, *FIELD_CHANGE_METRICS)},
         "n_eval_points_verified": out["n_eval_points_verified"],
         "snapshots_dropped_unverified": out["snapshots_dropped_unverified"],
         "run_status": "ok",
@@ -134,6 +123,7 @@ def _run_one(method: str, trace: str, vm_id: str, tier: str, out_dir: Path) -> d
     if pre is None and outp.is_file():
         try:
             data = json.loads(outp.read_text(encoding="utf-8"))
+            require_accounting_metrics(pd.DataFrame([{**data, "method": method}]))
             if data.get("causal_protocol") == CAUSAL_PROTOCOL and data.get("trace") == trace and str(data.get("vm_id")) == str(vm_id):
                 cc = data.get("cpu_class_accuracy")
                 if isinstance(cc, (int, float)) and math.isfinite(float(cc)):
@@ -145,8 +135,8 @@ def _run_one(method: str, trace: str, vm_id: str, tier: str, out_dir: Path) -> d
         return _empty_row(method, trace, vm_id, tier, "skipped", pre)
     try:
         out = run_method_on_vm(trace, vm_id, FACTORIES[method])
-        # Drop update_log for smaller JSON (summary already in parquet); keep if needed for audit
-        out_write = {k: v for k, v in out.items() if k != "update_log"}
+        # Event traces are audit details; summary counters are authoritative.
+        out_write = out
         outp.write_text(json.dumps(out_write, default=str), encoding="utf-8")
         return _success_row(method, tier, out)
     except Exception as e:
@@ -234,6 +224,7 @@ def main() -> int:
     if summary_path.is_file() and set(methods) != set(METHOD_ORDER):
         df_old = pd.read_parquet(summary_path)
         require_causal_protocol(df_old)
+        require_accounting_metrics(df_old)
         df_old = df_old[~df_old["method"].isin(methods)]
         df = pd.concat([df_old, df_new], ignore_index=True)
     else:
@@ -271,7 +262,7 @@ def main() -> int:
         "memory_class_accuracy",
         "cpu_p95_mae",
         "mem_p95_mae",
-        "total_updates",
+        *ACCOUNTING_METRICS,
     ]
 
     headline = []
@@ -404,9 +395,9 @@ def main() -> int:
     non_idle_df = pd.DataFrame(non_idle_rows)
 
     v3_ok = ok[ok["method"] == "dynapm_v3_v2"]
-    mem_nz = int((v3_ok["n_memory_class_updates"] == 0).sum())
-    mem_mean = float(v3_ok["n_memory_class_updates"].mean()) if len(v3_ok) else float("nan")
-    mem_med = float(v3_ok["n_memory_class_updates"].median()) if len(v3_ok) else float("nan")
+    mem_nz = int((v3_ok["n_memory_class_value_changes"] == 0).sum())
+    mem_mean = float(v3_ok["n_memory_class_value_changes"].mean()) if len(v3_ok) else float("nan")
+    mem_med = float(v3_ok["n_memory_class_value_changes"].median()) if len(v3_ok) else float("nan")
 
     # Figures
     rng2 = np.random.default_rng(43)
@@ -484,9 +475,9 @@ def main() -> int:
         "pair_v3_minus_predictor": sum_b,
         "near_idle_non_idle_count": int(n_non_idle),
         "non_idle_method_means": non_idle_df.to_dict(orient="records"),
-        "dynapm_v3_memory_updates_mean": mem_mean,
-        "dynapm_v3_memory_updates_median": mem_med,
-        "dynapm_v3_vms_memory_class_updates_zero": mem_nz,
+        "dynapm_v3_memory_class_value_changes_mean": mem_mean,
+        "dynapm_v3_memory_class_value_changes_median": mem_med,
+        "dynapm_v3_vms_memory_class_value_changes_zero": mem_nz,
         "checkpoint": {
             "Q1_gap_ge_10pp": Q1,
             "Q2_predictor_CI_excludes_zero": Q2,
@@ -504,7 +495,7 @@ def main() -> int:
             f"{r['memory_class_accuracy_mean']:.4f} | {r['memory_class_accuracy_median']:.4f} | "
             f"{r['cpu_p95_mae_mean']:.4f} | {r['cpu_p95_mae_median']:.4f} | "
             f"{r['mem_p95_mae_mean']:.4f} | {r['mem_p95_mae_median']:.4f} | "
-            f"{r['total_updates_mean']:.2f} | {r['total_updates_median']:.2f} | "
+            f"{r['n_refresh_events_mean']:.2f} | {r['n_refresh_events_median']:.2f} | "
             f"{int(r['n_success_used'])} | {r['fraction_corpus']:.4f} |"
         )
 
@@ -517,7 +508,7 @@ def main() -> int:
             f"`runner_v2.run_method_on_vm` for six methods (**{len(jobs)}** runs) with "
             f"`joblib.Parallel(n_jobs=8)`. Volatility tiers are tertiles of bootstrap-segment CPU% std "
             f"(same construction as Task 5B’s sample strata). Outputs: per-run JSON fragments stored under "
-            f"`{out_dir}/` **without** the heavy `update_log` field (metrics are duplicated in parquet). "
+            f"`{out_dir}/` with explicit accounting counters and separate event traces. "
             f"Consolidated **`{summary_path}`** includes `run_status` ∈ {{`ok`,`failed`,`skipped`}} and "
             f"`failure_reason`.",
             width=100,
@@ -552,7 +543,7 @@ def main() -> int:
     lines.append(
         "| method | mean cpu_acc | median cpu_acc | mean mem_acc | median mem_acc | "
         "mean cpu_p95_mae | median cpu_p95_mae | mean mem_p95_mae | median mem_p95_mae | "
-        "mean total_updates | median total_updates | n_ok | frac_corpus |\n"
+        "mean n_refresh_events | median n_refresh_events | n_ok | frac_corpus |\n"
     )
     lines.append("|---|---|---|---|---|---|---|---|---|---|---|---|---|\n")
     for _, row in headline_df.iterrows():
@@ -589,9 +580,9 @@ def main() -> int:
 
     lines.append("\n## Memory-class diagnostic (DynAPM-V3, successful runs)\n")
     lines.append(
-        f"- **Mean** `n_memory_class_updates`: **{mem_mean:.4f}**\n"
+        f"- **Mean** `n_memory_class_value_changes`: **{mem_mean:.4f}**\n"
         f"- **Median:** **{mem_med:.1f}**\n"
-        f"- **VMs with `n_memory_class_updates == 0`:** **{mem_nz}** / **{len(v3_ok)}**\n"
+        f"- **VMs with `n_memory_class_value_changes == 0`:** **{mem_nz}** / **{len(v3_ok)}**\n"
     )
 
     lines.append("\n## Checkpoint questions\n")
@@ -640,9 +631,9 @@ def main() -> int:
     lines.append(
         "- **Volatility tiers** follow Task 5B: tertiles of bootstrap CPU% standard deviation across the locked kept list "
         "(not a column shipped in `bootstrap_summary.parquet`).\n"
-        "- Corpus JSON omit `update_log` to limit disk footprint; parquet holds all headline metrics.\n"
+        "- Corpus JSON retain event traces; parquet holds all canonical accounting counters.\n"
         "- **`task15_full_corpus.py` resume:** if a per-run JSON already exists and parses with finite "
-        "`cpu_class_accuracy`, that VM–method pair is reloaded instead of recomputing.\n"
+        "`cpu_class_accuracy` and matching causal/accounting schemas, that VM–method pair is reloaded instead of recomputing.\n"
         '- **Skipped** runs are precondition failures (`failure_reason` e.g. `MissingRawCsv`);\n'
         '- **Wilcoxon** uses `zero_method="wilcox"`; ill-conditioned cases return `nan` *p*-value.\n'
     )

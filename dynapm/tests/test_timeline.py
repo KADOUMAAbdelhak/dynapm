@@ -54,7 +54,7 @@ def test_pw_pp_v3_have_identical_nominal_grid_despite_gaps(make_policy, gap, exp
         assert policy.periodic_grid.anchor == ANCHOR
         for t in idx:
             advance(policy, obs, t)
-        periodic = [x for x in policy.refresh_log if x["reason"] == "periodic"]
+        periodic = [x for x in policy.refresh_log if x["trigger"] == "periodic"]
         actual = [(x["nominal_scheduled_time"], x["actual_commit_time"]) for x in periodic]
         expected_times = [(ANCHOR + pd.Timedelta(hours=n), ANCHOR + pd.Timedelta(hours=a)) for n, a in expected]
         assert actual == expected_times
@@ -81,7 +81,7 @@ def test_drift_between_ticks_and_coincidence_do_not_move_grid(make_policy):
         if t == ANCHOR + pd.Timedelta(hours=3):
             assert policy.periodic_grid.next_tick == ANCHOR + pd.Timedelta(hours=6)
     assert cpu.calls == mem.calls == len(idx)
-    assert [(r["actual_commit_time"], r["reason"]) for r in policy.refresh_log] == [
+    assert [(r["actual_commit_time"], r["trigger"]) for r in policy.refresh_log] == [
         (ANCHOR + pd.Timedelta(hours=3), "drift"),
         (ANCHOR + pd.Timedelta(hours=6), "periodic"),
         (ANCHOR + pd.Timedelta(hours=12), "periodic"),
@@ -99,7 +99,7 @@ def test_refresh_event_is_recorded_even_when_values_do_not_change(make_policy, m
     event = policy.refresh_log[0]
     assert event["nominal_scheduled_time"] == event["actual_commit_time"] == idx[-1]
     if method == "periodic_6h_v2":
-        assert policy.update_log == []  # Field mutations and refresh events differ.
+        assert policy.accounting_metrics()["n_field_value_changes"] == 0
 
 
 @pytest.mark.parametrize("period", [0, -6, float("nan")])
@@ -138,12 +138,12 @@ def test_residual_drift_commit_snapshot_then_delayed_verification(replay_repo, l
             return False
     policy._cpu_drift = Detector("cpu")
     policy._mem_drift = Detector("mem")
-    record = policy._record_refresh
-    def record_commit(*args):
-        record(*args)
+    record = policy.accounting.commit
+    def record_commit(*args, **kwargs):
+        record(*args, **kwargs)
         if args[0] == origin:
             order.append("commit")
-    monkeypatch.setattr(policy, "_record_refresh", record_commit)
+    monkeypatch.setattr(policy.accounting, "commit", record_commit)
     def snapshot(value):
         order.append("snapshot")
         return deepcopy(value)
@@ -170,7 +170,7 @@ def test_residual_drift_commit_snapshot_then_delayed_verification(replay_repo, l
     assert snap.predicted_cpu_p95_next_24h == replay.observations.at[origin, "CPU usage [%]"]
     assert snap != policy.profile.dynamic  # Later commits did not mutate the copy.
     at_origin = [r for r in policy.refresh_log if r["actual_commit_time"] == origin]
-    assert len(at_origin) == 1 and at_origin[0]["reason"] == "periodic"
+    assert len(at_origin) == 1 and at_origin[0]["trigger"] == "periodic"
     for p in [policy._cpu_predictor, policy._mem_predictor]:
         assert p.histories[0].index[-1] == origin
 
@@ -199,7 +199,7 @@ def test_shared_anchor_survives_feature_warmup(replay_repo, lag_predictor_factor
         first_observed = replay.observations.index[0]
         assert first_observed == anchor + pd.Timedelta(hours=8)
         list(iter_verified_snapshots(replay))
-        periodic = [r for r in replay.method.refresh_log if r["reason"] == "periodic"]
+        periodic = [r for r in replay.method.refresh_log if r["trigger"] == "periodic"]
         assert periodic[0]["nominal_scheduled_time"] == anchor + pd.Timedelta(hours=6)
         assert periodic[0]["actual_commit_time"] == first_observed
         schedules.append([(r["nominal_scheduled_time"], r["actual_commit_time"]) for r in periodic])

@@ -1,26 +1,19 @@
 """Shared evaluation utilities (aggregation, churn, effect sizes)."""
 from __future__ import annotations
 
-from typing import Any
-
 import numpy as np
 import pandas as pd
 
+from dynapm.core.accounting import ACCOUNTING_METRICS, require_accounting_metrics
 
-def count_unique_refresh_timestamps(update_log: list[Any]) -> int:
-    """
-    Count distinct refresh events from an update_log.
-    A refresh event = unique timestamp in the log, regardless
-    of how many fields were logged at that timestamp.
-    """
-    if not update_log:
-        return 0
-    timestamps: set[str] = set()
-    for entry in update_log:
-        if not isinstance(entry, dict) or "timestamp" not in entry:
-            continue
-        timestamps.add(str(pd.Timestamp(entry["timestamp"])))
-    return len(timestamps)
+
+def summarize_accounting(frame: pd.DataFrame) -> pd.DataFrame:
+    """VM-level means/medians of canonical counters, never reconstructed logs."""
+    require_accounting_metrics(frame)
+    ok = frame[frame.run_status == "ok"] if "run_status" in frame else frame
+    result = ok.groupby("method")[list(ACCOUNTING_METRICS)].agg(["mean", "median"])
+    result.columns = [f"{stat}_{metric}" for metric, stat in result.columns]
+    return result.reset_index()
 
 
 def cohen_d_paired(x_method: np.ndarray, y_method: np.ndarray) -> float:

@@ -52,16 +52,9 @@ Missing observations are neither fabricated nor backfilled. Feature lags and rol
 
 ## Coincident periodic and drift triggers
 
-Both detectors are updated even if one reports drift. If a periodic tick is also due, one refresh commits with `reason="periodic"`. Otherwise a drift event commits with `reason="drift"`. Drift never changes the grid anchor or next nominal periodic tick.
+Both detectors are updated even if one reports drift. If a periodic tick is also due, one refresh commits with `trigger="periodic"`. Otherwise a drift event commits with `trigger="drift"`. Drift never changes the grid anchor or next nominal periodic tick.
 
-Each policy exposes `refresh_log`, with one record per logical refresh:
-
-- `nominal_scheduled_time`: latest due periodic tick, or `None` for a non-periodic refresh;
-- `actual_commit_time`: actual observation/commit timestamp;
-- `timestamp`: compatibility alias for actual commit time;
-- `reason`: periodic, drift, reactive, or full_rewrite.
-
-`update_log` remains a field-mutation log. A logical refresh can write several fields or leave values unchanged, so field rows must not be counted as distinct refresh events. Runner `n_refresh_events` and periodic/drift counters use `refresh_log`. `total_updates` continues to count field rows, not logical refreshes. Task 15 preserves these distinct counters in its summary.
+Canonical events carry an explicit trigger and separate written/changed field lists. See [Refresh Accounting](#refresh-accounting) for the complete schema and counter definitions.
 
 ## Forecast and ground-truth targets
 
@@ -88,3 +81,43 @@ Evaluation candidates are anchored to the first streaming timestamp at twelve-ho
 Verification occurs at the first processed observation at or after `t+24h`. If the endpoint is missing, a later observation can release the pending snapshot. If replay stops before the horizon, the snapshot remains unverified and is counted as dropped, never scored early.
 
 Replays derive labels in memory from these shared clock/window functions, using bootstrap-only thresholds. They do not consume old cached ground-truth Parquets. The standalone ground-truth producer uses the same functions and stamps the new protocol when explicitly run. No corpus generation is part of this phase.
+
+## Refresh Accounting
+
+Accounting schema: `refresh-accounting-v1`, alongside the unchanged temporal protocol `causal-timeline-v2`. The schema is required on result JSONs and per-VM summary rows. Earlier counter formats must not be relabeled as current measurements.
+
+`dynapm/core/accounting.py` defines frozen `InitializationEvent` and `RefreshEvent` records, a constrained `Trigger` enum, and the single `ProfileCommitter` used by every policy. All dynamic field assignments pass through this helper; policies only decide when to commit and calculate the values.
+
+- **Initialization event:** the initial population of all four dynamic fields from bootstrap data. Exactly one per policy instance, stored in `initialization_log`. It is not a runtime refresh, and its assignments are excluded from runtime write/change counters.
+- **Runtime refresh event:** one committed maintenance operation at one processed timestamp. It exists even when all newly assigned values equal the old values. Duplicate or reversed runtime commit timestamps are rejected before any assignment.
+- **Trigger:** exactly one of `periodic`, `drift`, `reactive`, or `full_rewrite`. Policies restrict their allowed triggers. V3 selects periodic on coincidence, producing one event and no additional drift event.
+- **Nominal scheduled tick:** a grid point from Phase 2A. `nominal_scheduled_time` is the latest due tick represented by a periodic commit, and is null for other triggers.
+- **Actual commit time:** the observed timestamp at which the operation writes its profile state. It can be later than the nominal tick.
+- **Field write:** one assignment to one dynamic field during a runtime refresh. Every current policy refresh writes all four fields, including assignments of equal values. Assignment timestamps are updated for those writes.
+- **Field value change:** a field write whose value differs from the previously committed value. Missing-to-missing is unchanged. `fields_changed` is a unique subset of `fields_written`.
+- **Coalesced ticks:** several nominal ticks can become due during a gap, but produce only one periodic commit on resumption. Skipped/coalesced ticks are not refreshes.
+
+The four written fields are CPU class, memory class, CPU p95, and memory p95. One refresh that changes only CPU p95 records one event, four writes, and one value change. One unchanged Full-Rewrite operation records one event, four writes, and zero changes.
+
+Each per-VM policy result exposes:
+
+| Counter | Exact scope |
+|---|---|
+| `n_initialization_events` | Bootstrap population operations; exactly one |
+| `n_refresh_events` | All committed runtime operations; the authoritative refresh metric |
+| `n_field_writes` | Runtime assignments; exactly four times runtime refreshes |
+| `n_field_value_changes` | Runtime assignments with a changed value |
+| `n_periodic_refreshes` | Runtime periodic-trigger events |
+| `n_drift_refreshes` | Runtime drift-only events |
+| `n_reactive_refreshes` | Runtime Reactive-trigger events |
+| `n_full_rewrite_refreshes` | Runtime Full-Rewrite-trigger events |
+| `nominal_periodic_ticks_due` | All grid ticks crossed through the last processed observation, including coalesced ticks |
+| `periodic_refresh_events_committed` | Actual periodic commits; equals `n_periodic_refreshes` |
+
+Static has zero runtime refreshes, writes, and changes after its one initialization. PW and PP each satisfy total refreshes = periodic refreshes, with exactly equal committed schedules/counts for identical timelines, split, and period even when their predicted content differs. Reactive counts only class-change-triggered commits. Full-Rewrite counts every eligible processed observation. V3 satisfies total refreshes = periodic + drift refreshes.
+
+Example: a six-hour grid crossed at 06:00, 12:00, and 18:00 during a gap has `nominal_periodic_ticks_due=3` on a 20:00 resume, but only one committed periodic event, associated with 18:00. The next tick remains 24:00. Drift never moves this grid.
+
+`refresh_log` is a serializable trace of canonical runtime events; `initialization_log` is separate. Each runtime event contains `actual_commit_time`, `trigger`, `nominal_scheduled_time`, `fields_written`, and `fields_changed`. ISO timestamps and explicit counters survive ordinary JSON serialization. No event trace is required to compute statistics. A bounded provisioning replay also exposes its per-VM accounting as `DataFrame.attrs["policy_accounting"]`, rather than repeating counters on each verified outcome row.
+
+The ambiguous legacy result names and changed-field-row log are removed. Per-field diagnostics use explicit names such as `n_memory_class_value_changes`. Task 15 retains every canonical counter in its per-VM summary. `summarize_accounting` and table builders read validated counters directly, including means of refreshes, periodic/drift events, writes, and value changes. There is no sample normalization, unique-field-timestamp inference, or cell override. [The accounting audit](accounting-audit.md) classifies the previous references and the remaining uses.

@@ -20,6 +20,7 @@ from dynapm.scripts import _matplotlib_setup  # noqa: F401
 import matplotlib.pyplot as plt  # noqa: E402
 
 from dynapm.eval.replay import require_causal_protocol
+from dynapm.core.accounting import require_accounting_metrics
 from dynapm.eval.provisioning import (  # noqa: E402
     OVER_THRESHOLD,
     SAFETY_FACTOR,
@@ -320,6 +321,7 @@ def main() -> int:
 
     summary = pd.read_parquet(summary_path)
     require_causal_protocol(summary)
+    require_accounting_metrics(summary)
     summary["vm_id"] = summary["vm_id"].astype(str)
 
     avail_note = (

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Task 18: paper-ready tables/figures plus normalized churn sample (no new eval)."""
+"""Result tables/figures from validated per-VM metrics; no count normalization."""
 from __future__ import annotations
 
 import json
@@ -12,7 +12,9 @@ import pandas as pd
 
 REPO = Path(__file__).resolve().parent.parent.parent
 
-from dynapm.eval.metrics import cohen_d_paired, count_unique_refresh_timestamps  # noqa: E402
+from dynapm.core.accounting import ACCOUNTING_METRICS, require_accounting_metrics
+from dynapm.eval.metrics import cohen_d_paired
+from dynapm.eval.replay import require_causal_protocol  # noqa: E402
 from dynapm.scripts.task17b_provisioning import (  # noqa: E402
     SAFETY_FACTOR,
     bootstrap_mean_ci,
@@ -22,10 +24,8 @@ from dynapm.scripts.task17b_provisioning import (  # noqa: E402
     tier_table as prov_tier_table,
 )
 
-SAMPLE_JSON = REPO / "dynapm/results/eval_sample_v2"
 CORPUS_SUMMARY = REPO / "dynapm/data/eval_full_corpus_summary.parquet"
 PROV_RECORDS = REPO / "dynapm/data/provisioning_eval_records.parquet"
-OUT_PARQUET = REPO / "dynapm/data/normalized_refresh_counts_sample.parquet"
 PAPER = REPO / "dynapm/reports/paper"
 
 PP = "periodic_predictor_6h_v2"
@@ -94,35 +94,6 @@ def provisioning_vectors(prov: pd.DataFrame, ma: str, mb: str, col: str) -> tupl
         j["vb"].to_numpy(dtype=np.float64),
         len(j),
     )
-
-
-def load_sample_rows(glob_pat: str, method_label: str) -> list[dict]:
-    rows: list[dict] = []
-    for p in sorted(SAMPLE_JSON.glob(glob_pat)):
-        with open(p, encoding="utf-8") as f:
-            rec = json.load(f)
-        trace = rec.get("trace")
-        vm_id = str(rec.get("vm_id", ""))
-        log = rec.get("update_log") or []
-        rows.append(
-            {
-                "method": method_label,
-                "trace": trace,
-                "vm_id": vm_id,
-                "n_refresh_events": count_unique_refresh_timestamps(log),
-                "total_updates_rowcount": int(rec.get("total_updates", len(log))),
-            }
-        )
-    return rows
-
-
-def build_normalized_refresh_parquet() -> pd.DataFrame:
-    v3_rows = load_sample_rows("dynapm_v3__*.json", "dynapm_v3")
-    pp_rows = load_sample_rows("periodic_predictor_6h_v2__*.json", "periodic_predictor_6h_v2")
-    df = pd.DataFrame(v3_rows + pp_rows)
-    OUT_PARQUET.parent.mkdir(parents=True, exist_ok=True)
-    df[["method", "trace", "vm_id", "n_refresh_events"]].to_parquet(OUT_PARQUET, index=False)
-    return df
 
 
 def headline_effect_sizes(summary: pd.DataFrame, prov: pd.DataFrame) -> list[tuple[str, str, float]]:
@@ -355,6 +326,7 @@ def figure_v3_vs_pp_scatter(summary: pd.DataFrame, path_stem: Path) -> None:
 
 
 def build_table1(summary: pd.DataFrame, prov: pd.DataFrame) -> pd.DataFrame:
+    require_accounting_metrics(summary)
     prov_tab = method_metrics_table(prov, SAFETY_FACTOR).set_index("method")
     ok = summary[summary["run_status"] == "ok"]
     out_rows = []
@@ -365,8 +337,7 @@ def build_table1(summary: pd.DataFrame, prov: pd.DataFrame) -> pd.DataFrame:
         ma, mla, mha = bootstrap_vm_mean_ci(sub["memory_class_accuracy"].astype(float).values, seed=302)
         cma, cmla, cmha = bootstrap_vm_mean_ci(sub["cpu_p95_mae"].astype(float).values, seed=303)
         mma, mmla, mmha = bootstrap_vm_mean_ci(sub["mem_p95_mae"].astype(float).values, seed=304)
-        mean_ref = float(sub["total_updates"].astype(float).mean())
-        med_ref = float(sub["total_updates"].astype(float).median())
+        med_ref = float(sub["n_refresh_events"].astype(float).median())
         under = float(prov_tab.loc[method, "mean_cpu_under_rate"]) if method in prov_tab.index else float("nan")
         out_rows.append(
             {
@@ -384,8 +355,8 @@ def build_table1(summary: pd.DataFrame, prov: pd.DataFrame) -> pd.DataFrame:
                 "mean_mem_p95_mae": round(mma, 3),
                 "ci_low_mem_mae": round(mmla, 3),
                 "ci_high_mem_mae": round(mmha, 3),
-                "mean_n_refresh_events": round(mean_ref, 1),
-                "median_n_refresh_events": round(med_ref, 1),
+                **{f"mean_{metric}": float(sub[metric].mean()) for metric in ACCOUNTING_METRICS},
+                "median_n_refresh_events": float(med_ref),
                 "mean_cpu_under_rate": round(under, 4),
             }
         )
@@ -417,9 +388,10 @@ def build_table3(summary: pd.DataFrame, prov: pd.DataFrame) -> pd.DataFrame:
 
 def main() -> int:
     PAPER.mkdir(parents=True, exist_ok=True)
-    build_normalized_refresh_parquet()
 
     summary = pd.read_parquet(CORPUS_SUMMARY)
+    require_causal_protocol(summary)
+    require_accounting_metrics(summary)
     summary["vm_id"] = summary["vm_id"].astype(str)
     prov = pd.read_parquet(PROV_RECORDS)
     prov["vm_id"] = prov["vm_id"].astype(str)
@@ -444,7 +416,6 @@ def main() -> int:
     print(
         json.dumps(
             {
-                "refresh_parquet": str(OUT_PARQUET),
                 "paper_dir": str(PAPER),
                 "headline_cohen_d": [(a, b, float(c) if np.isfinite(c) else None) for a, b, c in effects],
             },

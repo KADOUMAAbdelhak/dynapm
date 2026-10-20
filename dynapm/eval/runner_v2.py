@@ -1,14 +1,14 @@
 """Evaluation runner v2: snapshot-then-verify protocol.
 
-Return dict includes optional policy audit fields: ``update_log`` (list of entries from
-``method.update_log``), logical ``refresh_log`` events, and periodic/drift counts;
-``decision_head_stats`` when the policy exposes a ``decision_head`` with ``stats()``.
+Results expose canonical initialization, refresh, write, and value-change counters.
+Event traces are optional audit detail; analysis consumes counters directly.
 Forward ground truth is exposed only after the verification horizon; it is
 never passed back to a refresh policy."""
 from __future__ import annotations
 
 import pandas as pd
 
+from dynapm.core.accounting import ACCOUNTING_SCHEMA, FIELD_CHANGE_METRICS
 from dynapm.eval.replay import CAUSAL_PROTOCOL, prepare_vm_replay, iter_verified_snapshots
 
 
@@ -45,35 +45,21 @@ def run_method_on_vm(
             "mem_p95_mae": float(rec_df["mem_p95_abs_err"].mean()),
         }
 
-    log_df = pd.DataFrame(method.update_log)
-
-    def n_field(field: str) -> int:
-        if len(log_df) == 0:
-            return 0
-        return int((log_df["field"] == field).sum())
-
-    n_periodic = sum(r["reason"] == "periodic" for r in method.refresh_log)
-    n_drift = sum(r["reason"] == "drift" for r in method.refresh_log)
-
     out = {
         "causal_protocol": CAUSAL_PROTOCOL,
         "trace": trace,
         "vm_id": str(vm_id),
         **agg,
-        "n_cpu_class_updates": n_field("cpu_class"),
-        "n_memory_class_updates": n_field("memory_class"),
-        "n_cpu_p95_updates": n_field("predicted_cpu_p95_next_24h"),
-        "n_mem_p95_updates": n_field("predicted_mem_p95_next_24h"),
-        "total_updates": int(len(log_df)),
-        "n_refresh_events": len(method.refresh_log),
+        "accounting_schema": ACCOUNTING_SCHEMA,
+        **method.accounting_metrics(),
+        **{name: sum(field in e.fields_changed for e in method.accounting.refresh_events)
+           for name, field in FIELD_CHANGE_METRICS.items()},
         "n_eval_points_verified": int(len(rec_df)),
         "snapshots_dropped_unverified": int(replay.snapshots_dropped_unverified),
         "n_streaming_steps": int(len(replay.observations)),
         "stream_days": replay.stream_days,
-        "update_log": list(method.update_log),
-        "refresh_log": list(method.refresh_log),
-        "n_periodic_refreshes": n_periodic,
-        "n_drift_refreshes": n_drift,
+        "initialization_log": [e.to_dict() for e in method.accounting.initialization_events],
+        "refresh_log": [e.to_dict() for e in method.accounting.refresh_events],
     }
     dh = getattr(method, "decision_head", None)
     if dh is not None and hasattr(dh, "stats"):

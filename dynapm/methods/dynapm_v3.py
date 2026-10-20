@@ -6,10 +6,10 @@ import math
 import pandas as pd
 
 from dynapm.core.temporal import PeriodicGrid
+from dynapm.core.accounting import Trigger
 from dynapm.core.predictor import HorizonPredictor, forecast_at_origin
 
 from dynapm.core.drift import ADWINDetector
-from dynapm.core.forecasting import forecast_class_from_window, forecast_p95_from_window
 from dynapm.methods.baselines_v2 import _BasePolicyV2
 
 
@@ -24,6 +24,7 @@ class DynAPMPolicyV3(_BasePolicyV2):
 
     requires_predictors = True
     requires_residuals = True
+    allowed_triggers = (Trigger.PERIODIC, Trigger.DRIFT)
 
     def __init__(
         self,
@@ -48,16 +49,7 @@ class DynAPMPolicyV3(_BasePolicyV2):
         self.periodic_grid = PeriodicGrid(profile.static.bootstrap_end, period_hours)
         self._cpu_drift = ADWINDetector(delta=float(drift_delta))
         self._mem_drift = ADWINDetector(delta=float(drift_delta))
-        self._set_initial_forecast(bootstrap_cpu_series, bootstrap_mem_series)
-
-    def _set_initial_forecast(self, boot_cpu, boot_mem):
-        t0 = pd.Timestamp(self.profile.static.bootstrap_end)
-        self.profile.dynamic.cpu_class = forecast_class_from_window(boot_cpu, self.cpu_thresholds)
-        self.profile.dynamic.memory_class = forecast_class_from_window(boot_mem, self.mem_thresholds)
-        self.profile.dynamic.predicted_cpu_p95_next_24h = forecast_p95_from_window(boot_cpu)
-        self.profile.dynamic.predicted_mem_p95_next_24h = forecast_p95_from_window(boot_mem)
-        for f in ("cpu_class", "memory_class", "predicted_cpu_p95_next_24h", "predicted_mem_p95_next_24h"):
-            self.profile.last_updated[f] = t0
+        self._set_initial_forecast(bootstrap_cpu_series, bootstrap_mem_series, t=profile.static.bootstrap_end)
 
     def _causal_windows(self, t: pd.Timestamp):
         return (
@@ -65,44 +57,10 @@ class DynAPMPolicyV3(_BasePolicyV2):
             forecast_at_origin(self._mem_predictor, self._mem_obs_full, t),
         )
 
-    def _refresh_from_predictor(self, t: pd.Timestamp, reason: str, nominal=None) -> None:
-        t = pd.Timestamp(t)
+    def _refresh_from_predictor(self, t, trigger, nominal=None):
         cpu_lookahead, mem_lookahead = self._causal_windows(t)
-        if len(cpu_lookahead) == 0 or len(mem_lookahead) == 0:
-            return
-
-        log_start = len(self._update_log)
-        old = (
-            self.profile.dynamic.cpu_class,
-            self.profile.dynamic.memory_class,
-            self.profile.dynamic.predicted_cpu_p95_next_24h,
-            self.profile.dynamic.predicted_mem_p95_next_24h,
-        )
-
-        new_cpu_cls = forecast_class_from_window(cpu_lookahead, self.cpu_thresholds)
-        new_mem_cls = forecast_class_from_window(mem_lookahead, self.mem_thresholds)
-        new_cpu_p95 = forecast_p95_from_window(cpu_lookahead)
-        new_mem_p95 = forecast_p95_from_window(mem_lookahead)
-
-        self.profile.dynamic.cpu_class = new_cpu_cls
-        self.profile.dynamic.memory_class = new_mem_cls
-        self.profile.dynamic.predicted_cpu_p95_next_24h = new_cpu_p95
-        self.profile.dynamic.predicted_mem_p95_next_24h = new_mem_p95
-
-        for f in ("cpu_class", "memory_class", "predicted_cpu_p95_next_24h", "predicted_mem_p95_next_24h"):
-            self.profile.last_updated[f] = t
-
-        meta = {"timestamp": t, "p_commit": 1.0, "reason": reason}
-        self._update_log.append({**meta, "field": "cpu_class", "old_value": old[0], "new_value": new_cpu_cls})
-        self._update_log.append({**meta, "field": "memory_class", "old_value": old[1], "new_value": new_mem_cls})
-        self._update_log.append(
-            {**meta, "field": "predicted_cpu_p95_next_24h", "old_value": old[2], "new_value": new_cpu_p95}
-        )
-        self._update_log.append(
-            {**meta, "field": "predicted_mem_p95_next_24h", "old_value": old[3], "new_value": new_mem_p95}
-        )
-
-        self._record_refresh(t, reason, nominal, log_start)
+        self._commit_forecast(t, cpu_lookahead, mem_lookahead,
+            trigger=trigger, nominal_scheduled_time=nominal)
 
     def step(self, t, cpu_obs_window, mem_obs_window, *, cpu_prediction: float, mem_prediction: float):
         """Consume current yhat(t|t-1) scalars only; refreshes never use them."""
@@ -121,6 +79,6 @@ class DynAPMPolicyV3(_BasePolicyV2):
         # wins on coincidence; a drift refresh never changes the wall-clock grid.
         nominal = self.periodic_grid.pop_due(t)
         if nominal is not None:
-            self._refresh_from_predictor(t, reason="periodic", nominal=nominal)
+            self._refresh_from_predictor(t, trigger=Trigger.PERIODIC, nominal=nominal)
         elif cpu_drift or mem_drift:
-            self._refresh_from_predictor(t, reason="drift")
+            self._refresh_from_predictor(t, trigger=Trigger.DRIFT)

@@ -4,6 +4,7 @@ from __future__ import annotations
 import pandas as pd
 
 from dynapm.core.temporal import PeriodicGrid
+from dynapm.core.accounting import ProfileCommitter, Trigger
 from dynapm.core.predictor import HorizonPredictor, forecast_at_origin
 from dynapm.core.forecasting import forecast_class_from_window, forecast_p95_from_window
 
@@ -22,57 +23,32 @@ class _BasePolicyV2:
         self.profile = profile
         self.cpu_thresholds = cpu_thresholds
         self.mem_thresholds = mem_thresholds
-        self._update_log = []
-        self.refresh_log = []
+        self.accounting = ProfileCommitter(profile, self.allowed_triggers)
+
+    allowed_triggers = ()
 
     @property
-    def update_log(self):
-        return self._update_log
+    def refresh_log(self):
+        return [e.as_record() for e in self.accounting.refresh_events]
 
-    def _record_refresh(self, t, reason, nominal_scheduled_time, log_start):
-        """One event per logical refresh; field changes remain a separate log."""
-        event = {"timestamp": pd.Timestamp(t), "actual_commit_time": pd.Timestamp(t),
-                 "nominal_scheduled_time": nominal_scheduled_time, "reason": reason}
-        self.refresh_log.append(event)
-        for row in self._update_log[log_start:]:
-            row.update(event)
+    def accounting_metrics(self):
+        grid = getattr(self, "periodic_grid", None)
+        return self.accounting.counters(grid.nominal_ticks_due if grid is not None else 0)
 
-    def _set_initial_forecast(self, cpu_values, mem_values, t: pd.Timestamp):
-        self.profile.dynamic.cpu_class = forecast_class_from_window(cpu_values, self.cpu_thresholds)
-        self.profile.dynamic.memory_class = forecast_class_from_window(mem_values, self.mem_thresholds)
-        self.profile.dynamic.predicted_cpu_p95_next_24h = forecast_p95_from_window(cpu_values)
-        self.profile.dynamic.predicted_mem_p95_next_24h = forecast_p95_from_window(mem_values)
-        self.profile.last_updated["cpu_class"] = pd.Timestamp(t)
-        self.profile.last_updated["memory_class"] = pd.Timestamp(t)
-        self.profile.last_updated["predicted_cpu_p95_next_24h"] = pd.Timestamp(t)
-        self.profile.last_updated["predicted_mem_p95_next_24h"] = pd.Timestamp(t)
-
-    def _commit_forecast(self, t: pd.Timestamp, cpu_values, mem_values, *, reason, nominal_scheduled_time=None):
-        t = pd.Timestamp(t)
-        log_start = len(self._update_log)
-        new_vals = {
+    def _forecast_values(self, cpu_values, mem_values):
+        return {
             "cpu_class": forecast_class_from_window(cpu_values, self.cpu_thresholds),
             "memory_class": forecast_class_from_window(mem_values, self.mem_thresholds),
             "predicted_cpu_p95_next_24h": forecast_p95_from_window(cpu_values),
             "predicted_mem_p95_next_24h": forecast_p95_from_window(mem_values),
         }
-        for field, new_value in new_vals.items():
-            old_value = getattr(self.profile.dynamic, field)
-            if (pd.isna(old_value) and pd.isna(new_value)) or old_value == new_value:
-                continue
-            setattr(self.profile.dynamic, field, new_value)
-            self.profile.last_updated[field] = t
-            self._update_log.append(
-                {
-                    "timestamp": t,
-                    "field": field,
-                    "old_value": old_value,
-                    "new_value": new_value,
-                    "p_commit": 1.0,
-                }
-            )
 
-        self._record_refresh(t, reason, nominal_scheduled_time, log_start)
+    def _set_initial_forecast(self, cpu_values, mem_values, t):
+        self.accounting.initialize(t, self._forecast_values(cpu_values, mem_values))
+
+    def _commit_forecast(self, t, cpu_values, mem_values, *, trigger, nominal_scheduled_time=None):
+        self.accounting.commit(t, self._forecast_values(cpu_values, mem_values),
+            trigger=trigger, nominal_scheduled_time=nominal_scheduled_time)
 
     def step(self, t, cpu_obs_window, mem_obs_window):
         raise NotImplementedError
@@ -91,6 +67,8 @@ class StaticPolicyV2(_BasePolicyV2):
 
 
 class PeriodicPolicyV2(_BasePolicyV2):
+    allowed_triggers = (Trigger.PERIODIC,)
+
     def __init__(self, profile, cpu_thresholds, mem_thresholds, *,
                  bootstrap_cpu_series, bootstrap_mem_series, period_hours=6.0):
         super().__init__(profile, cpu_thresholds, mem_thresholds)
@@ -110,10 +88,12 @@ class PeriodicPolicyV2(_BasePolicyV2):
             self._commit_forecast(t,
                 cpu_obs_window.loc[cpu_obs_window.index <= t],
                 mem_obs_window.loc[mem_obs_window.index <= t],
-                reason="periodic", nominal_scheduled_time=nominal)
+                trigger=Trigger.PERIODIC, nominal_scheduled_time=nominal)
 
 
 class ReactiveThresholdPolicyV2(_BasePolicyV2):
+    allowed_triggers = (Trigger.REACTIVE,)
+
     def __init__(self, profile, cpu_thresholds, mem_thresholds, *,
                  bootstrap_cpu_series, bootstrap_mem_series):
         super().__init__(profile, cpu_thresholds, mem_thresholds)
@@ -135,10 +115,12 @@ class ReactiveThresholdPolicyV2(_BasePolicyV2):
             candidate_cpu_class != self.profile.dynamic.cpu_class
             or candidate_mem_class != self.profile.dynamic.memory_class
         ):
-            self._commit_forecast(t, cpu_candidate, mem_candidate, reason="reactive")
+            self._commit_forecast(t, cpu_candidate, mem_candidate, trigger=Trigger.REACTIVE)
 
 
 class FullRewritePolicyV2(_BasePolicyV2):
+    allowed_triggers = (Trigger.FULL_REWRITE,)
+
     def __init__(self, profile, cpu_thresholds, mem_thresholds, *,
                  bootstrap_cpu_series, bootstrap_mem_series):
         super().__init__(profile, cpu_thresholds, mem_thresholds)
@@ -153,7 +135,7 @@ class FullRewritePolicyV2(_BasePolicyV2):
         t = pd.Timestamp(t)
         cpu_now = _window_last_hours(cpu_obs_window, t, 24.0)
         mem_now = _window_last_hours(mem_obs_window, t, 24.0)
-        self._commit_forecast(t, cpu_now, mem_now, reason="full_rewrite")
+        self._commit_forecast(t, cpu_now, mem_now, trigger=Trigger.FULL_REWRITE)
 
 
 class PeriodicPredictorPolicyV2(_BasePolicyV2):
@@ -164,6 +146,7 @@ class PeriodicPredictorPolicyV2(_BasePolicyV2):
     """
 
     requires_predictors = True
+    allowed_triggers = (Trigger.PERIODIC,)
 
     def __init__(
         self, profile, cpu_thresholds, mem_thresholds, *,
@@ -195,68 +178,6 @@ class PeriodicPredictorPolicyV2(_BasePolicyV2):
         nominal = self.periodic_grid.pop_due(t)
         if nominal is None:
             return
-        log_start = len(self._update_log)
-
         cpu_lookahead, mem_lookahead = self._causal_windows(t)
-        if len(cpu_lookahead) == 0 or len(mem_lookahead) == 0:
-            return
-
-        old_cpu_cls = self.profile.dynamic.cpu_class
-        old_mem_cls = self.profile.dynamic.memory_class
-        old_cpu_p95 = self.profile.dynamic.predicted_cpu_p95_next_24h
-        old_mem_p95 = self.profile.dynamic.predicted_mem_p95_next_24h
-
-        new_cpu_cls = forecast_class_from_window(cpu_lookahead, self.cpu_thresholds)
-        new_mem_cls = forecast_class_from_window(mem_lookahead, self.mem_thresholds)
-        new_cpu_p95 = forecast_p95_from_window(cpu_lookahead)
-        new_mem_p95 = forecast_p95_from_window(mem_lookahead)
-
-        self.profile.dynamic.cpu_class = new_cpu_cls
-        self.profile.dynamic.memory_class = new_mem_cls
-        self.profile.dynamic.predicted_cpu_p95_next_24h = new_cpu_p95
-        self.profile.dynamic.predicted_mem_p95_next_24h = new_mem_p95
-
-        self.profile.last_updated["cpu_class"] = t
-        self.profile.last_updated["memory_class"] = t
-        self.profile.last_updated["predicted_cpu_p95_next_24h"] = t
-        self.profile.last_updated["predicted_mem_p95_next_24h"] = t
-
-        if old_cpu_cls != new_cpu_cls:
-            self._update_log.append(
-                {
-                    "timestamp": t,
-                    "field": "cpu_class",
-                    "old_value": old_cpu_cls,
-                    "new_value": new_cpu_cls,
-                    "p_commit": 1.0,
-                }
-            )
-        if old_mem_cls != new_mem_cls:
-            self._update_log.append(
-                {
-                    "timestamp": t,
-                    "field": "memory_class",
-                    "old_value": old_mem_cls,
-                    "new_value": new_mem_cls,
-                    "p_commit": 1.0,
-                }
-            )
-        self._update_log.append(
-            {
-                "timestamp": t,
-                "field": "predicted_cpu_p95_next_24h",
-                "old_value": old_cpu_p95,
-                "new_value": new_cpu_p95,
-                "p_commit": 1.0,
-            }
-        )
-        self._update_log.append(
-            {
-                "timestamp": t,
-                "field": "predicted_mem_p95_next_24h",
-                "old_value": old_mem_p95,
-                "new_value": new_mem_p95,
-                "p_commit": 1.0,
-            }
-        )
-        self._record_refresh(t, "periodic", nominal, log_start)
+        self._commit_forecast(t, cpu_lookahead, mem_lookahead,
+            trigger=Trigger.PERIODIC, nominal_scheduled_time=nominal)

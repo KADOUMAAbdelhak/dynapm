@@ -38,9 +38,9 @@ def test_dynapm_v3_periodic_only(lag_predictor_factory):
     policy, cpu, mem = _policy(lag_predictor_factory, [25.0] * 180, period_hours=1)
     for ts in cpu.index:
         policy.step(ts, cpu.loc[:ts], mem.loc[:ts], cpu_prediction=25.0, mem_prediction=25.0)
-    assert policy.update_log
-    assert {r["reason"] for r in policy.update_log} == {"periodic"}
-    refreshes = pd.DatetimeIndex(sorted({r["timestamp"] for r in policy.update_log}))
+    assert policy.refresh_log
+    assert {r["trigger"] for r in policy.refresh_log} == {"periodic"}
+    refreshes = pd.DatetimeIndex(sorted({r["actual_commit_time"] for r in policy.refresh_log}))
     assert (refreshes[1:] - refreshes[:-1] == pd.Timedelta(hours=1)).all()
 
 
@@ -49,7 +49,7 @@ def test_dynapm_v3_drift_adds_extra_refreshes(lag_predictor_factory):
                                period_hours=5000)
     for ts in cpu.index:
         policy.step(ts, cpu.loc[:ts], mem.loc[:ts], cpu_prediction=10.0, mem_prediction=10.0)
-    reasons = [r["reason"] for r in policy.update_log]
+    reasons = [r["trigger"] for r in policy.refresh_log]
     assert reasons.count("periodic") == 0  # Bootstrap initialization is not a scheduled tick.
     assert "drift" in reasons
     assert policy.profile.dynamic.predicted_cpu_p95_next_24h == 95.0
