@@ -1,0 +1,11 @@
+numpy>=1.26
+pandas>=2.1
+scikit-learn>=1.4
+xgboost>=2.0
+matplotlib>=3.8
+scipy>=1.12
+river>=0.21
+hdbscan>=0.8.33
+pyarrow>=14
+joblib>=1.3
+pytest>=7.4
