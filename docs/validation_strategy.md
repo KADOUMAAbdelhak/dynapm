@@ -228,3 +228,7 @@ may be chosen to favor observed pilot effects. See [protocol](protocol.md) and
 ## Corrected bounded gate status
 
 V2 passed under causal-timeline-v3 and phase-balanced-hourly-v1; see [pilot record](bounded_pilot.md). V2.5 is NEXT and must freeze every confirmatory rule before any held-out outcome. The matched-budget counterfactual uses paired V3 K with non-adaptive input-eligible positions; it does not calibrate an interval from favorable effects or claim deployability. The 18 development entities remain excluded from primary independent confirmation; no final cohort or practical margins were selected in this task.
+
+## V2.4 prerequisite to confirmation freeze
+
+Before V2.5, review [predictor diagnosis](predictor_diagnosis.md) on only the fixed eighteen development VMs and the [official-source dataset audit](dataset_suitability_audit.md). Distinguish recursive feedback, one-step model quality, distribution shift, threshold sensitivity and gap availability using exploratory diagnostics. Do not tune models here or inspect the 1,558 possible confirmatory entities. Dataset ranking must reflect resource semantics, usable horizon, continuity, reproducibility and independent workload evidence, not expected favorable performance. V2.5 remains blocked until this work is reviewed; V3 remains blocked. A redesign recommendation requires a separate development/validation step before freezing claims.

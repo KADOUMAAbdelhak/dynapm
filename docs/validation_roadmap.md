@@ -42,9 +42,19 @@ This roadmap specifies future gates, not authorization to execute them. The sole
 - **Reviewer concern addressed:** TOCS 7-9 design readiness and reproducibility.
 - **Unproven:** full-corpus effects, held-out budget matching, generalization, systems relevance.
 
+## V2.4 — PREDICTOR DIAGNOSIS + DATASET SUITABILITY AUDIT
+
+**STATUS: IN PROGRESS**
+
+- **Objective:** diagnose predictor-grounded underperformance on the fixed 18 development VMs; rank independent corpora from official documentation.
+- **Required artifacts:** [predictor diagnosis](predictor_diagnosis.md), managed lead/profile/VM diagnostics, [dataset suitability audit](dataset_suitability_audit.md), source/config/output integrity evidence.
+- **PASS criteria:** bounded clean-source exploratory diagnostics complete; causes and limitations documented; official-source dataset comparison and recommendation; lightweight suite and provenance validation pass. Accuracy improvement is not a criterion.
+- **Reviewer concern addressed:** predictor validity, forecast horizon and cross-corpus readiness.
+- **Unproven:** redesign efficacy, generalization, confirmatory effect or system benefit.
+
 ## V2.5 — CONFIRMATORY DESIGN FREEZE
 
-**STATUS: NEXT**
+**STATUS: BLOCKED PENDING V2.4 REVIEW**
 
 - **Objective:** freeze an independent, falsifiable confirmatory design before any full run.
 - **Required artifacts:** final eligible cohort and permanent pilot exclusion list; primary endpoints/comparisons; practical-benefit and acceptable-harm margins; multiplicity families; tests/confidence levels; volatility analysis; exclusion/missing-data rules; confirmatory versus exploratory analyses; exact method/config matrix.
@@ -144,7 +154,7 @@ This roadmap specifies future gates, not authorization to execute them. The sole
 
 ## Dependency and execution rule
 
-V0, V1A, V1B and V2 are PASS. V2.5 — Confirmatory Design Freeze is NEXT. V3 remains BLOCKED UNTIL V2.5 PASS. The earlier v2 pilot was blocked on gaps and aliasing; the corrected v3 pilot resolves those protocol defects with independently verified bounded execution. V4 requires frozen interval/budget comparisons; V6 requires dataset selection; V8 requires the V7 harness and V5 cost discipline. Every future experiment still requires explicit scope and authorization. No manuscript prose before V10 passes and V11 begins.
+V0, V1A, V1B and V2 are PASS. V2.4 diagnosis/audit is current; V2.5 is blocked pending its review. V3 remains BLOCKED UNTIL V2.5 PASS. The earlier v2 pilot was blocked on gaps and aliasing; the corrected v3 pilot resolves those protocol defects with independently verified bounded execution. V4 requires frozen interval/budget comparisons; V6 requires dataset selection; V8 requires the V7 harness and V5 cost discipline. Every future experiment still requires explicit scope and authorization. No manuscript prose before V10 passes and V11 begins.
 
 Primary confirmation must exclude the same 18 development-pilot VMs. Final eligibility and all exclusion rules remain for V2.5; 1,558 is the maximum retained primary cohort before any further predefined exclusions. Optional whole-corpus description is separate from independent confirmation.
 
@@ -152,4 +162,4 @@ Both pilot generations and the stopped diagnostic attempt are recorded in [bound
 
 ## Phase 3A-R execution record
 
-V2 PASS at source `82a79b90d70ce0405ffbf161698180bdf4f49ed7`; run `2026-10-21T111323.571341Z-6d801e1fe87c-e3a215fe`. 256 tests passed, no failures/skips. [Bounded pilot](bounded_pilot.md) records execution and exploratory diagnostics. V2.5 is NEXT; V3 remains BLOCKED UNTIL V2.5. The earlier v2 pilot remains preserved as a readiness failure. No full experiment follows automatically.
+V2 PASS at source `82a79b90d70ce0405ffbf161698180bdf4f49ed7`; run `2026-10-21T111323.571341Z-6d801e1fe87c-e3a215fe`. 256 tests passed, no failures/skips. [Bounded pilot](bounded_pilot.md) records execution and exploratory diagnostics. V2.5 is blocked pending V2.4 review; V3 remains BLOCKED UNTIL V2.5. The earlier v2 pilot remains preserved as a readiness failure. No full experiment follows automatically.
