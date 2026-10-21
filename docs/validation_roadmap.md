@@ -34,10 +34,10 @@ This roadmap specifies future gates, not authorization to execute them. The sole
 
 ## V2 — BOUNDED SCIENTIFIC PILOT
 
-**STATUS: NEXT — separate bounded-pilot authorization required**
+**STATUS: IN PROGRESS — Phase 3A authorized, awaiting clean-source pilot validation**
 
 - **Objective:** small VM subset only; test provenance, 3h/6h/12h scheduling, prospective matched-budget design, runtime feasibility, output schema and statistical pipeline sanity.
-- **Required artifacts:** managed pilot driver with explicit config-to-execution binding; development/confirmation split plan; bounded pilot config and manifests; runtime/resource estimates; eligibility/output checks; analysis dry-run; calibrated matched-budget proposal; practical-effect/budget margins and pre-registration for confirmation.
+- **Required artifacts:** [managed 18-VM pilot](bounded_pilot.md), permanent development-cohort exclusion manifest, explicit config-to-execution binding; development/confirmation split plan; bounded pilot config and manifests; runtime/resource estimates; eligibility/output checks; analysis dry-run; calibrated matched-budget proposal; practical-effect/budget margins and pre-registration for confirmation.
 - **PASS criteria:** complete provenance; expected schedule/count invariants; no hidden output repair; feasible runtime; explicit handling of missing pairs/zeros/ties; calibration uses development data only; numerical success/harm margins frozen before confirmation. A pilot is exploratory and cannot pass a manuscript claim.
 - **Reviewer concern addressed:** TOCS 7-9 design readiness and reproducibility.
 - **Unproven:** full-corpus effects, held-out budget matching, generalization, systems relevance.
@@ -135,3 +135,5 @@ This roadmap specifies future gates, not authorization to execute them. The sole
 ## Dependency and execution rule
 
 V0, V1A and V1B are complete. V2 is NEXT; Phase 2C implements provenance but does not run the scientific pilot. V2 precedes any new full Materna run. V4 uses pre-registered interval/budget evidence, V6 requires dataset selection before replication, and V8 requires the real V7 harness and V5 cost discipline. Planning can identify dependencies, but execution of any experiment requires explicit scope and authorization. No manuscript prose before V10 passes and V11 begins.
+
+Primary V3 confirmation must exclude the 18 development-pilot VMs identified by the V2 cohort manifest. Whole-corpus descriptive analysis is optional and separate. Gap semantics must be resolved before any full run.

@@ -195,3 +195,7 @@ TOCS concerns below are the human-confirmed requirements supplied for this conso
 FGCS is a candidate, not the predetermined destination. Journal selection occurs after major validation evidence exists. A target journal must fit the actual demonstrated contribution. We do not expand claims to fit a journal.
 
 High-selectivity/typically JUFO Level 3 aspirations do not waive any gate or establish venue fit. Check current venue scope/ranking only at V11; no current ranking claim is made here. Manuscript drafting starts after V10, with claims limited to evidence that passed its predefined criteria.
+
+## Development pilot exclusion rule
+
+Phase 3A uses the deterministic 18-VM DEVELOPMENT PILOT COHORT defined in [bounded_pilot.md](bounded_pilot.md). Its managed cohort manifest permanently records the selected trace/VM identities. Primary confirmatory Materna analysis excludes these 18 VMs; an optional later all-retained descriptive analysis is labeled separately after design freeze. Do not use viewed exploratory effects to choose practical benefit/harm margins or confirmatory families. V2 execution does not establish a manuscript claim.

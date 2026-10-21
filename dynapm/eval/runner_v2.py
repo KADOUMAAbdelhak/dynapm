@@ -18,6 +18,11 @@ def run_method_on_vm(
 ) -> dict:
     options = {} if predictor_factory is None else {"predictor_factory": predictor_factory}
     replay = prepare_vm_replay(trace, vm_id, method_factory, repo_root=repo_root, **options)
+    return evaluate_replay(replay, lookback_steps=lookback_steps)
+
+
+def evaluate_replay(replay, *, lookback_steps=288, include_records=False):
+    """One aggregation path for standalone and shared-input managed evaluations."""
     method = replay.method
     records = []
     for ts, snap, g in iter_verified_snapshots(replay, lookback_steps):
@@ -47,8 +52,8 @@ def run_method_on_vm(
 
     out = {
         "causal_protocol": CAUSAL_PROTOCOL,
-        "trace": trace,
-        "vm_id": str(vm_id),
+        "trace": method.profile.static.trace_name,
+        "vm_id": str(method.profile.static.vm_id),
         **agg,
         "accounting_schema": ACCOUNTING_SCHEMA,
         **method.accounting_metrics(),
@@ -64,4 +69,6 @@ def run_method_on_vm(
     dh = getattr(method, "decision_head", None)
     if dh is not None and hasattr(dh, "stats"):
         out["decision_head_stats"] = dh.stats()
+    if include_records:
+        out["evaluation_records"] = records
     return out

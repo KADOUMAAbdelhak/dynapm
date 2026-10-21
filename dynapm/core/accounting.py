@@ -12,6 +12,7 @@ ACCOUNTING_SCHEMA = "refresh-accounting-v1"
 ACCOUNTING_METRICS = (
     "n_initialization_events", "n_refresh_events", "n_field_writes", "n_field_value_changes",
     "n_periodic_refreshes", "n_drift_refreshes", "n_reactive_refreshes", "n_full_rewrite_refreshes",
+    "n_budget_extra_refreshes",
     "nominal_periodic_ticks_due", "periodic_refresh_events_committed",
 )
 
@@ -21,6 +22,7 @@ class Trigger(str, Enum):
     DRIFT = "drift"
     REACTIVE = "reactive"
     FULL_REWRITE = "full_rewrite"
+    BUDGET_EXTRA = "budget_extra"
 
 
 def value_changed(old, new):
@@ -132,6 +134,7 @@ class ProfileCommitter:
             "n_field_value_changes": sum(len(e.fields_changed) for e in self.refresh_events),
             "n_periodic_refreshes": counts[Trigger.PERIODIC], "n_drift_refreshes": counts[Trigger.DRIFT],
             "n_reactive_refreshes": counts[Trigger.REACTIVE], "n_full_rewrite_refreshes": counts[Trigger.FULL_REWRITE],
+            "n_budget_extra_refreshes": counts[Trigger.BUDGET_EXTRA],
             "nominal_periodic_ticks_due": nominal_ticks_due,
             "periodic_refresh_events_committed": counts[Trigger.PERIODIC],
         }
@@ -147,7 +150,7 @@ def require_accounting_metrics(frame):
     counts = ok[list(ACCOUNTING_METRICS)].apply(pd.to_numeric, errors="raise")
     if not np.isfinite(counts.to_numpy()).all() or ((counts < 0) | (counts % 1 != 0)).any().any():
         raise ValueError("accounting counters must be finite nonnegative integers")
-    trigger_sum = counts[["n_periodic_refreshes", "n_drift_refreshes", "n_reactive_refreshes", "n_full_rewrite_refreshes"]].sum(axis=1)
+    trigger_sum = counts[["n_periodic_refreshes", "n_drift_refreshes", "n_reactive_refreshes", "n_full_rewrite_refreshes", "n_budget_extra_refreshes"]].sum(axis=1)
     if not (counts.n_refresh_events.eq(trigger_sum).all()
             and counts.n_initialization_events.eq(1).all()
             and counts.n_field_writes.eq(4 * counts.n_refresh_events).all()
