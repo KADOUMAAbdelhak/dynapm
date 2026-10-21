@@ -44,7 +44,7 @@ This roadmap specifies future gates, not authorization to execute them. The sole
 
 ## V2.4 — PREDICTOR DIAGNOSIS + DATASET SUITABILITY AUDIT
 
-**STATUS: IN PROGRESS**
+**STATUS: PASS — completion; pending review before V2.5**
 
 - **Objective:** diagnose predictor-grounded underperformance on the fixed 18 development VMs; rank independent corpora from official documentation.
 - **Required artifacts:** [predictor diagnosis](predictor_diagnosis.md), managed lead/profile/VM diagnostics, [dataset suitability audit](dataset_suitability_audit.md), source/config/output integrity evidence.
@@ -163,3 +163,7 @@ Both pilot generations and the stopped diagnostic attempt are recorded in [bound
 ## Phase 3A-R execution record
 
 V2 PASS at source `82a79b90d70ce0405ffbf161698180bdf4f49ed7`; run `2026-10-21T111323.571341Z-6d801e1fe87c-e3a215fe`. 256 tests passed, no failures/skips. [Bounded pilot](bounded_pilot.md) records execution and exploratory diagnostics. V2.5 is blocked pending V2.4 review; V3 remains BLOCKED UNTIL V2.5. The earlier v2 pilot remains preserved as a readiness failure. No full experiment follows automatically.
+
+## V2.4 completion record
+
+Managed exploratory diagnosis completed on the fixed 18 development VMs, eight origins each, from source `8ad366a0a282c3981d135f26fe9cde34b1cb80ee`. 259 tests passed, zero failed/skipped. Exact run identity and lead/profile diagnostics are in [predictor diagnosis](predictor_diagnosis.md). Recursive feedback/long-horizon bias is the strongest evidenced issue; predictor redesign investigation is recommended before confirmation freeze, but no predictor change is made. [Dataset audit](dataset_suitability_audit.md) ranks Google 2019 first and Alibaba 2018 as optional third, subject to acquisition/continuity/semantics checks. **V2.5 remains BLOCKED pending V2.4 review and disposition of predictor adequacy; V3 remains BLOCKED.** No confirmatory outcomes, model tuning or candidate raw downloads were used.
