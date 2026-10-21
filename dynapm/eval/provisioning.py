@@ -65,13 +65,13 @@ def collect_verified_p95_pairs(
     for ts, snap, gt in iter_verified_snapshots(replay, lookback_steps):
         rows.append({
             "eval_timestamp": ts,
+            **replay.snapshot_metadata[ts],
             "snapshot_cpu_p95": float(snap.predicted_cpu_p95_next_24h),
             "snapshot_mem_p95": float(snap.predicted_mem_p95_next_24h),
             "gt_cpu_p95": float(gt["p95_cpu_next_24h"]),
             "gt_mem_p95": float(gt["p95_mem_next_24h"]),
         })
-    pairs = pd.DataFrame(rows, columns=["eval_timestamp", "snapshot_cpu_p95",
-        "snapshot_mem_p95", "gt_cpu_p95", "gt_mem_p95"])
+    pairs = pd.DataFrame(rows)
     pairs.attrs["policy_accounting"] = {"accounting_schema": ACCOUNTING_SCHEMA,
                                         **replay.method.accounting_metrics()}
     return pairs

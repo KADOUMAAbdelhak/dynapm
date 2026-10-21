@@ -3,16 +3,14 @@ from __future__ import annotations
 
 import pandas as pd
 
-from dynapm.core.temporal import PeriodicGrid
+from dynapm.core.temporal import (PeriodicGrid, trailing_observations, eligibility, MIN_OBSERVATIONS, MIN_REACTIVE_OBSERVATIONS)
 from dynapm.core.accounting import ProfileCommitter, Trigger
 from dynapm.core.predictor import HorizonPredictor, forecast_at_origin
 from dynapm.core.forecasting import forecast_class_from_window, forecast_p95_from_window
 
 
 def _window_last_hours(series: pd.Series, t: pd.Timestamp, hours: float) -> pd.Series:
-    t = pd.Timestamp(t)
-    start = t - pd.Timedelta(hours=float(hours))
-    return series.loc[(series.index >= start) & (series.index <= t)]
+    return trailing_observations(series, t, hours)
 
 
 class _BasePolicyV2:
@@ -83,11 +81,11 @@ class PeriodicPolicyV2(_BasePolicyV2):
 
     def step(self, t, cpu_obs_window, mem_obs_window):
         t = pd.Timestamp(t)
-        nominal = self.periodic_grid.pop_due(t)
+        nominal = self.periodic_grid.pop_due(t, eligibility(cpu_obs_window, mem_obs_window, t))
         if nominal is not None:
             self._commit_forecast(t,
-                cpu_obs_window.loc[cpu_obs_window.index <= t],
-                mem_obs_window.loc[mem_obs_window.index <= t],
+                _window_last_hours(cpu_obs_window, t, 24),
+                _window_last_hours(mem_obs_window, t, 24),
                 trigger=Trigger.PERIODIC, nominal_scheduled_time=nominal)
 
 
@@ -109,6 +107,8 @@ class ReactiveThresholdPolicyV2(_BasePolicyV2):
         cpu_candidate = _window_last_hours(cpu_obs_window, t, 6.0)
         mem_candidate = _window_last_hours(mem_obs_window, t, 6.0)
 
+        if len(cpu_candidate.index.intersection(mem_candidate.index)) < MIN_REACTIVE_OBSERVATIONS:
+            return
         candidate_cpu_class = forecast_class_from_window(cpu_candidate, self.cpu_thresholds)
         candidate_mem_class = forecast_class_from_window(mem_candidate, self.mem_thresholds)
         if (
@@ -135,7 +135,8 @@ class FullRewritePolicyV2(_BasePolicyV2):
         t = pd.Timestamp(t)
         cpu_now = _window_last_hours(cpu_obs_window, t, 24.0)
         mem_now = _window_last_hours(mem_obs_window, t, 24.0)
-        self._commit_forecast(t, cpu_now, mem_now, trigger=Trigger.FULL_REWRITE)
+        if len(cpu_now.index.intersection(mem_now.index)) >= MIN_OBSERVATIONS:
+            self._commit_forecast(t, cpu_now, mem_now, trigger=Trigger.FULL_REWRITE)
 
 
 class PeriodicPredictorPolicyV2(_BasePolicyV2):
@@ -175,7 +176,7 @@ class PeriodicPredictorPolicyV2(_BasePolicyV2):
 
     def step(self, t, cpu_obs_window, mem_obs_window):
         t = pd.Timestamp(t)
-        nominal = self.periodic_grid.pop_due(t)
+        nominal = self.periodic_grid.pop_due(t, eligibility(cpu_obs_window, mem_obs_window, t))
         if nominal is None:
             return
         cpu_lookahead, mem_lookahead = self._causal_windows(t)

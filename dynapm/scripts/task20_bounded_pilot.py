@@ -16,8 +16,11 @@ from dynapm.data.manifests import materna_manifest, check_dataset
 from dynapm.experiments.pilot_design import (default_config, characterize_inputs, select_pilot,
     pilot_cohort_manifest, guard_cohort, summarize_gaps)
 from dynapm.experiments.pilot_execution import run_vm, validate_config
+from dynapm.experiments.gap_eligibility import audit_dataset
 
 OUTPUTS = {
+    'materna_gap_eligibility_v3.parquet': 'all-retained-metadata-only-gap-eligibility',
+    'materna_gap_eligibility_v3.json': 'gap-safe-protocol-feasibility-summary',
     'pilot_cohort.json': 'permanent-development-pilot-selection',
     'pilot_cohort.parquet': 'development-pilot-selection-table',
     'selection_pool.parquet': 'bootstrap-only-selection-pool',
@@ -69,8 +72,16 @@ def execute(repo, config, *, workers=2):
     pool, gaps = characterize_inputs(raw, dataset, config)
     selected, tier_metadata = select_pilot(pool)
     guard_cohort(selected)
+    expected = {'Materna-Trace-1': {'374','213','96','64','143','76'},
+                'Materna-Trace-2': {'396','207','388','398','516','11'},
+                'Materna-Trace-3': {'212','151','83','133','224','127'}}
+    if {t:set(g.vm_id.astype(str)) for t,g in selected.groupby('trace')} != expected:
+        raise ValueError('remediation must retain exactly the original development cohort')
     cohort = pilot_cohort_manifest(dataset, selected, tier_metadata, config.data.minimum_observations)
     gap_summary = summarize_gaps(gaps)
+    eligibility_table, eligibility_summary = audit_dataset(raw, dataset, config)
+    if len(pool)!=1576 or len(eligibility_table)!=1576:
+        raise ValueError("retained metadata cohort must remain exactly 1576")
     check_dataset(raw, dataset)
     exp, env = prepare_experiment(repo, raw, config, dataset, cohort,
         {'model': config.model.random_state, 'descriptive_statistics': config.statistics.bootstrap_seed})
@@ -87,10 +98,12 @@ def execute(repo, config, *, workers=2):
         pool.to_parquet(out/'selection_pool.parquet', index=False)
         gaps.to_parquet(out/'materna_gap_audit.parquet', index=False)
         write_json(out/'materna_gap_audit.json', gap_summary)
+        eligibility_table.to_parquet(out/'materna_gap_eligibility_v3.parquet',index=False)
+        write_json(out/'materna_gap_eligibility_v3.json',eligibility_summary)
         print(canonical_json({'run_path': str(run.path), 'fingerprint': exp.fingerprint,
             'run_id': run.manifest.run_id, 'source_commit': source.commit, 'cohort_sha256': cohort.sha256,
             'selected': selected[['trace','vm_id','volatility_tier']].to_dict('records'),
-            'gap_semantics': gap_summary['decision']}), flush=True)
+            'gap_semantics': eligibility_summary['decision']}), flush=True)
         compute_start = time.perf_counter()
         answers = []
         # Processes parallelize VMs only; each process reuses its two frozen models.
@@ -134,10 +147,11 @@ def execute(repo, config, *, workers=2):
             'cohort_sha256': cohort.sha256, 'attempted': 198, 'completed': 198,
             'preparation_seconds': compute_start-preparation_start, 'pilot_wall_seconds': wall,
             'workers': workers, 'per_vm': sorted([a['diagnostics'] for a in answers], key=lambda d:(d['trace'],d['vm_id'])),
-            'execution_invariants': 'PASS', 'gap_semantics': gap_summary['decision'],
-            'v2_gate': 'PASS' if gap_summary['decision']=='ACCEPTABLE FOR V3' else 'BLOCKED',
+            'execution_invariants': 'PASS', 'gap_semantics': eligibility_summary['decision'],
+            'v2_gate': 'PASS' if eligibility_summary['decision']=='ACCEPTABLE FOR V3' else 'BLOCKED',
             'claim_eligible': False, 'no_historical_inputs': True,
             'forecast_reuse': 'same-vm-frozen-target-model-origin-and-history-sha256-in-memory-only'}
+        diagnostics['profile_age_by_method'] = {m: {'min':float(g.profile_age_hours.min()), 'median':float(g.profile_age_hours.median()), 'max':float(g.profile_age_hours.max()), 'zero_fraction':float(g.profile_age_hours.eq(0).mean())} for m,g in evaluations.groupby('method_id')}
         write_json(out/'pilot_diagnostics.json', diagnostics)
         write_json(out/'pilot_summary.json', {'label': 'PILOT / EXPLORATORY / DESCRIPTIVE ONLY',
             'confirmatory_tests': 'NOT PERFORMED', 'parameter_tuning': 'NOT PERFORMED', 'by_method': summary})

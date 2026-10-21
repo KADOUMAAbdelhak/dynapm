@@ -10,7 +10,7 @@ import pandas as pd
 from dynapm.core.accounting import ACCOUNTING_SCHEMA, ACCOUNTING_METRICS, require_accounting_metrics
 from dynapm.core.predictor import VMPredictor
 from dynapm.core.provenance import canonical_json, fingerprint, ModelConfig, TEMPORAL_PROTOCOL
-from dynapm.core.temporal import forecast_targets, forward_observations
+from dynapm.core.temporal import forecast_targets, forward_observations, validity_table, EVALUATION_GRID
 from dynapm.eval.replay import prepare_vm_inputs, replay_from_inputs, CPU_T, MEM_T
 from dynapm.eval.runner_v2 import evaluate_replay
 from dynapm.methods.baselines_v2 import (StaticPolicyV2, ReactiveThresholdPolicyV2,
@@ -70,7 +70,8 @@ class AuditedPredictor:
         return {"target": self.target, "fit_calls": self.fit_calls,
             "horizon_requests": self.horizon_requests, "generated_horizons": self.generated_horizons,
             "reused_horizons": self.reused_horizons, "horizon_steps": 288,
-            "cadence_seconds": 300, "origin_excluded": True}
+            "cadence_seconds": 300, "origin_excluded": True,
+            "training": self.predictor.training_diagnostics}
 
 
 def validate_config(config):
@@ -151,16 +152,18 @@ def run_vm(selected, config, repo_root, predictor_class=AuditedPredictor):
         'ground_truth': inputs.ground_truth.reset_index().assign(eval_timestamp=lambda f:f.eval_timestamp.astype(str)).to_dict('records')})
     rows, events, evaluations, extras = [], [], [], []
     evaluated_index, v3_result = None, None
-    periodic = periodic_commit_times(inputs.observations.index, inputs.info['bootstrap_end'], 6)
+    validity = validity_table(inputs.frame)
+    eligible_times = inputs.observations.index[validity.predictor_origin.reindex(inputs.observations.index).to_numpy()]
+    periodic = periodic_commit_times(inputs.observations.index, inputs.info['bootstrap_end'], 6, validity.periodic)
     for policy in config.policies:
         tick = time.perf_counter()
         extra = ()
         if policy.method_id == 'budget_matched':
             # Only K crosses this boundary. Drift event locations/residuals never do.
-            extra = budget_extra_times(inputs.observations.index, periodic, int(v3_result['n_drift_refreshes']))
+            extra = budget_extra_times(eligible_times, periodic, int(v3_result['n_drift_refreshes']))
             extras += [{'trace': trace, 'vm_id': vm_id, 'timestamp': t,
                 'schedule_version': BUDGET_SCHEDULE_VERSION, 'k': len(extra), 'ordinal': i,
-                'candidate_count': len(inputs.observations)-len(periodic)} for i, t in enumerate(extra)]
+                'candidate_count': len(eligible_times)-len(periodic)} for i, t in enumerate(extra)]
         replay = replay_from_inputs(inputs, factory_for(policy, extra_times=extra))
         original_commit = replay.method.accounting.commit
         def checked_commit(t, values, **kwargs):
@@ -215,9 +218,14 @@ def run_vm(selected, config, repo_root, predictor_class=AuditedPredictor):
                     'ground_truth_memory_class','ground_truth_cpu_p95','ground_truth_memory_p95','input_threshold_label_sha256'):
             assert group[col].nunique() == 1, col
     assert all(p.fit_calls == 1 for p in inputs.predictors)
+    for method, group in frame[frame.method_id.str.startswith(('pw_', 'pp_'))].groupby('method_id'):
+        if not group.profile_age_seconds.gt(0).any():
+            raise ValueError(f'all-zero-age evaluation aliasing: {method}')
     return {'rows': rows, 'events': events, 'evaluations': evaluations, 'extras': extras,
         'diagnostics': {'trace': trace, 'vm_id': vm_id, 'attempted': 11, 'completed': 11,
             'common_evaluation_points': len(evaluated_index), 'accounting_invariants': True,
             'budget_total_equal': True, 'budget_collisions': 0, 'causal_numeric_failures': 0,
             'predictors': [p.diagnostics() for p in inputs.predictors],
+            'unavailable_residual_timestamps': int(len(inputs.observations)-len(inputs.predictions)),
+            'evaluation_grid': EVALUATION_GRID,
             'wall_seconds': time.perf_counter()-started}}

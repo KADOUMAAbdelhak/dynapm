@@ -4,18 +4,16 @@ Each invocation fits CPU/memory predictors once on bootstrap observations only.
 Residual predictions are recomputed by the current causal implementation, never
 loaded from an unverified cached generation. Observation policies fit no model.
 """
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from copy import deepcopy
 from pathlib import Path
-from typing import Callable
 
 import pandas as pd
 
 from dynapm.core.discretization import compute_thresholds
 from dynapm.core.evaluation_clock import compute_data_aware_evaluation_timestamps
 from dynapm.core.ground_truth import derive_ground_truth_at_t_v2
-from dynapm.core.temporal import HORIZON, TEMPORAL_PROTOCOL
-from dynapm.core.features import build_features
+from dynapm.core.temporal import HORIZON, TEMPORAL_PROTOCOL, trailing_observations, validity_table
 from dynapm.core.predictor import VMPredictor
 from dynapm.core.schema import DynamicFields, ProfileInstance, StaticFields
 from dynapm.data.bootstrap import compute_split
@@ -44,6 +42,8 @@ class VMReplay:
     ground_truth: pd.DataFrame
     stream_days: float
     snapshots_dropped_unverified: int = 0
+    history: pd.DataFrame | None = None
+    snapshot_metadata: dict = field(default_factory=dict)
 
 
 @dataclass
@@ -65,7 +65,7 @@ class PreparedVM:
 
 def prepare_vm_inputs(trace, vm_id, *, repo_root=None, predictor_factory=VMPredictor,
                       with_predictors=False, with_residuals=True, bootstrap_fraction=0.30,
-                      evaluation_period_hours=12, minimum_ground_truth_slots=200):
+                      evaluation_period_hours=1, minimum_ground_truth_slots=200):
     root = REPO if repo_root is None else Path(repo_root)
     df = load_vm_csv(str(root / "data/raw" / trace / f"{vm_id}.csv"))
     boot, stream, info = compute_split(df, bootstrap_fraction)
@@ -88,19 +88,19 @@ def prepare_vm_inputs(trace, vm_id, *, repo_root=None, predictor_factory=VMPredi
         mem.fit(boot)
         predictors = cpu, mem
     if with_predictors and with_residuals:
-        cpu_out, mem_out = cpu.predict_streaming(stream), mem.predict_streaming(stream)
-        idx = cpu_out.index.intersection(mem_out.index).sort_values()
+        # Bootstrap observations remain available as causal history at stream start.
+        # Invalid exact-grid rows are absent; no residual is synthesized for them.
+        cpu_out, mem_out = cpu.predict_streaming(df), mem.predict_streaming(df)
+        idx = cpu_out.index.intersection(mem_out.index).intersection(stream.index).sort_values()
         predictions = pd.DataFrame({"cpu": cpu_out.loc[idx, "y_pred"],
                                     "mem": mem_out.loc[idx, "y_pred"]}, index=idx)
-    else:
-        idx = build_features(stream, CPU_T).index.intersection(
-            build_features(stream, MEM_T).index).sort_values()
-    observations = stream.loc[idx, [CPU_T, MEM_T]]
+    observed = validity_table(df).observed.reindex(stream.index, fill_value=False)
+    observations = stream.loc[observed, [CPU_T, MEM_T]]
     candidates, _ = compute_data_aware_evaluation_timestamps(df, stream.index,
         period_hours=evaluation_period_hours, min_observations_in_window=minimum_ground_truth_slots)
     rows = [{"eval_timestamp": t, **derive_ground_truth_at_t_v2(df, t,
         cpu_thresholds=cpu_th, mem_thresholds=mem_th,
-        min_observations_in_window=minimum_ground_truth_slots)} for t in candidates if t in idx]
+        min_observations_in_window=minimum_ground_truth_slots)} for t in candidates]
     gt = pd.DataFrame(rows, columns=["eval_timestamp", "cpu_class", "memory_class",
         "p95_cpu_next_24h", "p95_mem_next_24h"]).set_index("eval_timestamp")
     days = (stream.index[-1]-stream.index[0]).total_seconds()/86400.0
@@ -121,7 +121,7 @@ def replay_from_inputs(inputs, method_factory):
     method = method_factory(deepcopy(inputs.profile), inputs.cpu_thresholds, inputs.mem_thresholds, **deps)
     return VMReplay(method, inputs.observations,
                     inputs.predictions if cls.requires_residuals else None,
-                    inputs.ground_truth, inputs.stream_days)
+                    inputs.ground_truth, inputs.stream_days, history=inputs.frame[[CPU_T, MEM_T]])
 
 
 def prepare_vm_replay(trace, vm_id, method_factory, *, repo_root=None,
@@ -139,22 +139,35 @@ def iter_verified_snapshots(replay: VMReplay, lookback_steps: int = 288):
     Policies see current/past observations and, for V3 only, current causal
     one-step predictions. Forward ground truth is used solely for verification.
     """
-    if lookback_steps <= 0:
-        raise ValueError("lookback_steps must be positive")
+    if lookback_steps != 288:
+        raise ValueError("the canonical trailing 24h window requires lookback_steps=288")
     obs = replay.observations
+    history = obs if replay.history is None else replay.history
+    # One event loop: observation/commit precedes read, and verification is a
+    # clock event independent of telemetry arrival. No policy sees ground truth.
+    times = obs.index.union(replay.ground_truth.index).union(replay.ground_truth.index + HORIZON).sort_values()
     pending = []
-    for pos, t in enumerate(obs.index):
-        # Prepared yhat(t|past) uses no u_t; the observation is now visible.
-        # step consumes r_t, updates drift, resolves triggers, then commits once.
-        window = obs.iloc[max(0, pos - lookback_steps + 1):pos + 1]
-        residual_inputs = {}
-        if replay.method.requires_residuals:
-            residual_inputs = dict(cpu_prediction=float(replay.predictions.at[t, "cpu"]),
-                                   mem_prediction=float(replay.predictions.at[t, "mem"]))
-        replay.method.step(t=t, cpu_obs_window=window[CPU_T],
-                           mem_obs_window=window[MEM_T], **residual_inputs)
-        # Refresh-before-read: a coincident evaluation sees the committed state.
+    for t in times:
+        if t in obs.index:
+            cpu_window = trailing_observations(history[CPU_T], t, 24)
+            mem_window = trailing_observations(history[MEM_T], t, 24)
+            residual_inputs = {}
+            if replay.method.requires_residuals and replay.predictions is not None and t in replay.predictions.index:
+                residual_inputs = dict(cpu_prediction=float(replay.predictions.at[t, "cpu"]),
+                                       mem_prediction=float(replay.predictions.at[t, "mem"]))
+            replay.method.step(t=t, cpu_obs_window=cpu_window,
+                               mem_obs_window=mem_window, **residual_inputs)
         if t in replay.ground_truth.index:
+            events = replay.method.accounting.refresh_events
+            last = events[-1] if events else replay.method.accounting.initialization_events[0]
+            age = (t-last.actual_commit_time).total_seconds()
+            if age < 0:
+                raise ValueError("snapshot precedes profile initialization")
+            replay.snapshot_metadata[t] = {
+                "evaluation_time": t,
+                "last_refresh_actual_commit_time": last.actual_commit_time,
+                "profile_age_seconds": age, "profile_age_hours": age/3600,
+                "last_refresh_trigger": last.trigger.value if events else "initialization"}
             pending.append((pd.Timestamp(t), deepcopy(replay.method.profile.dynamic)))
         keep = []
         for origin, snapshot in pending:

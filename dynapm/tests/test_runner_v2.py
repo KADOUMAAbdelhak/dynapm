@@ -16,9 +16,9 @@ def test_evaluation_and_provisioning_share_construction(method, replay_repo, lag
     opts = dict(repo_root=replay_repo, predictor_factory=lag_predictor_factory)
     out = run_method_on_vm("TestTrace", "1", factory, **opts)
     pairs = collect_verified_p95_pairs("TestTrace", "1", factory, **opts)
-    assert out["n_eval_points_verified"] == len(pairs) == 1
+    assert out["n_eval_points_verified"] == len(pairs) == 18
     assert out["snapshots_dropped_unverified"] == 0
-    assert out["n_streaming_steps"] == 408
+    assert out["n_streaming_steps"] == 504
     from dynapm.core.accounting import ACCOUNTING_METRICS
     for metric in ACCOUNTING_METRICS:
         assert pairs.attrs["policy_accounting"][metric] == out[metric]
@@ -124,9 +124,9 @@ def test_small_real_forest_policy_path(method, replay_repo):
     factory = partial(policy_factory(method), period_hours=30.0)
     out = run_method_on_vm("TestTrace", "1", factory, repo_root=replay_repo,
         predictor_factory=partial(VMPredictor, n_estimators=3, max_depth=3))
-    assert out["n_eval_points_verified"] == 1
+    assert out["n_eval_points_verified"] == 18
     assert out["n_refresh_events"] > 0
-    assert out["n_streaming_steps"] == 408
+    assert out["n_streaming_steps"] == 504
 
 
 def test_legacy_runner_is_causal_compatibility_import():

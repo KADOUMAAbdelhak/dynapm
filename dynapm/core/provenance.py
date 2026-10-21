@@ -19,7 +19,7 @@ import time
 from typing import Any
 
 from dynapm.core.accounting import ACCOUNTING_SCHEMA
-from dynapm.core.temporal import TEMPORAL_PROTOCOL, HORIZON_STEPS, MIN_OBSERVATIONS
+from dynapm.core.temporal import TEMPORAL_PROTOCOL, HORIZON_STEPS, MIN_OBSERVATIONS, EVALUATION_GRID, FEATURE_HISTORY_SLOTS, MIN_REACTIVE_OBSERVATIONS
 from dynapm.core.features import LAGS, ROLL_WINDOWS, MAX_CONTEXT, VALID_TARGETS
 from dynapm.data.bootstrap import LOCKED_BOOTSTRAP_FRACTION
 
@@ -289,9 +289,13 @@ class DataConfig:
     minimum_observations: int = 2000
     forecast_horizon_steps: int = HORIZON_STEPS
     sampling_cadence_seconds: int = 300
-    evaluation_cadence_seconds: int = 43200
+    evaluation_cadence_seconds: int = 3600
     minimum_ground_truth_paired_slots: int = MIN_OBSERVATIONS
-    lag_semantics: str = "observed-row"
+    evaluation_grid: str = EVALUATION_GRID
+    feature_history_slots: int = FEATURE_HISTORY_SLOTS
+    minimum_trailing_24h_slots: int = MIN_OBSERVATIONS
+    minimum_trailing_6h_slots: int = MIN_REACTIVE_OBSERVATIONS
+    lag_semantics: str = "exact-nominal-five-minute-complete-history-v1"
 
 
 @dataclass(frozen=True)

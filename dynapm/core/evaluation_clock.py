@@ -8,7 +8,7 @@ from dynapm.core.temporal import MIN_OBSERVATIONS, forward_observations
 
 def _compute_candidate_timestamps(
     streaming_index: pd.DatetimeIndex,
-    period_hours: int = 12,
+    period_hours: int = 1,
     window_hours: int = 24,
 ) -> pd.DatetimeIndex:
     if len(streaming_index) == 0:
@@ -26,7 +26,7 @@ def _compute_candidate_timestamps(
 
 def compute_evaluation_timestamps(
     streaming_index: pd.DatetimeIndex,
-    period_hours: int = 12,
+    period_hours: int = 1,
 ) -> pd.DatetimeIndex:
     """Legacy fixed-clock evaluation timestamps (candidate clock only)."""
     return _compute_candidate_timestamps(streaming_index, period_hours=period_hours, window_hours=24)
@@ -35,14 +35,14 @@ def compute_evaluation_timestamps(
 def compute_data_aware_evaluation_timestamps(
     df: pd.DataFrame,
     streaming_index: pd.DatetimeIndex,
-    period_hours: int = 12,
+    period_hours: int = 1,
     window_hours: int = 24,
     min_observations_in_window: int = MIN_OBSERVATIONS,
 ) -> tuple[pd.DatetimeIndex, dict]:
     """
-    Fixed evaluation grid, with an observed origin and enough (t, t+window] targets.
+    Nominal read grid with enough (t, t+window] targets, even without an observed origin.
 
-    Missing evaluation origins are dropped (not deferred); periodic refreshes
+    Missing observations do not remove or defer read events; periodic refreshes
     have a separate delivery rule. The candidate grid stays anchored at the
     first streaming timestamp. The complete wall-clock horizon must fit.
 
@@ -56,7 +56,7 @@ def compute_data_aware_evaluation_timestamps(
     for t in cand:
         t0 = pd.Timestamp(t)
         n = len(forward_observations(df, t0, window_hours))
-        if t0 in streaming_index and t0 in df.index and n >= min_observations_in_window:
+        if n >= min_observations_in_window:
             keep.append(t0)
 
     out = pd.DatetimeIndex(keep).sort_values()

@@ -8,7 +8,7 @@ import pandas as pd
 from sklearn.ensemble import RandomForestRegressor
 
 from dynapm.core.features import LAGS, MAX_CONTEXT, ROLL_WINDOWS, build_features
-from dynapm.core.temporal import SAMPLE_STEP, forecast_targets
+from dynapm.core.temporal import SAMPLE_STEP, forecast_targets, history_valid, trailing_targets, FEATURE_HISTORY_SLOTS
 
 
 class HorizonPredictor(Protocol):
@@ -26,6 +26,8 @@ def forecast_at_origin(
     history = observations.loc[observations.index <= pd.Timestamp(origin)].sort_index()
     if history.empty or history.index[-1] != pd.Timestamp(origin):
         raise ValueError("refresh origin must have an available observation")
+    if not history_valid(history, origin):
+        raise ValueError("refresh origin lacks complete exact-grid causal history")
     forecast = predictor.predict_causal_horizon(history, n_steps=288)
     if not forecast.index.equals(forecast_targets(origin)):
         raise ValueError("forecast must cover exactly the 288 targets in (origin, origin+24h]")
@@ -88,8 +90,15 @@ class VMPredictor:
 
     def fit(self, df_bootstrap: pd.DataFrame) -> None:
         features = build_features(df_bootstrap, self.target)
+        features = features.loc[np.isfinite(df_bootstrap.loc[features.index, self.target].to_numpy(dtype=float))]
         if len(features) == 0:
             raise ValueError("no training rows after feature construction")
+        first_target = df_bootstrap.index[0] + MAX_CONTEXT*SAMPLE_STEP
+        candidates = df_bootstrap.index[df_bootstrap.index >= first_target]
+        self.training_diagnostics = {"bootstrap_observations": len(df_bootstrap),
+            "candidate_training_targets": len(candidates), "valid_feature_rows": len(features),
+            "invalid_gap_affected_rows": len(candidates)-len(features),
+            "valid_row_fraction": len(features)/len(candidates) if len(candidates) else 0.}
         X = features.values
         y = df_bootstrap.loc[features.index, self.target].values
         self.model.fit(X, y)
@@ -100,6 +109,9 @@ class VMPredictor:
             raise ValueError("model must be fit before predict_streaming")
         features = build_features(df_streaming, self.target)
         if len(features) == 0:
+            return pd.DataFrame(columns=["y_true", "y_pred", "residual"], index=features.index)
+        features = features.loc[np.isfinite(df_streaming.loc[features.index, self.target].to_numpy(dtype=float))]
+        if features.empty:
             return pd.DataFrame(columns=["y_true", "y_pred", "residual"], index=features.index)
         y_pred = self.model.predict(features.values)
         y_true = df_streaming.loc[features.index, self.target].values
@@ -132,9 +144,12 @@ class VMPredictor:
             raise ValueError("history requires unique datetime timestamps")
         if n_steps <= 0:
             raise ValueError("n_steps must be positive")
-        hist = history.astype(float).dropna().sort_index()
-        if len(hist) < MAX_CONTEXT:
-            return pd.Series(dtype=float, name="y_pred")
+        hist = history.astype(float).sort_index()
+        if hist.empty or not history_valid(hist, hist.index[-1]):
+            raise ValueError("recursive origin lacks complete exact-grid history")
+        # Positional operations below refer to a validated contiguous nominal buffer,
+        # never to raw observed-row positions across missing timestamps.
+        hist = hist.reindex(trailing_targets(hist.index[-1], FEATURE_HISTORY_SLOTS))
         if step is not None and pd.Timedelta(step) != SAMPLE_STEP:
             raise ValueError("the canonical forecast cadence is five minutes")
         targets = forecast_targets(hist.index[-1], n_steps)

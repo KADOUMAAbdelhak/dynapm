@@ -85,3 +85,24 @@ Before full confirmation, separately freeze primary endpoints, benefit/harm marg
 All 5,912 scored periodic-policy snapshots coincide with periodic commits; every one is read at zero refresh age. Across 739 VM/origin pairs, the five predictor configurations have confirmed pointwise-identical class-correctness and p95-error values. The 12h evaluation cadence shares its anchor with 3h/6h/12h refresh grids. Therefore these snapshots cannot identify the benefit of between-tick drift timing or more frequent predictor refresh. This is a structural measurement-design defect, not evidence that adaptive timing has no benefit.
 
 Before confirmation, separately pre-register phase-balanced shared evaluation opportunities, verify nonzero profile-age coverage for each period, and rerun bounded validation under a new fingerprint. Preserve refresh-before-read ordering at genuine coincidences. Do not alter or tune methods to manufacture differences. V2 is BLOCKED on this issue as well as gap semantics.
+
+## Phase 3A-R temporal remediation
+
+The previous pilot used `causal-timeline-v2` and a 12h read grid. Its execution
+integrity passed, but observed-row gap handling and refresh/read aliasing blocked
+scientific readiness. It is not reused by the corrected generation.
+
+The corrected protocol is `causal-timeline-v3`, with `phase-balanced-hourly-v1`,
+complete 96-slot nominal history, trailing 200/288 (24h) and 50/72 (6h) coverage,
+and a shared PW/PP/V3 periodic eligibility gate. Reads remain nominal even when
+telemetry is missing. Profile age is recorded at each read. Budget candidate
+eligibility is versioned `budget-match-uniform-eligible-v2`.
+
+The same permanent 18 development VMs are retained. Their outcomes cannot be
+primary independent confirmation. After bounded validation, V2.5 must freeze
+final eligible confirmatory cohort, pilot exclusions, endpoints, comparison
+families, benefit/harm margins, multiplicity, tests/CIs, tiers, exclusion and
+missing-data rules, exploratory/confirmatory distinctions and the exact method
+matrix before the 1,558-entity maximum primary cohort is evaluated. No thresholds
+may be chosen to favor observed pilot effects. See [protocol](protocol.md) and
+[the v3 metadata audit](materna_gap_semantics_v3.md).

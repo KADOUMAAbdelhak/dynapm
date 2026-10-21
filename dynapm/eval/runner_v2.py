@@ -28,6 +28,7 @@ def evaluate_replay(replay, *, lookback_steps=288, include_records=False):
     for ts, snap, g in iter_verified_snapshots(replay, lookback_steps):
         records.append({
             "eval_timestamp": ts,
+            **replay.snapshot_metadata[ts],
             "cpu_class_correct": int(snap.cpu_class == g["cpu_class"]),
             "memory_class_correct": int(snap.memory_class == g["memory_class"]),
             "cpu_p95_abs_err": abs(snap.predicted_cpu_p95_next_24h - g["p95_cpu_next_24h"]),

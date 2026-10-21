@@ -16,7 +16,7 @@ ANCHOR = pd.Timestamp("2021-01-01 08:00")
 @pytest.fixture
 def make_policy(lag_predictor_factory):
     def make(method, stream_index, constant=False):
-        boot_idx = pd.date_range(end=ANCHOR - pd.Timedelta(minutes=5), periods=96, freq="5min")
+        boot_idx = pd.date_range(end=ANCHOR - pd.Timedelta(minutes=5), periods=288, freq="5min")
         boot = pd.Series(25.0, index=boot_idx)
         obs = pd.Series(25.0 if constant else range(len(stream_index)), index=stream_index, dtype=float)
         history = pd.concat([boot, obs])
@@ -28,7 +28,7 @@ def make_policy(lag_predictor_factory):
             deps.update(cpu_predictor=lag_predictor_factory("CPU usage [%]"),
                 mem_predictor=lag_predictor_factory("Memory usage [%]"),
                 cpu_obs_full=history, mem_obs_full=history.copy())
-        return policy_factory(method)(profile, th, th, **deps), obs
+        return policy_factory(method)(profile, th, th, **deps), history
     return make
 
 
@@ -39,9 +39,9 @@ def advance(policy, obs, t):
 
 @pytest.mark.parametrize("gap,expected", [
     (None, [(6, 6), (12, 12), (18, 18), (24, 24)]),
-    ((6, 6), [(6, 6 + 5/60), (12, 12), (18, 18), (24, 24)]),
-    ((6 - 5/60, 6 + 15/60), [(6, 6 + 20/60), (12, 12), (18, 18), (24, 24)]),
-    ((6 - 5/60, 20 - 5/60), [(18, 20), (24, 24)]),
+    ((6, 6), [(12, 14), (18, 18), (24, 24)]),
+    ((6 - 5/60, 6 + 15/60), [(12, 14 + 15/60), (18, 18), (24, 24)]),
+    ((6 - 5/60, 20 - 5/60), []),
 ])
 def test_pw_pp_v3_have_identical_nominal_grid_despite_gaps(make_policy, gap, expected):
     idx = pd.date_range(ANCHOR, ANCHOR + pd.Timedelta(hours=24), freq="5min")
@@ -119,7 +119,8 @@ def test_residual_drift_commit_snapshot_then_delayed_verification(replay_repo, l
     import dynapm.eval.replay as replay_module
     replay = prepare_vm_replay("TestTrace", "1", policy_factory("dynapm_v3_v2"),
         repo_root=replay_repo, predictor_factory=lag_predictor_factory)
-    origin = replay.ground_truth.index[0]  # Also a nominal periodic tick.
+    origin = replay.ground_truth.index[6]  # First nominal 6h periodic tick.
+    replay.ground_truth = replay.ground_truth.loc[[origin]]
     replay.observations = replay.observations.loc[origin:origin + HORIZON]
     order = []
     last_step = [None]
@@ -175,19 +176,13 @@ def test_residual_drift_commit_snapshot_then_delayed_verification(replay_repo, l
         assert p.histories[0].index[-1] == origin
 
 
-def test_verification_waits_for_next_observation_after_missing_endpoint(replay_repo, lag_predictor_factory):
+def test_verification_is_a_clock_event_after_missing_endpoint(replay_repo, lag_predictor_factory):
     replay = prepare_vm_replay("TestTrace", "1", policy_factory("static_v2"),
         repo_root=replay_repo, predictor_factory=lag_predictor_factory)
     origin = replay.ground_truth.index[0]
-    end = origin + HORIZON
-    replay.observations = replay.observations.drop(end)
-    records = list(iter_verified_snapshots(replay))
-    assert len(records) == 1  # A later observation permits attachment after elapsed time.
-    early = prepare_vm_replay("TestTrace", "1", policy_factory("static_v2"),
-        repo_root=replay_repo, predictor_factory=lag_predictor_factory)
-    early.observations = early.observations.loc[:end - pd.Timedelta(minutes=5)]
-    assert list(iter_verified_snapshots(early)) == []
-    assert early.snapshots_dropped_unverified == 1
+    replay.ground_truth = replay.ground_truth.loc[[origin]]
+    replay.observations = replay.observations.drop(origin + HORIZON)
+    assert len(list(iter_verified_snapshots(replay))) == 1
 
 
 def test_shared_anchor_survives_feature_warmup(replay_repo, lag_predictor_factory):
@@ -197,11 +192,11 @@ def test_shared_anchor_survives_feature_warmup(replay_repo, lag_predictor_factor
             repo_root=replay_repo, predictor_factory=lag_predictor_factory)
         anchor = replay.method.periodic_grid.anchor
         first_observed = replay.observations.index[0]
-        assert first_observed == anchor + pd.Timedelta(hours=8)
+        assert first_observed == anchor
         list(iter_verified_snapshots(replay))
         periodic = [r for r in replay.method.refresh_log if r["trigger"] == "periodic"]
         assert periodic[0]["nominal_scheduled_time"] == anchor + pd.Timedelta(hours=6)
-        assert periodic[0]["actual_commit_time"] == first_observed
+        assert periodic[0]["actual_commit_time"] == anchor + pd.Timedelta(hours=6)
         schedules.append([(r["nominal_scheduled_time"], r["actual_commit_time"]) for r in periodic])
     assert schedules[0] == schedules[1] == schedules[2]
 
@@ -216,6 +211,6 @@ def test_replay_ignores_incompatible_cached_labels(replay_repo, lag_predictor_fa
     monkeypatch.setattr(pd, "read_parquet", forbidden)
     out = run_method_on_vm("TestTrace", "1", policy_factory("static_v2"),
         repo_root=replay_repo, predictor_factory=lag_predictor_factory)
-    assert out["n_eval_points_verified"] == 1
-    assert out["causal_protocol"] == "causal-timeline-v2"
+    assert out["n_eval_points_verified"] == 18
+    assert out["causal_protocol"] == "causal-timeline-v3"
     assert old.read_bytes() == b"incompatible old boundary labels"

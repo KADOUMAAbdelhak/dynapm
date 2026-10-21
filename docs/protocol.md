@@ -1,90 +1,125 @@
 # Deterministic causal timeline
 
-Protocol identifier: `causal-timeline-v2`. This changes scheduling and label semantics; earlier causal-protocol outputs are not interchangeable. No existing result files are rewritten by these definitions.
+Protocol: `causal-timeline-v3`. Evaluation design: `phase-balanced-hourly-v1`.
+Accounting remains `refresh-accounting-v1`. These semantics create a new scientific
+generation. Previous v2 outputs remain immutable and incompatible with current caches.
 
-## Audit of the preceding implementation
+## Nominal grid and observation visibility
 
-At commit `07fe9efd4b62bea9de9f4c4b849759a8212e4c62`:
+`dynapm/core/temporal.py` owns the five-minute cadence, exact lookups, trailing
+windows, presence/validity masks and pending periodic grid. Each entity has one
+nominal grid anchored to its first timestamp. Off-grid or duplicate timestamps
+are invalid. Missing raw slots stay missing: no forward/back fill or interpolation.
+Bootstrap is the first 30% of observed samples, unchanged. All available bootstrap
+and earlier streaming observations can support a streaming prediction; there is
+no additional arbitrary streaming-only 96-observation warmup.
 
-- `PeriodicPolicyV2.step` and `PeriodicPredictorPolicyV2.step` in `dynapm/methods/baselines_v2.py` tested elapsed time from the previous actual refresh. Their anchors were the final bootstrap observation, and delayed commits shifted later ticks.
-- `DynAPMPolicyV3.step` in `dynapm/methods/dynapm_v3.py` refreshed immediately at its first processed observation, then tested elapsed time from the last periodic commit. Drift already did not reset that timer. Both ADWIN detectors already ran before periodic/drift selection, and periodic already took precedence.
-- `iter_verified_snapshots` in `dynapm/eval/replay.py` already updated the policy before copying an evaluation snapshot and attached labels only after 24 elapsed hours. These correct orderings are retained and tested centrally.
-- `VMPredictor.predict_causal_horizon` targeted steps 1 through 288 after the origin. It inferred cadence from the first two history timestamps, so a gap there could turn 288 steps into more than 24 hours.
-- Both ground-truth functions and the density clock used `[t, t+24h)`: on a complete five-minute series they included the origin and excluded the final forecast target. The documented claim of alignment was incorrect.
+## Exact causal feature history
 
-## Event ordering and observation visibility
+For target timestamp s, lags 1,2,3,6,12,24,48 mean exact multiples of five minutes
+before s. Shifted rolling windows 6,12,24,48,96 require every nominal source slot;
+differences 1/12 are computed on shifted past history. All 96 slots
+[s-480min,s-5min] must be finite for that target/resource. Calendar features depend
+only on s. Batch shifting/rolling occurs AFTER nominal-grid reindexing; recursive
+array indexing operates only on a validated contiguous nominal buffer.
 
-The authoritative replay is `iter_verified_snapshots` in `dynapm/eval/replay.py`. Evaluation, provisioning, and the compatibility runner all use it. At each processed timestamp `t`:
+Training uses only bootstrap targets that actually exist and are finite, with
+complete causal features. A missing slot invalidates the next 96 target rows;
+the 97th target after it can recover. Per-target diagnostics record bootstrap
+observations, post-initial-context candidate targets, valid rows, gap-affected
+invalid rows and valid fraction. CPU and memory remain separate models.
 
-1. The current observation `u_t` becomes visible, along with earlier observations. Future actual utilization remains unavailable to policy inference.
-2. V3 compares `u_t` with its frozen one-step prediction `yhat(t | observations strictly before t)`, producing `r_t`. CPU and memory are separate.
-3. Both ADWIN detectors consume their current residuals.
-4. The policy checks the shared periodic grid and the drift flags.
-5. At most one logical refresh commits: periodic wins if both triggers are true.
-6. An evaluation at `t` copies the resulting dynamic profile. It sees the post-refresh state; a later refresh cannot mutate this copy.
-7. Pending snapshots are paired with forward labels only once the current replay time is at least their origin plus 24 hours.
+A one-step residual at t is u_t-yhat(t|t-5min). It is available only with finite
+u_t and complete exact prior history. Unavailable residuals pause both detectors
+without a reset, imputation or invented update. River's signal belongs only to
+the current update: if an exceptional invalid forecast origin prevents a drift
+commit, the signal is consumed and counted diagnostically, never latched.
 
-One-step predictions and labels may be computed in an offline batch during preparation. The one-step feature row for target `t` uses utilization at timestamps strictly before `t`, never `u_t`. Calendar information for `t` is deterministic. Preparation does not expose labels to the policy; replay reads them for verification only after the horizon. It never passes a future one-step prediction array to a refresh policy.
+## Refresh origins and observation windows
 
-Refresh inference uses `forecast_at_origin` in `dynapm/core/predictor.py`: the history is filtered to timestamps `<= t`, and `t` must have an observation. Recursive steps append only predictions after `t`.
+A predictor-origin t requires the exact 96 actual slots [t-475min,t] for each
+resource. Recursive inference then inserts predictions at the next exact nominal
+slot, never actual future values. Every horizon is 288 finite targets.
 
-## Periodic grid and anchor
+Periodic-Window and Full-Rewrite use (t-24h,t], with at least 200 paired finite
+observed slots of 288. Reactive uses (t-6h,t], with at least 50 paired slots of 72
+(ceil(72*200/288)). No window reaches further back to replace missing samples.
+Initialization separately populates the profile from bootstrap data using the
+policy's existing bootstrap estimator; runtime eligibility does not manufacture
+bootstrap data or count initialization as a refresh.
 
-`PeriodicGrid` in `dynapm/core/temporal.py` is shared by Periodic-Window, Periodic-Predictor, and V3. The anchor is `profile.static.bootstrap_end`, which `compute_split` defines as the first streaming observation timestamp. It is a per-VM wall-clock anchor, not a global midnight anchor.
+PW, PP and V3's periodic component share BOTH conditions: >=200 paired slots in
+the exact trailing 24h AND a valid CPU/memory predictor origin. The gate is based
+on input availability, including for observation-only PW; it requires no model
+construction for PW. Runtime window arguments contain only actual past samples.
 
-Bootstrap initialization is not a periodic refresh. For period `P > 0`, nominal refreshes are:
+## Periodic grid and coalescing
 
-```
-anchor + k * P,  k = 1, 2, 3, ...
-```
+Anchor is the first streaming timestamp from the bootstrap split. Nominal ticks
+are anchor+k*period, k>=1. Missing observations or false common eligibility leave
+the tick pending. At the first subsequent observed eligible origin, one refresh
+commits, representing the latest due nominal tick. Later ticks remain on the
+original grid. Gaps longer than 6h can cross many nominal ticks but cannot cause
+a burst of stale commits. Nominal ticks due and actual commits are separate counts.
+Drift never resets/reanchors the periodic grid. PW and PP therefore commit the
+same nominal/actual periodic timestamps for each shared interval and input timeline.
 
-All three policies receive the same nominal grid for the same timeline and period. Their initial bootstrap estimators remain method-specific. Policy processing retains the common streaming feature warmup of 96 observed rows. If this warmup crosses scheduled ticks, the same missed-tick rule applies to all three methods; the grid does not restart at the first usable feature row.
+## Single event ordering
 
-## Missing observations and long gaps
+The shared replay merges observed timestamps, nominal read clocks and verification
+maturity clocks. At t with an observation:
 
-A tick becomes due at its nominal time. If that time has no processed observation, delivery waits for the first subsequent processed observation. The commit uses history through this actual observation time, not a retrospective forecast at the missed tick.
+1. Observation u_t becomes visible.
+2. Available causal one-step residuals are evaluated.
+3. Both ADWIN states update if residuals are available.
+4. Eligible periodic/drift triggers resolve; periodic takes precedence.
+5. At most one runtime refresh commits.
+6. A coincident nominal evaluation reads the resulting profile copy.
+7. Pending copies whose future horizons have elapsed receive ground truth.
 
-When several ticks become due during a gap, exactly one refresh executes, associated with the latest due nominal tick. Earlier crossed ticks are coalesced. Subsequent ticks stay on the original grid.
+At t without an observation, there is no residual, detector update or policy step;
+the evaluation still reads the latest committed state AT t. Reads are never
+shifted to telemetry arrival. Verification is also a clock event, not a delayed
+observation event, and occurs only after t+24h within the available trace horizon.
 
-Example with a six-hour period and anchor 00:00: observations stop before 06:00 and resume at 20:00. One refresh at 20:00 records nominal 18:00; the next nominal tick remains 24:00. There are no duplicate catch-up refreshes for 06:00 or 12:00.
+## Hourly phase-balanced evaluation and profile age
 
-Missing observations are neither fabricated nor backfilled. Feature lags and rolling windows retain their existing observed-row interpretation across gaps; this phase does not introduce resampling or a new missing-data model. Future target cadence is nevertheless always five minutes.
+Nominal evaluations are anchor+k*1h, including k=0. Over the common 12h
+superperiod this covers phases 0..11. On complete data, after the first scheduled
+refresh, 3h policies have ages {0,1,2}h, 6h have {0,..,5}h and 12h have {0,..,11}h.
+Phase zero is retained but cannot be the only measured phase. Before the first
+periodic commit, age is measured from the policy's bootstrap initialization.
 
-## Coincident periodic and drift triggers
+Each read stores evaluation_time, last_refresh_actual_commit_time,
+profile_age_seconds, profile_age_hours, and last_refresh_trigger. Static age is
+from initialization. Same-time commit/read has zero age. A persisted aggregate
+is scored as-is; it is never silently recomputed at the read time.
 
-Both detectors are updated even if one reports drift. If a periodic tick is also due, one refresh commits with `trigger="periodic"`. Otherwise a drift event commits with `trigger="drift"`. Drift never changes the grid anchor or next nominal periodic tick.
+## Forecast and ground-truth alignment
 
-Canonical events carry an explicit trigger and separate written/changed field lists. See [Refresh Accounting](#refresh-accounting) for the complete schema and counter definitions.
+Both nominal target sets are (t,t+24h] = {t+5min,...,t+1440min}, 288 exact slots.
+A forecast requires an observed eligible origin; a ground-truth/read origin need
+not have an observation. Ground truth uses actual paired finite samples on those
+exact targets, >=200/288, and requires the full wall-clock horizon within the trace.
+Sparse truth describes the observed subset, not an imputed complete horizon.
 
-## Forecast and ground-truth targets
+The globally verified evaluation set depends only on data and this protocol, not
+on policy refresh behavior. Every method reads the same verified nominal times,
+thresholds and truth. Evaluation of stale profiles at e uses truth (e,e+24h]; its
+stored forecast originally issued at r is not resliced or regenerated at e.
 
-The canonical origin `t` is an available observation timestamp. Both nominal target definitions are:
+## Analysis-only budget control
 
-```
-(t, t+24h] = {t+5min, t+10min, ..., t+1440min}
-```
-
-There are exactly 288 targets. `forecast_targets` in `dynapm/core/temporal.py` supplies this index. Recursive inference uses it regardless of gaps in earlier observations; a ten-minute inferred cadence is not allowed.
-
-`forward_observations` selects actual observations on exactly these target timestamps. Both class and p95 ground-truth functions use this selection. They exclude `u_t` and include the observation at `t+24h` when present. The compatibility function name delegates to the same implementation.
-
-For a complete series, the forecast index equals the ground-truth observation index exactly. For a sparse series, the nominal target grid is still identical, but ground truth uses only its available paired CPU/memory observations. Missing actual utilization is not imputed, and future missingness is not used to reshape the profile forecast. Sparse labels therefore estimate the full-window quantities from an observed subset; they are not equivalent to fully observed labels.
-
-A persisted profile is read as the current estimate at each evaluation time. Between refreshes, its aggregate fields can be stale: evaluation at `e` scores the retained estimate against `(e, e+24h]`. The original forecast was issued at the last refresh `r`; it is not secretly regenerated or resliced at `e`. At a coincident refresh/evaluation (`r=e`), both use exactly the same target set. With the standard six-hour periodic and twelve-hour evaluation grids, complete observed evaluation ticks coincide with periodic ticks. Other period settings must retain this staleness distinction.
-
-## Eligibility and evaluation clocks
-
-The existing density threshold remains **at least 200 observed target slots out of 288**, with paired non-null CPU/memory values. The origin is not one of those slots. Duplicate timestamps are invalid; off-grid rows cannot inflate the count. A dense but truncated window is ineligible: the dataset must extend to at least `t+24h`.
-
-Evaluation candidates are anchored to the first streaming timestamp at twelve-hour intervals, including the anchor itself. They must have an observed origin, sufficient forward density, and an elapsed full horizon within the trace. Candidates before feature warmup are excluded from replay. An evaluation origin missing from the observation timeline is dropped, not deferred; later evaluation candidates remain on their original grid.
-
-Verification occurs at the first processed observation at or after `t+24h`. If the endpoint is missing, a later observation can release the pending snapshot. If replay stops before the horizon, the snapshot remains unverified and is counted as dropped, never scored early.
-
-Replays derive labels in memory from these shared clock/window functions, using bootstrap-only thresholds. They do not consume old cached ground-truth Parquets. The standalone ground-truth producer uses the same functions and stamps the new protocol when explicitly run. No corpus generation is part of this phase.
+`budget-match-uniform-eligible-v2` changes only candidate eligibility from v1.
+K is V3's paired count of committed drift refreshes. Eligible observed predictor
+origins excluding shared 6h periodic commits form an ordered candidate sequence.
+Midpoint integer equal-spacing chooses K unique timestamps; neither drift times,
+residuals nor outcomes enter. Extras are `budget_extra`, never drift. K=0 is PP6.
+This is a paired offline counterfactual, not a deployable online policy.
 
 ## Refresh Accounting
 
-Accounting schema: `refresh-accounting-v1`, alongside the unchanged temporal protocol `causal-timeline-v2`. The schema is required on result JSONs and per-VM summary rows. Earlier counter formats must not be relabeled as current measurements.
+Accounting schema: `refresh-accounting-v1`, alongside temporal protocol `causal-timeline-v3`. The schema is required on result JSONs and per-VM summary rows. Earlier counter formats must not be relabeled as current measurements.
 
 `dynapm/core/accounting.py` defines frozen `InitializationEvent` and `RefreshEvent` records, a constrained `Trigger` enum, and the single `ProfileCommitter` used by every policy. All dynamic field assignments pass through this helper; policies only decide when to commit and calculate the values.
 
@@ -116,7 +151,7 @@ Each per-VM policy result exposes:
 
 Static has zero runtime refreshes, writes, and changes after its one initialization. PW and PP each satisfy total refreshes = periodic refreshes, with exactly equal committed schedules/counts for identical timelines, split, and period even when their predicted content differs. Reactive counts only class-change-triggered commits. Full-Rewrite counts every eligible processed observation. V3 satisfies total refreshes = periodic + drift refreshes.
 
-Example: a six-hour grid crossed at 06:00, 12:00, and 18:00 during a gap has `nominal_periodic_ticks_due=3` on a 20:00 resume, but only one committed periodic event, associated with 18:00. The next tick remains 24:00. Drift never moves this grid.
+Example: a six-hour grid crossed at 06:00, 12:00, and 18:00 during a gap has `nominal_periodic_ticks_due=3` on a 20:00 resume, but at most one committed periodic event, associated with 18:00, if content eligibility is true. Otherwise it remains pending until recovery, potentially coalescing further ticks. The next nominal tick remains 24:00. Drift never moves this grid.
 
 `refresh_log` is a serializable trace of canonical runtime events; `initialization_log` is separate. Each runtime event contains `actual_commit_time`, `trigger`, `nominal_scheduled_time`, `fields_written`, and `fields_changed`. ISO timestamps and explicit counters survive ordinary JSON serialization. No event trace is required to compute statistics. A bounded provisioning replay also exposes its per-VM accounting as `DataFrame.attrs["policy_accounting"]`, rather than repeating counters on each verified outcome row.
 

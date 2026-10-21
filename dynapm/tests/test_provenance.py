@@ -437,9 +437,10 @@ def test_observed_row_lag_semantics_across_a_gap_are_explicit():
     index = index[:99].append(pd.DatetimeIndex([index[-1]+pd.Timedelta(hours=20)]))
     frame = pd.DataFrame({'CPU usage [%]': range(100)}, index=index)
     features = build_features(frame, 'CPU usage [%]')
-    assert features.iloc[-1]['target_lag_1'] == 98
+    assert index[-1] not in features.index
+    assert features.iloc[-1]['target_lag_1'] == 97
     assert index[-1]-index[-2] > pd.Timedelta(hours=20)
-    assert DataConfig('fixture').lag_semantics == 'observed-row'
+    assert DataConfig('fixture').lag_semantics == 'exact-nominal-five-minute-complete-history-v1'
 
 
 def test_cli_prepare_experiment_and_rejected_dirty_creation(inputs, tmp_path):

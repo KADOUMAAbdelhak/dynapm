@@ -10,6 +10,7 @@ import pandas as pd
 from dynapm.core.provenance import (CohortEntity, CohortManifest, DataConfig, ModelConfig,
     PolicyConfig, StatisticsConfig, ExperimentConfigProvenance, fingerprint)
 from dynapm.data.bootstrap import compute_split
+from dynapm.core.temporal import EVALUATION_GRID
 from dynapm.methods.budget_matched import BUDGET_SCHEDULE_VERSION
 
 SELECTION_VERSION = "dynapm-v2-pilot-selection-v1"
@@ -33,7 +34,7 @@ def default_config():
         StatisticsConfig(bootstrap_repetitions=0, test_specification={"inference": "none-pilot-descriptive-only"}),
         preprocessing={"selection_version": SELECTION_VERSION, "tiers": "pooled-bootstrap-cpu-std-tertiles-ddof0"},
         analysis={"matrix_version": MATRIX_VERSION, "purpose": "pilot", "cohort_size": 18,
-                  "lookback_steps": 288, "gap_decision_rule": "any-retained-history-gap-over-1h-requires-preconfirmation-correction"})
+                  "lookback_steps": 288, "evaluation_grid": EVALUATION_GRID, "gap_decision_rule": "exact-grid-invalidation-and-common-eligibility-v1"})
 
 
 def select_pilot(characterization):

@@ -89,7 +89,7 @@ def test_missing_evaluation_origin_is_dropped_without_moving_next_tick(synthetic
     idx = idx[idx != missing]
     df = pd.DataFrame({CPU: 20.0, MEM: 30.0}, index=idx)
     clock, _ = compute_data_aware_evaluation_timestamps(df, idx)
-    assert missing not in clock
+    assert missing in clock
     assert missing + pd.Timedelta(hours=12) in clock
     assert missing + SAMPLE_STEP not in clock
 
@@ -98,7 +98,7 @@ def test_clock_requires_actual_origin_even_if_candidate_index_contains_it(synthe
     t = synthetic_frame.index[100]
     no_origin = synthetic_frame.drop(t)
     clock, _ = compute_data_aware_evaluation_timestamps(no_origin, synthetic_frame.index[100:])
-    assert t not in clock
+    assert t in clock
 
 
 def test_density_requires_paired_cpu_memory_values(synthetic_frame):

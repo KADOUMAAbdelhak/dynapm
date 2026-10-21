@@ -8,12 +8,12 @@ from dynapm.methods.factories import policy_factory
 
 
 def _policy(lag_predictor_factory, values, *, period_hours=6):
-    idx = pd.date_range("2021-01-01", periods=96 + len(values), freq="5min")
-    boot = pd.Series([25.0] * 96, index=idx[:96])
-    cpu = pd.concat([boot, pd.Series(values, index=idx[96:])])
+    idx = pd.date_range("2021-01-01", periods=288 + len(values), freq="5min")
+    boot = pd.Series([25.0] * 288, index=idx[:288])
+    cpu = pd.concat([boot, pd.Series(values, index=idx[288:])])
     mem = cpu.copy()
     profile = ProfileInstance(
-        StaticFields("vm", "TestTrace", 2, 4.0, idx[0], idx[96], len(idx)),
+        StaticFields("vm", "TestTrace", 2, 4.0, idx[0], idx[288], len(idx)),
         DynamicFields("idle", "idle", float("nan"), float("nan")), {},
     )
     thresholds = {"p20": 10.0, "p40": 30.0, "p60": 60.0, "p80": 90.0, "p95": 95.0}
@@ -23,7 +23,7 @@ def _policy(lag_predictor_factory, values, *, period_hours=6):
         cpu_predictor=lag_predictor_factory("CPU usage [%]"),
         mem_predictor=lag_predictor_factory("Memory usage [%]"),
         cpu_obs_full=cpu, mem_obs_full=mem)
-    return policy, cpu.loc[idx[96]:], mem.loc[idx[96]:]
+    return policy, cpu.loc[idx[288]:], mem.loc[idx[288]:]
 
 
 def test_dynapm_v3_initializes(lag_predictor_factory):
@@ -37,7 +37,7 @@ def test_dynapm_v3_initializes(lag_predictor_factory):
 def test_dynapm_v3_periodic_only(lag_predictor_factory):
     policy, cpu, mem = _policy(lag_predictor_factory, [25.0] * 180, period_hours=1)
     for ts in cpu.index:
-        policy.step(ts, cpu.loc[:ts], mem.loc[:ts], cpu_prediction=25.0, mem_prediction=25.0)
+        policy.step(ts, policy._cpu_obs_full.loc[:ts], policy._mem_obs_full.loc[:ts], cpu_prediction=25.0, mem_prediction=25.0)
     assert policy.refresh_log
     assert {r["trigger"] for r in policy.refresh_log} == {"periodic"}
     refreshes = pd.DatetimeIndex(sorted({r["actual_commit_time"] for r in policy.refresh_log}))
@@ -48,7 +48,7 @@ def test_dynapm_v3_drift_adds_extra_refreshes(lag_predictor_factory):
     policy, cpu, mem = _policy(lag_predictor_factory, [10.0] * 400 + [95.0] * 1100,
                                period_hours=5000)
     for ts in cpu.index:
-        policy.step(ts, cpu.loc[:ts], mem.loc[:ts], cpu_prediction=10.0, mem_prediction=10.0)
+        policy.step(ts, policy._cpu_obs_full.loc[:ts], policy._mem_obs_full.loc[:ts], cpu_prediction=10.0, mem_prediction=10.0)
     reasons = [r["trigger"] for r in policy.refresh_log]
     assert reasons.count("periodic") == 0  # Bootstrap initialization is not a scheduled tick.
     assert "drift" in reasons

@@ -98,7 +98,7 @@ def test_refresh_snapshot_ignores_future_observations(method, replay_repo, lag_p
         history = getattr(second.method, name).copy()
         history.loc[history.index > t] += 1e8
         setattr(second.method, name, history)
-    obs = first.observations.loc[:t]
+    obs = first.history.loc[:t]
     residual = dict(cpu_prediction=30.0, mem_prediction=50.0) if first.method.requires_residuals else {}
     for replay in [first, second]:
         replay.method.step(t, obs[CPU], obs[MEM], **residual)
@@ -134,7 +134,8 @@ def test_no_full_prediction_stream_constructor(cls):
 
 
 def test_short_history_returns_empty_forecast(synthetic_frame, small_predictors):
-    assert small_predictors[0].predict_causal_horizon(synthetic_frame[CPU].iloc[:20]).empty
+    with pytest.raises(ValueError, match="exact-grid history"):
+        small_predictors[0].predict_causal_horizon(synthetic_frame[CPU].iloc[:20])
 
 
 def test_features_reject_time_reversal(synthetic_frame):

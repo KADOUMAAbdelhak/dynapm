@@ -1,5 +1,7 @@
 # Observed-row lag semantics assessment
 
+> Historical Phase 2C assessment, superseded by `causal-timeline-v3`. Current scientific paths use exact nominal slots and complete history; the observed-row decision below is retained only as a record of the earlier assessment. See [protocol](protocol.md) and [v3 eligibility audit](materna_gap_semantics_v3.md).
+
 Scope: Phase 2C provenance/data characterization, not an experiment or a protocol change. `causal-timeline-v2`, feature construction, forecasting and scheduling remain unchanged.
 
 ## Code contract and causal meaning

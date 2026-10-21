@@ -30,7 +30,7 @@ def values(cpu_p95=25.):
 @pytest.fixture
 def make_policy(lag_predictor_factory):
     def make(method, index, predictor_value=25.):
-        boot_idx = pd.date_range(end=ANCHOR-pd.Timedelta(minutes=5), periods=96, freq="5min")
+        boot_idx = pd.date_range(end=ANCHOR-pd.Timedelta(minutes=5), periods=288, freq="5min")
         boot = pd.Series(25., index=boot_idx)
         history = pd.concat([boot, pd.Series(25., index=index)])
         deps = dict(bootstrap_cpu_series=boot, bootstrap_mem_series=boot)
@@ -42,15 +42,21 @@ def make_policy(lag_predictor_factory):
             deps.update(cpu_predictor=ConstantHorizon("CPU usage [%]"),
                 mem_predictor=ConstantHorizon("Memory usage [%]"),
                 cpu_obs_full=history, mem_obs_full=history.copy())
-        return policy_factory(method)(profile(),
+        policy = policy_factory(method)(profile(),
             {"p20": 10, "p40": 30, "p60": 60, "p80": 90, "p95": 95},
             {"p20": 10, "p40": 30, "p60": 60, "p80": 90, "p95": 95}, **deps)
+        policy.test_history = history
+        return policy
     return make
 
 
 def step(policy, t, cpu=25., mem=25.):
     kwargs = dict(cpu_prediction=25., mem_prediction=25.) if policy.requires_residuals else {}
-    policy.step(t, pd.Series([cpu], index=[t]), pd.Series([mem], index=[t]), **kwargs)
+    window = policy.test_history.loc[:t].copy()
+    window.iloc[-1] = cpu
+    memory = policy.test_history.loc[:t].copy()*0+25.
+    memory.iloc[-1] = mem
+    policy.step(t, window, memory, **kwargs)
 
 
 def test_static_initialization_is_separate(make_policy):
@@ -78,12 +84,13 @@ def test_pw_pp_counts_are_equal_even_with_different_content(make_policy, timelin
         step(pw, t)
         step(pp, t)
     a, b = pw.accounting_metrics(), pp.accounting_metrics()
-    expected = 2 if timeline == "long_gap" else 4
+    expected = 0 if timeline == "long_gap" else 3 if timeline == "missing_tick" else 4
     for metric in ["n_refresh_events", "n_periodic_refreshes", "periodic_refresh_events_committed"]:
         assert a[metric] == b[metric] == expected
     assert a["n_field_writes"] == b["n_field_writes"] == 4 * expected
     assert a["nominal_periodic_ticks_due"] == b["nominal_periodic_ticks_due"] == 4
-    assert a["n_field_value_changes"] == 0 < b["n_field_value_changes"]
+    assert a["n_field_value_changes"] == 0
+    assert b["n_field_value_changes"] > 0 if expected else b["n_field_value_changes"] == 0
     assert [(e.actual_commit_time, e.nominal_scheduled_time) for e in pw.accounting.refresh_events] == [
         (e.actual_commit_time, e.nominal_scheduled_time) for e in pp.accounting.refresh_events]
 
@@ -95,10 +102,8 @@ def test_long_gap_counts_due_ticks_without_fabricating_commits(make_policy):
         step(p, t)
     m = p.accounting_metrics()
     assert m["nominal_periodic_ticks_due"] == 3
-    assert m["periodic_refresh_events_committed"] == m["n_refresh_events"] == 1
-    e = p.accounting.refresh_events[0]
-    assert e.nominal_scheduled_time == ANCHOR+pd.Timedelta(hours=18)
-    assert e.actual_commit_time == ANCHOR+pd.Timedelta(hours=20)
+    assert m["periodic_refresh_events_committed"] == m["n_refresh_events"] == 0
+    assert p.periodic_grid.pending_tick == ANCHOR+pd.Timedelta(hours=18)
     assert p.periodic_grid.next_tick == ANCHOR+pd.Timedelta(hours=24)
 
 
@@ -129,13 +134,15 @@ def test_v3_trigger_decomposition_and_precedence(make_policy, drift_hours):
 
 
 def test_reactive_counts_triggered_commits_not_field_rows(make_policy):
-    idx = pd.date_range(ANCHOR, periods=5, freq="5min")
+    idx = pd.date_range(ANCHOR, periods=5, freq="6h")
     p = make_policy("reactive_v2", idx)
     step(p, idx[0])
     step(p, idx[1], cpu=27.)  # Different p95 but same class: no trigger.
     assert p.accounting_metrics()["n_refresh_events"] == 0
+    p.test_history = pd.Series(71., index=pd.date_range(ANCHOR-pd.Timedelta(days=1), idx[-1], freq="5min"))
     step(p, idx[2], cpu=71.)
     step(p, idx[3], cpu=75.)  # Again same class: no trigger or write.
+    p.test_history.loc[idx[3]:idx[4]] = 5.
     step(p, idx[4], cpu=5.)
     m = p.accounting_metrics()
     assert m["n_refresh_events"] == m["n_reactive_refreshes"] == 2

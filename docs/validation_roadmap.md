@@ -42,9 +42,19 @@ This roadmap specifies future gates, not authorization to execute them. The sole
 - **Reviewer concern addressed:** TOCS 7-9 design readiness and reproducibility.
 - **Unproven:** full-corpus effects, held-out budget matching, generalization, systems relevance.
 
+## V2.5 — CONFIRMATORY DESIGN FREEZE
+
+**STATUS: BLOCKED UNTIL V2 PASS; NEXT after successful remediation**
+
+- **Objective:** freeze an independent, falsifiable confirmatory design before any full run.
+- **Required artifacts:** final eligible cohort and permanent pilot exclusion list; primary endpoints/comparisons; practical-benefit and acceptable-harm margins; multiplicity families; tests/confidence levels; volatility analysis; exclusion/missing-data rules; confirmatory versus exploratory analyses; exact method/config matrix.
+- **PASS criteria:** source/config/cohort and analysis plan locked before confirmatory outcomes, without optimizing margins to exploratory pilot effects.
+- **Reviewer concern addressed:** fair update budgets/intervals and defensible evidence rather than post-hoc favorable comparisons.
+- **Unproven:** actual effects, generalization and operational benefit.
+
 ## V3 — FULL MATERNA CAUSAL EVALUATION
 
-**STATUS: BLOCKED — requires gap/phase-coverage corrections, bounded revalidation and design freeze**
+**STATUS: BLOCKED UNTIL V2.5 PASS**
 
 - **Objective:** fresh causal-generation evidence on the predeclared Materna eligible corpus.
 - **Required artifacts:** locked configuration/source; complete run/output manifests; all six per-VM results; exclusion/failure accounting; paired baseline analysis and uncertainty; untouched confirmatory set.

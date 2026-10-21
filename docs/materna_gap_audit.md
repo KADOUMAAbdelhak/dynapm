@@ -35,3 +35,24 @@ Required before gate V3 (full Materna generation):
 4. Rerun bounded validation as a new clean-source generation before any full run. Retain the permanent development-cohort exclusion rule. Do not choose the correction or thresholds to favor viewed pilot effects.
 
 This task implements none of those corrections. V2 remains BLOCKED; gate V3 is not NEXT. No full corpus, additional dataset, system experiment or manuscript work is authorized by this audit.
+
+## Phase 3A-R temporal remediation
+
+The previous pilot used `causal-timeline-v2` and a 12h read grid. Its execution
+integrity passed, but observed-row gap handling and refresh/read aliasing blocked
+scientific readiness. It is not reused by the corrected generation.
+
+The corrected protocol is `causal-timeline-v3`, with `phase-balanced-hourly-v1`,
+complete 96-slot nominal history, trailing 200/288 (24h) and 50/72 (6h) coverage,
+and a shared PW/PP/V3 periodic eligibility gate. Reads remain nominal even when
+telemetry is missing. Profile age is recorded at each read. Budget candidate
+eligibility is versioned `budget-match-uniform-eligible-v2`.
+
+The same permanent 18 development VMs are retained. Their outcomes cannot be
+primary independent confirmation. After bounded validation, V2.5 must freeze
+final eligible confirmatory cohort, pilot exclusions, endpoints, comparison
+families, benefit/harm margins, multiplicity, tests/CIs, tiers, exclusion and
+missing-data rules, exploratory/confirmatory distinctions and the exact method
+matrix before the 1,558-entity maximum primary cohort is evaluated. No thresholds
+may be chosen to favor observed pilot effects. See [protocol](protocol.md) and
+[the v3 metadata audit](materna_gap_semantics_v3.md).

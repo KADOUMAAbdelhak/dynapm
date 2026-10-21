@@ -5,12 +5,12 @@ from dynapm.core.accounting import Trigger
 from dynapm.core.temporal import PeriodicGrid
 from dynapm.methods.baselines_v2 import PeriodicPredictorPolicyV2
 
-BUDGET_SCHEDULE_VERSION = "budget-match-uniform-observed-v1"
+BUDGET_SCHEDULE_VERSION = "budget-match-uniform-eligible-v2"
 
 
-def periodic_commit_times(timeline, anchor, period_hours=6):
+def periodic_commit_times(timeline, anchor, period_hours=6, eligibility_mask=None):
     grid = PeriodicGrid(anchor, period_hours)
-    return pd.DatetimeIndex([t for t in timeline if grid.pop_due(t) is not None])
+    return pd.DatetimeIndex([t for t in timeline if grid.pop_due(t, True if eligibility_mask is None else bool(eligibility_mask.loc[t])) is not None])
 
 
 def budget_extra_times(timeline, periodic_commits, k):

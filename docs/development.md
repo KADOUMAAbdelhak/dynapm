@@ -15,17 +15,17 @@ cpu_obs_full=cpu_observations,
 mem_obs_full=memory_observations,
 ```
 
-Each target has its own fitted predictor. `forecast_at_origin` filters observations to timestamps at or before the refresh origin. The predictor recursively appends predictions for its 288 future steps. Initialization uses bootstrap observations; refreshes use the causal horizon. Short histories without 96 observations produce no horizon.
+Each target has its own fitted predictor. `forecast_at_origin` filters observations to timestamps at or before the refresh origin. The predictor recursively appends predictions for its 288 future steps. Initialization uses bootstrap observations; refreshes use the causal horizon. Origins without 96 complete exact nominal slots are rejected, never bridged across gaps.
 
-All policies implement `step(t, cpu_obs_window, mem_obs_window)`. DynAPM-V3 additionally requires keyword-only `cpu_prediction` and `mem_prediction`: the current causal one-step predictions, not future arrays. Its ADWIN inputs are `observation(t) - prediction(t|t-1)`.
+All policies implement `step(t, cpu_obs_window, mem_obs_window)`. DynAPM-V3 additionally accepts keyword-only `cpu_prediction` and `mem_prediction`: the current causal one-step predictions, not future arrays; unavailable predictions are None and pause ADWIN. Its ADWIN inputs are `observation(t) - prediction(t|t-1)`.
 
 ## Shared replay
 
 Evaluation and provisioning both call `prepare_vm_replay` and `iter_verified_snapshots` in `dynapm/eval/replay.py`. Preparation fits CPU/memory predictors once per replay, on the first 30% bootstrap segment. Thresholds and provisioning capacity are derived from bootstrap data directly. Observation-only policies fit no models. V3 recomputes causal one-step predictions with the same fitted models; replay does not load cached residuals.
 
-See [the temporal protocol](protocol.md) for the shared periodic grid, ordering, missing-observation rules, and exact forecast/label boundaries. The replay grid preserves streaming-only feature warmup. Labels are derived in memory under the current convention; cached ground-truth files are not read. Snapshot copies are verified only once their 24-hour horizons have elapsed. Forward ground truth never enters policy construction or policy steps. `repo_root` supports isolated fixtures; `predictor_factory` supports lightweight test doubles or explicitly configured predictors.
+See [the temporal protocol](protocol.md) for the shared periodic grid, ordering, missing-observation rules, and exact forecast/label boundaries. Replay uses available bootstrap history and exact-grid eligibility, with nominal hourly reads independent of observations. Labels are derived in memory under the current convention; cached ground-truth files are not read. Snapshot copies are verified only once their 24-hour horizons have elapsed. Forward ground truth never enters policy construction or policy steps. `repo_root` supports isolated fixtures; `predictor_factory` supports lightweight test doubles or explicitly configured predictors.
 
-The evaluation/provisioning compute APIs use the same factories. Legacy standalone Task 04/15/17b/18 orchestration now refuses unversioned execution; use an explicit managed run as described in [provenance](provenance.md). New outputs identify `causal-timeline-v2`; unversioned JSONs/tables are not accepted as current causal measurements. The separate `refresh-accounting-v1` schema is also required on per-VM results and summaries. These compatibility markers alone are not complete provenance; Phase 2C adds source/config/input/cohort/environment fingerprints and output integrity. Do not mix source revisions or experimental generations. Corpus-level provenance and performance validation remain separate research work.
+The evaluation/provisioning compute APIs use the same factories. Legacy standalone Task 04/15/17b/18 orchestration now refuses unversioned execution; use an explicit managed run as described in [provenance](provenance.md). New outputs identify `causal-timeline-v3`; unversioned JSONs/tables are not accepted as current causal measurements. The separate `refresh-accounting-v1` schema is also required on per-VM results and summaries. These compatibility markers alone are not complete provenance; Phase 2C adds source/config/input/cohort/environment fingerprints and output integrity. Do not mix source revisions or experimental generations. Corpus-level provenance and performance validation remain separate research work.
 
 ## Lightweight validation
 
@@ -75,3 +75,13 @@ Phase 2C validation: 195 passed, 0 failed, 0 skipped; raw manifests and a metada
 [Phase 3A / V2](bounded_pilot.md) adds an exactly 18-VM / 198-evaluation managed driver, shared frozen per-VM predictors, an analysis-only exact budget counterfactual and timestamp-only all-retained gap audit. It refuses dirty scientific execution and cannot become a full-corpus run. Synthetic tests may inject cheap predictors; real runs use the recorded RF configuration. Output manifests and cache probes must pass. A complete pilot is not confirmation; the selected entities are excluded from the primary future confirmatory cohort. See the pilot document for the preconfirmation gap gate and no-tuning rule.
 
 Phase 3A actual execution: 198/198 completed; 223 unit tests passed, zero failures/skips; independent artifact/count/schedule reconciliation passed. V2 is BLOCKED on [gap handling](materna_gap_audit.md), with source/run/output identities and permanent pilot pairs in [bounded_pilot.md](bounded_pilot.md). Correct gap semantics and evaluation phase coverage in a separately authorized task and rerun bounded validation before full experiments. No implementation commit is pushed while the requested final V2 PASS condition is unmet.
+
+## Phase 3A-R remediation
+
+Current semantics are [causal-timeline-v3](protocol.md), `phase-balanced-hourly-v1`
+and unchanged `refresh-accounting-v1`. The earlier v2 pilot remains a frozen
+readiness failure, not an input/cache for the corrected generation. The same 18
+development entities must be rerun from clean committed source. Full-corpus work
+remains blocked; V2.5 must freeze confirmatory design before V3. Exact-grid
+metadata-only eligibility characterization may inspect all retained entities,
+but must not fit predictors or execute policies on that cohort.

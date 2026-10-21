@@ -58,7 +58,7 @@ def _process(item: dict, tmap: dict) -> dict:
         eval_ts, clock_info = compute_data_aware_evaluation_timestamps(
             df=df,
             streaming_index=df_s.index,
-            period_hours=12,
+            period_hours=1,
             window_hours=24,
             min_observations_in_window=200,
         )

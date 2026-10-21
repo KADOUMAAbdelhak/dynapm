@@ -179,7 +179,7 @@ def test_all_eleven_methods_share_evaluation_alignment_and_frozen_models(replay_
     out=run_vm({'trace':'TestTrace','vm_id':'1','volatility_tier':'low'},default_config(),replay_repo,predictor_class=Cheap)
     rows=out['rows']; assert len(rows)==11
     assert_counts(rows)
-    assert out['diagnostics']['budget_total_equal'] and out['diagnostics']['common_evaluation_points']==1
+    assert out['diagnostics']['budget_total_equal'] and out['diagnostics']['common_evaluation_points']==18
     assert all(r['n_initialization_events']==1 for r in rows)
     assert all('total_updates' not in r for r in rows)
     assert all(set(ACCOUNTING_METRICS)<=set(r) for r in rows)
