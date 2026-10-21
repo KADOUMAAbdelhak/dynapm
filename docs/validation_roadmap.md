@@ -10,7 +10,7 @@ This roadmap specifies future gates, not authorization to execute them. The sole
 - **Required artifacts:** causal interface tests, future-data invariance tests, horizon alignment assertions, shared event ordering/grid, protocol `causal-timeline-v2`, Phase 1 commit `07fe9efd4b62bea9de9f4c4b849759a8212e4c62` and Phase 2A commit `9a620142a657cd2c3ab21b13e1f1d6dba7485901`.
 - **PASS criteria:** target features exclude current utilization; refreshes exclude future observations; `(t,t+24h]` forecast/label alignment; deterministic missing/coincident behavior; lightweight suite passes. Established by completed phases, retained in 123-test baseline.
 - **Reviewer concern addressed:** TOCS 11; correctness prerequisite for future-lead claims.
-- **Unproven:** corpus accuracy, lag semantics under irregular telemetry, generalization and operational benefit.
+- **Unproven:** corpus accuracy, final gap-based cohort eligibility, generalization and operational benefit.
 
 ## V1A — UNIFORM REFRESH ACCOUNTING
 
@@ -34,17 +34,17 @@ This roadmap specifies future gates, not authorization to execute them. The sole
 
 ## V2 — BOUNDED SCIENTIFIC PILOT
 
-**STATUS: BLOCKED — 198/198 evaluations verified; gap and evaluation-phase corrections required**
+**STATUS: PASS — corrected 18-VM pilot, causal-timeline-v3 and phase-balanced-hourly-v1**
 
-- **Objective:** small VM subset only; test provenance, 3h/6h/12h scheduling, prospective matched-budget design, runtime feasibility, output schema and statistical pipeline sanity.
-- **Required artifacts:** [managed 18-VM pilot](bounded_pilot.md), permanent development-cohort exclusion manifest, explicit config-to-execution binding; development/confirmation split plan; bounded pilot config and manifests; runtime/resource estimates; eligibility/output checks; analysis dry-run; calibrated matched-budget proposal; practical-effect/budget margins and pre-registration for confirmation.
-- **PASS criteria:** complete provenance; expected schedule/count invariants; no hidden output repair; feasible runtime; explicit handling of missing pairs/zeros/ties; calibration uses development data only; numerical success/harm margins frozen before confirmation. A pilot is exploratory and cannot pass a manuscript claim.
+- **Objective:** small VM subset only; test provenance, 3h/6h/12h scheduling, exact analysis-only matched-budget design, runtime feasibility, output schema and statistical pipeline sanity.
+- **Required artifacts:** [managed 18-VM pilot](bounded_pilot.md), permanent development-cohort exclusion manifest, explicit config-to-execution binding; development/confirmation split plan; bounded pilot config and manifests; runtime/resource estimates; eligibility/output checks; analysis dry-run; exact paired budget-control specification; phase/age and gap-eligibility artifacts. Practical margins and confirmation pre-registration belong to V2.5.
+- **PASS criteria:** 198/198 complete with validated provenance/output hashes; exact schedules/budgets and shared nominal truth; finite causal outputs; exact-grid history and wall-clock windows; nonzero age phases; cache-negative probes; full metadata-only audit; no manual output repair. Numerical benefit/harm margins remain deliberately unfrozen until V2.5. A pilot is exploratory and cannot pass a manuscript claim.
 - **Reviewer concern addressed:** TOCS 7-9 design readiness and reproducibility.
 - **Unproven:** full-corpus effects, held-out budget matching, generalization, systems relevance.
 
 ## V2.5 — CONFIRMATORY DESIGN FREEZE
 
-**STATUS: BLOCKED UNTIL V2 PASS; NEXT after successful remediation**
+**STATUS: NEXT**
 
 - **Objective:** freeze an independent, falsifiable confirmatory design before any full run.
 - **Required artifacts:** final eligible cohort and permanent pilot exclusion list; primary endpoints/comparisons; practical-benefit and acceptable-harm margins; multiplicity families; tests/confidence levels; volatility analysis; exclusion/missing-data rules; confirmatory versus exploratory analyses; exact method/config matrix.
@@ -57,14 +57,14 @@ This roadmap specifies future gates, not authorization to execute them. The sole
 **STATUS: BLOCKED UNTIL V2.5 PASS**
 
 - **Objective:** fresh causal-generation evidence on the predeclared Materna eligible corpus.
-- **Required artifacts:** locked configuration/source; complete run/output manifests; all six per-VM results; exclusion/failure accounting; paired baseline analysis and uncertainty; untouched confirmatory set.
+- **Required artifacts:** locked configuration/source; complete run/output manifests; the complete frozen per-VM method/config matrix; exclusion/failure accounting; paired baseline analysis and uncertainty; untouched confirmatory set.
 - **PASS criteria:** every included output verifies under current protocols/fingerprints; complete predeclared coverage or justified exclusions; no reuse of historical TOCS metrics; analysis can be independently reconstructed. Record C1/C2 support or failure without requiring a positive result to call execution valid.
 - **Reviewer concern addressed:** credible evidence prerequisite; TOCS 10-11 applied to real traces.
 - **Unproven:** multiple-interval/matched-budget conclusions until V4, external validity and operational benefit.
 
 ## V4 — REFRESH TRADE-OFF EVIDENCE
 
-**STATUS: PLANNED — requires frozen V2 design and V3-quality outputs**
+**STATUS: PLANNED — requires frozen V2.5 design and V3-quality outputs**
 
 - **Objective:** full 3h/6h/12h PW/PP and matched-budget PP/V3 analysis.
 - **Required artifacts:** direct canonical counter summaries; actual budget discrepancy; per-volatility paired effects/CIs; provisioning outcomes; corrected confirmatory tests; benefit-cost curves; negative results and guardrails.
@@ -144,8 +144,12 @@ This roadmap specifies future gates, not authorization to execute them. The sole
 
 ## Dependency and execution rule
 
-V0, V1A and V1B are complete. V2 execution completed (198/198) with verified provenance, but the gate is BLOCKED by unresolved long-gap history semantics and phase-aliased evaluation; see [the audit](materna_gap_audit.md). V3 is not NEXT. V2 precedes any new full Materna run. V4 uses pre-registered interval/budget evidence, V6 requires dataset selection before replication, and V8 requires the real V7 harness and V5 cost discipline. Planning can identify dependencies, but execution of any experiment requires explicit scope and authorization. No manuscript prose before V10 passes and V11 begins.
+V0, V1A, V1B and V2 are PASS. V2.5 — Confirmatory Design Freeze is NEXT. V3 remains BLOCKED UNTIL V2.5 PASS. The earlier v2 pilot was blocked on gaps and aliasing; the corrected v3 pilot resolves those protocol defects with independently verified bounded execution. V4 requires frozen interval/budget comparisons; V6 requires dataset selection; V8 requires the V7 harness and V5 cost discipline. Every future experiment still requires explicit scope and authorization. No manuscript prose before V10 passes and V11 begins.
 
-Primary V3 confirmation must exclude the 18 development-pilot VMs identified by the V2 cohort manifest. Whole-corpus descriptive analysis is optional and separate. Gap semantics must be resolved before any full run.
+Primary confirmation must exclude the same 18 development-pilot VMs. Final eligibility and all exclusion rules remain for V2.5; 1,558 is the maximum retained primary cohort before any further predefined exclusions. Optional whole-corpus description is separate from independent confirmation.
 
-Phase 3A source/run identities and permanent selected pairs are recorded in [bounded_pilot.md](bounded_pilot.md). All 223 lightweight tests pass. No practical benefit/harm margins or confirmatory families were chosen from pilot effects.
+Both pilot generations and the stopped diagnostic attempt are recorded in [bounded_pilot.md](bounded_pilot.md). Current lightweight validation is 256 passed, 0 failed, 0 skipped. No practical benefit/harm margins or confirmatory families were chosen from pilot effects.
+
+## Phase 3A-R execution record
+
+V2 PASS at source `82a79b90d70ce0405ffbf161698180bdf4f49ed7`; run `2026-10-21T111323.571341Z-6d801e1fe87c-e3a215fe`. 256 tests passed, no failures/skips. [Bounded pilot](bounded_pilot.md) records execution and exploratory diagnostics. V2.5 is NEXT; V3 remains BLOCKED UNTIL V2.5. The earlier v2 pilot remains preserved as a readiness failure. No full experiment follows automatically.

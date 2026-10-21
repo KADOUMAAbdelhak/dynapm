@@ -23,7 +23,7 @@ Denominator: **13,985,401 intervals**. Threshold categories are nested, not addi
 
 The all-series record includes the split-crossing interval; each within-phase record excludes it. Percentages alone understate entity prevalence: rare intervals affect many VMs. Per-VM maxima and counts are retained in the Parquet, rather than replacing them with aggregate averages.
 
-## GAP SEMANTICS: REQUIRES PRE-V3 CORRECTION
+## Historical v2 verdict: GAP SEMANTICS REQUIRES PRE-V3 CORRECTION
 
 The pre-execution conservative gate flags any retained history gap over one hour. It was frozen before viewing pilot method effects. Observed-row lags and windows can silently bridge long outages while recursive forecasts advance five-minute calendar time. This is a temporal-modeling/eligibility issue, not evidence of future leakage. The successful causal replay does not establish acceptable missing-data semantics for confirmation.
 
@@ -56,3 +56,7 @@ missing-data rules, exploratory/confirmatory distinctions and the exact method
 matrix before the 1,558-entity maximum primary cohort is evaluated. No thresholds
 may be chosen to favor observed pilot effects. See [protocol](protocol.md) and
 [the v3 metadata audit](materna_gap_semantics_v3.md).
+
+## Corrected-generation disposition
+
+The blocked decision above describes the earlier v2 generation. The corrected v3 pilot passed gap-safe and hourly-read invariants; see [the v3 eligibility audit](materna_gap_semantics_v3.md) for metadata counts and [bounded pilot](bounded_pilot.md) for its immutable run identity. Gap frequency/maxima remain input facts, not justification for bridging. V2.5 remains required before full confirmation.

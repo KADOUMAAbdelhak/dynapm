@@ -60,7 +60,7 @@ The sole authoritative active repository is `/Users/fgtek002/dynapm`, branch `dy
 
 Historical TOCS evidence exists as an immutable external archive, not an alternate implementation tree. The frozen original publication reference is also inactive. Neither may be loaded automatically by current experiments, used as a fallback cache, or described as current causal results. See the [consolidation record](consolidation_record.md) for archive identity and verification; historical provenance paths must not be rewritten into runtime defaults.
 
-The [validation strategy](validation_strategy.md) governs intended claims, corpus selection, fair controls, statistics, overhead, real systems evidence and reproducibility. The [roadmap](validation_roadmap.md) records V0/V1A/V1B PASS and V2 NEXT. Phase 2C implements and tests complete manifests/fingerprint-based cache rejection. Before any new full-corpus run, obtain a bounded-pilot scope, bind explicit configs to current compute APIs, validate managed outputs and freeze confirmation criteria. No scientific benefit is inferred from the passing lightweight suite.
+The [validation strategy](validation_strategy.md) governs intended claims, corpus selection, fair controls, statistics, overhead, real systems evidence and reproducibility. The [roadmap](validation_roadmap.md) records V0/V1A/V1B/V2 PASS and V2.5 NEXT. Phase 2C implements and tests complete manifests/fingerprint-based cache rejection. Before any new full-corpus run, obtain a bounded-pilot scope, bind explicit configs to current compute APIs, validate managed outputs and freeze confirmation criteria. No scientific benefit is inferred from the passing lightweight suite.
 
 ## Managed experiments
 
@@ -68,20 +68,24 @@ Use `prepare_experiment` with freshly checked dataset/cohort manifests, then `Ru
 
 Schema versions, CLI examples, exact legacy-path audit, cache rejection reasons and input identities are in [provenance.md](provenance.md). [Observed-row lag assessment](lag_semantics_assessment.md) records temporal-distance distributions without changing features or horizons. Current package versions are checked against imported distributions. Future dependencies and timing-sensitive hardware must be explicitly added to compatibility; this infrastructure cannot infer hidden scientific inputs.
 
-Phase 2C validation: 195 passed, 0 failed, 0 skipped; raw manifests and a metadata-only managed smoke check verified. No corpus evaluation, interval experiment, provisioning replay, Kubernetes trial or historical-result rewrite was performed. The next pilot must check config-to-execution binding, required coverage/failures, numerical determinism and runtime feasibility. Provenance integrity is not scientific validation.
+Historical Phase 2C validation: 195 passed, 0 failed, 0 skipped; raw manifests and a metadata-only managed smoke check verified. No corpus evaluation, interval experiment, provisioning replay, Kubernetes trial or historical-result rewrite was performed. The next pilot must check config-to-execution binding, required coverage/failures, numerical determinism and runtime feasibility. Provenance integrity is not scientific validation.
 
 ## Bounded managed pilot
 
 [Phase 3A / V2](bounded_pilot.md) adds an exactly 18-VM / 198-evaluation managed driver, shared frozen per-VM predictors, an analysis-only exact budget counterfactual and timestamp-only all-retained gap audit. It refuses dirty scientific execution and cannot become a full-corpus run. Synthetic tests may inject cheap predictors; real runs use the recorded RF configuration. Output manifests and cache probes must pass. A complete pilot is not confirmation; the selected entities are excluded from the primary future confirmatory cohort. See the pilot document for the preconfirmation gap gate and no-tuning rule.
 
-Phase 3A actual execution: 198/198 completed; 223 unit tests passed, zero failures/skips; independent artifact/count/schedule reconciliation passed. V2 is BLOCKED on [gap handling](materna_gap_audit.md), with source/run/output identities and permanent pilot pairs in [bounded_pilot.md](bounded_pilot.md). Correct gap semantics and evaluation phase coverage in a separately authorized task and rerun bounded validation before full experiments. No implementation commit is pushed while the requested final V2 PASS condition is unmet.
+Historical Phase 3A v2 execution: 198/198 completed; 223 unit tests passed, zero failures/skips; independent artifact/count/schedule reconciliation passed. V2 is BLOCKED on [gap handling](materna_gap_audit.md), with source/run/output identities and permanent pilot pairs in [bounded_pilot.md](bounded_pilot.md). Correct gap semantics and evaluation phase coverage in a separately authorized task and rerun bounded validation before full experiments. No implementation commit is pushed while the requested final V2 PASS condition is unmet.
 
 ## Phase 3A-R remediation
 
 Current semantics are [causal-timeline-v3](protocol.md), `phase-balanced-hourly-v1`
 and unchanged `refresh-accounting-v1`. The earlier v2 pilot remains a frozen
 readiness failure, not an input/cache for the corrected generation. The same 18
-development entities must be rerun from clean committed source. Full-corpus work
+development entities were rerun from clean committed source; verified identities are below. Full-corpus work
 remains blocked; V2.5 must freeze confirmatory design before V3. Exact-grid
 metadata-only eligibility characterization may inspect all retained entities,
 but must not fit predictors or execute policies on that cohort.
+
+## Verified remediation status
+
+V2 PASS: 256 tests passed, 0 failed, 0 skipped; the corrected clean-source pilot completed 198/198. See [immutable run identities and diagnostics](bounded_pilot.md). V2.5 is NEXT. V3 remains BLOCKED UNTIL V2.5. Earlier blocked-pilot statements above document their historical generation and do not describe the current gate. No new model/policy tuning or full-corpus execution was performed.

@@ -1,5 +1,8 @@
 # Bounded development pilot
 
+> Current verified generation: `causal-timeline-v3`, `phase-balanced-hourly-v1`, `budget-match-uniform-eligible-v2`. V2 PASS; V2.5 NEXT; V3 BLOCKED UNTIL V2.5. The earlier design/verdicts below are historical Phase 3A records, superseded by [the current protocol](protocol.md) and the verified remediation record at the end.
+
+
 Phase 3A / V2 is a development experiment, not claim evidence. Run only with `purpose=pilot`, clean committed Git source, Phase 2C manifests and the managed `RunSession`. No unmanaged predictions, thresholds, results or historical archive are inputs. No model tuning or confirmatory tests are permitted.
 
 ## Selection and separation
@@ -120,3 +123,82 @@ The raw timestamp summary now reports only the requirement for exact-grid
 eligibility, explicitly identifies the current protocol, and delegates readiness
 to the eligibility audit plus bounded invariants. Regression coverage prevents
 the stale verdict. The entire pilot must restart from a new clean commit.
+
+## Verified corrected pilot — Phase 3A-R / V2
+
+**V2: PASS. V2.5: NEXT. V3: BLOCKED UNTIL V2.5 PASS.**
+This is bounded exploratory execution evidence, not a claim-generating result.
+It supersedes the earlier pilot's readiness decision without editing its artifacts.
+
+- Source: `82a79b90d70ce0405ffbf161698180bdf4f49ed7` (clean at execution).
+- Protocol: `causal-timeline-v3`; grid: `phase-balanced-hourly-v1`; accounting: `refresh-accounting-v1`.
+- Fingerprint: `6d801e1fe87c2696c1d6f190ddb8aef96bd48cc1660d6650541afc68ded20682`.
+- Run: `2026-10-21T111323.571341Z-6d801e1fe87c-e3a215fe`.
+- Cohort SHA-256: `6f6f0c78902f5ad6568dc0e299c97ca217d6449d971fa1a44f06ab2e04f6684f`. Same permanent 18 development VMs.
+- Output-manifest SHA-256: `d554956ea600bd7d9aa24447f1df832d0a8166914fcd2473da5b27eef9e49c84`.
+- Location relative to repository: `results/runs/6d801e1fe87c2696c1d6f190ddb8aef96bd48cc1660d6650541afc68ded20682/2026-10-21T111323.571341Z-6d801e1fe87c-e3a215fe/`.
+- Completed: **198/198** method/entity evaluations, with 11 fixed configurations each.
+- Snapshot records: **99,231**, versus **8,129** in the earlier defective-clock pilot.
+- Compute wall time: **7882.374 seconds**; preparation **186.087 seconds**; 4 VM workers. This is feasibility timing, not a controlled maintenance-cost benchmark.
+- PW/PP nominal and actual commits match at every interval for every VM. V3 = periodic+drift; BudgetMatched = periodic+budget_extra = V3, independently reconstructed using only K and input eligibility.
+- All methods use identical verified nominal timestamps, target bytes, labels and thresholds within each VM. Every periodic configuration has nonzero age coverage; no all-zero-age aliasing remains.
+- Zero duplicate/colliding commits, nonfinite committed/scored values, or runtime causal/numeric assertion failures. Synthetic tests separately verify future-data invariance and exact-grid behavior.
+- Exact pilot cache validates. Mutated configuration, claim-purpose request, tampered COPY and prior v2 protocol cache are rejected. Completed outputs were not rewritten.
+- Unit validation: **256 passed, 0 failed, 0 skipped**; 66 Python files parsed/compiled, 41 modules imported. No full-corpus model/policy run or historical archive input.
+
+### Observed periodic profile age (hours; PW and PP)
+
+| Interval | Min | Median | p95 | Max | Fraction zero |
+|---|---:|---:|---:|---:|---:|
+| 3h | 0 | 1 | 2 | 43 | 32.823412% |
+| 6h | 0 | 3 | 5 | 46 | 16.383993% |
+| 12h | 0 | 5.08333 | 11 | 52 | 8.103314% |
+
+Synthetic complete-series tests establish exact post-first-refresh phase sets 3h={0,1,2}, 6h={0,..,5}, 12h={0,..,11}. Sparse telemetry can delay eligible commits; bootstrap age before the first periodic commit is separately retained.
+
+### Per-VM paired refresh budget
+
+| Trace | VM | V3 | BudgetMatched | Drift/extra K | Verified times per method |
+|---|---|---:|---:|---:|---:|
+| Materna-Trace-1 | 143 | 88 | 88 | 7 | 464 |
+| Materna-Trace-1 | 76 | 84 | 84 | 3 | 464 |
+| Materna-Trace-1 | 374 | 83 | 83 | 2 | 464 |
+| Materna-Trace-1 | 213 | 81 | 81 | 0 | 464 |
+| Materna-Trace-1 | 96 | 98 | 98 | 18 | 464 |
+| Materna-Trace-1 | 64 | 73 | 73 | 4 | 396 |
+| Materna-Trace-2 | 516 | 88 | 88 | 7 | 471 |
+| Materna-Trace-2 | 11 | 91 | 91 | 10 | 463 |
+| Materna-Trace-2 | 396 | 104 | 104 | 18 | 497 |
+| Materna-Trace-2 | 207 | 87 | 87 | 1 | 497 |
+| Materna-Trace-2 | 388 | 86 | 86 | 0 | 497 |
+| Materna-Trace-2 | 398 | 77 | 77 | 1 | 437 |
+| Materna-Trace-3 | 224 | 110 | 110 | 10 | 581 |
+| Materna-Trace-3 | 127 | 116 | 116 | 16 | 581 |
+| Materna-Trace-3 | 212 | 105 | 105 | 5 | 581 |
+| Materna-Trace-3 | 151 | 103 | 103 | 3 | 581 |
+| Materna-Trace-3 | 83 | 108 | 108 | 11 | 564 |
+| Materna-Trace-3 | 133 | 101 | 101 | 6 | 555 |
+
+### Exploratory diagnostics only
+
+No confirmatory tests, practical-margin fitting or parameter tuning were performed. Means below are unweighted per-VM descriptions. They cannot establish publication claims.
+
+| Method | CPU class accuracy | Memory class accuracy | CPU p95 MAE | Memory p95 MAE | Mean refreshes |
+|---|---:|---:|---:|---:|---:|
+| budget_matched | 0.371807 | 0.288350 | 2.701067 | 3.611845 | 93.500 |
+| full_rewrite | 0.757170 | 0.727047 | 0.402271 | 0.694314 | 6287.500 |
+| pp_12h | 0.376480 | 0.290829 | 2.690887 | 3.579405 | 43.111 |
+| pp_3h | 0.371182 | 0.281101 | 2.677444 | 3.609910 | 173.444 |
+| pp_6h | 0.371520 | 0.287823 | 2.702575 | 3.608498 | 86.722 |
+| pw_12h | 0.740675 | 0.714194 | 0.428464 | 0.751333 | 43.111 |
+| pw_3h | 0.752860 | 0.725420 | 0.413162 | 0.710801 | 173.444 |
+| pw_6h | 0.748002 | 0.718477 | 0.427604 | 0.725887 | 86.722 |
+| reactive | 0.669363 | 0.599778 | 1.095632 | 1.035319 | 218.056 |
+| static | 0.497765 | 0.552956 | 0.649198 | 1.051004 | 0.000 |
+| v3 | 0.374043 | 0.289576 | 2.687693 | 3.605327 | 93.500 |
+
+Exploratory V3 minus BudgetMatched paired per-VM mean deltas: cpu_class_accuracy=0.00223589, memory_class_accuracy=0.00122671, cpu_p95_mae=-0.01337453, mem_p95_mae=-0.00651745. Error deltas use raw error direction (negative means lower error); these descriptions do not set confirmatory thresholds.
+
+### Nominal reads during missing telemetry
+
+Raw timestamp reconciliation finds **16** globally verifiable nominal hourly origins without an observation (VM 96: 1; VM 396: 1; VM 516: 7; VM 133: 7), yielding **176** method snapshots. All retain their exact nominal evaluation time and future target horizon. The independent `-clock-read-check.json` report is stored beside the cache/event verification reports outside the immutable completed run.
