@@ -30,6 +30,8 @@ from dynapm.eval.provisioning import (  # noqa: E402
 from dynapm.methods.factories import policy_factory as _factory
 
 
+from dynapm.core.run_store import refuse_unmanaged_workflow
+
 def enrich_rates(df: pd.DataFrame, sf: float) -> pd.DataFrame:
     """Add CPU/Mem under/over/well/error/mae/excess columns for safety factor sf."""
     z = df.copy()
@@ -311,6 +313,7 @@ def main() -> int:
     ap.add_argument("--n-jobs", type=int, default=8)
     ap.add_argument("--force-collect", action="store_true", help="rebuild per-eval parquet")
     args = ap.parse_args()
+    refuse_unmanaged_workflow()  # Help works; unmanaged execution is retired.
 
     repo = REPO
     fig_dir = repo / "dynapm/reports/task_17b"
@@ -330,13 +333,9 @@ def main() -> int:
         "the current causal protocol; --force-collect builds a fresh generation."
     )
 
-    if out_records.is_file() and not args.force_collect:
-        raw = pd.read_parquet(out_records)
-        require_causal_protocol(raw)
-    else:
-        raw = collect_all(summary, repo, args.n_jobs)
-        out_records.parent.mkdir(parents=True, exist_ok=True)
-        raw.to_parquet(out_records, index=False)
+    raw = collect_all(summary, repo, args.n_jobs)
+    out_records.parent.mkdir(parents=True, exist_ok=True)
+    raw.to_parquet(out_records, index=False)
 
     # --- Primary aggregates @ SAFETY_FACTOR
     agg = method_metrics_table(raw, SAFETY_FACTOR)

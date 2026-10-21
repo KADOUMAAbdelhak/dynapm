@@ -41,4 +41,13 @@ The sole authoritative active project for current code, experiments and developm
 
 Historical TOCS material is retained as an immutable external archive, not a second working project. The separately frozen original publication directory remains reference-only. Runtime code must never reference or automatically load that archive/publication material. Archive identity, integrity checks and the scoped duplicate search are documented in the [consolidation record](docs/consolidation_record.md).
 
-Follow the [validation strategy](docs/validation_strategy.md) and [gated roadmap](docs/validation_roadmap.md). V0 (causal protocol) and V1A (uniform accounting) passed. **V1B / Phase 2C experiment provenance is next and has not started.** No new full-corpus claim-generating run is permitted before provenance and bounded-pilot gates. Implementation completion, statistical significance and offline accuracy alone do not establish a systems contribution. Manuscript drafting follows the evidence/claim audit, not implementation completion.
+Follow the [validation strategy](docs/validation_strategy.md) and [gated roadmap](docs/validation_roadmap.md). V0 (causal protocol), V1A (uniform accounting), and **V1B / Phase 2C provenance** passed. **V2 — Bounded Scientific Pilot is NEXT and has not started.** No new full-corpus claim-generating run is permitted before the bounded-pilot gate. Implementation completion, statistical significance and offline accuracy alone do not establish a systems contribution. Manuscript drafting follows the evidence/claim audit, not implementation completion.
+
+## Provenance tooling
+
+See [experiment provenance and cache integrity](docs/provenance.md). Experiments use separate deterministic fingerprints and physical run IDs, explicit configuration/input/cohort/environment manifests, and verified output hashes. Smoke/pilot outputs never satisfy claim caches; dirty claim overrides remain noncanonical. Legacy directory-based corpus/report entry points now refuse unmanaged execution rather than reuse old outputs. Current compute APIs remain available for a separately authorized managed pilot; no corpus driver was run in Phase 2C.
+
+```sh
+python -m dynapm.scripts.provenance --help
+python -m pytest
+```

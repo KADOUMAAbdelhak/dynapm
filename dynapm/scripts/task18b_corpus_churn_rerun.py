@@ -31,6 +31,8 @@ OUT_JSON = REPO / "dynapm/results/eval_full_corpus_with_log"
 PARQUET_OUT = REPO / "dynapm/data/accounting_corpus.parquet"
 
 
+from dynapm.core.run_store import refuse_unmanaged_workflow
+
 def _precheck_vm(trace: str, vm_id: str) -> str | None:
     vm_id = str(vm_id)
     if not (REPO / "data/raw" / trace / f"{vm_id}.csv").is_file():
@@ -39,48 +41,11 @@ def _precheck_vm(trace: str, vm_id: str) -> str | None:
 
 
 def _run_one(method: str, trace: str, vm_id: str) -> tuple[str, float | None]:
-    """Returns cache_hit True as wall 0.0; fresh run CPU seconds; None if skipped/failed."""
-    outp = OUT_JSON / f"{method}__{trace}__{vm_id}.json"
-    pre = _precheck_vm(trace, vm_id)
-
-    if pre is None and outp.is_file():
-        try:
-            data = json.loads(outp.read_text(encoding="utf-8"))
-            require_accounting_metrics(pd.DataFrame([{**data, "method": method}]))
-            cc = data.get("cpu_class_accuracy")
-            if (
-                data.get("causal_protocol") == CAUSAL_PROTOCOL
-                and isinstance(cc, (int, float))
-                and math.isfinite(float(cc))
-            ):
-                return "cached", 0.0
-        except (json.JSONDecodeError, OSError, TypeError, ValueError):
-            pass
-
-    if pre is not None:
-        row = {"method": method, "trace": trace, "vm_id": str(vm_id), "run_status": "skipped", "failure_reason": pre}
-        outp.write_text(json.dumps(row), encoding="utf-8")
-        return "skipped", None
-
-    t0 = time.perf_counter()
-    try:
-        out = run_method_on_vm(trace, vm_id, FACTORIES[method])
-        outp.write_text(json.dumps(out, default=str), encoding="utf-8")
-        return "ok", time.perf_counter() - t0
-    except Exception as e:
-        row = {
-            "method": method,
-            "trace": trace,
-            "vm_id": str(vm_id),
-            "run_status": "failed",
-            "failure_reason": type(e).__name__,
-        }
-        outp.write_text(json.dumps(row), encoding="utf-8")
-        return "failed", None
+    refuse_unmanaged_workflow()
 
 
 def run_corpus(n_jobs: int) -> tuple[float, int, int, int]:
-    OUT_JSON.mkdir(parents=True, exist_ok=True)
+    refuse_unmanaged_workflow()
     kept_path = REPO / "dynapm/data/kept_vms.json"
     kept = json.loads(kept_path.read_text(encoding="utf-8"))
     assert len(kept) == 1576, len(kept)
@@ -119,46 +84,12 @@ def _wilcox(d: np.ndarray) -> float | None:
 
 
 def row_from_json(path: Path) -> dict | None:
-    try:
-        data = json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError):
-        return None
-    if data.get("causal_protocol") != CAUSAL_PROTOCOL:
-        return None
-    if data.get("run_status") in ("skipped", "failed"):
-        return None
-    for method in (PP, V3):
-        prefix = method + "__"
-        if path.stem.startswith(prefix):
-            parts = path.stem[len(prefix):].rsplit("__", 1)
-            if len(parts) != 2:
-                return None
-            trace, vm_id = parts
-            try:
-                require_accounting_metrics(pd.DataFrame([{**data, "method": method}]))
-            except (ValueError, TypeError):
-                return None
-            return {"method": method, "trace": trace, "vm_id": str(vm_id),
-                    "causal_protocol": CAUSAL_PROTOCOL, "accounting_schema": ACCOUNTING_SCHEMA,
-                    **{k: data[k] for k in ACCOUNTING_METRICS}}
+    """An unversioned standalone JSON is never a scientific cache."""
     return None
 
 
 def aggregate_accounting_records() -> pd.DataFrame:
-    rows = []
-    for p in sorted(OUT_JSON.glob(f"{PP}__*.json")):
-        r = row_from_json(p)
-        if r:
-            rows.append(r)
-    for p in sorted(OUT_JSON.glob(f"{V3}__*.json")):
-        r = row_from_json(p)
-        if r:
-            rows.append(r)
-
-    df = pd.DataFrame(rows)
-    PARQUET_OUT.parent.mkdir(parents=True, exist_ok=True)
-    df.to_parquet(PARQUET_OUT, index=False)
-    return df
+    refuse_unmanaged_workflow()
 
 
 def summarize(df: pd.DataFrame) -> dict:
@@ -209,6 +140,7 @@ def main() -> int:
     ap.add_argument("--n-jobs", type=int, default=8, help="parallel workers")
     ap.add_argument("--aggregate-only", action="store_true", help="skip runs; rebuild parquet from JSON")
     args = ap.parse_args()
+    refuse_unmanaged_workflow()  # Help works; unmanaged execution is retired.
 
     if not args.aggregate_only:
         wall, n_ok, n_cached, n_fail = run_corpus(args.n_jobs)

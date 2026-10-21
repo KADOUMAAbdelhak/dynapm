@@ -27,6 +27,8 @@ META_PATH = REPO / "dynapm/data/ground_truth_run_meta.json"
 FAIL_PATH = REPO / "dynapm/data/ground_truth_failures.json"
 
 
+from dynapm.core.run_store import refuse_unmanaged_workflow
+
 def _norm_vm_id(v: str) -> str:
     t = str(v)
     if t.isdigit():
@@ -35,6 +37,7 @@ def _norm_vm_id(v: str) -> str:
 
 
 def _threshold_map() -> dict[tuple[str, str], dict]:
+    refuse_unmanaged_workflow()  # No unversioned bootstrap thresholds.
     bs = pd.read_parquet(BOOT_SUM_PATH)
     out = {}
     for _, r in bs.iterrows():
@@ -95,6 +98,7 @@ def _process(item: dict, tmap: dict) -> dict:
 
 
 def main() -> int:
+    refuse_unmanaged_workflow()  # Explicitly retired unversioned corpus/result layout.
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     with open(KEPT_PATH, encoding="utf-8") as f:
         kept = json.load(f)

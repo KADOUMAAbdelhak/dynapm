@@ -31,6 +31,8 @@ FAIL_PATH = REPO / "dynapm/data/predictor_failures.json"
 META_PATH = REPO / "dynapm/data/predictor_run_meta.json"
 
 
+from dynapm.core.run_store import refuse_unmanaged_workflow
+
 def _vm_path(trace: str, vm_id: str) -> Path:
     return REPO / "data/raw" / trace / f"{vm_id}.csv"
 
@@ -83,6 +85,7 @@ def _process_vm(item: dict) -> dict:
 
 
 def main() -> int:
+    refuse_unmanaged_workflow()  # Explicitly retired unversioned corpus/result layout.
     RESID_DIR.mkdir(parents=True, exist_ok=True)
 
     with open(KEPT_PATH, encoding="utf-8") as f:

@@ -38,12 +38,12 @@ Established lightweight correctness evidence at baseline `b70d4eee0cdb20226b8f63
 
 Covered invariants: causal features exclude target utilization; causal one-step residuals; causal recursive 288-step forecasting; future-data invariance; independent CPU/memory predictors; aligned `(t,t+24h]` targets; deterministic observation/residual/detector/trigger/commit/snapshot/delayed-verification ordering; anchored periodic grid; missing-observation/coalescing rules; uniform refresh accounting; PW/PP scheduling equality; V3 periodic-plus-drift decomposition. These are correctness properties, not accuracy or systems claims.
 
-Remaining requirements before claim-generating runs:
+Phase 2C correctness/provenance disposition before claim-generating runs:
 
-- Complete experiment provenance and deterministic run manifests.
-- Source/config/input/environment fingerprints and strict cache rejection on mismatches. Current protocol/schema checks are necessary but incomplete.
-- An explicit assessment of wall-clock versus observed-row lags/windows across gaps, including temporal distance distributions and effects on causal feature meaning. Existing observed-row semantics remain unchanged until a separately reviewed protocol decision.
-- Negative tests for changed config, input, source, seed, protocol, schema and partial/corrupt output; deterministic small-run recovery evidence.
+- Complete experiment provenance and deterministic run manifests are implemented and tested in [Phase 2C](provenance.md). Full scientific execution remains gated by V2.
+- Source/config/input/cohort/environment fingerprints, supported schemas and output hashes now govern cache rejection. Protocol/accounting labels alone are explicitly insufficient; old standalone reuse is refused.
+- The [observed-row lag assessment](lag_semantics_assessment.md) records temporal distance distributions and causal meaning across gaps. Existing semantics remain unchanged; V2 must predefine handling/strata, and any correction needs separate protocol review.
+- Negative tests cover changed config/input/cohort/source/seed/protocol/schema/environment and incomplete/corrupt output; deterministic metadata/output tests and relocation recovery pass. Config-to-production binding remains a pilot requirement.
 - No implicit loading of archived outputs or legacy predictions as current causal measurements.
 
 ## 5. Layer B — Multi-Corpus Validation
@@ -164,7 +164,7 @@ Before any new full-corpus claim-generating run, record:
 - Exact command invocation; UTC start/end times; output path and output manifest with hashes.
 - Completion status, partial runs, failures, exclusions and denominators.
 
-Cache compatibility must include every scientifically relevant source/config/input/model/seed/protocol/schema/environment fingerprint. Reject missing or different fingerprints, partial/corrupt outputs, and stale fitted models. No unversioned result reuse. An explicit compatibility exception, if ever necessary, requires a reviewed scientific justification before reuse; it cannot silently relabel an older generation. Checkpoints and historical archives must never be fallback runtime inputs. Phase 2C must implement and negatively test this contract; this task only specifies it.
+Cache compatibility must include every scientifically relevant source/config/input/model/seed/protocol/schema/environment fingerprint. Reject missing or different fingerprints, partial/corrupt outputs, and stale fitted models. No unversioned result reuse. An explicit compatibility exception, if ever necessary, requires a reviewed scientific justification before reuse; it cannot silently relabel an older generation. Checkpoints and historical archives must never be fallback runtime inputs. Phase 2C implements and negatively tests the shared [provenance contract](provenance.md); old unversioned workflows are refused. V2 must validate its binding to actual scientific execution before full-corpus use.
 
 ## 14. Reviewer Concern Traceability
 

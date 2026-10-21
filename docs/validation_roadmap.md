@@ -24,20 +24,20 @@ This roadmap specifies future gates, not authorization to execute them. The sole
 
 ## V1B — EXPERIMENT PROVENANCE
 
-**STATUS: NEXT — Phase 2C; NOT STARTED**
+**STATUS: PASS — Phase 2C**
 
 - **Objective:** independently attributable, fingerprinted, cache-safe result generations. Required before any new full-corpus evaluation.
-- **Required artifacts:** run-manifest schema/writer/validator; source/config/input/model/environment fingerprints; eligible entities; commands/seeds/times; output hashes; failure/exclusion records; deterministic bounded-run evidence; observed-row vs wall-clock lag assessment and disposition.
+- **Required artifacts:** [provenance schemas/store/CLI](provenance.md), source/config/input/model/environment fingerprints, raw/cohort manifests, commands/seeds/times, output hashes, failure/exclusion records, deterministic bounded-run tests and [lag semantics assessment](lag_semantics_assessment.md). Implemented with 195 passing lightweight tests; old unversioned entry points fail closed.
 - **PASS criteria:** missing/changed relevant fingerprints and corrupt/partial caches are rejected by negative tests; bounded reruns are deterministic within declared tolerance; independent manifest verification succeeds; no archive fallback. Lag assessment either justifies current semantics with bounded scope or requires a separately authorized protocol correction.
 - **Reviewer concern addressed:** reproducibility prerequisite for TOCS 1-9; protects 10-11 corrections.
-- **Unproven:** scientific benefit, production scalability and any new empirical result.
+- **Unproven:** scientific benefit, production scalability, full-corpus runtime and pilot-driver config-to-execution/coverage binding. No new empirical result is established.
 
 ## V2 — BOUNDED SCIENTIFIC PILOT
 
-**STATUS: PLANNED — separate authorization after V1B**
+**STATUS: NEXT — separate bounded-pilot authorization required**
 
 - **Objective:** small VM subset only; test provenance, 3h/6h/12h scheduling, prospective matched-budget design, runtime feasibility, output schema and statistical pipeline sanity.
-- **Required artifacts:** development/confirmation split plan; bounded pilot config and manifests; runtime/resource estimates; eligibility/output checks; analysis dry-run; calibrated matched-budget proposal; practical-effect/budget margins and pre-registration for confirmation.
+- **Required artifacts:** managed pilot driver with explicit config-to-execution binding; development/confirmation split plan; bounded pilot config and manifests; runtime/resource estimates; eligibility/output checks; analysis dry-run; calibrated matched-budget proposal; practical-effect/budget margins and pre-registration for confirmation.
 - **PASS criteria:** complete provenance; expected schedule/count invariants; no hidden output repair; feasible runtime; explicit handling of missing pairs/zeros/ties; calibration uses development data only; numerical success/harm margins frozen before confirmation. A pilot is exploratory and cannot pass a manuscript claim.
 - **Reviewer concern addressed:** TOCS 7-9 design readiness and reproducibility.
 - **Unproven:** full-corpus effects, held-out budget matching, generalization, systems relevance.
@@ -134,4 +134,4 @@ This roadmap specifies future gates, not authorization to execute them. The sole
 
 ## Dependency and execution rule
 
-V0 and V1A are complete. V1B is the next implementation gate; this consolidation does not begin Phase 2C. V2 precedes any new full Materna run. V4 uses pre-registered interval/budget evidence, V6 requires dataset selection before replication, and V8 requires the real V7 harness and V5 cost discipline. Planning can identify dependencies, but execution of any experiment requires explicit scope and authorization. No manuscript prose before V10 passes and V11 begins.
+V0, V1A and V1B are complete. V2 is NEXT; Phase 2C implements provenance but does not run the scientific pilot. V2 precedes any new full Materna run. V4 uses pre-registered interval/budget evidence, V6 requires dataset selection before replication, and V8 requires the real V7 harness and V5 cost discipline. Planning can identify dependencies, but execution of any experiment requires explicit scope and authorization. No manuscript prose before V10 passes and V11 begins.

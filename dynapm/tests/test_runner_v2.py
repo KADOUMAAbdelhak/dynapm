@@ -95,13 +95,11 @@ def test_script_cache_rejects_unversioned_measurements(script, missing, replay_r
     else:
         monkeypatch.setattr(module, "OUT_JSON", out_dir)
         invoke = lambda: module._run_one(method, "TestTrace", "1")
-    invoke()
-    assert len(calls) == 1
-    assert json.loads(output.read_text())["causal_protocol"] == CAUSAL_PROTOCOL
-    if script == "task18b_corpus_churn_rerun":
-        assert module.row_from_json(output)["causal_protocol"] == CAUSAL_PROTOCOL
-    invoke()
-    assert len(calls) == 1  # A matching causal generation can be reused.
+    before = output.read_bytes()
+    with pytest.raises(ValueError, match="unversioned_workflow_rejected"):
+        invoke()
+    assert calls == []
+    assert output.read_bytes() == before  # No migration or overwrite.
 
 
 @pytest.mark.parametrize("protocol", [None, "causal-policy-v1", "causal-timeline-v2"])

@@ -24,7 +24,10 @@ CPU_M = "CPU usage [%]"
 MEM_M = "Memory usage [%]"
 
 
+from dynapm.core.run_store import refuse_unmanaged_workflow
+
 def main() -> int:
+    refuse_unmanaged_workflow()  # Explicitly retired unversioned corpus/result layout.
     with open(KEPT, encoding="utf-8") as f:
         kept = json.load(f)
     rows = []

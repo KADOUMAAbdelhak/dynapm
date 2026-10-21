@@ -25,7 +25,7 @@ Evaluation and provisioning both call `prepare_vm_replay` and `iter_verified_sna
 
 See [the temporal protocol](protocol.md) for the shared periodic grid, ordering, missing-observation rules, and exact forecast/label boundaries. The replay grid preserves streaming-only feature warmup. Labels are derived in memory under the current convention; cached ground-truth files are not read. Snapshot copies are verified only once their 24-hour horizons have elapsed. Forward ground truth never enters policy construction or policy steps. `repo_root` supports isolated fixtures; `predictor_factory` supports lightweight test doubles or explicitly configured predictors.
 
-Task 15, provisioning, and event-log orchestration use the same factories. New outputs identify `causal-timeline-v2`; unversioned JSONs/tables are not accepted as current causal measurements. The separate `refresh-accounting-v1` schema is also required on per-VM results and summaries. These compatibility markers are not a complete input/source/environment provenance manifest. Do not mix source revisions or experimental generations. Corpus-level provenance and performance validation remain separate research work.
+The evaluation/provisioning compute APIs use the same factories. Legacy standalone Task 04/15/17b/18 orchestration now refuses unversioned execution; use an explicit managed run as described in [provenance](provenance.md). New outputs identify `causal-timeline-v2`; unversioned JSONs/tables are not accepted as current causal measurements. The separate `refresh-accounting-v1` schema is also required on per-VM results and summaries. These compatibility markers alone are not complete provenance; Phase 2C adds source/config/input/cohort/environment fingerprints and output integrity. Do not mix source revisions or experimental generations. Corpus-level provenance and performance validation remain separate research work.
 
 ## Lightweight validation
 
@@ -33,11 +33,12 @@ Task 15, provisioning, and event-log orchestration use the same factories. New o
 python -m pytest
 python -m dynapm.scripts.task17b_provisioning --help
 python -m dynapm.scripts.task18b_corpus_churn_rerun --help
+python -m dynapm.scripts.provenance --help
 ```
 
 Policy integration tests use one 720-row synthetic VM and a deterministic causal test double. Predictor tests use tiny forests. The two loader checks require the local Materna CSV fixtures described in `data/README.md`; other tests use synthetic data. No test runs full Task 15, provisioning corpus replay, or production model training.
 
-Full corpus jobs, production-size forests, and extensive recursive inference require separate authorization. Some orchestration scripts execute `main()` without a help parser; do not invoke them as smoke checks.
+Full corpus jobs, production-size forests, and extensive recursive inference require separate authorization. Standalone legacy corpus/report drivers are retired and reject unmanaged execution. Their pure compute/analysis helpers remain library APIs, not cache readers or claim-eligible outputs. The new provenance CLI performs metadata tooling only.
 
 ## Scientific state
 
@@ -59,4 +60,12 @@ The sole authoritative active repository is `/Users/fgtek002/dynapm`, branch `dy
 
 Historical TOCS evidence exists as an immutable external archive, not an alternate implementation tree. The frozen original publication reference is also inactive. Neither may be loaded automatically by current experiments, used as a fallback cache, or described as current causal results. See the [consolidation record](consolidation_record.md) for archive identity and verification; historical provenance paths must not be rewritten into runtime defaults.
 
-The [validation strategy](validation_strategy.md) governs intended claims, corpus selection, fair controls, statistics, overhead, real systems evidence and reproducibility. The [roadmap](validation_roadmap.md) records V0/V1A PASS and V1B (Phase 2C) NEXT. This governance update does not implement Phase 2C. Before a new full-corpus run, implement and test complete manifests/fingerprint-based cache rejection, then obtain a bounded-pilot scope and freeze its confirmation criteria. No scientific benefit is inferred from the passing lightweight suite.
+The [validation strategy](validation_strategy.md) governs intended claims, corpus selection, fair controls, statistics, overhead, real systems evidence and reproducibility. The [roadmap](validation_roadmap.md) records V0/V1A/V1B PASS and V2 NEXT. Phase 2C implements and tests complete manifests/fingerprint-based cache rejection. Before any new full-corpus run, obtain a bounded-pilot scope, bind explicit configs to current compute APIs, validate managed outputs and freeze confirmation criteria. No scientific benefit is inferred from the passing lightweight suite.
+
+## Managed experiments
+
+Use `prepare_experiment` with freshly checked dataset/cohort manifests, then `RunSession` with a purpose and predeclared output coverage. Configuration serialization is explicit: drivers must honor the recorded values, not infer settings from callable reprs. Use `check_cache` or `load_verified_output` as the only reuse decision; never bypass with filenames, protocol labels or a directory glob. A dirty claim override can finish only as DEVELOPMENT_NONCANONICAL; no cache option makes it canonical.
+
+Schema versions, CLI examples, exact legacy-path audit, cache rejection reasons and input identities are in [provenance.md](provenance.md). [Observed-row lag assessment](lag_semantics_assessment.md) records temporal-distance distributions without changing features or horizons. Current package versions are checked against imported distributions. Future dependencies and timing-sensitive hardware must be explicitly added to compatibility; this infrastructure cannot infer hidden scientific inputs.
+
+Phase 2C validation: 195 passed, 0 failed, 0 skipped; raw manifests and a metadata-only managed smoke check verified. No corpus evaluation, interval experiment, provisioning replay, Kubernetes trial or historical-result rewrite was performed. The next pilot must check config-to-execution binding, required coverage/failures, numerical determinism and runtime feasibility. Provenance integrity is not scientific validation.

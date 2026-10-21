@@ -45,6 +45,8 @@ METHOD_ORDER = [
 ]
 
 
+from dynapm.core.run_store import refuse_unmanaged_workflow
+
 def _tier_map_from_kept(kept: list[dict]) -> dict[tuple[str, str], str]:
     rows = []
     for item in kept:
@@ -117,30 +119,7 @@ def _success_row(method: str, tier: str, out: dict) -> dict:
 
 
 def _run_one(method: str, trace: str, vm_id: str, tier: str, out_dir: Path) -> dict:
-    pre = _precheck_vm(trace, vm_id)
-    outp = out_dir / f"{method}__{trace}__{vm_id}.json"
-
-    if pre is None and outp.is_file():
-        try:
-            data = json.loads(outp.read_text(encoding="utf-8"))
-            require_accounting_metrics(pd.DataFrame([{**data, "method": method}]))
-            if data.get("causal_protocol") == CAUSAL_PROTOCOL and data.get("trace") == trace and str(data.get("vm_id")) == str(vm_id):
-                cc = data.get("cpu_class_accuracy")
-                if isinstance(cc, (int, float)) and math.isfinite(float(cc)):
-                    return _success_row(method, tier, data)
-        except (json.JSONDecodeError, OSError, TypeError, ValueError):
-            pass
-
-    if pre is not None:
-        return _empty_row(method, trace, vm_id, tier, "skipped", pre)
-    try:
-        out = run_method_on_vm(trace, vm_id, FACTORIES[method])
-        # Event traces are audit details; summary counters are authoritative.
-        out_write = out
-        outp.write_text(json.dumps(out_write, default=str), encoding="utf-8")
-        return _success_row(method, tier, out)
-    except Exception as e:
-        return _empty_row(method, trace, vm_id, tier, "failed", type(e).__name__)
+    refuse_unmanaged_workflow()
 
 
 def _bootstrap_mean_ci(values: np.ndarray, rng: np.random.Generator, n_boot: int = 1000) -> tuple[float, float, float]:
@@ -177,6 +156,7 @@ def _markdown_table(df: pd.DataFrame) -> str:
 
 
 def main() -> int:
+    refuse_unmanaged_workflow()  # Explicitly retired unversioned corpus/result layout.
     import os
 
     kept_path = REPO / "dynapm/data/kept_vms.json"
@@ -221,14 +201,7 @@ def main() -> int:
     wall = time.perf_counter() - t0
 
     df_new = pd.DataFrame(rows)
-    if summary_path.is_file() and set(methods) != set(METHOD_ORDER):
-        df_old = pd.read_parquet(summary_path)
-        require_causal_protocol(df_old)
-        require_accounting_metrics(df_old)
-        df_old = df_old[~df_old["method"].isin(methods)]
-        df = pd.concat([df_old, df_new], ignore_index=True)
-    else:
-        df = df_new
+    df = df_new  # Never merge arbitrary existing summaries.
     df.to_parquet(summary_path, index=False)
 
     ok = df[df["run_status"] == "ok"].copy()

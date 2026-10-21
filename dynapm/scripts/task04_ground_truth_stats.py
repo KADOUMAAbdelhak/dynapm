@@ -12,6 +12,8 @@ OUT_JSON = REPO / "dynapm/data/ground_truth_stats.json"
 GT_DIR = REPO / "dynapm/results/ground_truth"
 
 
+from dynapm.core.run_store import refuse_unmanaged_workflow
+
 def _q(s: pd.Series) -> dict[str, float]:
     return {
         "min": float(s.min()),
@@ -23,6 +25,7 @@ def _q(s: pd.Series) -> dict[str, float]:
 
 
 def main() -> int:
+    refuse_unmanaged_workflow()  # Explicitly retired unversioned corpus/result layout.
     rows = []
     per_vm = []
     for p in sorted(GT_DIR.glob("*.parquet")):

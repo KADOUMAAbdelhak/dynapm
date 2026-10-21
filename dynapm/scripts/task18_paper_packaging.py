@@ -37,6 +37,8 @@ TIER_COL = {"low": "#009E73", "medium": "#0072B2", "high": "#D55E00"}
 CB6 = ["#0072B2", "#E69F00", "#009E73", "#D55E00", "#CC79A7", "#56B4E9"]
 
 
+from dynapm.core.run_store import refuse_unmanaged_workflow
+
 def _setup_pub_style() -> None:
     mpl.rcParams.update(
         {
@@ -387,6 +389,7 @@ def build_table3(summary: pd.DataFrame, prov: pd.DataFrame) -> pd.DataFrame:
 
 
 def main() -> int:
+    refuse_unmanaged_workflow()  # Explicitly retired unversioned corpus/result layout.
     PAPER.mkdir(parents=True, exist_ok=True)
 
     summary = pd.read_parquet(CORPUS_SUMMARY)
