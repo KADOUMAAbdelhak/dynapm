@@ -263,3 +263,13 @@ def test_metadata_distinguishes_coalesced_tick_wait_from_commit_delay(synthetic_
     assert row['p3_max_tick_wait_seconds']>3*3600
     assert row['p3_max_delay_seconds']<3*3600
     assert row['p3_delayed_commits']>0
+
+
+def test_gap_summary_cannot_emit_superseded_v2_readiness_verdict():
+    from dynapm.experiments.pilot_design import gap_records,summarize_gaps
+    index=pd.to_datetime(['2021-01-01','2021-01-02','2021-01-03'])
+    summary=summarize_gaps(pd.DataFrame(gap_records(index,'fixture','1',1)))
+    assert summary['protocol']==TEMPORAL_PROTOCOL
+    assert summary['decision']=='EXACT-GRID ELIGIBILITY REQUIRED'
+    assert summary['phases']['all']['gt_1h']['n_vms']==1
+    assert 'silently spans' not in summary['decision_rule']

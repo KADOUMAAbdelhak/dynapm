@@ -106,3 +106,17 @@ missing-data rules, exploratory/confirmatory distinctions and the exact method
 matrix before the 1,558-entity maximum primary cohort is evaluated. No thresholds
 may be chosen to favor observed pilot effects. See [protocol](protocol.md) and
 [the v3 metadata audit](materna_gap_semantics_v3.md).
+
+### Invalidated remediation attempt
+
+Run `2026-10-21T110336.455748Z-e6812721436f-d6c72515`, fingerprint
+`e6812721436f32c9eafce56504c73d17381fc075ce574cb192b2f8d1ee34a2ca`,
+source `2fdc7db1152e5117e015dd3cab2a5d1f29199be2`, was stopped before
+completion because the timestamp-only summary still emitted the superseded v2
+readiness verdict. The actual gap-safe eligibility report was separate, but the
+conflicting labels made the artifact set ambiguous. Worker termination caused
+managed FAILED/BrokenProcessPool recording. No output was patched or reused.
+The raw timestamp summary now reports only the requirement for exact-grid
+eligibility, explicitly identifies the current protocol, and delegates readiness
+to the eligibility audit plus bounded invariants. Regression coverage prevents
+the stale verdict. The entire pilot must restart from a new clean commit.

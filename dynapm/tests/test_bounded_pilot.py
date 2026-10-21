@@ -205,7 +205,8 @@ def test_gap_audit_percentages_and_preconfirmation_decision():
     assert summary['phases']['all']['exact_5m']['fraction']==1/3
     assert summary['phases']['all']['gt_1h']['n_vms']==1
     assert summary['phases']['all']['max_gap_seconds']==7200
-    assert summary['decision']=='REQUIRES PRE-V3 CORRECTION'
+    assert summary['decision']=='EXACT-GRID ELIGIBILITY REQUIRED'
+    assert summary['protocol']=='causal-timeline-v3'
 
 
 def test_output_roles_and_managed_provenance_cache_probes(inputs,tmp_path):

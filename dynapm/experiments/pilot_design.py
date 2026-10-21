@@ -10,7 +10,7 @@ import pandas as pd
 from dynapm.core.provenance import (CohortEntity, CohortManifest, DataConfig, ModelConfig,
     PolicyConfig, StatisticsConfig, ExperimentConfigProvenance, fingerprint)
 from dynapm.data.bootstrap import compute_split
-from dynapm.core.temporal import EVALUATION_GRID
+from dynapm.core.temporal import EVALUATION_GRID, TEMPORAL_PROTOCOL
 from dynapm.methods.budget_matched import BUDGET_SCHEDULE_VERSION
 
 SELECTION_VERSION = "dynapm-v2-pilot-selection-v1"
@@ -121,7 +121,7 @@ def summarize_gaps(gaps):
             "n_vms": len(frame), **{key: {"intervals": int(frame[key].sum()),
                 "fraction": float(frame[key].sum()/n) if n else 0.,
                 "n_vms": int((frame[key] > 0).sum())} for key in GAPS}}
-    needs_correction = result["all"]["gt_1h"]["n_vms"] > 0
-    return {"phases": result, "decision": "REQUIRES PRE-V3 CORRECTION" if needs_correction else "ACCEPTABLE FOR V3",
-        "decision_rule": "Observed-row history silently spans >1h telemetry gaps; fix explicit gap handling before confirmation, not causal leakage.",
+    return {"phases": result, "protocol": TEMPORAL_PROTOCOL,
+        "decision": "EXACT-GRID ELIGIBILITY REQUIRED",
+        "decision_rule": "Timestamp characterization alone cannot judge protocol readiness. Use the separate exact-grid eligibility audit and bounded invariant checks.",
         "phase_boundary": "all includes split-crossing interval; separate phases exclude it"}
