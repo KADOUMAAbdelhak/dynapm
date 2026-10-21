@@ -199,3 +199,5 @@ High-selectivity/typically JUFO Level 3 aspirations do not waive any gate or est
 ## Development pilot exclusion rule
 
 Phase 3A uses the deterministic 18-VM DEVELOPMENT PILOT COHORT defined in [bounded_pilot.md](bounded_pilot.md). Its managed cohort manifest permanently records the selected trace/VM identities. Primary confirmatory Materna analysis excludes these 18 VMs; an optional later all-retained descriptive analysis is labeled separately after design freeze. Do not use viewed exploratory effects to choose practical benefit/harm margins or confirmatory families. V2 execution does not establish a manuscript claim.
+
+Phase 3A completed 198/198 managed development evaluations with passing count/alignment/integrity checks. V2 remains BLOCKED because [timestamp-gap semantics](materna_gap_audit.md) and the phase-locked evaluation grid require separate preconfirmation corrections and bounded revalidation. See [the pilot record](bounded_pilot.md) for permanent trace/VM exclusions and exact provenance. No scientific benefit is established by successful execution.

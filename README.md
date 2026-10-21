@@ -41,7 +41,7 @@ The sole authoritative active project for current code, experiments and developm
 
 Historical TOCS material is retained as an immutable external archive, not a second working project. The separately frozen original publication directory remains reference-only. Runtime code must never reference or automatically load that archive/publication material. Archive identity, integrity checks and the scoped duplicate search are documented in the [consolidation record](docs/consolidation_record.md).
 
-Follow the [validation strategy](docs/validation_strategy.md) and [gated roadmap](docs/validation_roadmap.md). V0 (causal protocol), V1A (uniform accounting), and **V1B / Phase 2C provenance** passed. **V2 — Bounded Scientific Pilot is NEXT and has not started.** No new full-corpus claim-generating run is permitted before the bounded-pilot gate. Implementation completion, statistical significance and offline accuracy alone do not establish a systems contribution. Manuscript drafting follows the evidence/claim audit, not implementation completion.
+Follow the [validation strategy](docs/validation_strategy.md) and [gated roadmap](docs/validation_roadmap.md). V0 (causal protocol), V1A (uniform accounting), and **V1B / Phase 2C provenance** passed. **V2 — Bounded Scientific Pilot completed 198/198 evaluations, but the gate is BLOCKED on gap handling and [evaluation phase coverage](docs/bounded_pilot.md). V3 is not NEXT.** No new full-corpus claim-generating run is permitted before the bounded-pilot gate. Implementation completion, statistical significance and offline accuracy alone do not establish a systems contribution. Manuscript drafting follows the evidence/claim audit, not implementation completion.
 
 ## Provenance tooling
 

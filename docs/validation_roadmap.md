@@ -34,7 +34,7 @@ This roadmap specifies future gates, not authorization to execute them. The sole
 
 ## V2 — BOUNDED SCIENTIFIC PILOT
 
-**STATUS: IN PROGRESS — Phase 3A authorized, awaiting clean-source pilot validation**
+**STATUS: BLOCKED — 198/198 evaluations verified; gap and evaluation-phase corrections required**
 
 - **Objective:** small VM subset only; test provenance, 3h/6h/12h scheduling, prospective matched-budget design, runtime feasibility, output schema and statistical pipeline sanity.
 - **Required artifacts:** [managed 18-VM pilot](bounded_pilot.md), permanent development-cohort exclusion manifest, explicit config-to-execution binding; development/confirmation split plan; bounded pilot config and manifests; runtime/resource estimates; eligibility/output checks; analysis dry-run; calibrated matched-budget proposal; practical-effect/budget margins and pre-registration for confirmation.
@@ -44,7 +44,7 @@ This roadmap specifies future gates, not authorization to execute them. The sole
 
 ## V3 — FULL MATERNA CAUSAL EVALUATION
 
-**STATUS: PLANNED — requires V1B and V2**
+**STATUS: BLOCKED — requires gap/phase-coverage corrections, bounded revalidation and design freeze**
 
 - **Objective:** fresh causal-generation evidence on the predeclared Materna eligible corpus.
 - **Required artifacts:** locked configuration/source; complete run/output manifests; all six per-VM results; exclusion/failure accounting; paired baseline analysis and uncertainty; untouched confirmatory set.
@@ -134,6 +134,8 @@ This roadmap specifies future gates, not authorization to execute them. The sole
 
 ## Dependency and execution rule
 
-V0, V1A and V1B are complete. V2 is NEXT; Phase 2C implements provenance but does not run the scientific pilot. V2 precedes any new full Materna run. V4 uses pre-registered interval/budget evidence, V6 requires dataset selection before replication, and V8 requires the real V7 harness and V5 cost discipline. Planning can identify dependencies, but execution of any experiment requires explicit scope and authorization. No manuscript prose before V10 passes and V11 begins.
+V0, V1A and V1B are complete. V2 execution completed (198/198) with verified provenance, but the gate is BLOCKED by unresolved long-gap history semantics and phase-aliased evaluation; see [the audit](materna_gap_audit.md). V3 is not NEXT. V2 precedes any new full Materna run. V4 uses pre-registered interval/budget evidence, V6 requires dataset selection before replication, and V8 requires the real V7 harness and V5 cost discipline. Planning can identify dependencies, but execution of any experiment requires explicit scope and authorization. No manuscript prose before V10 passes and V11 begins.
 
 Primary V3 confirmation must exclude the 18 development-pilot VMs identified by the V2 cohort manifest. Whole-corpus descriptive analysis is optional and separate. Gap semantics must be resolved before any full run.
+
+Phase 3A source/run identities and permanent selected pairs are recorded in [bounded_pilot.md](bounded_pilot.md). All 223 lightweight tests pass. No practical benefit/harm margins or confirmatory families were chosen from pilot effects.

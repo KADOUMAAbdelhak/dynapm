@@ -39,3 +39,49 @@ Pre-execution conservative gate: any retained history gap >1h requires a separat
 ## Decision status
 
 Implementation and synthetic validation precede the first clean-source scientific pilot. Record actual run identity and factual diagnostics after execution. V2 passes only after all requested execution/integrity criteria and the gap-semantics decision permit proceeding. Otherwise V2 is BLOCKED and no full Materna generation is authorized. Practical benefit/harm margins, primary endpoints and comparison families must be frozen separately; exploratory pilot effects cannot be used to choose favorable thresholds.
+
+## Verified execution record
+
+- Source commit: `3d66c50f6bb3b87734f7857926f1d9f3844c3625` (clean, committed before execution).
+- Purpose: `pilot`; not claim-eligible.
+- Experiment fingerprint: `4f8536add087f4eb2bcd2292067ecab2f86f9a24968bbdd1166c236d698ad510`.
+- Run ID: `2026-10-21T052752.223470Z-4f8536add087-68ffcfb8`.
+- Pilot cohort SHA-256: `6f6f0c78902f5ad6568dc0e299c97ca217d6449d971fa1a44f06ab2e04f6684f`.
+- Managed run: `/Users/fgtek002/dynapm/results/runs/4f8536add087f4eb2bcd2292067ecab2f86f9a24968bbdd1166c236d698ad510/2026-10-21T052752.223470Z-4f8536add087-68ffcfb8`.
+- Output manifest SHA-256: `e8e9df629285b085774aea9178743ab6e431a643f5bc2a67d8314fa0d5fbf494`.
+- Attempted/completed: 198/198; all 18 VM matrices complete.
+- Managed duration (manifest start/end): 4432.155 seconds. Matrix compute wall time: 4430.425 seconds; preparation: 28.204 seconds. These are feasibility timings with shared forecasts, not independent policy overhead measurements.
+- Unit tests: 223 passed, 0 failed, 0 skipped.
+- Count, periodic-schedule, common-evaluation/target/threshold, numeric and exact-budget checks: PASS for every VM. Zero periodic/extra collisions.
+- Exact pilot cache: accepted. Changed configuration and a tampered disposable COPY: rejected. Pilot-to-claim reuse: rejected. Canonical outputs were not edited.
+- Independent event/counter, schedule and output-schema reconciliation: PASS.
+- Invalidated scientific attempts: none. This is the first and only scientific pilot execution in this task.
+- Gap semantics: **REQUIRES PRE-V3 CORRECTION**. V2: **BLOCKED**.
+
+### Permanent development cohort
+
+These exact `(trace, VM ID)` pairs are excluded from primary future confirmation. IDs repeat across traces, so exclusion must use the pair, not the numeric ID alone.
+
+| Trace | Tier | VM IDs (hash-rank order) |
+|---|---|---|
+| Materna-Trace-1 | low | 374, 213 |
+| Materna-Trace-1 | medium | 96, 64 |
+| Materna-Trace-1 | high | 143, 76 |
+| Materna-Trace-2 | low | 396, 207 |
+| Materna-Trace-2 | medium | 388, 398 |
+| Materna-Trace-2 | high | 516, 11 |
+| Materna-Trace-3 | low | 212, 151 |
+| Materna-Trace-3 | medium | 83, 133 |
+| Materna-Trace-3 | high | 224, 127 |
+
+### Gate disposition
+
+All 198 evaluations completed under the recorded current protocol. Execution integrity does not override the gap gate. See [the full input gap audit](materna_gap_audit.md). No method parameters were tuned; the machine-readable summaries are PILOT / EXPLORATORY only. No confirmatory significance tests, historical-number comparisons, full-corpus evaluation or manuscript generation were performed.
+
+Before full confirmation, separately freeze primary endpoints, benefit/harm margins and confirmatory comparison families. Do not derive favorable thresholds from these pilot effects.
+
+### Evaluation phase-aliasing finding
+
+All 5,912 scored periodic-policy snapshots coincide with periodic commits; every one is read at zero refresh age. Across 739 VM/origin pairs, the five predictor configurations have confirmed pointwise-identical class-correctness and p95-error values. The 12h evaluation cadence shares its anchor with 3h/6h/12h refresh grids. Therefore these snapshots cannot identify the benefit of between-tick drift timing or more frequent predictor refresh. This is a structural measurement-design defect, not evidence that adaptive timing has no benefit.
+
+Before confirmation, separately pre-register phase-balanced shared evaluation opportunities, verify nonzero profile-age coverage for each period, and rerun bounded validation under a new fingerprint. Preserve refresh-before-read ordering at genuine coincidences. Do not alter or tune methods to manufacture differences. V2 is BLOCKED on this issue as well as gap semantics.
