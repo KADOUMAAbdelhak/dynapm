@@ -12,12 +12,15 @@ Before observing confirmatory outcomes, freeze the claim, eligibility rules, con
 
 These are candidate claims, not conclusions:
 
-- **C1 (withdrawn after V2.4D):** Predictor-grounded profile maintenance improves future-profile fidelity relative to observation-window maintenance. Development evidence does not support this intended contribution; retained here for traceability.
-- **C2 (retired after V2.4F):** Adaptive refresh provides benefit beyond periodic refresh when content and update opportunity/cost are controlled. Equal-budget residual-RF, Reactive, and direct-observation ADWIN studies do not justify this intended contribution; retain it for traceability, not as an active claim.
-- **C3:** Benefits generalize beyond one workload corpus.
-- **C4:** Improvements in maintained profile state produce measurable downstream operational benefit.
-- **C5:** DynAPM maintenance overhead is acceptable relative to its benefit.
-- **C6:** Any empirical Cloud-Edge/continuum claim requires actual heterogeneous/edge evidence. Without that experiment, CECC remains motivation/context, not an empirical contribution.
+- **C1 (WITHDRAWN after V2.4D/G):** Predictor-grounded profile maintenance improves future-profile fidelity relative to observation-window maintenance. Forecasting-superiority is retired.
+- **C2 (WITHDRAWN after V2.4E–F/G):** Adaptive refresh provides benefit beyond periodic refresh when content and update opportunity/cost are controlled. Adaptive-refresh-superiority is retired for residual-RF, Reactive, and direct-observation ADWIN.
+- **C3 (UNPROVEN):** Benefits or benchmark findings generalize beyond one workload corpus.
+- **C4 (UNPROVEN):** Improvements in maintained profile state produce measurable downstream operational benefit.
+- **C5 (UNPROVEN):** DynAPM maintenance overhead is acceptable relative to its benefit.
+- **C6 (UNPROVEN):** Any empirical Cloud-Edge/continuum claim requires actual heterogeneous/edge evidence. Without that experiment, CECC remains motivation/context, not an empirical contribution.
+
+See the [V2.4G claim disposition table](research_scope_redesign.md) for the full
+SUPPORTED / WITHDRAWN / UNPROVEN ledger used for scope redesign.
 
 A claim decision must address direction, effect magnitude, consistency, uncertainty, and operational relevance where applicable. Before confirmatory runs, a signed experiment specification must assign numerical minimum-benefit and maximum-harm margins to its endpoints. Those values are currently **unassigned** and therefore block claim-generating runs; choose them from engineering requirements independently of favorable pilot effect magnitudes, never the held-out confirmatory outcomes. Pilot feasibility must not optimize benefit/harm thresholds. Freeze the margins before V3/V4, and separate system margins before V8. Report estimates and intervals even when a claim fails.
 
@@ -305,8 +308,19 @@ correctness values and both MAEs against its control. Direct-observation ADWIN
 is mixed: memory MAE worsens, VM wins split, and no volatility tier is uniformly
 favorable. The first technically invalid generation remains explicitly superseded.
 
-**ADAPTIVE MAINTENANCE NOT JUSTIFIED.** C2 is retired as a candidate contribution.
+**ADAPTIVE MAINTENANCE NOT JUSTIFIED.** C2 is withdrawn as a candidate contribution.
 Do not add trigger searches. Deterministic observation-window maintenance remains
-a reference implementation, not a demonstrated novel adaptive method. V2.5 must
-not freeze an adaptive superiority study; it and V3 remain blocked pending a
-human decision on a defensible non-adaptive project scope.
+a reference implementation, not a demonstrated novel adaptive method.
+
+
+## V2.4G — research scope redesign
+
+The [scope redesign](research_scope_redesign.md) consolidates claim status,
+audits the non-adaptive Static/PW/Full-Rewrite fidelity–cost trade-off on the
+corrected development pilot, and compares candidate directions against primary
+literature. Disposition: **EMPIRICAL/SYSTEM STUDY VIABLE**. Forecasting and
+adaptive-refresh superiority stay withdrawn. A cost-aware cadence *selector* is
+not authorized; system validation remains optional/deferred. V2.5 is redefined as
+an empirical contribution freeze under the documented GO/NO-GO criteria; V3
+remains blocked until that freeze passes. No new algorithm or confirmatory run is
+authorized by V2.4G alone.

@@ -99,15 +99,24 @@ This roadmap specifies future gates, not authorization to execute them. The sole
 - **PASS criteria:** 90/90 valid method/VM evaluations; exact per-VM adaptive/control budgets; no prediction; finite causal snapshots; verified shared content, base schedules and evaluation truth; output/hash/cache integrity; and one predefined architecture disposition. A negative scientific result can pass investigation validity.
 - **Unproven:** practical margins, independent confirmation, other triggers, cross-corpus or systems benefit. No additional trigger search follows a negative disposition.
 
-## V2.5 — CONFIRMATORY DESIGN FREEZE
+## V2.4G — RESEARCH SCOPE REDESIGN
 
-**STATUS: BLOCKED PENDING NON-ADAPTIVE SCOPE DECISION**
+**STATUS: PASS — EMPIRICAL/SYSTEM STUDY VIABLE**
 
-- **Objective:** freeze an independent, falsifiable confirmatory design before any full run.
-- **Required artifacts:** final eligible cohort and permanent pilot exclusion list; primary endpoints/comparisons; practical-benefit and acceptable-harm margins; multiplicity families; tests/confidence levels; volatility analysis; exclusion/missing-data rules; confirmatory versus exploratory analyses; exact method/config matrix.
-- **PASS criteria:** source/config/cohort and analysis plan locked before confirmatory outcomes, without optimizing margins to exploratory pilot effects.
-- **Reviewer concern addressed:** fair update budgets/intervals and defensible evidence rather than post-hoc favorable comparisons.
-- **Unproven:** actual effects, generalization and operational benefit.
+- **Objective:** decide whether a defensible non-adaptive research contribution remains after withdrawing forecasting and adaptive-refresh superiority.
+- **Required artifacts:** [research scope redesign](research_scope_redesign.md), claim disposition table, non-adaptive Static/PW/Full-Rewrite trade-off summary from the corrected pilot, literature collision audit, A/B/C direction assessment, GO/NO-GO criteria.
+- **PASS criteria:** one predefined disposition; every quantitative figure traced to valid development generations; no confirmatory outcomes; no new mechanism; literature sources identified by DOI/URL; next gate only (no method implementation).
+- **Unproven:** multi-corpus external validity, system-level benefit, and any cost-aware cadence *selector* claim. Direction A is motivational only.
+
+## V2.5 — EMPIRICAL CONTRIBUTION FREEZE
+
+**STATUS: BLOCKED PENDING AUTHORIZATION UNDER V2.4G GO CRITERIA**
+
+- **Objective:** freeze an evidence-limited empirical/methodological contribution and confirmatory design—not an adaptive superiority study.
+- **Required artifacts:** contribution statement with C1/C2 withdrawn; claim ledger; permanent pilot exclusion; non-adaptive reporting matrix; practical margins chosen independently of pilot effects; multi-corpus plan (Google 2019 first) for benchmark external validity; explicit deferral or separate authorization for K8s/system validation.
+- **PASS criteria:** source/config/cohort and analysis plan locked before confirmatory outcomes, without optimizing margins to exploratory pilot effects or resurrecting withdrawn adaptive/forecast claims.
+- **Reviewer concern addressed:** contribution/venue match and fair evidence rather than post-hoc favorable comparisons.
+- **Unproven:** actual multi-corpus and system effects until later gates.
 
 ## V3 — FULL MATERNA CAUSAL EVALUATION
 
@@ -201,7 +210,7 @@ This roadmap specifies future gates, not authorization to execute them. The sole
 
 ## Dependency and execution rule
 
-V0, V1A, V1B, V2 and the V2.4 investigation chain through V2.4F are PASS as executions. C1 is withdrawn and C2 is retired; V2.5 is blocked pending a defensible non-adaptive scope decision. V3 remains BLOCKED UNTIL V2.5 PASS. The earlier v2 pilot was blocked on gaps and aliasing; the corrected v3 pilot resolves those protocol defects with independently verified bounded execution. V4 requires frozen interval/budget comparisons; V6 requires dataset selection; V8 requires the V7 harness and V5 cost discipline. Every future experiment still requires explicit scope and authorization. No manuscript prose before V10 passes and V11 begins.
+V0, V1A, V1B, V2 and the V2.4 investigation chain through V2.4G are PASS as executions. C1 and C2 are withdrawn. V2.4G disposition is **EMPIRICAL/SYSTEM STUDY VIABLE**; V2.5 is redefined as an empirical contribution freeze and remains blocked until authorized under the V2.4G GO criteria. V3 remains BLOCKED UNTIL V2.5 PASS. The earlier v2 pilot was blocked on gaps and aliasing; the corrected v3 pilot resolves those protocol defects with independently verified bounded execution. V4 requires frozen interval/budget comparisons; V6 requires dataset selection; V8 requires the V7 harness and V5 cost discipline. Every future experiment still requires explicit scope and authorization. No manuscript prose before V10 passes and V11 begins.
 
 Primary confirmation must exclude the same 18 development-pilot VMs. Final eligibility and all exclusion rules remain for V2.5; 1,558 is the maximum retained primary cohort before any further predefined exclusions. Optional whole-corpus description is separate from independent confirmation.
 
@@ -261,5 +270,17 @@ The corrected generation completed from clean source
 shared paired-window content, zero prediction calls, and independently verified
 schedules/content/truth. See [predictor-free adaptive investigation](predictor_free_adaptive_investigation.md).
 Disposition: **ADAPTIVE MAINTENANCE NOT JUSTIFIED**. Stop trigger search and
-retire C2 as an active contribution. V2.5 must not proceed as an adaptive
-superiority freeze; V2.5/V3 remain blocked pending non-adaptive scope review.
+retire C2 as an active contribution.
+
+
+V2.4G completed from existing development evidence only (corrected Phase 3A-R
+pilot + predictor-free bias/age reconstruction on the same 18 VMs; no
+confirmatory access; no new mechanism). See [research scope redesign](research_scope_redesign.md).
+Claim table withdraws forecasting and adaptive-refresh superiority. Non-adaptive
+audit: Static≪PW fidelity jump; PW 3/6/12h show small marginal gains at roughly
+doubling refresh cost; Full-Rewrite is cost-dominated. Literature collision is
+high for adaptive monitoring/rightsizing and moderate for a causal
+benchmark-with-negatives contribution. Disposition:
+**EMPIRICAL/SYSTEM STUDY VIABLE**. V2.5 is an empirical contribution freeze under
+explicit GO/NO-GO criteria; V3 remains BLOCKED. No cadence selector or full run
+is authorized by this gate.
