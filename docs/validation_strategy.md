@@ -12,7 +12,7 @@ Before observing confirmatory outcomes, freeze the claim, eligibility rules, con
 
 These are candidate claims, not conclusions:
 
-- **C1:** Predictor-grounded profile maintenance improves future-profile fidelity relative to observation-window maintenance.
+- **C1 (withdrawn after V2.4D):** Predictor-grounded profile maintenance improves future-profile fidelity relative to observation-window maintenance. Development evidence does not support this intended contribution; retained here for traceability.
 - **C2:** Drift-triggered refresh provides benefit beyond predictor-grounded periodic refresh when update opportunity/cost is controlled.
 - **C3:** Benefits generalize beyond one workload corpus.
 - **C4:** Improvements in maintained profile state produce measurable downstream operational benefit.
@@ -25,7 +25,7 @@ A claim decision must address direction, effect magnitude, consistency, uncertai
 
 | Claim | Experiment required | Datasets / environment | Controls / baselines | Primary metrics | Secondary metrics | Statistical analysis | Sensitivity / ablation | Minimum evidence required | Current status |
 |---|---|---|---|---|---|---|---|---|---|
-| C1 | Same-origin causal profile evaluation, paired by entity, at matched intervals | Fresh Materna plus independently selected production corpus | PW vs PP at 3h/6h/12h; identical bootstrap, models, eligibility and observation timelines | CPU/memory future-profile class accuracy and p95 profile MAE; co-primary family frozen prospectively | Provisioning under/well/over rates, volatility strata, refresh counters | Paired entity bootstrap CIs, paired effects and inference; multiplicity control | Interval, missingness, predictor quality; forecast-origin vs stale-profile scoring | Desired accuracy increase/error decrease exceeds frozen practical margin with uncertainty bounded; no unacceptable resource-specific harm; consistent direction across entities/corpora or explicitly narrowed claim | Unvalidated; protocol tests only |
+| C1 | Same-origin causal profile evaluation, paired by entity, at matched intervals | Fresh Materna plus independently selected production corpus | PW vs PP at 3h/6h/12h; identical bootstrap, models, eligibility and observation timelines | CPU/memory future-profile class accuracy and p95 profile MAE; co-primary family frozen prospectively | Provisioning under/well/over rates, volatility strata, refresh counters | Paired entity bootstrap CIs, paired effects and inference; multiplicity control | Interval, missingness, predictor quality; forecast-origin vs stale-profile scoring | Desired accuracy increase/error decrease exceeds frozen practical margin with uncertainty bounded; no unacceptable resource-specific harm; consistent direction across entities/corpora or explicitly narrowed claim | V2.4D: unsupported on development VMs; retire as current contribution; see disposition |
 | C2 | V3 vs ordinary PP and exact paired analysis-only matched-budget PP | Same fresh held-out traces; shared replay/protocol | PP 6h, PP interval grid, matched-budget PP; same fitted predictors and drift inputs | Fidelity/provisioning benefit at comparable committed refresh opportunity and measured cost | Drift vs periodic event decomposition, field writes/changes, drift timing | Paired effects/CIs and planned paired tests; budget discrepancy reported | Drift disabled, degraded/late/false detections, cost-matched sensitivity | Improvement exceeds frozen benefit margin and budget/cost tolerance; direction consistent; no claim that more refreshes alone prove drift benefit | Unvalidated |
 | C3 | Locked-protocol external replication | At least one substantially different real production corpus; prefer two | Same controls; common protocol with documented domain adapters | C1/C2 endpoint replication per corpus | Coverage, exclusions, workload/cadence strata, negative transfer | Per-corpus paired inference; explicit heterogeneity; any pooled estimate secondary | Dataset, entity type, telemetry quality, forecast horizon | Practical benefit with bounded uncertainty across distinct corpora, or clear limits; not a pooled average masking failure | No dataset selected |
 | C4 | Repeated controlled downstream resource decisions | Real Kubernetes application(s), telemetry and resource controller | PW, PP, V3, matched-budget PP; fair native mechanism only if semantics match | Preselected application/SLO endpoint and resource-efficiency endpoint | Latency quantiles, throughput, changes/churn, decision delay | Independent-run/scenario paired contrasts, CIs and planned tests | Workload scenarios, load transitions, actuation delay, controller guardrails | Operational effect exceeds frozen SLO/resource margin with uncertainty; no unacceptable safety/churn regression; repeated across scenarios | No systems evidence |
@@ -234,3 +234,24 @@ V2 passed under causal-timeline-v3 and phase-balanced-hourly-v1; see [pilot reco
 Before V2.5, review [predictor diagnosis](predictor_diagnosis.md) on only the fixed eighteen development VMs and the [official-source dataset audit](dataset_suitability_audit.md). Distinguish recursive feedback, one-step model quality, distribution shift, threshold sensitivity and gap availability using exploratory diagnostics. Do not tune models here or inspect the 1,558 possible confirmatory entities. Dataset ranking must reflect resource semantics, usable horizon, continuity, reproducibility and independent workload evidence, not expected favorable performance. V2.5 remains blocked until this work is reviewed; V3 remains blocked. A redesign recommendation requires a separate development/validation step before freezing claims.
 
 V2.4 diagnostics are complete (259 tests; managed fixed-development execution verified). Review found strong recursive-error growth and weak profile forecasting; a separate predictor-design investigation is recommended before the design freeze. This is not a change to current parameters or permission to inspect confirmatory outcomes. V2.5 remains blocked pending review/disposition; V3 remains blocked. See the diagnosis for uncertainty and the dataset audit for official-source ranking and unresolved acquisition gates.
+
+
+## V2.4D predictor disposition — current design prerequisite
+
+[Predictor disposition](predictor_disposition.md) records **PREDICTOR NOT JUSTIFIED**
+for profile-content generation. C1 is unsupported and is withdrawn from the
+current intended contribution set; its earlier matrix row remains for traceability,
+not as an executable plan to rescue a favorable outcome. C2 and the predictor-based
+controls in the earlier policy/system plans require review and re-scoping before
+V2.5: compare drift timing against periodic and exact matched-budget timing with
+the same observation-window content. Do not call seasonal/PW-equivalent content a
+separate learned predictive contribution. One-step RF residual surveillance has
+not been independently justified by these content studies. It requires a separate
+incremental-value test. Cross-corpus and system claims remain unproven.
+
+No production interfaces or scientific behavior are changed by this decision.
+An architecture follow-up must predefine drift refresh behavior when a 200-slot
+trailing content window is unavailable and revalidate common periodic eligibility,
+exact budgets, accounting and phase-balanced reads on the same development cohort.
+Only then can a reviewed V2.5 freeze the final architecture/comparison matrix.
+V2.5 and V3 remain blocked. No model search or confirmatory run is authorized.

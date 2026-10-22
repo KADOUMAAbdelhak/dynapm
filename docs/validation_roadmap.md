@@ -74,7 +74,7 @@ This roadmap specifies future gates, not authorization to execute them. The sole
 
 ## V2.4D — PREDICTOR DISPOSITION
 
-**STATUS: IN PROGRESS — bounded operational-origin and bootstrap-selector study**
+**STATUS: PASS — disposition B; architectural follow-up requires review**
 
 - **Objective:** decide whether profile-content forecasting is justified, keeping the one-step residual RF separate.
 - **Required artifacts:** [disposition report](predictor_disposition.md), managed actual-periodic/drift-origin comparisons, bootstrap-only prequential selector evidence, per-VM/tier coverage and errors.
@@ -204,3 +204,16 @@ V2.4B record: source `ff7388ab3ec122d3f528e45216adc5882cacbc13`; managed run `20
 Current prerequisite: V2.4C is complete and requires review/disposition. Seasonal-naive is the strongest tested scalar-profile reference and equals trailing-window PW refresh content. No learned predictor integration is recommended. V2.5/V3 remain blocked.
 
 V2.4C record: source `d579c46be0691e72db87814fbd86f636b05e7d3b`, study-v2 run `2026-10-22T071114.218486Z-807040bbf43c-322dd54d`; same 18 development VMs/eight origins, six methods, 1,728 resource/profile rows and a timestamp-only 1,576-VM availability audit. 274 tests passed. The metadata-v1 generation is superseded unchanged. See [task-aligned investigation](profile_predictor_investigation.md) for A/B/C/D disposition, seasonal/PW identity and unresolved availability/residual/claim contracts. No full run follows automatically.
+
+
+V2.4D completed on the fixed 18 VMs from source `0ada9c14ead1621039830ade86963193ba8a446a`;
+managed run `2026-10-22T073824.175800Z-77f3f60abcd1-ef449ae2`, 288 tests passing.
+Disposition: **PREDICTOR NOT JUSTIFIED** for profile generation. Direct-profile RF
+loses to seasonal/PW content at operational origins; the strict bootstrap selector
+does not generalize robustly. The first, incomplete no-mature-label attempt is
+preserved as FAILED. See [disposition](predictor_disposition.md) for all choices,
+coverage and architecture consequences. C1 is unsupported and should be retired;
+residual RF remains a separate unvalidated role. Review observation-content
+architecture, its gap eligibility and same-content matched budgets, then perform
+bounded revalidation before freezing confirmation. **V2.5/V3 remain BLOCKED.**
+No production policy change, confirmatory inference or extra model search occurs.
