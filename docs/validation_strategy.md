@@ -13,7 +13,7 @@ Before observing confirmatory outcomes, freeze the claim, eligibility rules, con
 These are candidate claims, not conclusions:
 
 - **C1 (withdrawn after V2.4D):** Predictor-grounded profile maintenance improves future-profile fidelity relative to observation-window maintenance. Development evidence does not support this intended contribution; retained here for traceability.
-- **C2 (unsupported after V2.4E):** Drift-triggered refresh provides benefit beyond periodic refresh when content and update opportunity/cost are controlled. The frozen residual-RF/ADWIN timing does not justify this intended contribution; retain the question for traceability, not as an established benefit.
+- **C2 (unsupported after V2.4E; V2.4F rerun pending):** Adaptive refresh provides benefit beyond periodic refresh when content and update opportunity/cost are controlled. Residual-RF timing is unsupported; the first predictor-free generation was technically invalid and cannot decide the broader claim.
 - **C3:** Benefits generalize beyond one workload corpus.
 - **C4:** Improvements in maintained profile state produce measurable downstream operational benefit.
 - **C5:** DynAPM maintenance overhead is acceptable relative to its benefit.
@@ -227,7 +227,7 @@ may be chosen to favor observed pilot effects. See [protocol](protocol.md) and
 
 ## Corrected bounded gate status
 
-V2 passed under causal-timeline-v3 and phase-balanced-hourly-v1; see [pilot record](bounded_pilot.md). V2.5 is NEXT and must freeze every confirmatory rule before any held-out outcome. The matched-budget counterfactual uses paired V3 K with non-adaptive input-eligible positions; it does not calibrate an interval from favorable effects or claim deployability. The 18 development entities remain excluded from primary independent confirmation; no final cohort or practical margins were selected in this task.
+V2 passed under causal-timeline-v3 and phase-balanced-hourly-v1; see [pilot record](bounded_pilot.md). The later V2.4 chain supersedes the historical “V2.5 is NEXT” state: V2.5/V3 are blocked pending a non-adaptive scope decision after C1 withdrawal and C2 retirement. The 18 development entities remain excluded from any primary independent confirmation; no final cohort or practical margins have been selected.
 
 ## V2.4 prerequisite to confirmation freeze
 
@@ -294,3 +294,13 @@ reproducibility pending separately reviewed refactoring. Observation-window
 maintenance alone is a reference implementation, not established novel adaptive
 or systems evidence. Review the final contribution/research scope before V2.5;
 V2.5/V3 remain blocked. No full run or new model search is authorized.
+
+## V2.4F status — corrected predictor-free rerun required
+
+The first [predictor-free trigger study](predictor_free_adaptive_investigation.md)
+generation completed mechanically but is invalid for architecture inference:
+periodic 24h commits could reset Reactive's six-hour trigger state and manufacture
+a later transition, and per-resource Reactive aggregates were omitted. The
+corrected source preserves trigger-state closure independently of periodic
+content and records both aggregates. V2.5/V3 remain blocked until a clean-source
+bounded rerun supports one predefined disposition.

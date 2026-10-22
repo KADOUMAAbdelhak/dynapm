@@ -151,6 +151,8 @@ class ReactiveWindowPolicy(_PredictorFreeAdaptivePolicy):
         # state separately from the maintained profile content.
         self._reactive_cpu_class = self.profile.dynamic.cpu_class
         self._reactive_mem_class = self.profile.dynamic.memory_class
+        self.cpu_trigger_signals = 0
+        self.mem_trigger_signals = 0
 
     def step(self, t, cpu_obs_window, mem_obs_window):
         t = pd.Timestamp(t)
@@ -164,8 +166,10 @@ class ReactiveWindowPolicy(_PredictorFreeAdaptivePolicy):
             mem_class = forecast_class_from_window(mem_candidate, self.mem_thresholds)
             cpu_signal = cpu_class != self._reactive_cpu_class
             mem_signal = mem_class != self._reactive_mem_class
+        self.cpu_trigger_signals += int(cpu_signal)
+        self.mem_trigger_signals += int(mem_signal)
         window = paired_content_window(cpu_obs_window, mem_obs_window, t)
-        disposition = self._apply_signal(
+        self._apply_signal(
             t, window, cpu_signal or mem_signal, Trigger.REACTIVE,
             cpu_signal=cpu_signal, mem_signal=mem_signal)
         if cpu_signal or mem_signal:
@@ -173,9 +177,6 @@ class ReactiveWindowPolicy(_PredictorFreeAdaptivePolicy):
             # takes precedence; do not latch the same class transition.
             self._reactive_cpu_class = cpu_class
             self._reactive_mem_class = mem_class
-        elif disposition == 'periodic':
-            self._reactive_cpu_class = self.profile.dynamic.cpu_class
-            self._reactive_mem_class = self.profile.dynamic.memory_class
 
 
 class ADWINObservationPolicy(_PredictorFreeAdaptivePolicy):

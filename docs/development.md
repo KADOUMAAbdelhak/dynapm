@@ -88,7 +88,7 @@ but must not fit predictors or execute policies on that cohort.
 
 ## Verified remediation status
 
-V2 PASS: 256 tests passed, 0 failed, 0 skipped; the corrected clean-source pilot completed 198/198. See [immutable run identities and diagnostics](bounded_pilot.md). V2.5 is NEXT. V3 remains BLOCKED UNTIL V2.5. Earlier blocked-pilot statements above document their historical generation and do not describe the current gate. No new model/policy tuning or full-corpus execution was performed.
+V2 PASS: the corrected clean-source pilot completed 198/198. See [immutable run identities and diagnostics](bounded_pilot.md). The later V2.4 investigation chain supersedes “V2.5 is NEXT”: V2.5/V3 are blocked pending a non-adaptive scope decision after V2.4F. Earlier blocked-pilot statements above document their historical generation and do not describe the current gate.
 
 
 ## Observation-content candidate (V2.4E)
@@ -116,3 +116,19 @@ choosing architecture/baselines. Keep both C1 and residual-driven C2 unsupported
 V2.5/V3 remain blocked pending scope review. Compatibility field names
 `predicted_*_p95_next_24h` are inherited storage names; the new policies place
 paired observation-window p95 values there and do not generate future samples.
+
+## Predictor-free trigger disposition (V2.4F)
+
+`ReactiveWindowPolicy` and `ADWINObservationPolicy` are fixed experimental
+controls in `observation_timing.py`. Reactive preserves the legacy six-hour
+class-transition trigger in separate trigger state while all profile commits
+remain common 24h observation-window content. ADWIN consumes current CPU/memory
+observations directly at delta `.002`. Neither constructs predictors.
+
+Use `python -m dynapm.scripts.task26_predictor_free_adaptive --help` only for the
+fixed-18 managed interface. The first generation is invalid because periodic
+content reset Reactive trigger state and its resource aggregates were omitted.
+Corrected source keeps the six-hour shadow independent of periodic commits and
+records both aggregates. Reactive/ADWIN remain experimental controls, not
+accepted architecture. V2.5/V3 remain blocked pending a clean corrected rerun;
+see the [investigation](predictor_free_adaptive_investigation.md).

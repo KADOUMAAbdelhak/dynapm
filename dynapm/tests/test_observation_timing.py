@@ -119,6 +119,19 @@ def test_reactive_ineligible_trigger_is_consumed():
     assert p.total_trigger_signals==1
 
 
+def test_periodic_content_does_not_manufacture_reactive_transition():
+    p,boot=make(ReactiveWindowPolicy)
+    index=pd.date_range(ANCHOR,ANCHOR+pd.Timedelta(hours=6,minutes=5),freq='5min')
+    history=pd.concat([boot,pd.Series(95.,index=index)])
+    feed(p,history,ANCHOR+pd.Timedelta(hours=5,minutes=55))
+    assert p.total_trigger_signals==1
+    feed(p,history,ANCHOR+pd.Timedelta(hours=6))
+    assert p.accounting_metrics()['n_periodic_refreshes']==1
+    feed(p,history,ANCHOR+pd.Timedelta(hours=6,minutes=5))
+    assert p.total_trigger_signals==1
+    assert p.cpu_trigger_signals==p.mem_trigger_signals==1
+
+
 def test_adwin_observation_consumes_direct_values_and_periodic_precedes():
     p,boot=make(ADWINObservationPolicy)
     p._cpu_drift=Signal(True);p._mem_drift=Signal(True)

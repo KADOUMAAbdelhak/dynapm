@@ -1,6 +1,6 @@
 # DynAPM
 
-DynAPM is a research implementation for application-profile maintenance. The simplified architecture uses exact trailing observation-window content and deterministic refresh scheduling/accounting. Bounded development studies did not justify learned profile generation or RF-residual/ADWIN timing; those implementations remain isolated experimental controls for reproducibility. Development and scope review are ongoing. Protocol correctness does not establish a novel adaptive method, scientific benefit or system-level contribution.
+DynAPM is a research implementation for application-profile maintenance. The simplified architecture uses exact trailing observation-window content and deterministic refresh scheduling/accounting. Bounded development studies did not justify learned profile generation or RF-residual/ADWIN timing; those implementations remain isolated experimental controls for reproducibility. Predictor-free Reactive/direct-observation ADWIN revalidation is in progress after invalidating its first generation. Protocol correctness does not establish a novel adaptive method, scientific benefit or system-level contribution.
 
 Datasets and generated outputs are external or untracked. Historical publication results are not stored in this repository.
 
