@@ -54,7 +54,7 @@ This roadmap specifies future gates, not authorization to execute them. The sole
 
 ## V2.4B — PREDICTOR DESIGN INVESTIGATION
 
-**STATUS: IN PROGRESS**
+**STATUS: PASS — investigation complete; no single adequate candidate**
 
 - **Objective:** compare four predefined causal fixed-origin forecast designs on the fixed 18 development VMs before freezing confirmation.
 - **Required artifacts:** [design investigation](predictor_design_investigation.md), managed all-lead forecasts/metrics/costs, identical-origin and future-invariance tests, source/output provenance.
@@ -178,4 +178,6 @@ V2 PASS at source `82a79b90d70ce0405ffbf161698180bdf4f49ed7`; run `2026-10-21T11
 
 Managed exploratory diagnosis completed on the fixed 18 development VMs, eight origins each, from source `8ad366a0a282c3981d135f26fe9cde34b1cb80ee`. 259 tests passed, zero failed/skipped. Exact run identity and lead/profile diagnostics are in [predictor diagnosis](predictor_diagnosis.md). Recursive feedback/long-horizon bias is the strongest evidenced issue; predictor redesign investigation is recommended before confirmation freeze, but no predictor change is made. [Dataset audit](dataset_suitability_audit.md) ranks Google 2019 first and Alibaba 2018 as optional third, subject to acquisition/continuity/semantics checks. **V2.5 remains BLOCKED pending V2.4 review and disposition of predictor adequacy; V3 remains BLOCKED.** No confirmatory outcomes, model tuning or candidate raw downloads were used.
 
-Current prerequisite: V2.4B is the active bounded design investigation; V2.5/V3 remain blocked. No result authorizes automatic predictor integration.
+Current prerequisite: V2.4B is complete and requires review. No single adequate two-resource predictor was selected; V2.5/V3 remain blocked pending explicit predictor disposition. No result authorizes automatic predictor integration.
+
+V2.4B record: source `ff7388ab3ec122d3f528e45216adc5882cacbc13`; managed run `2026-10-22T004212.427895Z-62f5727e20e2-905e675d`; 18 development VMs, identical eight origins, four candidates, all288 leads. 265 tests passed. Direct RF improves recursion but loses to seasonal on CPU and has large state cost; no production integration is recommended. See the design investigation for full metrics, mixed resource findings and limitations.
