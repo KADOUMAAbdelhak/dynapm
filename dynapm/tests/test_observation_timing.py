@@ -9,7 +9,8 @@ from dynapm.core.schema import ProfileInstance,StaticFields,DynamicFields
 from dynapm.core.temporal import trailing_targets
 from dynapm.core.accounting import Trigger
 from dynapm.methods.observation_timing import (paired_content_window,WindowPeriodicPolicy,
-    AdaptiveResidualPolicy,BudgetMatchedWindowPolicy)
+    AdaptiveResidualPolicy,BudgetMatchedWindowPolicy,ReactiveWindowPolicy,
+    ADWINObservationPolicy)
 from dynapm.methods.budget_matched import budget_extra_times,periodic_commit_times
 from dynapm.eval.replay import prepare_vm_replay,prepare_vm_inputs,replay_from_inputs
 from dynapm.eval.runner_v2 import evaluate_replay
@@ -33,8 +34,8 @@ def feed(policy,history,t):
 
 
 class Signal:
-    def __init__(self,signal=False):self.signal=signal;self.calls=0
-    def update(self,value):self.calls+=1;return self.signal
+    def __init__(self,signal=False):self.signal=signal;self.calls=0;self.values=[]
+    def update(self,value):self.calls+=1;self.values.append(value);return self.signal
 
 
 def test_paired_content_exact_window_and_joint_finiteness():
@@ -90,6 +91,51 @@ def test_ineligible_drift_signal_consumed_not_latched():
     p._cpu_drift.signal=False
     later=t+pd.Timedelta(minutes=5);h.loc[later]=25.;feed(p,h,later)
     assert not p.accounting.refresh_events and p._cpu_drift.calls==2
+
+
+def test_reactive_trigger_uses_six_hours_but_commits_shared_window():
+    p,boot=make(ReactiveWindowPolicy)
+    t=ANCHOR+pd.Timedelta(hours=1)
+    stream=pd.Series(95.,index=pd.date_range(ANCHOR,t,freq='5min'))
+    history=pd.concat([boot,stream])
+    feed(p,history,t)
+    assert p.total_trigger_signals==1 and p.accounting_metrics()['n_reactive_refreshes']==1
+    window=paired_content_window(history,history,t)
+    assert p.profile.dynamic.predicted_cpu_p95_next_24h==np.quantile(window.cpu,.95)
+    later=t+pd.Timedelta(minutes=5);history.loc[later]=95.;feed(p,history,later)
+    assert p.total_trigger_signals==1
+    assert p.accounting_metrics()['n_reactive_refreshes']==1
+    assert p.trigger_events[0]['disposition']=='committed'
+
+
+def test_reactive_ineligible_trigger_is_consumed():
+    p,boot=make(ReactiveWindowPolicy)
+    t=ANCHOR+pd.Timedelta(hours=40)
+    history=pd.concat([boot,pd.Series(95.,index=pd.date_range(end=t,periods=72,freq='5min'))])
+    feed(p,history,t)
+    assert p.total_trigger_signals==p.ineligible_trigger_signals==1
+    assert not p.accounting.refresh_events
+    later=t+pd.Timedelta(minutes=5);history.loc[later]=95.;feed(p,history,later)
+    assert p.total_trigger_signals==1
+
+
+def test_adwin_observation_consumes_direct_values_and_periodic_precedes():
+    p,boot=make(ADWINObservationPolicy)
+    p._cpu_drift=Signal(True);p._mem_drift=Signal(True)
+    t=ANCHOR+pd.Timedelta(hours=6)
+    history=pd.concat([boot,pd.Series(37.,index=pd.date_range(ANCHOR,t,freq='5min'))])
+    feed(p,history,t)
+    assert p._cpu_drift.values==p._mem_drift.values==[37.]
+    assert p.total_trigger_signals==p.periodic_coincident_trigger_signals==1
+    assert p.cpu_trigger_signals==p.mem_trigger_signals==1
+    assert p.accounting.refresh_events[-1].trigger==Trigger.PERIODIC
+
+
+def test_predictor_free_policies_declare_no_prediction_dependencies():
+    assert not ReactiveWindowPolicy.requires_predictors
+    assert not ReactiveWindowPolicy.requires_residuals
+    assert not ADWINObservationPolicy.requires_predictors
+    assert not ADWINObservationPolicy.requires_residuals
 
 
 def test_gap_delayed_coalesced_periodic_base_equal():

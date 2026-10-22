@@ -90,9 +90,18 @@ This roadmap specifies future gates, not authorization to execute them. The sole
 - **PASS criteria:** 54/54 valid evaluations, exact budgets/base schedules, causal gap/content eligibility, finite aligned snapshots, output integrity, and conservative A/B/C residual-signal disposition. Negative evidence can complete the investigation.
 - **Unproven:** practical margins, independent confirmation, alternative detector benefits, cross-corpus and system effects. V2.5 remains blocked until review.
 
+## V2.4F — PREDICTOR-FREE ADAPTIVE TRIGGER INVESTIGATION
+
+**STATUS: IN PROGRESS — fixed 18-VM predictor-free timing study**
+
+- **Objective:** determine whether either of two predefined predictor-free triggers—existing Reactive class change or direct-observation ADWIN—provides a consistent advantage over its own equal-budget nonadaptive control.
+- **Required artifacts:** [predictor-free adaptive investigation](predictor_free_adaptive_investigation.md), identical 24h content and periodic bases, matched Reactive/ADWIN budgets, aligned hourly truth/age records, trigger/ineligible-trigger accounting, per-VM/tier effects, and managed provenance.
+- **PASS criteria:** 90/90 valid method/VM evaluations; exact per-VM adaptive/control budgets; no prediction; finite causal snapshots; verified shared content, base schedules and evaluation truth; output/hash/cache integrity; and one predefined architecture disposition. A negative scientific result can pass investigation validity.
+- **Unproven:** practical margins, independent confirmation, other triggers, cross-corpus or systems benefit. No additional trigger search follows a negative disposition.
+
 ## V2.5 — CONFIRMATORY DESIGN FREEZE
 
-**STATUS: BLOCKED PENDING V2.4E REVIEW AND FINAL ARCHITECTURAL DISPOSITION**
+**STATUS: BLOCKED PENDING V2.4F AND FINAL ARCHITECTURAL DISPOSITION**
 
 - **Objective:** freeze an independent, falsifiable confirmatory design before any full run.
 - **Required artifacts:** final eligible cohort and permanent pilot exclusion list; primary endpoints/comparisons; practical-benefit and acceptable-harm margins; multiplicity families; tests/confidence levels; volatility analysis; exclusion/missing-data rules; confirmatory versus exploratory analyses; exact method/config matrix.
