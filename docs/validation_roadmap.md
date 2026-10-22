@@ -62,9 +62,19 @@ This roadmap specifies future gates, not authorization to execute them. The sole
 - **Reviewer concern addressed:** predictive validity, horizon behavior, cost and credible predictor controls.
 - **Unproven:** confirmatory advantage, integrated policy outcomes, other-corpus generalization and operational value.
 
+## V2.4C — TASK-ALIGNED PROFILE PREDICTION
+
+**STATUS: IN PROGRESS**
+
+- **Objective:** test direct future mean/p95 prediction against the four previously fixed point strategies, on the same 18 development VMs/eight origins only.
+- **Required artifacts:** [profile investigation](profile_predictor_investigation.md), managed RF/Ridge task-aligned predictions, per-VM/tier errors, costs/state and timestamp-only seasonal availability across 1,576 VMs.
+- **PASS criteria:** canonical bootstrap-only labels, future-data invariance, identical origins/truth, valid managed lineage/output integrity and an evidence-limited A/B/C/D disposition. A negative finding can complete the investigation; no automatic integration.
+- **Reviewer concern addressed:** task-aligned predictive validity, meaningful profile fields, deployability/availability and maintenance cost.
+- **Unproven:** confirmatory effects, integrated policy behavior, cross-corpus generalization and systems benefit.
+
 ## V2.5 — CONFIRMATORY DESIGN FREEZE
 
-**STATUS: BLOCKED PENDING V2.4/V2.4B REVIEW AND PREDICTOR DISPOSITION**
+**STATUS: BLOCKED PENDING V2.4C REVIEW AND PREDICTOR DISPOSITION**
 
 - **Objective:** freeze an independent, falsifiable confirmatory design before any full run.
 - **Required artifacts:** final eligible cohort and permanent pilot exclusion list; primary endpoints/comparisons; practical-benefit and acceptable-harm margins; multiplicity families; tests/confidence levels; volatility analysis; exclusion/missing-data rules; confirmatory versus exploratory analyses; exact method/config matrix.
@@ -181,3 +191,5 @@ Managed exploratory diagnosis completed on the fixed 18 development VMs, eight o
 Current prerequisite: V2.4B is complete and requires review. No single adequate two-resource predictor was selected; V2.5/V3 remain blocked pending explicit predictor disposition. No result authorizes automatic predictor integration.
 
 V2.4B record: source `ff7388ab3ec122d3f528e45216adc5882cacbc13`; managed run `2026-10-22T004212.427895Z-62f5727e20e2-905e675d`; 18 development VMs, identical eight origins, four candidates, all288 leads. 265 tests passed. Direct RF improves recursion but loses to seasonal on CPU and has large state cost; no production integration is recommended. See the design investigation for full metrics, mixed resource findings and limitations.
+
+Current prerequisite: V2.4C task-aligned profile prediction is the active bounded investigation; V2.5/V3 remain blocked. No production predictor or policy change is included.
