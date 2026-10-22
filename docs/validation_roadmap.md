@@ -121,17 +121,18 @@ This roadmap specifies future gates, not authorization to execute them. The sole
 
 ## V3 — MATERNA CONFIRMATORY ESTIMATION STUDY
 
-**STATUS: NEXT — after V2.5 PASS (V2.5A)**
+**STATUS: PASS — estimation execution complete**
 
 - **Objective:** execute the frozen non-adaptive **estimation** study on the 1,558-candidate Materna cohort (minus protocol-validity exclusions only): report paired mean/median effects, bootstrap 95% CIs, Wilcoxon/Holm, effect sizes, costs, and fidelity–cost relationships — not profile-level practical superiority.
-- **Required artifacts:** locked V2.5A config/hashes (`materna_confirmatory_v1_1`); complete run/output manifests; Static/PW-12h/PW-6h/PW-3h/Full-Rewrite matrix; exclusion accounting under predefined protocol codes; paired F1–F3 estimation analysis; no adaptive/forecasting primary methods.
-- **PASS criteria:** every included output verifies under current protocols/fingerprints; complete predeclared coverage or justified protocol exclusions; analysis reconstructible from the frozen design hashes; negative/null/small findings remain valid; no operational-superiority claims from p-values alone.
+- **Required artifacts:** locked V2.5A config/hashes (`materna_confirmatory_v1_1`); complete run/output manifests; Static/PW-12h/PW-6h/PW-3h/Full-Rewrite matrix; exclusion accounting under predefined protocol codes; paired F1–F3 estimation analysis; [results record](materna_confirmatory_results.md); no adaptive/forecasting primary methods.
+- **PASS criteria (met):** 7,790/7,790 method×VM evaluations; 0 protocol exclusions; shared evaluation stamps; output/hash/cache validation; F1–F3 estimation complete; no operational-superiority claims from p-values alone.
+- **Execution:** source `5119957`; fingerprint `9be95e6c…`; run `2026-10-22T150748.006454Z-9be95e6c23a5-87fdc2de`; output manifest `f1da7159…`.
 - **Reviewer concern addressed:** credible Materna confirmation under estimation framing; TOCS 10–11 applied to real traces under the non-adaptive scope.
 - **Unproven:** external validity (V4–V5), maintenance-cost budgets (V6), operational benefit C4 (V7–V8).
 
 ## V4 — INDEPENDENT PRODUCTION-CORPUS SUITABILITY / ACQUISITION
 
-**STATUS: PLANNED — requires V2.5 PASS; Materna confirmation remains separate**
+**STATUS: NEXT — after V3 PASS; Materna confirmation remains separate**
 
 - **Objective:** select and acquire (or refuse) an independent production corpus for generalization; prefer continuing the Google ClusterData 2019 suitability track when still valid.
 - **Required artifacts:** formal suitability/licensing/acquisition report; reproducible adapters and hashes; eligibility audit; no confirmatory Materna outcome use in corpus choice.
@@ -189,7 +190,7 @@ Earlier documents used a denser V3–V11 numbering (full Materna + refresh trade
 
 ## Dependency and execution rule
 
-V0, V1A, V1B, V2 and the V2.4 investigation chain through V2.4G are PASS as executions. C1 and C2 are withdrawn. V2.4G disposition is **EMPIRICAL/SYSTEM STUDY VIABLE**. V2.5 / V2.5A is **PASS** (estimation-first confirmatory design). V3 is **NEXT** (Materna confirmatory estimation study). Materna confirmation (V3) stays separate from generalization (V4–V5). V6 cost, V7–V8 system (C4), and V9 claim/venue gates follow. Every future experiment still requires explicit scope and authorization. No manuscript prose before V9.
+V0, V1A, V1B, V2 and the V2.4 investigation chain through V2.4G are PASS as executions. C1 and C2 are withdrawn. V2.4G disposition is **EMPIRICAL/SYSTEM STUDY VIABLE**. V2.5 / V2.5A is **PASS** (estimation-first confirmatory design). V3 is **PASS** (Materna confirmatory estimation study; see [results](materna_confirmatory_results.md)). **V4 is NEXT** (independent production-corpus suitability/acquisition). C3 and C4 remain UNPROVEN. V6 cost, V7–V8 system (C4), and V9 claim/venue gates follow. Every future experiment still requires explicit scope and authorization. No manuscript prose before V9.
 
 Primary confirmation must exclude the same 18 development-pilot VMs. Candidate confirmatory set is exactly **1,558** IDs before protocol-validity exclusions ([cohort manifest](../configs/materna_confirmatory_cohort_v1.json)). The 199 gap-audit review flags remain diagnostics, not automatic exclusions. Optional whole-corpus description is separate from independent confirmation.
 
@@ -279,6 +280,14 @@ Estimation-first amendment (v1.1, PASS): design fingerprint
 `62c546a48ee25dff7e8ab46d3081e1688137f565024e5c102950100a03765296`;
 `configs/materna_confirmatory_v1_1.{json,yaml}`. Profile-level practical
 significance `NOT_DEFINED_AT_PROFILE_LEVEL`. Cohort/methods/F1–F3/bootstrap
-unchanged. **V2.5 = PASS**; **V3 = NEXT — Materna confirmatory estimation
-study**. C4 remains UNPROVEN. No confirmatory outcomes accessed; no scientific
-run.
+unchanged. **V2.5 = PASS**. C4 remains UNPROVEN.
+
+## V3 execution record
+
+Confirmatory estimation completed from source `5119957` (clean). Experiment
+fingerprint `9be95e6c23a5b58688b74f57a4a91b0e8003109d3075c5351581f5bbb4163f11`;
+run `2026-10-22T150748.006454Z-9be95e6c23a5-87fdc2de`; output manifest
+`f1da7159691467338d8d759a1830a4118c52713ab8eefa49c3770e6a1a0064be`. Eligible
+1,558 / excluded 0; 7,790/7,790 method×VM complete; F1–F3 estimation reported.
+See [materna_confirmatory_results.md](materna_confirmatory_results.md).
+**V3 = PASS**; **V4 = NEXT**. C3/C4 UNPROVEN.
