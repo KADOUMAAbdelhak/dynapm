@@ -13,7 +13,7 @@ Before observing confirmatory outcomes, freeze the claim, eligibility rules, con
 These are candidate claims, not conclusions:
 
 - **C1 (withdrawn after V2.4D):** Predictor-grounded profile maintenance improves future-profile fidelity relative to observation-window maintenance. Development evidence does not support this intended contribution; retained here for traceability.
-- **C2:** Drift-triggered refresh provides benefit beyond predictor-grounded periodic refresh when update opportunity/cost is controlled.
+- **C2 (unsupported after V2.4E):** Drift-triggered refresh provides benefit beyond periodic refresh when content and update opportunity/cost are controlled. The frozen residual-RF/ADWIN timing does not justify this intended contribution; retain the question for traceability, not as an established benefit.
 - **C3:** Benefits generalize beyond one workload corpus.
 - **C4:** Improvements in maintained profile state produce measurable downstream operational benefit.
 - **C5:** DynAPM maintenance overhead is acceptable relative to its benefit.
@@ -274,3 +274,23 @@ A/B/C residual-signal disposition after the fixed development run; prediction is
 not retained merely because a pooled number is positive. V2.5 remains blocked
 until this architectural investigation is reviewed. No confirmation follows
 without a separate frozen design and authorization.
+
+
+## V2.4E disposition — no retained prediction component
+
+The [timing-only study](adaptive_timing_investigation.md) completed 54/54 bounded
+comparisons with exact equal budgets, identical observation-window content and
+verified provenance. **RESIDUAL SIGNAL NOT JUSTIFIED**: modest class-average
+changes did not accompany consistent p95-error/VM/tier benefit. No post-hoc
+meaningful-effect threshold or confirmatory inference was used. Recommend removing
+prediction entirely from the final framework; both profile-content RF and
+residual RF are unsupported roles under the tested development design.
+
+This supersedes the earlier proposed predictor-driven C1/C2 superiority plans.
+C1 remains withdrawn; residual-driven C2 is unsupported. The old matrix and
+predictor baseline plans remain historical candidate requirements, not execution
+authorization. New window/residual controls are preserved only for development
+reproducibility pending separately reviewed refactoring. Observation-window
+maintenance alone is a reference implementation, not established novel adaptive
+or systems evidence. Review the final contribution/research scope before V2.5;
+V2.5/V3 remain blocked. No full run or new model search is authorized.

@@ -107,3 +107,12 @@ study interface. No unbounded cohort or parameter override is available. Legacy
 PP/V3 modules and previous experiment drivers retain their historical development
 interfaces; do not interpret them as the final candidate. See the [timing
 investigation](adaptive_timing_investigation.md) and [protocol](protocol.md).
+
+
+V2.4E completed validly but recommends **no retained prediction component**.
+The residual-only policy above is a frozen experimental control, not an accepted
+final signal. See [the disposition](adaptive_timing_investigation.md) before
+choosing architecture/baselines. Keep both C1 and residual-driven C2 unsupported;
+V2.5/V3 remain blocked pending scope review. Compatibility field names
+`predicted_*_p95_next_24h` are inherited storage names; the new policies place
+paired observation-window p95 values there and do not generate future samples.

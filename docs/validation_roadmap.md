@@ -83,7 +83,7 @@ This roadmap specifies future gates, not authorization to execute them. The sole
 
 ## V2.4E — ARCHITECTURE SIMPLIFICATION & DRIFT-SIGNAL JUSTIFICATION
 
-**STATUS: IN PROGRESS — fixed 18-VM timing-only managed revalidation**
+**STATUS: PASS — disposition B; review final scope before V2.5**
 
 - **Objective:** compare RF-residual/ADWIN timing against equal-budget nonadaptive timing using identical paired observation-window content.
 - **Required artifacts:** [timing investigation](adaptive_timing_investigation.md), same-content commits, shared hourly truth/age records, per-VM/tier deltas and provenance.
@@ -226,3 +226,16 @@ residual RF remains a separate unvalidated role. Review observation-content
 architecture, its gap eligibility and same-content matched budgets, then perform
 bounded revalidation before freezing confirmation. **V2.5/V3 remain BLOCKED.**
 No production policy change, confirmatory inference or extra model search occurs.
+
+
+V2.4E completed from clean source `11131f64b8f4ce69ebf22ba8d3fc5a8d756623f2`,
+run `2026-10-22T080121.494735Z-4fd1541d4a30-1e730315`; 304 tests pass,
+54/54 method/VM evaluations, 18/18 exact equal budgets and base schedules,
+shared paired-window content and hourly verification. See [adaptive timing
+investigation](adaptive_timing_investigation.md). Disposition: **RESIDUAL SIGNAL
+NOT JUSTIFIED**. Small class averages coexist with worse CPU/memory p95 MAE
+at equal budget and mixed VM/tier effects. Recommend dropping prediction entirely
+from the final architecture, keeping legacy/residual controls for reproducibility.
+C1 and residual-driven C2 are unsupported. V2.5 remains BLOCKED until review
+accepts a defensible final architecture and research scope; V3 remains BLOCKED.
+No full experiment or model search follows automatically.
