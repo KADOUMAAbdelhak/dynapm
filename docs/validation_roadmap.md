@@ -52,9 +52,19 @@ This roadmap specifies future gates, not authorization to execute them. The sole
 - **Reviewer concern addressed:** predictor validity, forecast horizon and cross-corpus readiness.
 - **Unproven:** redesign efficacy, generalization, confirmatory effect or system benefit.
 
+## V2.4B — PREDICTOR DESIGN INVESTIGATION
+
+**STATUS: IN PROGRESS**
+
+- **Objective:** compare four predefined causal fixed-origin forecast designs on the fixed 18 development VMs before freezing confirmation.
+- **Required artifacts:** [design investigation](predictor_design_investigation.md), managed all-lead forecasts/metrics/costs, identical-origin and future-invariance tests, source/output provenance.
+- **PASS criteria:** bounded, clean-source, paired-target execution completes; comparison to seasonal-naive and per-VM robustness supports an evidence-limited recommendation or explicit no-adequate-candidate conclusion. Beating recursive RF alone is insufficient. No production integration or confirmatory inference.
+- **Reviewer concern addressed:** predictive validity, horizon behavior, cost and credible predictor controls.
+- **Unproven:** confirmatory advantage, integrated policy outcomes, other-corpus generalization and operational value.
+
 ## V2.5 — CONFIRMATORY DESIGN FREEZE
 
-**STATUS: BLOCKED PENDING V2.4 REVIEW**
+**STATUS: BLOCKED PENDING V2.4/V2.4B REVIEW AND PREDICTOR DISPOSITION**
 
 - **Objective:** freeze an independent, falsifiable confirmatory design before any full run.
 - **Required artifacts:** final eligible cohort and permanent pilot exclusion list; primary endpoints/comparisons; practical-benefit and acceptable-harm margins; multiplicity families; tests/confidence levels; volatility analysis; exclusion/missing-data rules; confirmatory versus exploratory analyses; exact method/config matrix.
@@ -167,3 +177,5 @@ V2 PASS at source `82a79b90d70ce0405ffbf161698180bdf4f49ed7`; run `2026-10-21T11
 ## V2.4 completion record
 
 Managed exploratory diagnosis completed on the fixed 18 development VMs, eight origins each, from source `8ad366a0a282c3981d135f26fe9cde34b1cb80ee`. 259 tests passed, zero failed/skipped. Exact run identity and lead/profile diagnostics are in [predictor diagnosis](predictor_diagnosis.md). Recursive feedback/long-horizon bias is the strongest evidenced issue; predictor redesign investigation is recommended before confirmation freeze, but no predictor change is made. [Dataset audit](dataset_suitability_audit.md) ranks Google 2019 first and Alibaba 2018 as optional third, subject to acquisition/continuity/semantics checks. **V2.5 remains BLOCKED pending V2.4 review and disposition of predictor adequacy; V3 remains BLOCKED.** No confirmatory outcomes, model tuning or candidate raw downloads were used.
+
+Current prerequisite: V2.4B is the active bounded design investigation; V2.5/V3 remain blocked. No result authorizes automatic predictor integration.
