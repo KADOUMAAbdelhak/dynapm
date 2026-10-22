@@ -3,9 +3,10 @@ import numpy as np
 import pandas as pd
 from dynapm.core.discretization import classify_value
 from dynapm.core.temporal import (HORIZON, MIN_OBSERVATIONS, METRICS,
-    history_valid, trailing_observations, forward_observations)
+    history_valid, trailing_observations, forward_observations, SAMPLE_STEP, HORIZON_STEPS)
+from dynapm.experiments.profile_prediction import profile_training_data
 
-VERSION = 'operational-profile-disposition-v1'
+VERSION = 'operational-profile-disposition-v2'
 VALIDATION_FOLDS = 4
 
 
@@ -45,10 +46,15 @@ def bootstrap_origins(bootstrap):
     A full validation horizon must end inside bootstrap. Presence eligibility
     uses only bootstrap data. No streaming values or method errors are inputs.
     """
+    # Presence-only training eligibility: a prefix must actually contain at
+    # least one mature label before it can train. Values/errors never rank folds.
+    # First feature index is first future target, hence +287 slots label end.
+    mature_after = max(profile_training_data(bootstrap, m)[0].index[0] +
+                       (HORIZON_STEPS-1)*SAMPLE_STEP for m in METRICS)
     candidates = []
     for t in pd.date_range(bootstrap.index[0] + pd.Timedelta(hours=72),
                            bootstrap.index[-1] - HORIZON, freq='6h'):
-        if t not in bootstrap.index:
+        if t not in bootstrap.index or t < mature_after:
             continue
         if not all(history_valid(bootstrap[m], t) and
                    len(trailing_observations(bootstrap[m], t, hours=24)) >= MIN_OBSERVATIONS

@@ -171,7 +171,7 @@ def execute(repo, workers=2):
         methods=['rf_profile','seasonal','bootstrap_selector'], managed_origin_dependency=dependency,
         origins='all-distinct-PP3-PP6-PP12-V3-budget-commits;PP6-and-drift-subgroups',
         selector=dict(folds=VALIDATION_FOLDS,grid='6h-from-bootstrap-start+72h',
-            placement='evenly-indexed-eligible-origins', training='expanding-prefix-labels-fully-elapsed',
+            placement='evenly-indexed-eligible-origins-with-mature-training-labels', training='expanding-prefix-labels-fully-elapsed',
             thresholds='prefix-only-validation-full-bootstrap-streaming',
             rule='RF-iff-strictly-better-class-AND-strictly-lower-p95-MAE',fallback='none'),
         rf=dict(n_estimators=200,max_depth=20,max_features='sqrt',random_state=42,n_jobs=1),

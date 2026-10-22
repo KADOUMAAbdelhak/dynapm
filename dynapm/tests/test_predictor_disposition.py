@@ -105,3 +105,15 @@ def test_production_diagnostic_path_bootstrap_freeze_and_common_truth(frame,monk
     vm,macro,tiers,wins=summarize(pd.DataFrame(rows))
     assert macro.groupby(['origin_group','resource']).class_correct.nunique().eq(1).all()
     assert all(w['losses']==0 and w['wins']==0 for w in wins)
+
+
+def test_bootstrap_fold_requires_mature_training_labels_after_early_gap(frame):
+    boot=frame.iloc[:2600].drop(frame.index[1:576])
+    origins=bootstrap_origins(boot)
+    # 72h has current96 + seasonal288, but not a single mature trainable label.
+    assert origins.min()>boot.index[0]+pd.Timedelta(hours=72)
+    for origin in origins:
+        for target in METRICS:
+            model=DirectProfile(target,n_estimators=2,max_depth=3)
+            model.fit(boot.loc[:origin])
+            assert model.training_rows>0 and model.last_training_target<=origin
