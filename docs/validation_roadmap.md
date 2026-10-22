@@ -72,9 +72,18 @@ This roadmap specifies future gates, not authorization to execute them. The sole
 - **Reviewer concern addressed:** task-aligned predictive validity, meaningful profile fields, deployability/availability and maintenance cost.
 - **Unproven:** confirmatory effects, integrated policy behavior, cross-corpus generalization and systems benefit.
 
+## V2.4D — PREDICTOR DISPOSITION
+
+**STATUS: IN PROGRESS — bounded operational-origin and bootstrap-selector study**
+
+- **Objective:** decide whether profile-content forecasting is justified, keeping the one-step residual RF separate.
+- **Required artifacts:** [disposition report](predictor_disposition.md), managed actual-periodic/drift-origin comparisons, bootstrap-only prequential selector evidence, per-VM/tier coverage and errors.
+- **PASS criteria:** fixed 18 development VMs, identical origins/truth, strict two-metric bootstrap selector, future invariance, clean-source provenance/output integrity, explicit A/B/C architecture disposition; negative findings can pass the investigation.
+- **Unproven:** independent confirmation, residual-predictor value, integrated revised architecture, cross-corpus and system benefits. No production integration is authorized by this gate alone.
+
 ## V2.5 — CONFIRMATORY DESIGN FREEZE
 
-**STATUS: BLOCKED PENDING V2.4C REVIEW AND PREDICTOR DISPOSITION**
+**STATUS: BLOCKED PENDING V2.4D DISPOSITION REVIEW AND ARCHITECTURAL FOLLOW-UP**
 
 - **Objective:** freeze an independent, falsifiable confirmatory design before any full run.
 - **Required artifacts:** final eligible cohort and permanent pilot exclusion list; primary endpoints/comparisons; practical-benefit and acceptable-harm margins; multiplicity families; tests/confidence levels; volatility analysis; exclusion/missing-data rules; confirmatory versus exploratory analyses; exact method/config matrix.
