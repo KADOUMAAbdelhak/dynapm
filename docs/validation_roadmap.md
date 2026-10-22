@@ -92,7 +92,7 @@ This roadmap specifies future gates, not authorization to execute them. The sole
 
 ## V2.4F — PREDICTOR-FREE ADAPTIVE TRIGGER INVESTIGATION
 
-**STATUS: IN PROGRESS — first generation invalidated; corrected rerun required**
+**STATUS: PASS — adaptive maintenance not justified**
 
 - **Objective:** determine whether either of two predefined predictor-free triggers—existing Reactive class change or direct-observation ADWIN—provides a consistent advantage over its own equal-budget nonadaptive control.
 - **Required artifacts:** [predictor-free adaptive investigation](predictor_free_adaptive_investigation.md), identical 24h content and periodic bases, matched Reactive/ADWIN budgets, aligned hourly truth/age records, trigger/ineligible-trigger accounting, per-VM/tier effects, and managed provenance.
@@ -101,7 +101,7 @@ This roadmap specifies future gates, not authorization to execute them. The sole
 
 ## V2.5 — CONFIRMATORY DESIGN FREEZE
 
-**STATUS: BLOCKED PENDING VALID V2.4F DISPOSITION**
+**STATUS: BLOCKED PENDING NON-ADAPTIVE SCOPE DECISION**
 
 - **Objective:** freeze an independent, falsifiable confirmatory design before any full run.
 - **Required artifacts:** final eligible cohort and permanent pilot exclusion list; primary endpoints/comparisons; practical-benefit and acceptable-harm margins; multiplicity families; tests/confidence levels; volatility analysis; exclusion/missing-data rules; confirmatory versus exploratory analyses; exact method/config matrix.
@@ -201,7 +201,7 @@ This roadmap specifies future gates, not authorization to execute them. The sole
 
 ## Dependency and execution rule
 
-V0, V1A, V1B and V2 are PASS. The V2.4 chain has withdrawn C1 and rejected residual-RF timing; V2.4F requires a corrected predictor-free rerun before any broader C2 disposition. V2.5 is blocked pending that result and final scope review. V3 remains BLOCKED UNTIL V2.5 PASS. The earlier v2 pilot was blocked on gaps and aliasing; the corrected v3 pilot resolves those protocol defects with independently verified bounded execution. V4 requires frozen interval/budget comparisons; V6 requires dataset selection; V8 requires the V7 harness and V5 cost discipline. Every future experiment still requires explicit scope and authorization. No manuscript prose before V10 passes and V11 begins.
+V0, V1A, V1B, V2 and the V2.4 investigation chain through V2.4F are PASS as executions. C1 is withdrawn and C2 is retired; V2.5 is blocked pending a defensible non-adaptive scope decision. V3 remains BLOCKED UNTIL V2.5 PASS. The earlier v2 pilot was blocked on gaps and aliasing; the corrected v3 pilot resolves those protocol defects with independently verified bounded execution. V4 requires frozen interval/budget comparisons; V6 requires dataset selection; V8 requires the V7 harness and V5 cost discipline. Every future experiment still requires explicit scope and authorization. No manuscript prose before V10 passes and V11 begins.
 
 Primary confirmation must exclude the same 18 development-pilot VMs. Final eligibility and all exclusion rules remain for V2.5; 1,558 is the maximum retained primary cohort before any further predefined exclusions. Optional whole-corpus description is separate from independent confirmation.
 
@@ -252,8 +252,14 @@ No full experiment or model search follows automatically.
 
 The first V2.4F generation from source
 `10cae8cfb77b142fcad8548235c8d21694f6345c`, run
-`2026-10-22T092211.896873Z-f4f66f61eb48-deed1373`, is **INVALID FOR
-DISPOSITION**. Review found periodic 24h commits could reset Reactive's six-hour
-trigger shadow and manufacture a later transition; Reactive resource-signal
-aggregates were also omitted. Outputs remain preserved as superseded diagnostics.
-Corrected source must be committed and rerun cleanly. V2.5/V3 remain blocked.
+`2026-10-22T092211.896873Z-f4f66f61eb48-deed1373`, remains **INVALID FOR
+DISPOSITION** due to Reactive trigger-state reset and aggregate-counter defects.
+The corrected generation completed from clean source
+`d8b8421226ebd989476323c2f955eb676e2c0d7f`, run
+`2026-10-22T094401.887475Z-7f855e124a48-b40753f6`; 312 tests pass,
+90/90 method/VM evaluations, 18/18 exact Reactive and ADWIN matched budgets,
+shared paired-window content, zero prediction calls, and independently verified
+schedules/content/truth. See [predictor-free adaptive investigation](predictor_free_adaptive_investigation.md).
+Disposition: **ADAPTIVE MAINTENANCE NOT JUSTIFIED**. Stop trigger search and
+retire C2 as an active contribution. V2.5 must not proceed as an adaptive
+superiority freeze; V2.5/V3 remain blocked pending non-adaptive scope review.

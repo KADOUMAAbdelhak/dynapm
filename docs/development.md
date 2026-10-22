@@ -129,6 +129,7 @@ Use `python -m dynapm.scripts.task26_predictor_free_adaptive --help` only for th
 fixed-18 managed interface. The first generation is invalid because periodic
 content reset Reactive trigger state and its resource aggregates were omitted.
 Corrected source keeps the six-hour shadow independent of periodic commits and
-records both aggregates. Reactive/ADWIN remain experimental controls, not
-accepted architecture. V2.5/V3 remain blocked pending a clean corrected rerun;
-see the [investigation](predictor_free_adaptive_investigation.md).
+records both aggregates. Its valid disposition is **ADAPTIVE MAINTENANCE NOT
+JUSTIFIED**. Reactive/ADWIN remain reproducibility controls, not accepted
+architecture; do not tune or add triggers. V2.5/V3 remain blocked pending a
+non-adaptive scope decision; see the [investigation](predictor_free_adaptive_investigation.md).

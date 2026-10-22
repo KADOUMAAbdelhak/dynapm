@@ -13,7 +13,7 @@ Before observing confirmatory outcomes, freeze the claim, eligibility rules, con
 These are candidate claims, not conclusions:
 
 - **C1 (withdrawn after V2.4D):** Predictor-grounded profile maintenance improves future-profile fidelity relative to observation-window maintenance. Development evidence does not support this intended contribution; retained here for traceability.
-- **C2 (unsupported after V2.4E; V2.4F rerun pending):** Adaptive refresh provides benefit beyond periodic refresh when content and update opportunity/cost are controlled. Residual-RF timing is unsupported; the first predictor-free generation was technically invalid and cannot decide the broader claim.
+- **C2 (retired after V2.4F):** Adaptive refresh provides benefit beyond periodic refresh when content and update opportunity/cost are controlled. Equal-budget residual-RF, Reactive, and direct-observation ADWIN studies do not justify this intended contribution; retain it for traceability, not as an active claim.
 - **C3:** Benefits generalize beyond one workload corpus.
 - **C4:** Improvements in maintained profile state produce measurable downstream operational benefit.
 - **C5:** DynAPM maintenance overhead is acceptable relative to its benefit.
@@ -295,12 +295,18 @@ maintenance alone is a reference implementation, not established novel adaptive
 or systems evidence. Review the final contribution/research scope before V2.5;
 V2.5/V3 remain blocked. No full run or new model search is authorized.
 
-## V2.4F status — corrected predictor-free rerun required
+## V2.4F disposition — adaptive maintenance not justified
 
-The first [predictor-free trigger study](predictor_free_adaptive_investigation.md)
-generation completed mechanically but is invalid for architecture inference:
-periodic 24h commits could reset Reactive's six-hour trigger state and manufacture
-a later transition, and per-resource Reactive aggregates were omitted. The
-corrected source preserves trigger-state closure independently of periodic
-content and records both aggregates. V2.5/V3 remain blocked until a clean-source
-bounded rerun supports one predefined disposition.
+The corrected [predictor-free trigger study](predictor_free_adaptive_investigation.md)
+completed 90/90 fixed-development comparisons with exact Reactive and ADWIN
+matched budgets, common 24h content, zero prediction calls, and independently
+reconstructed schedules/content/truth. Reactive worsens both average class
+correctness values and both MAEs against its control. Direct-observation ADWIN
+is mixed: memory MAE worsens, VM wins split, and no volatility tier is uniformly
+favorable. The first technically invalid generation remains explicitly superseded.
+
+**ADAPTIVE MAINTENANCE NOT JUSTIFIED.** C2 is retired as a candidate contribution.
+Do not add trigger searches. Deterministic observation-window maintenance remains
+a reference implementation, not a demonstrated novel adaptive method. V2.5 must
+not freeze an adaptive superiority study; it and V3 remain blocked pending a
+human decision on a defensible non-adaptive project scope.
