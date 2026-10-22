@@ -60,3 +60,32 @@ def test_timestamp_seasonal_availability_and_gap(frame):
     assert gapped['seasonal_complete_288']<gapped['predictor_eligible_origins']
     assert gapped['seasonal_density_200']==gapped['predictor_eligible_origins']
     assert gapped['seasonal_incomplete_but_200']>0
+
+
+def test_seasonal_profile_equals_periodic_window_even_with_gap(frame):
+    from dynapm.scripts.task21_predictor_diagnosis import diagnostic_controls
+    from dynapm.core.forecasting import forecast_class_from_window,forecast_p95_from_window
+    from dynapm.core.temporal import trailing_observations,history_valid
+    origin=frame.index[730]
+    for target in (CPU_T,MEM_T):
+        history=frame[target].drop(frame.index[600])
+        assert history_valid(history,origin)
+        seasonal=diagnostic_controls(history,origin)['seasonal_naive_24h'].dropna().to_numpy()
+        window=trailing_observations(history,origin,24).to_numpy()
+        threshold=compute_thresholds(frame.iloc[:500],target)
+        np.testing.assert_array_equal(seasonal,window)
+        assert len(window)==287
+        assert forecast_class_from_window(seasonal,threshold)==forecast_class_from_window(window,threshold)
+        assert forecast_p95_from_window(seasonal)==forecast_p95_from_window(window)
+
+
+def test_scalar_profile_availability_is_not_288_point_predictions():
+    from dynapm.experiments.profile_prediction import availability_metadata
+    scalar=availability_metadata(True)
+    assert scalar['profile_available']
+    assert scalar['profile_feature_history_slots']==96
+    assert scalar['point_forecast_slots_available'] is None
+    points=availability_metadata(False,287)
+    assert points['point_forecast_slots_available']==287
+    assert points['profile_feature_history_slots'] is None
+    with pytest.raises(ValueError):availability_metadata(False,199)

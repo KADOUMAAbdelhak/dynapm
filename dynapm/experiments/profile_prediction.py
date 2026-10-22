@@ -12,7 +12,7 @@ from dynapm.core.temporal import (nominal_grid,forecast_targets,history_valid,tr
 from dynapm.core.discretization import classify_value
 from dynapm.data.bootstrap import LOCKED_BOOTSTRAP_FRACTION
 
-VERSION='direct-profile-mean-p95-v1'
+VERSION='direct-profile-mean-p95-v2'
 
 
 def profile_training_data(bootstrap,target):
@@ -84,3 +84,14 @@ def timestamp_availability(index,trace,vm):
         'seasonal_density_200':int(samples.ge(MIN_OBSERVATIONS).sum()),
         'seasonal_incomplete_but_200':int((samples.ge(MIN_OBSERVATIONS)&samples.lt(HORIZON_STEPS)).sum()),
         'seasonal_below_200':int(samples.lt(MIN_OBSERVATIONS).sum())}
+
+
+def availability_metadata(direct_profile, point_slots=None):
+    """Distinguish scalar inference history from actual point forecast availability."""
+    if direct_profile:
+        return {'profile_available':True,'point_forecast_slots_available':None,
+                'profile_feature_history_slots':FEATURE_HISTORY_SLOTS}
+    if point_slots is None or not MIN_OBSERVATIONS<=point_slots<=HORIZON_STEPS:
+        raise ValueError('eligible point forecast count required')
+    return {'profile_available':True,'point_forecast_slots_available':int(point_slots),
+            'profile_feature_history_slots':None}

@@ -14,7 +14,7 @@ from dynapm.core.discretization import classify_value
 from dynapm.core.forecasting import forecast_class_from_window,forecast_p95_from_window
 from dynapm.eval.replay import prepare_vm_inputs,CPU_T,MEM_T
 from dynapm.experiments.pilot_design import guard_cohort
-from dynapm.experiments.profile_prediction import DirectProfile,timestamp_availability,VERSION
+from dynapm.experiments.profile_prediction import DirectProfile,timestamp_availability,VERSION,availability_metadata
 
 PARENT=('62f5727e20e29e0d0cbb620b9391c6d2909dd978549120dddd09bd7b3e470948/'
         '2026-10-22T004212.427895Z-62f5727e20e2-905e675d')
@@ -46,13 +46,15 @@ def profile_vm(task):
             for method in METHODS:
                 start=time.perf_counter()
                 if method in fitted:
-                    pred=fitted[method].predict_profile(inputs.frame[target],origin,thresholds);available_slots=288
+                    pred=fitted[method].predict_profile(inputs.frame[target],origin,thresholds)
+                    availability=availability_metadata(True)
                 else:
                     g=points[(points.resource==resource)&points.origin.eq(origin)&points.method.eq(method)].sort_values('lead')
                     if len(g)!=288 or not pd.DatetimeIndex(g.target_time).equals(forecast_targets(origin)):raise ValueError('parent forecast alignment')
                     # NO future observation mask may influence profile construction.
                     available=g.prediction.dropna().to_numpy(dtype=float);available_slots=len(available)
                     if available_slots<200:raise ValueError('baseline profile unavailable at fixed origin')
+                    availability=availability_metadata(False,available_slots)
                     pred={'mean':float(available.mean()),'p95':forecast_p95_from_window(available),
                         'class':forecast_class_from_window(available,thresholds)}
                 costs.append({'trace':trace,'vm_id':vm,'resource':resource,'method':method,
@@ -64,7 +66,7 @@ def profile_vm(task):
                     'actual_class':actual_class,'class_correct':pred['class']==actual_class,
                     'p95_absolute_error':abs(pred['p95']-actual_p95),'p95_bias':pred['p95']-actual_p95,
                     'mean_absolute_error':abs(pred['mean']-actual_mean),'mean_bias':pred['mean']-actual_mean,
-                    'ground_truth_slots':len(w),'available_source_slots':available_slots,
+                    'ground_truth_slots':len(w),**availability,
                     'negative_mean':pred['mean']<0,'negative_p95':pred['p95']<0})
     print(f'completed {trace}/{vm}',flush=True)
     return rows,costs,training
