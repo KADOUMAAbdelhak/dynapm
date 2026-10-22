@@ -110,115 +110,94 @@ This roadmap specifies future gates, not authorization to execute them. The sole
 
 ## V2.5 — EMPIRICAL CONTRIBUTION FREEZE
 
-**STATUS: BLOCKED PENDING AUTHORIZATION UNDER V2.4G GO CRITERIA**
+**STATUS: BLOCKED — practical_effect_margins_unassigned**
 
-- **Objective:** freeze an evidence-limited empirical/methodological contribution and confirmatory design—not an adaptive superiority study.
-- **Required artifacts:** contribution statement with C1/C2 withdrawn; claim ledger; permanent pilot exclusion; non-adaptive reporting matrix; practical margins chosen independently of pilot effects; multi-corpus plan (Google 2019 first) for benchmark external validity; explicit deferral or separate authorization for K8s/system validation.
-- **PASS criteria:** source/config/cohort and analysis plan locked before confirmatory outcomes, without optimizing margins to exploratory pilot effects or resurrecting withdrawn adaptive/forecast claims.
+- **Objective:** freeze the non-adaptive empirical study (RQ1–RQ4) before accessing 1,558 confirmatory Materna VM outcomes—not an adaptive/forecasting superiority study.
+- **Required artifacts:** [confirmatory design freeze](confirmatory_design_freeze.md); `configs/materna_confirmatory_v1.{json,yaml}`; `configs/materna_confirmatory_cohort_v1.json`; C1/C2 withdrawn; permanent 18-VM pilot exclusion; non-adaptive Static/PW/Full-Rewrite matrix; F1–F3 comparisons; statistics/decision templates; future V3–V9 roadmap; design/config/cohort hashes.
+- **PASS criteria:** source/config/cohort/endpoints/comparisons/statistics locked before confirmatory outcomes; practical-benefit and acceptable-harm margins assigned from metric/operational/domain rationale **without** pilot-effect calibration or confirmatory peeking; no resurrection of withdrawn adaptive/forecast claims.
+- **Current disposition:** RQs, cohort (1,576−18=1,558 candidates), methods, endpoints, F1–F3, bootstrap (B=10000, seed=20251022), and decision templates are frozen. Numeric practical margins remain **null** because no defensible non-arbitrary values exist without inventing round numbers or using pilot effects. Therefore V2.5 is **BLOCKED** and V3 must not execute.
 - **Reviewer concern addressed:** contribution/venue match and fair evidence rather than post-hoc favorable comparisons.
-- **Unproven:** actual multi-corpus and system effects until later gates.
+- **Unproven:** actual Materna confirmatory effects (V3), multi-corpus and system effects (V4–V8), claim/venue audit (V9).
 
-## V3 — FULL MATERNA CAUSAL EVALUATION
+## V3 — MATERNA CONFIRMATORY NON-ADAPTIVE STUDY
 
 **STATUS: BLOCKED UNTIL V2.5 PASS**
 
-- **Objective:** fresh causal-generation evidence on the predeclared Materna eligible corpus.
-- **Required artifacts:** locked configuration/source; complete run/output manifests; the complete frozen per-VM method/config matrix; exclusion/failure accounting; paired baseline analysis and uncertainty; untouched confirmatory set.
-- **PASS criteria:** every included output verifies under current protocols/fingerprints; complete predeclared coverage or justified exclusions; no reuse of historical TOCS metrics; analysis can be independently reconstructed. Record C1/C2 support or failure without requiring a positive result to call execution valid.
-- **Reviewer concern addressed:** credible evidence prerequisite; TOCS 10-11 applied to real traces.
-- **Unproven:** multiple-interval/matched-budget conclusions until V4, external validity and operational benefit.
+- **Objective:** execute the frozen non-adaptive confirmatory study on the 1,558-candidate Materna cohort (minus protocol-validity exclusions only).
+- **Required artifacts:** locked V2.5 config/hashes; complete run/output manifests; Static/PW-12h/PW-6h/PW-3h/Full-Rewrite matrix; exclusion accounting under predefined protocol codes; paired F1–F3 analysis with frozen statistics; no adaptive/forecasting primary methods.
+- **PASS criteria:** every included output verifies under current protocols/fingerprints; complete predeclared coverage or justified protocol exclusions; analysis reconstructible from the frozen design hashes; negative/null findings remain valid.
+- **Reviewer concern addressed:** credible Materna confirmation; TOCS 10–11 applied to real traces under the non-adaptive scope.
+- **Unproven:** external validity (V4–V5), maintenance-cost budgets (V6), operational benefit (V7–V8).
 
-## V4 — REFRESH TRADE-OFF EVIDENCE
+## V4 — INDEPENDENT PRODUCTION-CORPUS SUITABILITY / ACQUISITION
 
-**STATUS: PLANNED — requires frozen V2.5 design and V3-quality outputs**
+**STATUS: PLANNED — requires V2.5 PASS; Materna confirmation remains separate**
 
-- **Objective:** full 3h/6h/12h PW/PP and matched-budget PP/V3 analysis.
-- **Required artifacts:** direct canonical counter summaries; actual budget discrepancy; per-volatility paired effects/CIs; provisioning outcomes; corrected confirmatory tests; benefit-cost curves; negative results and guardrails.
-- **PASS criteria:** all planned comparisons reported; no manual counter normalization; calibration/test separation verified; matched-budget tolerance assessed; practical-magnitude/uncertainty criteria used. Mark each claim supported, limited or falsified; a failed scientific claim is not repaired by changing its gate.
-- **Reviewer concern addressed:** TOCS 7-8 and update-opportunity confounding.
-- **Unproven:** maintenance cost until V5 and downstream operational benefit until V8.
+- **Objective:** select and acquire (or refuse) an independent production corpus for generalization; prefer continuing the Google ClusterData 2019 suitability track when still valid.
+- **Required artifacts:** formal suitability/licensing/acquisition report; reproducible adapters and hashes; eligibility audit; no confirmatory Materna outcome use in corpus choice.
+- **PASS criteria:** meaningful domain diversity and CPU/memory/time/horizon suitability decided before second-corpus benefit evaluation; acquisition reproducible without secrets in Git.
+- **Unproven:** actual second-corpus effects until V5.
 
-## V5 — MAINTENANCE OVERHEAD
+## V5 — SECOND-CORPUS REPLICATION
+
+**STATUS: PLANNED — requires V4 PASS**
+
+- **Objective:** replicate the frozen non-adaptive maintenance/cadence study on the acquired corpus (preferably Google ClusterData 2019 if V4 affirms suitability).
+- **Required artifacts:** locked replication protocol; paired per-corpus effects; heterogeneity/negative-transfer report.
+- **PASS criteria:** no post-outcome eligibility tuning; uncertainty and limitations transparent; C3 only if practical-benefit criteria hold or the claim is narrowed.
+- **Unproven:** domains outside tested corpora; operational effects.
+
+## V6 — MAINTENANCE-COST / SERVICE BENCHMARK
 
 **STATUS: PLANNED — instrumentation needs separate implementation task**
 
-- **Objective:** attribute training, one-step/horizon inference, ADWIN, refresh/commit/state and service-scale cost.
-- **Required artifacts:** instrumented boundaries; dedicated hardware/environment record; warm-up/repeated-run protocol; latency distributions/median/p95; CPU/memory/state/throughput scaling; declared overhead budgets.
-- **PASS criteria:** repeatable same-environment measurements; no double counting or cross-machine timing comparison; amortized ongoing work included; C5 practical cost budget explicitly passed or failed at a stated scale.
-- **Reviewer concern addressed:** TOCS 9 and overhead part of 3.
-- **Unproven:** cost-benefit acceptability in a real consumer until V8; different hardware/scale.
+- **Objective:** attribute refresh/commit/state and service-scale maintenance cost under declared budgets (C5 track).
+- **Required artifacts:** instrumented boundaries; dedicated hardware/environment record; warm-up/repeated-run protocol; latency/CPU/memory/throughput distributions; declared overhead budgets.
+- **PASS criteria:** repeatable same-environment measurements; no double counting or cross-machine timing comparison; C5 budget explicitly passed or failed at a stated scale.
+- **Unproven:** cost-benefit acceptability in a real consumer until V8.
 
-## V6 — SECOND-CORPUS REPLICATION
+## V7 — KUBERNETES PROFILE→RESOURCE-MANAGEMENT HARNESS
 
-**STATUS: PLANNED — dataset-selection report first**
+**STATUS: PLANNED — design/authorization separate**
 
-- **Objective:** at least one substantially different real production corpus, preferably two where feasible.
-- **Required artifacts:** formal suitability/acquisition/licensing report; reproducible adapters and hashes; eligibility audit; locked replication protocol; paired per-corpus effects and heterogeneity/negative-transfer report.
-- **PASS criteria:** meaningful domain diversity; CPU/memory/time/horizon suitability; no post-outcome eligibility tuning; replication completes with uncertainty and transparent limitations. A broad C3 claim additionally requires frozen practical-benefit criteria to hold, or must be narrowed.
-- **Reviewer concern addressed:** TOCS 4-5.
-- **Unproven:** unseen domains outside the tested corpora and operational effects.
+- **Objective:** working Kubernetes telemetry → profile service → fixed provisioning consumer → resource decision loop.
+- **Required artifacts:** environment/deployment configs; observed decision/actuation traces; workload scenarios; policy isolation; trial plan frozen.
+- **PASS criteria:** real application and real consumed profile/resource actions; no future data; operational metrics captured. A deployment screenshot is insufficient.
+- **Unproven:** operational advantage until V8.
 
-## V7 — SYSTEM HARNESS
+## V8 — REPEATED OPERATIONAL / SYSTEM VALIDATION
 
-**STATUS: PLANNED — design only in this task**
+**STATUS: PLANNED — requires V6 and V7**
 
-- **Objective:** working Kubernetes telemetry -> profile service -> fixed provisioning consumer -> resource decision loop.
-- **Required artifacts:** environment/deployment configs; observed decision/actuation traces; workload scenarios; policy switch isolation; telemetry/clock verification; reset/randomization plan; system power/precision and trial-count plan; real-time horizon feasibility decision.
-- **PASS criteria:** real application and real consumed profile/resource actions; no future data; identical consumer/guardrails across PW/PP/V3/matched-budget PP; operational metrics captured; trial plan frozen. A deployment screenshot is insufficient.
-- **Reviewer concern addressed:** integration parts of TOCS 1-2 and 6.
-- **Unproven:** operational advantage, acceptable service overhead and empirical edge claims.
-
-## V8 — REPEATED SYSTEM VALIDATION
-
-**STATUS: PLANNED — requires V5 and V7**
-
-- **Objective:** operational benefit and harm estimates under controlled repeated trials.
-- **Required artifacts:** independent run/scenario replicates; randomized/counterbalanced order; identical scenarios; environment state; application/resource/control/DynAPM metrics; SLO and resource guardrails; run-level paired CIs/effects and planned inference.
-- **PASS criteria:** sufficient preplanned replication to estimate uncertainty; predefined operational magnitude/harm criteria assessed; all failed trials reported; fair native comparison only when justified. C4/C5 support is a separate evidence decision, not inferred from successful deployment.
-- **Reviewer concern addressed:** TOCS 1-3; empirical scope part of 6.
+- **Objective:** operational benefit and harm estimates under controlled repeated trials (C4/C5 evidence).
+- **Required artifacts:** independent run/scenario replicates; predefined operational magnitude/harm criteria; run-level paired inference.
+- **PASS criteria:** preplanned replication; all failed trials reported; C4/C5 support is a separate evidence decision.
 - **Unproven:** heterogeneous edge generalization without a dedicated C6 experiment.
 
-## V9 — ROBUSTNESS / ABLATIONS
-
-**STATUS: PLANNED — designs frozen before their runs**
-
-- **Objective:** explain mechanism behavior and boundaries, including negative cases.
-- **Required artifacts:** stable/periodic/burst/abrupt/gradual/volatility fixtures; sparse/missing/>period-gap tests; degraded predictor and ADWIN false/late-trigger interventions; drift-off and budget/cost controls; seeds/configs/manifests.
-- **PASS criteria:** expected invariants checked; fidelity/cost/safety failure cases exposed; ablations isolate mechanisms; synthetic results labeled mechanistic and never substitute for V6/V8.
-- **Reviewer concern addressed:** interpretation of TOCS 7-9 and limits of C1-C5.
-- **Unproven:** real-workload prevalence of synthetic stress conditions.
-
-## V10 — CLAIM AUDIT
+## V9 — FINAL CLAIM AUDIT / VENUE DECISION
 
 **STATUS: PLANNED — after relevant evidence gates**
 
-- **Objective:** map every intended manuscript claim to evidence and remove unsupported scope.
-- **Required artifacts:** C1-C6 claim ledger; pre-registration IDs; source/config/input/output fingerprints; effect/CI/margin decisions; negative outcomes; reviewer traceability; CECC Path A/B decision.
-- **PASS criteria:** every retained claim meets its predefined evidence requirement and declared domain; no significance-only or offline-to-system leap; no historical metrics described as causal; no resource/machine sharing claim without its own experiment; unresolved concerns explicitly limit claims.
-- **Reviewer concern addressed:** all TOCS concerns and confirmed historical project lessons.
-- **Unproven:** transfer beyond demonstrated scope and editorial acceptance.
-
-## V11 — JOURNAL SELECTION + WRITING
-
-**STATUS: PLANNED — only after V10**
-
-- **Objective:** select a venue fitting the demonstrated contribution, then begin drafting.
-- **Required artifacts:** evidence-limited contribution statement, venue-scope/current-ranking audit, approved claim ledger and reproducibility package plan.
-- **PASS criteria:** actual evidence fits venue; FGCS treated as candidate rather than destination; no claim expansion to satisfy journal framing; manuscript drafting begins only now.
-- **Reviewer concern addressed:** overclaiming and contribution/venue mismatch.
+- **Objective:** map every intended manuscript claim to evidence, remove unsupported scope, and only then select a venue / begin drafting.
+- **Required artifacts:** C1–C6 claim ledger (C1/C2 remain withdrawn unless separately revived with new evidence); source/config/input/output fingerprints including V2.5 freeze hashes; effect/CI/margin decisions; negative outcomes; venue-scope audit.
+- **PASS criteria:** every retained claim meets its predefined evidence requirement; no significance-only or offline-to-system leap; manuscript drafting begins only after this gate.
 - **Unproven:** peer-review outcome or journal acceptance.
+
+### Historical gate aliases (superseded numbering)
+
+Earlier documents used a denser V3–V11 numbering (full Materna + refresh trade-off + overhead + second corpus + harness + system + ablations + claim audit + writing). That numbering is **superseded** by the V3–V9 empirical/system path above. Ablations remain allowed as nested protocol/mechanistic checks inside later gates when pre-registered; they are not a separate publication claim gate.
 
 ## Dependency and execution rule
 
-V0, V1A, V1B, V2 and the V2.4 investigation chain through V2.4G are PASS as executions. C1 and C2 are withdrawn. V2.4G disposition is **EMPIRICAL/SYSTEM STUDY VIABLE**; V2.5 is redefined as an empirical contribution freeze and remains blocked until authorized under the V2.4G GO criteria. V3 remains BLOCKED UNTIL V2.5 PASS. The earlier v2 pilot was blocked on gaps and aliasing; the corrected v3 pilot resolves those protocol defects with independently verified bounded execution. V4 requires frozen interval/budget comparisons; V6 requires dataset selection; V8 requires the V7 harness and V5 cost discipline. Every future experiment still requires explicit scope and authorization. No manuscript prose before V10 passes and V11 begins.
+V0, V1A, V1B, V2 and the V2.4 investigation chain through V2.4G are PASS as executions. C1 and C2 are withdrawn. V2.4G disposition is **EMPIRICAL/SYSTEM STUDY VIABLE**. V2.5 froze the non-adaptive design but is **BLOCKED** on unassigned practical-effect margins. V3 remains **BLOCKED UNTIL V2.5 PASS**. Materna confirmation (V3) stays separate from generalization (V4–V5). V6 cost, V7–V8 system, and V9 claim/venue gates follow. Every future experiment still requires explicit scope and authorization. No manuscript prose before V9.
 
-Primary confirmation must exclude the same 18 development-pilot VMs. Final eligibility and all exclusion rules remain for V2.5; 1,558 is the maximum retained primary cohort before any further predefined exclusions. Optional whole-corpus description is separate from independent confirmation.
+Primary confirmation must exclude the same 18 development-pilot VMs. Candidate confirmatory set is exactly **1,558** IDs before protocol-validity exclusions ([cohort manifest](../configs/materna_confirmatory_cohort_v1.json)). The 199 gap-audit review flags remain diagnostics, not automatic exclusions. Optional whole-corpus description is separate from independent confirmation.
 
-Both pilot generations and the stopped diagnostic attempt are recorded in [bounded_pilot.md](bounded_pilot.md). Current lightweight validation is 312 passed, 0 failed, 0 skipped. No practical benefit/harm margins or confirmatory families were chosen from pilot effects.
+Both pilot generations and the stopped diagnostic attempt are recorded in [bounded_pilot.md](bounded_pilot.md). See [confirmatory design freeze](confirmatory_design_freeze.md) for hashes and the margin blocker.
 
 ## Phase 3A-R execution record
 
-V2 PASS at source `82a79b90d70ce0405ffbf161698180bdf4f49ed7`; run `2026-10-21T111323.571341Z-6d801e1fe87c-e3a215fe`. 256 tests passed, no failures/skips. [Bounded pilot](bounded_pilot.md) records execution and exploratory diagnostics. V2.5 is blocked pending V2.4 review; V3 remains BLOCKED UNTIL V2.5. The earlier v2 pilot remains preserved as a readiness failure. No full experiment follows automatically.
+V2 PASS at source `82a79b90d70ce0405ffbf161698180bdf4f49ed7`; run `2026-10-21T111323.571341Z-6d801e1fe87c-e3a215fe`. 256 tests passed, no failures/skips. [Bounded pilot](bounded_pilot.md) records execution and exploratory diagnostics. V2.5 design freeze exists but is BLOCKED on unassigned practical margins; V3 remains BLOCKED UNTIL V2.5 PASS. The earlier v2 pilot remains preserved as a readiness failure. No full experiment follows automatically.
 
 ## V2.4 completion record
 
@@ -281,6 +260,16 @@ audit: Static≪PW fidelity jump; PW 3/6/12h show small marginal gains at roughl
 doubling refresh cost; Full-Rewrite is cost-dominated. Literature collision is
 high for adaptive monitoring/rightsizing and moderate for a causal
 benchmark-with-negatives contribution. Disposition:
-**EMPIRICAL/SYSTEM STUDY VIABLE**. V2.5 is an empirical contribution freeze under
-explicit GO/NO-GO criteria; V3 remains BLOCKED. No cadence selector or full run
-is authorized by this gate.
+**EMPIRICAL/SYSTEM STUDY VIABLE**. V2.5 froze the non-adaptive design under
+explicit GO/NO-GO templates but remains **BLOCKED** on unassigned practical
+margins ([freeze record](confirmatory_design_freeze.md)); V3 remains BLOCKED.
+No cadence selector or full run is authorized until V2.5 PASS.
+
+## V2.5 execution record
+
+Design freeze committed with configs/cohort manifests and validators. Design
+fingerprint `d3c94bcdcf9cb626d915187ca8d5071c26197464ad6154e3f527f1f4d79bac26`.
+Candidate confirmatory cohort: 1,558 IDs (entities fingerprint
+`3a590437f108493b085f1cb34765e76bd5f10fa233a48c2e96f6bf3bd54b7939`). Practical
+margins unassigned → **V2.5 = BLOCKED**; **V3 = BLOCKED**. No confirmatory
+outcomes accessed; no scientific run.

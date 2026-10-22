@@ -1,0 +1,275 @@
+# Frozen by V2.5 — authoritative twin is materna_confirmatory_v1.json
+schema_version: materna-confirmatory-design-v1
+gate: V2.5
+gate_status: BLOCKED
+blocker: practical_effect_margins_unassigned
+blocker_rationale: "Defensible numeric practical-benefit and acceptable-harm margins for the four primary fidelity endpoints cannot be established from metric semantics, profile resolution, or an external operational requirement without arbitrary round-number choices. Deriving margins from the 18-VM pilot effects is forbidden. Margins remain null; V3 execution stays blocked until a separate authorized margin freeze assigns them without confirmatory outcome access and without pilot-effect calibration."
+withdrawn_claims:
+  - C1_forecasting_superiority
+  - C2_adaptive_refresh_superiority
+branding:
+  repository_name: DynAPM
+  continuity_note: Repository name may remain for continuity; manuscript framing must not imply validated adaptive or predictive functionality.
+  working_contribution: "A rigorous empirical methodology and benchmark for application-profile maintenance, refresh cadence, freshness, cost, and downstream validity."
+  manuscript_title: null
+research_questions:
+  RQ1: Does periodic observation-window profile maintenance materially improve profile fidelity over Static?
+  RQ2: "How do 12h, 6h, and 3h periodic refresh cadences trade profile fidelity against maintenance cost?"
+  RQ3: Does Full-Rewrite provide practically meaningful fidelity improvement over PW-3h sufficient to justify its much higher refresh/write cost?
+  RQ4: "Are these conclusions consistent across traces, resources, and predefined volatility strata?"
+protocol:
+  temporal: causal-timeline-v3
+  evaluation_grid: phase-balanced-hourly-v1
+  accounting: refresh-accounting-v1
+  observation_window: paired-observation-window-24h-v1
+  observation_window_semantics: "(t-24h,t], >=200/288 paired finite CPU+memory slots where refresh eligibility applies"
+cohort:
+  corpus: Materna
+  retained_pool_source: dynapm/data/kept_vms.json
+  retained_pool_count: 1576
+  permanent_pilot_exclusion_count: 18
+  permanent_pilot_exclusions:
+    -
+      trace: Materna-Trace-1
+      vm_id: 143
+    -
+      trace: Materna-Trace-1
+      vm_id: 213
+    -
+      trace: Materna-Trace-1
+      vm_id: 374
+    -
+      trace: Materna-Trace-1
+      vm_id: 64
+    -
+      trace: Materna-Trace-1
+      vm_id: 76
+    -
+      trace: Materna-Trace-1
+      vm_id: 96
+    -
+      trace: Materna-Trace-2
+      vm_id: 11
+    -
+      trace: Materna-Trace-2
+      vm_id: 207
+    -
+      trace: Materna-Trace-2
+      vm_id: 388
+    -
+      trace: Materna-Trace-2
+      vm_id: 396
+    -
+      trace: Materna-Trace-2
+      vm_id: 398
+    -
+      trace: Materna-Trace-2
+      vm_id: 516
+    -
+      trace: Materna-Trace-3
+      vm_id: 127
+    -
+      trace: Materna-Trace-3
+      vm_id: 133
+    -
+      trace: Materna-Trace-3
+      vm_id: 151
+    -
+      trace: Materna-Trace-3
+      vm_id: 212
+    -
+      trace: Materna-Trace-3
+      vm_id: 224
+    -
+      trace: Materna-Trace-3
+      vm_id: 83
+  candidate_confirmatory_count_before_protocol_exclusions: 1558
+  cohort_manifest: configs/materna_confirmatory_cohort_v1.json
+  gap_audit_199_flags: diagnostic_only_not_automatic_exclusion
+  protocol_exclusion_codes:
+    - insufficient_bootstrap_history
+    - insufficient_exact_grid_feature_or_window_validity
+    - insufficient_globally_verifiable_evaluation_origins
+    - corrupt_or_nonfinite_source_data
+    - protocol_invalid_timeline_or_schema
+  forbidden_exclusion_basis:
+    - method_performance
+    - favorable_or_unfavorable_effect_size
+    - post_hoc_gap_flag_without_protocol_rule
+  statistical_unit: vm
+methods:
+  primary:
+    - static
+    - pw_12h
+    - pw_6h
+    - pw_3h
+    - full_rewrite
+  excluded_from_primary_confirmation:
+    - periodic_predictor
+    - reactive
+    - dynapm_v3
+    - budget_matched
+    - adwin_trigger
+    - any_forecasting_or_adaptive_method
+  shared_content_semantics: "Identical observation-window content for Static/PW/Full-Rewrite: (t-24h,t], >=200/288 paired finite CPU+memory slots where refresh eligibility applies."
+endpoints:
+  primary_fidelity:
+    - cpu_class_correctness
+    - memory_class_correctness
+    - cpu_p95_profile_mae
+    - memory_p95_profile_mae
+  primary_maintenance_cost: n_refresh_events
+  secondary_cost_diagnostic:
+    - n_field_writes
+    - n_field_value_changes
+    - profile_age_distribution
+    - refresh_eligibility_delays
+    - verified_evaluation_point_count
+    - bias
+  aggregation: per_vm_then_paired_across_vms
+  forbidden: timestamp_level_pseudo_replication_as_statistical_unit
+comparison_families:
+  F1_maintenance_vs_none:
+    -
+      treatment: pw_12h
+      control: static
+    -
+      treatment: pw_6h
+      control: static
+    -
+      treatment: pw_3h
+      control: static
+  F2_cadence_increments:
+    -
+      treatment: pw_6h
+      control: pw_12h
+    -
+      treatment: pw_3h
+      control: pw_6h
+  F3_high_cost_limit:
+    -
+      treatment: full_rewrite
+      control: pw_3h
+practical_effect_margins:
+  status: UNASSIGNED
+  blocks_v25_pass: true
+  blocks_v3_execution: true
+  source_policy: "Must be justified from metric semantics, measurement/profile resolution, operational interpretation, and/or external domain rationale. Must NOT be derived from observed 18-VM pilot effect sizes or confirmatory outcomes."
+  cpu_class_correctness:
+    practical_benefit_margin: null
+    acceptable_harm_margin: null
+    unit: accuracy_fraction_points
+    favorable_direction: higher_is_better
+    rationale_status: insufficient_without_arbitrary_choice
+    rationale: "Class correctness is the fraction of evaluation origins whose profile mean utilization class (idle/low/medium/high/burst from bootstrap p20/p40/p60/p80 gates) matches truth. Without a documented consumer that maps class errors to operational cost, any numeric Δaccuracy margin is an arbitrary round number. Pilot Static→PW gains are exploratory and must not calibrate this margin."
+    sources_consulted:
+      - dynapm/core/discretization.py class gates
+      - docs/protocol.md causal evaluation semantics
+      - no engineering SLO or provisioning misclassification cost available in-repo
+  memory_class_correctness:
+    practical_benefit_margin: null
+    acceptable_harm_margin: null
+    unit: accuracy_fraction_points
+    favorable_direction: higher_is_better
+    rationale_status: insufficient_without_arbitrary_choice
+    rationale: Same class taxonomy and consumer gap as CPU class correctness; resource identity alone does not supply a non-arbitrary margin.
+    sources_consulted:
+      - dynapm/core/discretization.py class gates
+      - docs/protocol.md causal evaluation semantics
+  cpu_p95_profile_mae:
+    practical_benefit_margin: null
+    acceptable_harm_margin: null
+    unit: utilization_percentage_points
+    favorable_direction: lower_is_better
+    rationale_status: insufficient_without_arbitrary_choice
+    rationale: "p95-profile MAE is continuous utilization error. Measurement resolution does not imply a practical threshold: rightsizing literature discusses capacity headroom for allocation decisions, not a transferable MAE margin for offline profile fidelity. Mapping capacity headroom to MAE requires an unstated consumer model; inventing 0.5/1.0 pp would be arbitrary."
+    sources_consulted:
+      - docs/protocol.md profile evaluation
+      - no in-repo downstream resource-controller tolerance for profile MAE
+  memory_p95_profile_mae:
+    practical_benefit_margin: null
+    acceptable_harm_margin: null
+    unit: utilization_percentage_points
+    favorable_direction: lower_is_better
+    rationale_status: insufficient_without_arbitrary_choice
+    rationale: Same continuous-error and consumer-model gap as CPU p95-profile MAE.
+    sources_consulted:
+      - docs/protocol.md profile evaluation
+statistics:
+  unit: vm
+  paired_differences: treatment_minus_control_per_vm
+  report:
+    - median_effect
+    - mean_effect
+    - paired_bootstrap_95ci
+    - paired_nonparametric_test
+    - zero_and_tie_handling
+    - effect_size
+    - multiplicity_adjusted_p
+    - statistical_significance
+    - practical_significance
+  bootstrap:
+    repetitions: 10000
+    seed: 20251022
+    ci_level: 0.95
+    method: percentile_of_paired_mean_and_median_differences
+  paired_test:
+    name: wilcoxon_signed_rank
+    zero_method: wilcox
+    tie_policy: report_effective_n_and_use_documented_approximation_or_permutation
+    all_ties_rule: effect_zero_p_equals_1
+  effect_size:
+    primary: paired_median_difference
+    standardized: mean_difference_divided_by_sd_of_paired_differences
+    undefined_when: sd_of_paired_differences_equals_zero
+  multiplicity:
+    method: holm
+    alpha: 0.05
+    scope: within_each_comparison_family_separately
+    families:
+      - F1_maintenance_vs_none
+      - F2_cadence_increments
+      - F3_high_cost_limit
+  robustness_analyses:
+    primary: false
+    includes:
+      - volatility_tier_strata
+      - trace_strata
+      - resource_specific_endpoints
+    claim_rule: no_subgroup_driven_primary_claims_unless_predefined_here
+  practical_significance_rule: "Requires assigned practical_effect_margins. Until margins are assigned, practical significance is reported as NOT_EVALUABLE and cannot support GO."
+decision_logic:
+  status: TEMPLATES_FROZEN_MARGINS_REQUIRED
+  rules:
+    -
+      id: R1_better_requires_practical_margin
+      text: "Declare a method 'better' on a fidelity endpoint only when the paired effect is directionally favorable AND the practical-benefit margin criterion is met (point estimate and/or CI rule as assigned with margins); p-value alone is insufficient."
+    -
+      id: R2_negligible_fidelity_blocks_added_cost
+      text: Do not recommend an added-cost method when its fidelity improvement over the cheaper comparator is practically negligible under the assigned margins.
+    -
+      id: R3_full_rewrite_dominance
+      text: Full-Rewrite is dominated if its incremental fidelity benefit over PW-3h fails the practical-benefit criterion while requiring materially greater refresh cost (n_refresh_events).
+    -
+      id: R4_negative_null_valid
+      text: Negative and null findings are valid confirmatory outcomes and may support NO-GO or narrowed claims.
+    -
+      id: R5_no_expected_winners
+      text: Do not encode expected winners; comparisons remain those frozen in F1–F3.
+    -
+      id: R6_margins_gate
+      text: "While practical_effect_margins.status is UNASSIGNED, overall confirmatory GO is impossible; V2.5 remains BLOCKED and V3 must not execute."
+future_gates:
+  V3: Materna confirmatory non-adaptive study
+  V4: independent production-corpus suitability/acquisition
+  V5: "second-corpus replication, preferably Google ClusterData 2019 if suitability remains valid"
+  V6: maintenance-cost/service benchmark
+  V7: Kubernetes profile→resource-management harness
+  V8: repeated operational/system validation
+  V9: final claim audit / venue decision
+  claim_rule: Do not claim C3–C6 before their corresponding gates pass.
+execution_guards:
+  scientific_run_in_v25: false
+  access_confirmatory_outcomes: false
+  new_predictor_trigger_selector_cadence_or_algorithm: false
+  use_pilot_effects_to_choose_margins_or_hypotheses: false

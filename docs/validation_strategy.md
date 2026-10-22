@@ -22,7 +22,7 @@ These are candidate claims, not conclusions:
 See the [V2.4G claim disposition table](research_scope_redesign.md) for the full
 SUPPORTED / WITHDRAWN / UNPROVEN ledger used for scope redesign.
 
-A claim decision must address direction, effect magnitude, consistency, uncertainty, and operational relevance where applicable. Before confirmatory runs, a signed experiment specification must assign numerical minimum-benefit and maximum-harm margins to its endpoints. Those values are currently **unassigned** and therefore block claim-generating runs; choose them from engineering requirements independently of favorable pilot effect magnitudes, never the held-out confirmatory outcomes. Pilot feasibility must not optimize benefit/harm thresholds. Freeze the margins before V3/V4, and separate system margins before V8. Report estimates and intervals even when a claim fails.
+A claim decision must address direction, effect magnitude, consistency, uncertainty, and operational relevance where applicable. Before confirmatory runs, a signed experiment specification must assign numerical minimum-benefit and maximum-harm margins to its endpoints. The [V2.5 confirmatory design freeze](confirmatory_design_freeze.md) locks RQs, cohort, methods, endpoints, F1–F3 comparisons, and statistics, but leaves practical margins **null** because no defensible non-arbitrary values exist without inventing round numbers or calibrating to the 18-VM pilot. That unassigned state **blocks V2.5 PASS and V3 execution**. Choose margins later from engineering/domain requirements independently of favorable pilot effect magnitudes, never the held-out confirmatory outcomes. Pilot feasibility must not optimize benefit/harm thresholds. Separate system margins before V8. Report estimates and intervals even when a claim fails.
 
 ## 3. Claim-to-Evidence Matrix
 
@@ -43,10 +43,10 @@ Covered invariants: causal features exclude target utilization; causal one-step 
 
 Phase 2C correctness/provenance disposition before claim-generating runs:
 
-- Complete experiment provenance and deterministic run manifests are implemented and tested in [Phase 2C](provenance.md). Full scientific execution remains gated by V2.5.
+- Complete experiment provenance and deterministic run manifests are implemented and tested in [Phase 2C](provenance.md). Full scientific execution remains gated by V2.5 PASS (practical margins still unassigned).
 - Source/config/input/cohort/environment fingerprints, supported schemas and output hashes now govern cache rejection. Protocol/accounting labels alone are explicitly insufficient; old standalone reuse is refused.
-- The historical [observed-row assessment](lag_semantics_assessment.md) is superseded by [exact-grid v3 semantics and eligibility](materna_gap_semantics_v3.md). No observed-row lag bridges a gap; full-cohort eligibility/exclusions still require V2.5 freeze.
-- Negative tests cover changed config/input/cohort/source/seed/protocol/schema/environment and incomplete/corrupt output; deterministic metadata/output tests and relocation recovery pass. Config-to-production binding passed bounded tests and execution; the confirmatory matrix must still be frozen in V2.5.
+- The historical [observed-row assessment](lag_semantics_assessment.md) is superseded by [exact-grid v3 semantics and eligibility](materna_gap_semantics_v3.md). No observed-row lag bridges a gap; confirmatory candidate IDs and protocol-validity exclusion codes are frozen in [V2.5](confirmatory_design_freeze.md).
+- Negative tests cover changed config/input/cohort/source/seed/protocol/schema/environment and incomplete/corrupt output; deterministic metadata/output tests and relocation recovery pass. Config-to-production binding passed bounded tests and execution; the non-adaptive confirmatory matrix is frozen in V2.5 (margins remaining).
 - No implicit loading of archived outputs or legacy predictions as current causal measurements.
 
 ## 5. Layer B — Multi-Corpus Validation
@@ -82,11 +82,11 @@ Pre-register the core experiment before running it:
 
 Use the same bootstrap split, thresholds, frozen per-VM predictors, test entities, density rules and snapshot protocol. The trace-study counterfactual obtains only K = paired V3 committed drift refreshes, retains identical common-eligible 6h base commits, and places exactly K extras using `budget-match-uniform-eligible-v2`. Candidates are observed predictor-eligible timestamps excluding base commits; midpoint equal-spacing is deterministic. Drift timestamps, residual magnitudes, accuracy and future ground truth are forbidden placement inputs. K=0 is PP6. Enforce exact total equality per VM; no interval conversion, manual normalization, post-hoc commit resampling or table overrides.
 
-This paired offline control tests timing conditional on equal refresh opportunities; it is not a deployable online policy, and equal counts do not establish equal measured compute cost. Maintenance cost requires V5. Any future online/system budget-control design must be specified prospectively after downstream-consumer semantics are fixed; it is not implemented or validated here. The confirmatory trace matrix, endpoints and comparison families still require V2.5 freeze, independent of favorable pilot effect magnitudes.
+This paired offline control tests timing conditional on equal refresh opportunities; it is not a deployable online policy, and equal counts do not establish equal measured compute cost. Historical PP/V3/BudgetMatched rows above remain withdrawn from primary confirmation after C1/C2 retirement. Primary confirmatory methods are Static / PW-12h / PW-6h / PW-3h / Full-Rewrite only ([V2.5 freeze](confirmatory_design_freeze.md)). Maintenance-cost service benchmarking is V6 under the remapped roadmap. Any future online/system budget-control design must be specified prospectively after downstream-consumer semantics are fixed; it is not implemented or validated here.
 
-Primary measurements: future-profile CPU/memory class accuracy, p95 forecast/profile error and declared provisioning outcomes. Report canonical `n_refresh_events`, trigger decomposition, writes/changes, nominal ticks due and periodic commits. Retained stale profiles are scored according to the current causal-timeline-v3 protocol; origin-aligned forecast diagnostics are separate endpoints, not silently substituted.
+Primary confirmatory measurements: future-profile CPU/memory class correctness and p95-profile MAE; primary cost `n_refresh_events`. Report writes/changes, age, eligibility delays, verified evaluation counts and bias as secondary/diagnostic. Retained stale profiles are scored according to the current causal-timeline-v3 protocol.
 
-Require per-volatility analysis, paired VM-level inference, effects, confidence intervals, and multiplicity correction for confirmatory families. Distinguish exploratory interval discovery from held-out confirmation. Full-Rewrite is an operational-cost extreme, not automatically an accuracy oracle. No interval experiment is started by this document.
+Require per-volatility robustness analysis (secondary), paired VM-level inference, effects, confidence intervals, and Holm multiplicity correction within each frozen family F1–F3. Distinguish exploratory pilot discovery from held-out confirmation. Full-Rewrite is an operational-cost extreme, not automatically an accuracy oracle. No confirmatory interval experiment is started while practical margins remain unassigned.
 
 ## 7. Layer D — Maintenance Cost
 
@@ -199,7 +199,7 @@ TOCS concerns below are the human-confirmed requirements supplied for this conso
 
 FGCS is a candidate, not the predetermined destination. Journal selection occurs after major validation evidence exists. A target journal must fit the actual demonstrated contribution. We do not expand claims to fit a journal.
 
-High-selectivity/typically JUFO Level 3 aspirations do not waive any gate or establish venue fit. Check current venue scope/ranking only at V11; no current ranking claim is made here. Manuscript drafting starts after V10, with claims limited to evidence that passed its predefined criteria.
+High-selectivity/typically JUFO Level 3 aspirations do not waive any gate or establish venue fit. Check current venue scope/ranking only at V9 (claim audit / venue decision); no current ranking claim is made here. Manuscript drafting starts after V9, with claims limited to evidence that passed its predefined criteria.
 
 ## Development pilot exclusion rule
 
@@ -220,17 +220,16 @@ telemetry is missing. Profile age is recorded at each read. Budget candidate
 eligibility is versioned `budget-match-uniform-eligible-v2`.
 
 The same permanent 18 development VMs are retained. Their outcomes cannot be
-primary independent confirmation. After bounded validation, V2.5 must freeze
-final eligible confirmatory cohort, pilot exclusions, endpoints, comparison
-families, benefit/harm margins, multiplicity, tests/CIs, tiers, exclusion and
-missing-data rules, exploratory/confirmatory distinctions and the exact method
-matrix before the 1,558-entity maximum primary cohort is evaluated. No thresholds
-may be chosen to favor observed pilot effects. See [protocol](protocol.md) and
-[the v3 metadata audit](materna_gap_semantics_v3.md).
+primary independent confirmation. The [V2.5 freeze](confirmatory_design_freeze.md)
+locks the 1,558-candidate confirmatory cohort, pilot exclusions, endpoints,
+F1–F3 comparisons, multiplicity, tests/CIs, protocol-validity exclusion codes,
+and the non-adaptive method matrix. Practical benefit/harm margins remain
+unassigned (V2.5 BLOCKED). No thresholds may be chosen to favor observed pilot
+effects. See [protocol](protocol.md) and [the v3 metadata audit](materna_gap_semantics_v3.md).
 
 ## Corrected bounded gate status
 
-V2 passed under causal-timeline-v3 and phase-balanced-hourly-v1; see [pilot record](bounded_pilot.md). The later V2.4 chain supersedes the historical “V2.5 is NEXT” state: V2.5/V3 are blocked pending a non-adaptive scope decision after C1 withdrawal and C2 retirement. The 18 development entities remain excluded from any primary independent confirmation; no final cohort or practical margins have been selected.
+V2 passed under causal-timeline-v3 and phase-balanced-hourly-v1; see [pilot record](bounded_pilot.md). After V2.4G (**EMPIRICAL/SYSTEM STUDY VIABLE**), V2.5 froze the non-adaptive confirmatory design but is **BLOCKED** on `practical_effect_margins_unassigned`; V3 remains BLOCKED UNTIL V2.5 PASS. The 18 development entities remain excluded; candidate confirmatory IDs are exactly 1,558 before protocol-validity exclusions.
 
 ## V2.4 prerequisite to confirmation freeze
 
@@ -320,7 +319,19 @@ audits the non-adaptive Static/PW/Full-Rewrite fidelity–cost trade-off on the
 corrected development pilot, and compares candidate directions against primary
 literature. Disposition: **EMPIRICAL/SYSTEM STUDY VIABLE**. Forecasting and
 adaptive-refresh superiority stay withdrawn. A cost-aware cadence *selector* is
-not authorized; system validation remains optional/deferred. V2.5 is redefined as
-an empirical contribution freeze under the documented GO/NO-GO criteria; V3
-remains blocked until that freeze passes. No new algorithm or confirmatory run is
-authorized by V2.4G alone.
+not authorized; system validation remains optional/deferred. No new algorithm or
+confirmatory run is authorized by V2.4G alone.
+
+## V2.5 — empirical contribution freeze (current)
+
+The [confirmatory design freeze](confirmatory_design_freeze.md) and
+`configs/materna_confirmatory_v1.{json,yaml}` lock RQ1–RQ4, the 1,558-candidate
+cohort, Static/PW-12h/PW-6h/PW-3h/Full-Rewrite, primary/secondary endpoints,
+F1–F3 comparisons, bootstrap B=10000 seed=20251022, Wilcoxon/Holm plan, and
+GO/NO-GO templates. C1/C2 remain withdrawn. Practical-effect margins for the four
+fidelity endpoints are intentionally **null** (no non-arbitrary justification
+without inventing values or using pilot effects). **V2.5 STATUS: BLOCKED.**
+**V3 remains blocked.** Future gates: V3 Materna confirmatory non-adaptive; V4
+corpus suitability/acquisition; V5 second-corpus replication; V6 cost benchmark;
+V7 K8s harness; V8 operational validation; V9 claim audit / venue decision.
+Do not claim C3–C6 before the corresponding gates pass.
