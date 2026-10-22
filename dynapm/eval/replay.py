@@ -113,6 +113,8 @@ def replay_from_inputs(inputs, method_factory):
     cls = policy_class(method_factory)
     deps = dict(bootstrap_cpu_series=inputs.bootstrap[CPU_T],
                 bootstrap_mem_series=inputs.bootstrap[MEM_T])
+    if cls.requires_residuals and inputs.predictions is None:
+        raise ValueError('residual policy requires prepared causal one-step predictions')
     if cls.requires_predictors:
         if inputs.predictors is None:
             raise ValueError("predictor-grounded replay requires prepared target models")
@@ -128,7 +130,8 @@ def prepare_vm_replay(trace, vm_id, method_factory, *, repo_root=None,
                       predictor_factory=VMPredictor):
     """Standalone compatibility path; managed matrices use shared PreparedVM."""
     inputs = prepare_vm_inputs(trace, vm_id, repo_root=repo_root,
-        predictor_factory=predictor_factory, with_predictors=policy_class(method_factory).requires_predictors,
+        predictor_factory=predictor_factory, with_predictors=(policy_class(method_factory).requires_predictors or
+                         policy_class(method_factory).requires_residuals),
         with_residuals=policy_class(method_factory).requires_residuals)
     return replay_from_inputs(inputs, method_factory)
 

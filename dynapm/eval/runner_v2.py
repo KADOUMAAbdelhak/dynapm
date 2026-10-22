@@ -31,6 +31,12 @@ def evaluate_replay(replay, *, lookback_steps=288, include_records=False):
             **replay.snapshot_metadata[ts],
             "cpu_class_correct": int(snap.cpu_class == g["cpu_class"]),
             "memory_class_correct": int(snap.memory_class == g["memory_class"]),
+            "profile_cpu_class": snap.cpu_class,
+            "profile_memory_class": snap.memory_class,
+            "profile_cpu_p95": snap.predicted_cpu_p95_next_24h,
+            "profile_memory_p95": snap.predicted_mem_p95_next_24h,
+            "cpu_p95_bias": snap.predicted_cpu_p95_next_24h - g["p95_cpu_next_24h"],
+            "mem_p95_bias": snap.predicted_mem_p95_next_24h - g["p95_mem_next_24h"],
             "cpu_p95_abs_err": abs(snap.predicted_cpu_p95_next_24h - g["p95_cpu_next_24h"]),
             "mem_p95_abs_err": abs(snap.predicted_mem_p95_next_24h - g["p95_mem_next_24h"]),
         })

@@ -255,3 +255,22 @@ trailing content window is unavailable and revalidate common periodic eligibilit
 exact budgets, accounting and phase-balanced reads on the same development cohort.
 Only then can a reviewed V2.5 freeze the final architecture/comparison matrix.
 V2.5 and V3 remain blocked. No model search or confirmatory run is authorized.
+
+
+## V2.4E — observation-content timing investigation
+
+The candidate architecture drops predictor-generated content. The bounded matrix
+is PW-6h, Adaptive-Residual (same PW content, frozen one-step RF/ADWIN timing), and
+analysis-only BudgetMatched with the same base plus K nonadaptive eligible extras.
+The primary exploratory contrast is Adaptive minus BudgetMatched; Adaptive minus
+PW is secondary. All methods use exactly the same paired finite >=200/288 trailing
+slots, thresholds, hourly read events and forward truth. Residual availability adds
+a requirement only for drift decisions, not periodic content eligibility.
+
+No practical-effect margin is defined retrospectively. Report effect distributions,
+VM/tier directions, age, counts and uncertainty limitations rather than inventing
+a favorable threshold or performing confirmatory inference. Choose a conservative
+A/B/C residual-signal disposition after the fixed development run; prediction is
+not retained merely because a pooled number is positive. V2.5 remains blocked
+until this architectural investigation is reviewed. No confirmation follows
+without a separate frozen design and authorization.

@@ -160,3 +160,20 @@ The ambiguous legacy result names and changed-field-row log are removed. Per-fie
 ### Analysis-only budget control
 
 Phase 3A adds `budget_extra` and `n_budget_extra_refreshes` as an additive counterfactual category. It uses the same one-commit/four-write rules; the six production policy definitions, initialization exclusion, periodic precedence and grid remain unchanged. The [bounded pilot](bounded_pilot.md) explains the non-adaptive extra placement and why the paired-budget control is not an online algorithm.
+
+## Candidate observation-content architecture (V2.4E)
+
+`WindowPeriodicPolicy`, `AdaptiveResidualPolicy` and `BudgetMatchedWindowPolicy`
+share `paired_content_window` (`paired-observation-window-24h-v1`). Initialization
+and all runtime content use `(t-24h,t]`, >=200/288 paired finite CPU/memory slots.
+Periodic/budget eligibility has no 96-slot RF-origin requirement. This is an
+explicit new candidate architecture, not a reinterpretation of prior PP/V3 runs;
+the timeline/grid/accounting versions remain unchanged. Legacy predictor-content
+modules remain for development reproducibility, outside the new candidate matrix.
+
+Adaptive residual updates require both causal one-step predictions and exact
+history before the current observation. Missing residuals pause ADWIN without
+reset. An ADWIN signal with ineligible content is consumed and diagnosed, never
+latched or converted into a fabricated refresh. Periodic takes precedence; drift
+never shifts the base grid. Budget-extra eligibility is identical to periodic
+content eligibility; only K enters the nonadaptive scheduling interface.

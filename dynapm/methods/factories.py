@@ -6,6 +6,7 @@ from dynapm.methods.baselines_v2 import (
     FullRewritePolicyV2, PeriodicPredictorPolicyV2,
 )
 from dynapm.methods.dynapm_v3 import DynAPMPolicyV3
+from dynapm.methods.observation_timing import WindowPeriodicPolicy, AdaptiveResidualPolicy
 
 
 def policy_class(factory):
@@ -20,6 +21,8 @@ def policy_class(factory):
 
 def policy_factory(method: str):
     factories = {
+        "window_periodic_6h": partial(WindowPeriodicPolicy, period_hours=6),
+        "adaptive_residual_6h": partial(AdaptiveResidualPolicy, period_hours=6, drift_delta=.002),
         "static_v2": StaticPolicyV2,
         "periodic_6h_v2": partial(PeriodicPolicyV2, period_hours=6.0),
         "reactive_v2": ReactiveThresholdPolicyV2,

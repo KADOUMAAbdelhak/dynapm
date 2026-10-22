@@ -89,3 +89,21 @@ but must not fit predictors or execute policies on that cohort.
 ## Verified remediation status
 
 V2 PASS: 256 tests passed, 0 failed, 0 skipped; the corrected clean-source pilot completed 198/198. See [immutable run identities and diagnostics](bounded_pilot.md). V2.5 is NEXT. V3 remains BLOCKED UNTIL V2.5. Earlier blocked-pilot statements above document their historical generation and do not describe the current gate. No new model/policy tuning or full-corpus execution was performed.
+
+
+## Observation-content candidate (V2.4E)
+
+The candidate policies live in `dynapm/methods/observation_timing.py`. Their
+`requires_predictors` flag is false: no profile-content models are accepted.
+`AdaptiveResidualPolicy.requires_residuals` is true. Standalone replay prepares
+one-step models when either dependency flag requires them and passes only current
+causal prediction scalars to residual policies. WindowPeriodic/BudgetMatched need
+no RF at all. In a managed matrix, two target-specific models are fitted once and
+their one-step streams are shared only with Adaptive. Recursive forecasting is
+explicitly prohibited by the bounded experiment's adapter.
+
+Use `python -m dynapm.scripts.task25_adaptive_timing --help` for the fixed-18 managed
+study interface. No unbounded cohort or parameter override is available. Legacy
+PP/V3 modules and previous experiment drivers retain their historical development
+interfaces; do not interpret them as the final candidate. See the [timing
+investigation](adaptive_timing_investigation.md) and [protocol](protocol.md).

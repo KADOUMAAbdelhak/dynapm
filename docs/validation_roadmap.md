@@ -81,9 +81,18 @@ This roadmap specifies future gates, not authorization to execute them. The sole
 - **PASS criteria:** fixed 18 development VMs, identical origins/truth, strict two-metric bootstrap selector, future invariance, clean-source provenance/output integrity, explicit A/B/C architecture disposition; negative findings can pass the investigation.
 - **Unproven:** independent confirmation, residual-predictor value, integrated revised architecture, cross-corpus and system benefits. No production integration is authorized by this gate alone.
 
+## V2.4E — ARCHITECTURE SIMPLIFICATION & DRIFT-SIGNAL JUSTIFICATION
+
+**STATUS: IN PROGRESS — fixed 18-VM timing-only managed revalidation**
+
+- **Objective:** compare RF-residual/ADWIN timing against equal-budget nonadaptive timing using identical paired observation-window content.
+- **Required artifacts:** [timing investigation](adaptive_timing_investigation.md), same-content commits, shared hourly truth/age records, per-VM/tier deltas and provenance.
+- **PASS criteria:** 54/54 valid evaluations, exact budgets/base schedules, causal gap/content eligibility, finite aligned snapshots, output integrity, and conservative A/B/C residual-signal disposition. Negative evidence can complete the investigation.
+- **Unproven:** practical margins, independent confirmation, alternative detector benefits, cross-corpus and system effects. V2.5 remains blocked until review.
+
 ## V2.5 — CONFIRMATORY DESIGN FREEZE
 
-**STATUS: BLOCKED PENDING V2.4D DISPOSITION REVIEW AND ARCHITECTURAL FOLLOW-UP**
+**STATUS: BLOCKED PENDING V2.4E REVIEW AND FINAL ARCHITECTURAL DISPOSITION**
 
 - **Objective:** freeze an independent, falsifiable confirmatory design before any full run.
 - **Required artifacts:** final eligible cohort and permanent pilot exclusion list; primary endpoints/comparisons; practical-benefit and acceptable-harm margins; multiplicity families; tests/confidence levels; volatility analysis; exclusion/missing-data rules; confirmatory versus exploratory analyses; exact method/config matrix.

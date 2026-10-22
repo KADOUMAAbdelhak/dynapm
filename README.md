@@ -1,6 +1,6 @@
 # DynAPM
 
-DynAPM is a research implementation for adaptive application-profile maintenance. It includes predictor-grounded and drift-augmented profile refresh. The current development version uses causal feature construction and causal multi-step forecasting. Development is ongoing. Causal interface, timeline and refresh-accounting correctness passed their lightweight validation gates; scientific benefit and system-level validation remain open.
+DynAPM is a research implementation for adaptive application-profile maintenance. The candidate architecture uses exact trailing observation-window content and evaluates RF-residual/ADWIN-driven refresh timing against periodic and equal-budget controls. Legacy causal multi-step predictor-content policies remain isolated for development reproducibility; they are not the candidate architecture. Development is ongoing. Protocol and accounting correctness do not establish scientific or system-level benefit.
 
 Datasets and generated outputs are external or untracked. Historical publication results are not stored in this repository.
 
