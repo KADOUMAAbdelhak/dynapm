@@ -110,24 +110,24 @@ This roadmap specifies future gates, not authorization to execute them. The sole
 
 ## V2.5 — EMPIRICAL CONTRIBUTION FREEZE
 
-**STATUS: BLOCKED — practical_effect_margins_unassigned**
+**STATUS: PASS — V2.5A estimation-first amendment**
 
 - **Objective:** freeze the non-adaptive empirical study (RQ1–RQ4) before accessing 1,558 confirmatory Materna VM outcomes—not an adaptive/forecasting superiority study.
-- **Required artifacts:** [confirmatory design freeze](confirmatory_design_freeze.md); `configs/materna_confirmatory_v1.{json,yaml}`; `configs/materna_confirmatory_cohort_v1.json`; C1/C2 withdrawn; permanent 18-VM pilot exclusion; non-adaptive Static/PW/Full-Rewrite matrix; F1–F3 comparisons; statistics/decision templates; future V3–V9 roadmap; design/config/cohort hashes.
-- **PASS criteria:** source/config/cohort/endpoints/comparisons/statistics locked before confirmatory outcomes; practical-benefit and acceptable-harm margins assigned from metric/operational/domain rationale **without** pilot-effect calibration or confirmatory peeking; no resurrection of withdrawn adaptive/forecast claims.
-- **Current disposition:** RQs, cohort (1,576−18=1,558 candidates), methods, endpoints, F1–F3, bootstrap (B=10000, seed=20251022), and decision templates are frozen. Numeric practical margins remain **null** because no defensible non-arbitrary values exist without inventing round numbers or using pilot effects. Therefore V2.5 is **BLOCKED** and V3 must not execute.
-- **Reviewer concern addressed:** contribution/venue match and fair evidence rather than post-hoc favorable comparisons.
-- **Unproven:** actual Materna confirmatory effects (V3), multi-corpus and system effects (V4–V8), claim/venue audit (V9).
+- **Required artifacts:** [confirmatory design freeze](confirmatory_design_freeze.md); current `configs/materna_confirmatory_v1_1.{json,yaml}`; preserved provenance `configs/materna_confirmatory_v1.{json,yaml}`; `configs/materna_confirmatory_cohort_v1.json`; C1/C2 withdrawn; permanent 18-VM pilot exclusion; non-adaptive Static/PW/Full-Rewrite matrix; F1–F3 comparisons; estimation statistics/decision rules; future V3–V9 roadmap; design/config/cohort hashes.
+- **PASS criteria (met via V2.5A):** source/config/cohort/endpoints/comparisons/statistics locked before confirmatory outcomes; study framed as pre-specified **estimation** with profile-level practical significance `NOT_DEFINED_AT_PROFILE_LEVEL` (no invented numeric margins; no pilot-effect calibration); no resurrection of withdrawn adaptive/forecast claims.
+- **V2.5A disposition:** Original V2.5 superiority-margin freeze remains on disk as BLOCKED provenance. Amendment converts V3 into an estimation study (effects, CIs, tests, costs, Pareto/trade-offs) without inventing practical margins. **V2.5 = PASS.** **V3 = NEXT.**
+- **Reviewer concern addressed:** contribution/venue match and fair evidence rather than post-hoc favorable comparisons or invented practical thresholds.
+- **Unproven:** actual Materna confirmatory estimates (V3), multi-corpus and system effects (V4–V8), claim/venue audit (V9). C4 remains UNPROVEN.
 
-## V3 — MATERNA CONFIRMATORY NON-ADAPTIVE STUDY
+## V3 — MATERNA CONFIRMATORY ESTIMATION STUDY
 
-**STATUS: BLOCKED UNTIL V2.5 PASS**
+**STATUS: NEXT — after V2.5 PASS (V2.5A)**
 
-- **Objective:** execute the frozen non-adaptive confirmatory study on the 1,558-candidate Materna cohort (minus protocol-validity exclusions only).
-- **Required artifacts:** locked V2.5 config/hashes; complete run/output manifests; Static/PW-12h/PW-6h/PW-3h/Full-Rewrite matrix; exclusion accounting under predefined protocol codes; paired F1–F3 analysis with frozen statistics; no adaptive/forecasting primary methods.
-- **PASS criteria:** every included output verifies under current protocols/fingerprints; complete predeclared coverage or justified protocol exclusions; analysis reconstructible from the frozen design hashes; negative/null findings remain valid.
-- **Reviewer concern addressed:** credible Materna confirmation; TOCS 10–11 applied to real traces under the non-adaptive scope.
-- **Unproven:** external validity (V4–V5), maintenance-cost budgets (V6), operational benefit (V7–V8).
+- **Objective:** execute the frozen non-adaptive **estimation** study on the 1,558-candidate Materna cohort (minus protocol-validity exclusions only): report paired mean/median effects, bootstrap 95% CIs, Wilcoxon/Holm, effect sizes, costs, and fidelity–cost relationships — not profile-level practical superiority.
+- **Required artifacts:** locked V2.5A config/hashes (`materna_confirmatory_v1_1`); complete run/output manifests; Static/PW-12h/PW-6h/PW-3h/Full-Rewrite matrix; exclusion accounting under predefined protocol codes; paired F1–F3 estimation analysis; no adaptive/forecasting primary methods.
+- **PASS criteria:** every included output verifies under current protocols/fingerprints; complete predeclared coverage or justified protocol exclusions; analysis reconstructible from the frozen design hashes; negative/null/small findings remain valid; no operational-superiority claims from p-values alone.
+- **Reviewer concern addressed:** credible Materna confirmation under estimation framing; TOCS 10–11 applied to real traces under the non-adaptive scope.
+- **Unproven:** external validity (V4–V5), maintenance-cost budgets (V6), operational benefit C4 (V7–V8).
 
 ## V4 — INDEPENDENT PRODUCTION-CORPUS SUITABILITY / ACQUISITION
 
@@ -189,15 +189,15 @@ Earlier documents used a denser V3–V11 numbering (full Materna + refresh trade
 
 ## Dependency and execution rule
 
-V0, V1A, V1B, V2 and the V2.4 investigation chain through V2.4G are PASS as executions. C1 and C2 are withdrawn. V2.4G disposition is **EMPIRICAL/SYSTEM STUDY VIABLE**. V2.5 froze the non-adaptive design but is **BLOCKED** on unassigned practical-effect margins. V3 remains **BLOCKED UNTIL V2.5 PASS**. Materna confirmation (V3) stays separate from generalization (V4–V5). V6 cost, V7–V8 system, and V9 claim/venue gates follow. Every future experiment still requires explicit scope and authorization. No manuscript prose before V9.
+V0, V1A, V1B, V2 and the V2.4 investigation chain through V2.4G are PASS as executions. C1 and C2 are withdrawn. V2.4G disposition is **EMPIRICAL/SYSTEM STUDY VIABLE**. V2.5 / V2.5A is **PASS** (estimation-first confirmatory design). V3 is **NEXT** (Materna confirmatory estimation study). Materna confirmation (V3) stays separate from generalization (V4–V5). V6 cost, V7–V8 system (C4), and V9 claim/venue gates follow. Every future experiment still requires explicit scope and authorization. No manuscript prose before V9.
 
 Primary confirmation must exclude the same 18 development-pilot VMs. Candidate confirmatory set is exactly **1,558** IDs before protocol-validity exclusions ([cohort manifest](../configs/materna_confirmatory_cohort_v1.json)). The 199 gap-audit review flags remain diagnostics, not automatic exclusions. Optional whole-corpus description is separate from independent confirmation.
 
-Both pilot generations and the stopped diagnostic attempt are recorded in [bounded_pilot.md](bounded_pilot.md). See [confirmatory design freeze](confirmatory_design_freeze.md) for hashes and the margin blocker.
+Both pilot generations and the stopped diagnostic attempt are recorded in [bounded_pilot.md](bounded_pilot.md). See [confirmatory design freeze](confirmatory_design_freeze.md) for V2.5A hashes and estimation rules.
 
 ## Phase 3A-R execution record
 
-V2 PASS at source `82a79b90d70ce0405ffbf161698180bdf4f49ed7`; run `2026-10-21T111323.571341Z-6d801e1fe87c-e3a215fe`. 256 tests passed, no failures/skips. [Bounded pilot](bounded_pilot.md) records execution and exploratory diagnostics. V2.5 design freeze exists but is BLOCKED on unassigned practical margins; V3 remains BLOCKED UNTIL V2.5 PASS. The earlier v2 pilot remains preserved as a readiness failure. No full experiment follows automatically.
+V2 PASS at source `82a79b90d70ce0405ffbf161698180bdf4f49ed7`; run `2026-10-21T111323.571341Z-6d801e1fe87c-e3a215fe`. 256 tests passed, no failures/skips. [Bounded pilot](bounded_pilot.md) records execution and exploratory diagnostics. V2.5A estimation amendment PASS; V3 is NEXT. The earlier v2 pilot remains preserved as a readiness failure. No full experiment follows automatically from this record alone.
 
 ## V2.4 completion record
 
@@ -260,16 +260,25 @@ audit: Static≪PW fidelity jump; PW 3/6/12h show small marginal gains at roughl
 doubling refresh cost; Full-Rewrite is cost-dominated. Literature collision is
 high for adaptive monitoring/rightsizing and moderate for a causal
 benchmark-with-negatives contribution. Disposition:
-**EMPIRICAL/SYSTEM STUDY VIABLE**. V2.5 froze the non-adaptive design under
-explicit GO/NO-GO templates but remains **BLOCKED** on unassigned practical
-margins ([freeze record](confirmatory_design_freeze.md)); V3 remains BLOCKED.
-No cadence selector or full run is authorized until V2.5 PASS.
+**EMPIRICAL/SYSTEM STUDY VIABLE**. V2.5 initially froze the non-adaptive design
+and blocked on unassigned practical margins; V2.5A amends to estimation-first
+([freeze record](confirmatory_design_freeze.md)). No cadence selector is
+authorized by these gates alone.
 
 ## V2.5 execution record
 
-Design freeze committed with configs/cohort manifests and validators. Design
-fingerprint `d3c94bcdcf9cb626d915187ca8d5071c26197464ad6154e3f527f1f4d79bac26`.
-Candidate confirmatory cohort: 1,558 IDs (entities fingerprint
-`3a590437f108493b085f1cb34765e76bd5f10fa233a48c2e96f6bf3bd54b7939`). Practical
-margins unassigned → **V2.5 = BLOCKED**; **V3 = BLOCKED**. No confirmatory
-outcomes accessed; no scientific run.
+Initial freeze (v1, BLOCKED provenance): design fingerprint
+`d3c94bcdcf9cb626d915187ca8d5071c26197464ad6154e3f527f1f4d79bac26`; preserved at
+`configs/materna_confirmatory_v1.{json,yaml}`. Candidate confirmatory cohort:
+1,558 IDs (entities fingerprint
+`3a590437f108493b085f1cb34765e76bd5f10fa233a48c2e96f6bf3bd54b7939`).
+
+## V2.5A execution record
+
+Estimation-first amendment (v1.1, PASS): design fingerprint
+`62c546a48ee25dff7e8ab46d3081e1688137f565024e5c102950100a03765296`;
+`configs/materna_confirmatory_v1_1.{json,yaml}`. Profile-level practical
+significance `NOT_DEFINED_AT_PROFILE_LEVEL`. Cohort/methods/F1–F3/bootstrap
+unchanged. **V2.5 = PASS**; **V3 = NEXT — Materna confirmatory estimation
+study**. C4 remains UNPROVEN. No confirmatory outcomes accessed; no scientific
+run.

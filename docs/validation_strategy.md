@@ -22,7 +22,7 @@ These are candidate claims, not conclusions:
 See the [V2.4G claim disposition table](research_scope_redesign.md) for the full
 SUPPORTED / WITHDRAWN / UNPROVEN ledger used for scope redesign.
 
-A claim decision must address direction, effect magnitude, consistency, uncertainty, and operational relevance where applicable. Before confirmatory runs, a signed experiment specification must assign numerical minimum-benefit and maximum-harm margins to its endpoints. The [V2.5 confirmatory design freeze](confirmatory_design_freeze.md) locks RQs, cohort, methods, endpoints, F1–F3 comparisons, and statistics, but leaves practical margins **null** because no defensible non-arbitrary values exist without inventing round numbers or calibrating to the 18-VM pilot. That unassigned state **blocks V2.5 PASS and V3 execution**. Choose margins later from engineering/domain requirements independently of favorable pilot effect magnitudes, never the held-out confirmatory outcomes. Pilot feasibility must not optimize benefit/harm thresholds. Separate system margins before V8. Report estimates and intervals even when a claim fails.
+A claim decision must address direction, effect magnitude, consistency, uncertainty, and operational relevance where applicable. The [V2.5 / V2.5A confirmatory design freeze](confirmatory_design_freeze.md) locks RQs, cohort, methods, endpoints, F1–F3 comparisons, and statistics as a **pre-specified estimation study**. Profile-level numeric practical-benefit / acceptable-harm margins are explicitly **`NOT_DEFINED_AT_PROFILE_LEVEL`** (not invented; not pilot-calibrated). V3 may establish direction, magnitude, uncertainty, and statistical distinguishability; statistical significance alone must never imply operational superiority (C4 remains for system gates). Separate system/operational margins before V8. Report estimates and intervals even when effects are null or small.
 
 ## 3. Claim-to-Evidence Matrix
 
@@ -43,10 +43,10 @@ Covered invariants: causal features exclude target utilization; causal one-step 
 
 Phase 2C correctness/provenance disposition before claim-generating runs:
 
-- Complete experiment provenance and deterministic run manifests are implemented and tested in [Phase 2C](provenance.md). Full scientific execution remains gated by V2.5 PASS (practical margins still unassigned).
+- Complete experiment provenance and deterministic run manifests are implemented and tested in [Phase 2C](provenance.md). Full scientific execution is gated by V2.5 PASS (met via V2.5A); V3 is the Materna confirmatory estimation study.
 - Source/config/input/cohort/environment fingerprints, supported schemas and output hashes now govern cache rejection. Protocol/accounting labels alone are explicitly insufficient; old standalone reuse is refused.
-- The historical [observed-row assessment](lag_semantics_assessment.md) is superseded by [exact-grid v3 semantics and eligibility](materna_gap_semantics_v3.md). No observed-row lag bridges a gap; confirmatory candidate IDs and protocol-validity exclusion codes are frozen in [V2.5](confirmatory_design_freeze.md).
-- Negative tests cover changed config/input/cohort/source/seed/protocol/schema/environment and incomplete/corrupt output; deterministic metadata/output tests and relocation recovery pass. Config-to-production binding passed bounded tests and execution; the non-adaptive confirmatory matrix is frozen in V2.5 (margins remaining).
+- The historical [observed-row assessment](lag_semantics_assessment.md) is superseded by [exact-grid v3 semantics and eligibility](materna_gap_semantics_v3.md). No observed-row lag bridges a gap; confirmatory candidate IDs and protocol-validity exclusion codes are frozen in [V2.5A](confirmatory_design_freeze.md).
+- Negative tests cover changed config/input/cohort/source/seed/protocol/schema/environment and incomplete/corrupt output; deterministic metadata/output tests and relocation recovery pass. Config-to-production binding passed bounded tests and execution; the non-adaptive estimation matrix is frozen in V2.5A.
 - No implicit loading of archived outputs or legacy predictions as current causal measurements.
 
 ## 5. Layer B — Multi-Corpus Validation
@@ -220,16 +220,17 @@ telemetry is missing. Profile age is recorded at each read. Budget candidate
 eligibility is versioned `budget-match-uniform-eligible-v2`.
 
 The same permanent 18 development VMs are retained. Their outcomes cannot be
-primary independent confirmation. The [V2.5 freeze](confirmatory_design_freeze.md)
+primary independent confirmation. The [V2.5 / V2.5A freeze](confirmatory_design_freeze.md)
 locks the 1,558-candidate confirmatory cohort, pilot exclusions, endpoints,
 F1–F3 comparisons, multiplicity, tests/CIs, protocol-validity exclusion codes,
-and the non-adaptive method matrix. Practical benefit/harm margins remain
-unassigned (V2.5 BLOCKED). No thresholds may be chosen to favor observed pilot
-effects. See [protocol](protocol.md) and [the v3 metadata audit](materna_gap_semantics_v3.md).
+and the non-adaptive method matrix as an estimation study. Profile-level
+practical significance is `NOT_DEFINED_AT_PROFILE_LEVEL`. No thresholds may be
+chosen to favor observed pilot effects. See [protocol](protocol.md) and
+[the v3 metadata audit](materna_gap_semantics_v3.md).
 
 ## Corrected bounded gate status
 
-V2 passed under causal-timeline-v3 and phase-balanced-hourly-v1; see [pilot record](bounded_pilot.md). After V2.4G (**EMPIRICAL/SYSTEM STUDY VIABLE**), V2.5 froze the non-adaptive confirmatory design but is **BLOCKED** on `practical_effect_margins_unassigned`; V3 remains BLOCKED UNTIL V2.5 PASS. The 18 development entities remain excluded; candidate confirmatory IDs are exactly 1,558 before protocol-validity exclusions.
+V2 passed under causal-timeline-v3 and phase-balanced-hourly-v1; see [pilot record](bounded_pilot.md). After V2.4G (**EMPIRICAL/SYSTEM STUDY VIABLE**), V2.5A amends the confirmatory design to estimation-first: **V2.5 = PASS**; **V3 = NEXT**. The 18 development entities remain excluded; candidate confirmatory IDs are exactly 1,558 before protocol-validity exclusions. C4 remains UNPROVEN.
 
 ## V2.4 prerequisite to confirmation freeze
 
@@ -322,16 +323,18 @@ adaptive-refresh superiority stay withdrawn. A cost-aware cadence *selector* is
 not authorized; system validation remains optional/deferred. No new algorithm or
 confirmatory run is authorized by V2.4G alone.
 
-## V2.5 — empirical contribution freeze (current)
+## V2.5 — empirical contribution freeze / V2.5A estimation amendment (current)
 
 The [confirmatory design freeze](confirmatory_design_freeze.md) and
-`configs/materna_confirmatory_v1.{json,yaml}` lock RQ1–RQ4, the 1,558-candidate
-cohort, Static/PW-12h/PW-6h/PW-3h/Full-Rewrite, primary/secondary endpoints,
-F1–F3 comparisons, bootstrap B=10000 seed=20251022, Wilcoxon/Holm plan, and
-GO/NO-GO templates. C1/C2 remain withdrawn. Practical-effect margins for the four
-fidelity endpoints are intentionally **null** (no non-arbitrary justification
-without inventing values or using pilot effects). **V2.5 STATUS: BLOCKED.**
-**V3 remains blocked.** Future gates: V3 Materna confirmatory non-adaptive; V4
-corpus suitability/acquisition; V5 second-corpus replication; V6 cost benchmark;
-V7 K8s harness; V8 operational validation; V9 claim audit / venue decision.
-Do not claim C3–C6 before the corresponding gates pass.
+`configs/materna_confirmatory_v1_1.{json,yaml}` lock estimation-framed RQ1–RQ4,
+the 1,558-candidate cohort, Static/PW-12h/PW-6h/PW-3h/Full-Rewrite,
+primary/secondary endpoints, F1–F3 comparisons, bootstrap B=10000 seed=20251022,
+Wilcoxon/Holm plan, cost/Pareto reporting, and estimation decision rules. The
+original margin-blocked freeze remains at `configs/materna_confirmatory_v1.*`
+for provenance. C1/C2 remain withdrawn. Profile-level practical significance is
+**`NOT_DEFINED_AT_PROFILE_LEVEL`** (numeric margins not invented). **V2.5 STATUS:
+PASS (V2.5A).** **V3 = NEXT — Materna confirmatory estimation study.** C4
+operational/practical benefit remains UNPROVEN (V7–V8). Future gates: V4 corpus
+suitability/acquisition; V5 second-corpus replication; V6 cost benchmark; V7 K8s
+harness; V8 operational validation; V9 claim audit / venue decision. Do not claim
+C3–C6 before the corresponding gates pass.

@@ -1,4 +1,8 @@
-"""V2.5 confirmatory design freeze: load, validate, and hash frozen inputs.
+"""V2.5 / V2.5A confirmatory design freeze: load, validate, and hash frozen inputs.
+
+Current authoritative design is estimation-first amendment v1.1 (V2.5A).
+The original superiority-margin freeze v1 is preserved under configs/materna_confirmatory_v1.*
+for provenance and must not be rewritten.
 
 No scientific run. Does not read confirmatory VM outcome tables.
 """
@@ -11,14 +15,30 @@ from typing import Any
 from dynapm.core.provenance import canonical_json, file_sha256, fingerprint, read_json
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-CONFIG_JSON = REPO_ROOT / "configs" / "materna_confirmatory_v1.json"
-CONFIG_YAML = REPO_ROOT / "configs" / "materna_confirmatory_v1.yaml"
+
+# Current authoritative amendment (V2.5A).
+CONFIG_JSON = REPO_ROOT / "configs" / "materna_confirmatory_v1_1.json"
+CONFIG_YAML = REPO_ROOT / "configs" / "materna_confirmatory_v1_1.yaml"
+
+# Immutable V2.5 original freeze (blocked on margins) — provenance only.
+LEGACY_CONFIG_JSON = REPO_ROOT / "configs" / "materna_confirmatory_v1.json"
+LEGACY_CONFIG_YAML = REPO_ROOT / "configs" / "materna_confirmatory_v1.yaml"
+
 COHORT_JSON = REPO_ROOT / "configs" / "materna_confirmatory_cohort_v1.json"
 KEPT_VMS = REPO_ROOT / "dynapm" / "data" / "kept_vms.json"
 
-SCHEMA_VERSION = "materna-confirmatory-design-v1"
-GATE_STATUS = "BLOCKED"
-BLOCKER = "practical_effect_margins_unassigned"
+SCHEMA_VERSION = "materna-confirmatory-design-v1.1"
+LEGACY_SCHEMA_VERSION = "materna-confirmatory-design-v1"
+AMENDMENT = "V2.5A"
+GATE_STATUS = "PASS"
+BLOCKER = None
+
+# Provenance hashes of the original V2.5 freeze (must remain byte-identical).
+LEGACY_DESIGN_FINGERPRINT = "d3c94bcdcf9cb626d915187ca8d5071c26197464ad6154e3f527f1f4d79bac26"
+LEGACY_CONFIG_JSON_SHA256 = "4ce8fb3a68005717a0a4062ea535d647b3e6a8cf75bc61bda3404cd682131caa"
+LEGACY_CONFIG_YAML_SHA256 = "4a27b96b71a9ad7c14cef1ca3cb2255461edc1b9f42a5361c09f8cf5828e7e5d"
+COHORT_ENTITIES_FINGERPRINT = "3a590437f108493b085f1cb34765e76bd5f10fa233a48c2e96f6bf3bd54b7939"
+COHORT_FILE_SHA256 = "9adac57a35af69bf83ce5ee0751818ec242d04138d983d95f3441d0c278e02cd"
 
 PERMANENT_PILOT_EXCLUSIONS: tuple[tuple[str, str], ...] = (
     ("Materna-Trace-1", "143"),
@@ -90,13 +110,42 @@ PROTOCOL_EXCLUSION_CODES: tuple[str, ...] = (
     "protocol_invalid_timeline_or_schema",
 )
 
-# Outcome artifact patterns that must not be read by V2.5 tooling.
 FORBIDDEN_OUTCOME_GLOBS: tuple[str, ...] = (
     "**/per_vm*.parquet",
     "**/policy_results*.parquet",
     "**/evaluation_snapshots*.parquet",
     "**/class_accuracy*",
     "**/profile_mae*",
+)
+
+EXTERNAL_RATIONALE_SOURCES: tuple[dict[str, str], ...] = (
+    {
+        "id": "asa_pvalues_2016",
+        "citation": (
+            "Wasserstein, R. L., & Lazar, N. A. (2016). The ASA Statement on p-Values: "
+            "Context, Process, and Purpose. The American Statistician, 70(2), 129–133."
+        ),
+        "doi": "10.1080/00031305.2016.1154108",
+        "url": "https://doi.org/10.1080/00031305.2016.1154108",
+        "use": (
+            "Scientific conclusions and policy decisions must not rest on p-value thresholds "
+            "alone; effect sizes and uncertainty are required. Separates statistical "
+            "distinguishability from practical/operational superiority."
+        ),
+        "role": "external_methodology_rationale_not_dynapm_evidence",
+    },
+    {
+        "id": "kubernetes_hpa_resource_utilization",
+        "citation": "Kubernetes documentation — Horizontal Pod Autoscaling (resource metrics).",
+        "url": "https://kubernetes.io/docs/concepts/workloads/autoscaling/horizontal-pod-autoscale/",
+        "use": (
+            "Operational CPU/memory utilization is defined relative to configured resource "
+            "requests and controller targets; mapping offline profile-utilization error to "
+            "autoscaling/SLO outcomes therefore depends on capacity, request/limit mapping, "
+            "and controller policy — not a universal profile-level margin."
+        ),
+        "role": "external_systems_rationale_not_dynapm_evidence",
+    },
 )
 
 
@@ -142,21 +191,36 @@ def _yaml_scalar(value: Any) -> str:
 
 
 def design_document() -> dict[str, Any]:
-    """Frozen confirmatory design object (margins intentionally unassigned)."""
+    """Current frozen confirmatory design (V2.5A estimation-first amendment)."""
     return {
         "schema_version": SCHEMA_VERSION,
         "gate": "V2.5",
+        "amendment": AMENDMENT,
         "gate_status": GATE_STATUS,
         "blocker": BLOCKER,
-        "blocker_rationale": (
-            "Defensible numeric practical-benefit and acceptable-harm margins for the four "
-            "primary fidelity endpoints cannot be established from metric semantics, profile "
-            "resolution, or an external operational requirement without arbitrary round-number "
-            "choices. Deriving margins from the 18-VM pilot effects is forbidden. Margins remain "
-            "null; V3 execution stays blocked until a separate authorized margin freeze assigns "
-            "them without confirmatory outcome access and without pilot-effect calibration."
-        ),
+        "study_framing": "estimation_first",
+        "amends": {
+            "previous_schema_version": LEGACY_SCHEMA_VERSION,
+            "previous_config_json": "configs/materna_confirmatory_v1.json",
+            "previous_config_yaml": "configs/materna_confirmatory_v1.yaml",
+            "previous_design_fingerprint": LEGACY_DESIGN_FINGERPRINT,
+            "previous_config_json_sha256": LEGACY_CONFIG_JSON_SHA256,
+            "previous_config_yaml_sha256": LEGACY_CONFIG_YAML_SHA256,
+            "change_summary": (
+                "Replace practical-superiority / numeric-margin GO criteria with a "
+                "pre-specified estimation study. Cohort, methods, endpoints, F1–F3, "
+                "bootstrap B/seed, Wilcoxon, and Holm remain unchanged. Numeric practical "
+                "margins are not invented; profile-level practical significance is "
+                "NOT_DEFINED_AT_PROFILE_LEVEL. Operational benefit remains C4."
+            ),
+        },
         "withdrawn_claims": ["C1_forecasting_superiority", "C2_adaptive_refresh_superiority"],
+        "claim_status": {
+            "C3": "UNPROVEN",
+            "C4": "UNPROVEN",
+            "C5": "UNPROVEN",
+            "C6": "UNPROVEN",
+        },
         "branding": {
             "repository_name": "DynAPM",
             "continuity_note": (
@@ -170,17 +234,33 @@ def design_document() -> dict[str, Any]:
             "manuscript_title": None,
         },
         "research_questions": {
-            "RQ1": "Does periodic observation-window profile maintenance materially improve profile fidelity over Static?",
-            "RQ2": "How do 12h, 6h, and 3h periodic refresh cadences trade profile fidelity against maintenance cost?",
-            "RQ3": "Does Full-Rewrite provide practically meaningful fidelity improvement over PW-3h sufficient to justify its much higher refresh/write cost?",
-            "RQ4": "Are these conclusions consistent across traces, resources, and predefined volatility strata?",
+            "RQ1": (
+                "What are the magnitude and uncertainty of paired fidelity and cost effects "
+                "of periodic observation-window maintenance (PW-12h, PW-6h, PW-3h) relative "
+                "to Static?"
+            ),
+            "RQ2": (
+                "What are the magnitude and uncertainty of paired fidelity and cost effects "
+                "for successive cadence increments (PW-6h vs PW-12h; PW-3h vs PW-6h)?"
+            ),
+            "RQ3": (
+                "What is the incremental fidelity effect of Full-Rewrite relative to PW-3h, "
+                "and what is the associated incremental refresh, write, and change cost?"
+            ),
+            "RQ4": (
+                "Are the estimated effects directionally and quantitatively consistent across "
+                "predefined traces, resources, and volatility strata?"
+            ),
         },
         "protocol": {
             "temporal": "causal-timeline-v3",
             "evaluation_grid": "phase-balanced-hourly-v1",
             "accounting": "refresh-accounting-v1",
             "observation_window": "paired-observation-window-24h-v1",
-            "observation_window_semantics": "(t-24h,t], >=200/288 paired finite CPU+memory slots where refresh eligibility applies",
+            "observation_window_semantics": (
+                "(t-24h,t], >=200/288 paired finite CPU+memory slots where refresh "
+                "eligibility applies"
+            ),
         },
         "cohort": {
             "corpus": "Materna",
@@ -213,7 +293,8 @@ def design_document() -> dict[str, Any]:
             ],
             "shared_content_semantics": (
                 "Identical observation-window content for Static/PW/Full-Rewrite: "
-                "(t-24h,t], >=200/288 paired finite CPU+memory slots where refresh eligibility applies."
+                "(t-24h,t], >=200/288 paired finite CPU+memory slots where refresh "
+                "eligibility applies."
             ),
         },
         "endpoints": {
@@ -222,88 +303,67 @@ def design_document() -> dict[str, Any]:
             "secondary_cost_diagnostic": list(SECONDARY_ENDPOINTS),
             "aggregation": "per_vm_then_paired_across_vms",
             "forbidden": "timestamp_level_pseudo_replication_as_statistical_unit",
+            "favorable_directions": {
+                "cpu_class_correctness": "higher_is_better",
+                "memory_class_correctness": "higher_is_better",
+                "cpu_p95_profile_mae": "lower_is_better",
+                "memory_p95_profile_mae": "lower_is_better",
+                "n_refresh_events": "lower_is_better_for_cost",
+            },
         },
         "comparison_families": {
             name: [{"treatment": a, "control": b} for a, b in pairs]
             for name, pairs in COMPARISON_FAMILIES.items()
         },
-        "practical_effect_margins": {
-            "status": "UNASSIGNED",
-            "blocks_v25_pass": True,
-            "blocks_v3_execution": True,
-            "source_policy": (
-                "Must be justified from metric semantics, measurement/profile resolution, "
-                "operational interpretation, and/or external domain rationale. Must NOT be "
-                "derived from observed 18-VM pilot effect sizes or confirmatory outcomes."
+        "practical_significance": {
+            "status": "NOT_DEFINED_AT_PROFILE_LEVEL",
+            "numeric_margins": "not_invented",
+            "blocks_v25_pass": False,
+            "blocks_v3_execution": False,
+            "interpretation": (
+                "V3 reports estimation quantities only. Profile-level numeric practical-"
+                "benefit / acceptable-harm margins are explicitly not defined. Statistical "
+                "distinguishability must never be translated into operational superiority."
             ),
-            "cpu_class_correctness": {
-                "practical_benefit_margin": None,
-                "acceptable_harm_margin": None,
-                "unit": "accuracy_fraction_points",
-                "favorable_direction": "higher_is_better",
-                "rationale_status": "insufficient_without_arbitrary_choice",
-                "rationale": (
-                    "Class correctness is the fraction of evaluation origins whose profile mean "
-                    "utilization class (idle/low/medium/high/burst from bootstrap p20/p40/p60/p80 "
-                    "gates) matches truth. Without a documented consumer that maps class errors to "
-                    "operational cost, any numeric Δaccuracy margin is an arbitrary round number. "
-                    "Pilot Static→PW gains are exploratory and must not calibrate this margin."
+            "rationale_why_numeric_margins_unavailable": {
+                "profile_error_units": (
+                    "Primary fidelity errors are utilization percentages / class fractions "
+                    "on offline profiles, not SLO or capacity outcomes."
                 ),
-                "sources_consulted": [
-                    "dynapm/core/discretization.py class gates",
-                    "docs/protocol.md causal evaluation semantics",
-                    "no engineering SLO or provisioning misclassification cost available in-repo",
-                ],
+                "operational_dependence": (
+                    "Any operational effect depends on resource capacity, request/limit "
+                    "mapping, controller policy, and SLO definitions."
+                ),
+                "no_universal_conversion": (
+                    "No validated universal conversion from profile MAE/class error to "
+                    "operational benefit currently exists for this study."
+                ),
+                "pilot_derived_margins_forbidden": (
+                    "Deriving margins from the 18-VM pilot effects would be outcome-driven "
+                    "and is forbidden."
+                ),
+                "deferral": (
+                    "Operational meaningfulness must be calibrated and validated in later "
+                    "system-validation gates (C4 / V7–V8), not invented before V3."
+                ),
+                "external_sources": [dict(s) for s in EXTERNAL_RATIONALE_SOURCES],
+                "separation_from_dynapm_evidence": (
+                    "External sources justify methodology and systems semantics only; they "
+                    "are not DynAPM empirical evidence of benefit."
+                ),
             },
-            "memory_class_correctness": {
-                "practical_benefit_margin": None,
-                "acceptable_harm_margin": None,
-                "unit": "accuracy_fraction_points",
-                "favorable_direction": "higher_is_better",
-                "rationale_status": "insufficient_without_arbitrary_choice",
-                "rationale": (
-                    "Same class taxonomy and consumer gap as CPU class correctness; resource "
-                    "identity alone does not supply a non-arbitrary margin."
-                ),
-                "sources_consulted": [
-                    "dynapm/core/discretization.py class gates",
-                    "docs/protocol.md causal evaluation semantics",
-                ],
-            },
-            "cpu_p95_profile_mae": {
-                "practical_benefit_margin": None,
-                "acceptable_harm_margin": None,
-                "unit": "utilization_percentage_points",
-                "favorable_direction": "lower_is_better",
-                "rationale_status": "insufficient_without_arbitrary_choice",
-                "rationale": (
-                    "p95-profile MAE is continuous utilization error. Measurement resolution does "
-                    "not imply a practical threshold: rightsizing literature discusses capacity "
-                    "headroom for allocation decisions, not a transferable MAE margin for offline "
-                    "profile fidelity. Mapping capacity headroom to MAE requires an unstated "
-                    "consumer model; inventing 0.5/1.0 pp would be arbitrary."
-                ),
-                "sources_consulted": [
-                    "docs/protocol.md profile evaluation",
-                    "no in-repo downstream resource-controller tolerance for profile MAE",
-                ],
-            },
-            "memory_p95_profile_mae": {
-                "practical_benefit_margin": None,
-                "acceptable_harm_margin": None,
-                "unit": "utilization_percentage_points",
-                "favorable_direction": "lower_is_better",
-                "rationale_status": "insufficient_without_arbitrary_choice",
-                "rationale": (
-                    "Same continuous-error and consumer-model gap as CPU p95-profile MAE."
-                ),
-                "sources_consulted": [
-                    "docs/protocol.md profile evaluation",
-                ],
+            "per_endpoint": {
+                endpoint: {
+                    "practical_benefit_margin": None,
+                    "acceptable_harm_margin": None,
+                    "practical_significance": "NOT_DEFINED_AT_PROFILE_LEVEL",
+                }
+                for endpoint in PRIMARY_FIDELITY_ENDPOINTS
             },
         },
         "statistics": {
             "unit": "vm",
+            "study_type": "pre_specified_estimation",
             "paired_differences": "treatment_minus_control_per_vm",
             "report": [
                 "median_effect",
@@ -313,8 +373,9 @@ def design_document() -> dict[str, Any]:
                 "zero_and_tie_handling",
                 "effect_size",
                 "multiplicity_adjusted_p",
-                "statistical_significance",
-                "practical_significance",
+                "statistical_distinguishability",
+                "refresh_write_change_costs",
+                "pareto_fidelity_cost_relationships",
             ],
             "bootstrap": {
                 "repetitions": 10000,
@@ -349,59 +410,85 @@ def design_document() -> dict[str, Any]:
                 "claim_rule": "no_subgroup_driven_primary_claims_unless_predefined_here",
             },
             "practical_significance_rule": (
-                "Requires assigned practical_effect_margins. Until margins are assigned, "
-                "practical significance is reported as NOT_EVALUABLE and cannot support GO."
+                "Profile-level practical significance is NOT_DEFINED_AT_PROFILE_LEVEL. "
+                "Do not invent numeric margins. Do not infer operational superiority from "
+                "statistical significance."
             ),
         },
         "decision_logic": {
-            "status": "TEMPLATES_FROZEN_MARGINS_REQUIRED",
+            "status": "ESTIMATION_FIRST_FROZEN",
+            "v3_may_establish": [
+                "direction",
+                "magnitude",
+                "uncertainty",
+                "statistical_distinguishability",
+            ],
             "rules": [
                 {
-                    "id": "R1_better_requires_practical_margin",
+                    "id": "R1_estimation_scope",
                     "text": (
-                        "Declare a method 'better' on a fidelity endpoint only when the paired "
-                        "effect is directionally favorable AND the practical-benefit margin "
-                        "criterion is met (point estimate and/or CI rule as assigned with margins); "
-                        "p-value alone is insufficient."
+                        "V3 may establish direction, magnitude, uncertainty, and statistical "
+                        "distinguishability for the frozen F1–F3 contrasts and endpoints."
                     ),
                 },
                 {
-                    "id": "R2_negligible_fidelity_blocks_added_cost",
+                    "id": "R2_no_p_value_operational_superiority",
                     "text": (
-                        "Do not recommend an added-cost method when its fidelity improvement over "
-                        "the cheaper comparator is practically negligible under the assigned margins."
+                        "Statistical significance alone must never imply practical or "
+                        "operational superiority."
                     ),
                 },
                 {
-                    "id": "R3_full_rewrite_dominance",
+                    "id": "R3_no_cadence_recommendation_from_p",
                     "text": (
-                        "Full-Rewrite is dominated if its incremental fidelity benefit over PW-3h "
-                        "fails the practical-benefit criterion while requiring materially greater "
-                        "refresh cost (n_refresh_events)."
+                        "Do not recommend a refresh cadence solely from p-values."
                     ),
                 },
                 {
-                    "id": "R4_negative_null_valid",
+                    "id": "R4_pareto_dominance",
                     "text": (
-                        "Negative and null findings are valid confirmatory outcomes and may support "
-                        "NO-GO or narrowed claims."
+                        "Call a method strictly Pareto-dominated only when the predefined "
+                        "fidelity/cost evidence satisfies dominance on all four primary "
+                        "fidelity endpoints (favorable directions) and primary cost "
+                        "(n_refresh_events), using both paired median and paired mean "
+                        "effects: the dominating method is nowhere worse and strictly "
+                        "better on at least one fidelity endpoint or cost. Otherwise "
+                        "report the fidelity–cost trade-off without a dominance label."
                     ),
                 },
                 {
-                    "id": "R5_no_expected_winners",
-                    "text": "Do not encode expected winners; comparisons remain those frozen in F1–F3.",
+                    "id": "R5_operational_benefit_is_c4",
+                    "text": (
+                        "Operational/practical benefit remains claim C4 and is deferred to "
+                        "system-validation gates (V7–V8)."
+                    ),
                 },
                 {
-                    "id": "R6_margins_gate",
+                    "id": "R6_negative_null_small_publishable",
                     "text": (
-                        "While practical_effect_margins.status is UNASSIGNED, overall confirmatory "
-                        "GO is impossible; V2.5 remains BLOCKED and V3 must not execute."
+                        "Negative, null, and small effects remain valid and publishable "
+                        "estimation findings."
+                    ),
+                },
+                {
+                    "id": "R7_no_expected_winners",
+                    "text": (
+                        "Do not encode expected winners; comparisons remain those frozen "
+                        "in F1–F3."
+                    ),
+                },
+                {
+                    "id": "R8_no_materially_better_without_ops",
+                    "text": (
+                        "Do not use wording such as 'materially better' or 'practically "
+                        "meaningful improvement' for profile endpoints unless later "
+                        "operational evidence (C4) supports that language."
                     ),
                 },
             ],
         },
         "future_gates": {
-            "V3": "Materna confirmatory non-adaptive study",
+            "V3": "Materna confirmatory estimation study (non-adaptive)",
             "V4": "independent production-corpus suitability/acquisition",
             "V5": "second-corpus replication, preferably Google ClusterData 2019 if suitability remains valid",
             "V6": "maintenance-cost/service benchmark",
@@ -409,12 +496,14 @@ def design_document() -> dict[str, Any]:
             "V8": "repeated operational/system validation",
             "V9": "final claim audit / venue decision",
             "claim_rule": "Do not claim C3–C6 before their corresponding gates pass.",
+            "v3_status_after_v25a": "NEXT",
         },
         "execution_guards": {
-            "scientific_run_in_v25": False,
+            "scientific_run_in_v25_or_v25a": False,
             "access_confirmatory_outcomes": False,
             "new_predictor_trigger_selector_cadence_or_algorithm": False,
             "use_pilot_effects_to_choose_margins_or_hypotheses": False,
+            "invent_numeric_practical_margins": False,
         },
     }
 
@@ -445,6 +534,10 @@ def validate_cohort_manifest(manifest: dict[str, Any] | None = None) -> dict[str
         raise ValueError("cohort entities do not match kept_vms minus permanent pilots")
     if fingerprint(entities) != manifest["entities_fingerprint"]:
         raise ValueError("entities_fingerprint mismatch")
+    if manifest["entities_fingerprint"] != COHORT_ENTITIES_FINGERPRINT:
+        raise ValueError("cohort entities fingerprint drifted from V2.5 freeze")
+    if file_sha256(COHORT_JSON) != COHORT_FILE_SHA256:
+        raise ValueError("cohort file sha256 drifted from V2.5 freeze")
     pilot_ids = {(e["trace"], e["vm_id"]) for e in manifest["permanent_pilot_exclusions"]}
     if pilot_ids != set(PERMANENT_PILOT_EXCLUSIONS):
         raise ValueError("permanent pilot exclusion set mismatch")
@@ -458,18 +551,28 @@ def validate_cohort_manifest(manifest: dict[str, Any] | None = None) -> dict[str
     }
 
 
-def validate_design(design: dict[str, Any] | None = None) -> dict[str, Any]:
-    design = design if design is not None else design_document()
-    if design["schema_version"] != SCHEMA_VERSION:
-        raise ValueError("unsupported design schema")
-    if design["gate_status"] != GATE_STATUS:
-        raise ValueError("gate_status must remain BLOCKED while margins are unassigned")
-    if design["practical_effect_margins"]["status"] != "UNASSIGNED":
-        raise ValueError("margins must be UNASSIGNED for this freeze")
-    for endpoint in PRIMARY_FIDELITY_ENDPOINTS:
-        block = design["practical_effect_margins"][endpoint]
-        if block["practical_benefit_margin"] is not None or block["acceptable_harm_margin"] is not None:
-            raise ValueError(f"{endpoint} margins must be null in this freeze")
+def validate_legacy_provenance() -> dict[str, str]:
+    if not LEGACY_CONFIG_JSON.is_file() or not LEGACY_CONFIG_YAML.is_file():
+        raise FileNotFoundError("legacy V2.5 configs missing")
+    legacy = read_json(LEGACY_CONFIG_JSON)
+    if legacy.get("schema_version") != LEGACY_SCHEMA_VERSION:
+        raise ValueError("legacy schema_version mismatch")
+    if fingerprint(legacy) != LEGACY_DESIGN_FINGERPRINT:
+        raise ValueError("legacy design fingerprint mismatch")
+    if file_sha256(LEGACY_CONFIG_JSON) != LEGACY_CONFIG_JSON_SHA256:
+        raise ValueError("legacy config JSON sha256 mismatch")
+    if file_sha256(LEGACY_CONFIG_YAML) != LEGACY_CONFIG_YAML_SHA256:
+        raise ValueError("legacy config YAML sha256 mismatch")
+    if legacy.get("gate_status") != "BLOCKED":
+        raise ValueError("legacy freeze must remain BLOCKED for provenance")
+    return {
+        "legacy_design_fingerprint": LEGACY_DESIGN_FINGERPRINT,
+        "legacy_config_json_sha256": LEGACY_CONFIG_JSON_SHA256,
+        "legacy_config_yaml_sha256": LEGACY_CONFIG_YAML_SHA256,
+    }
+
+
+def _validate_shared_matrices(design: dict[str, Any]) -> None:
     methods = design["methods"]["primary"]
     if methods != list(PRIMARY_METHODS):
         raise ValueError("primary method matrix mismatch")
@@ -483,24 +586,68 @@ def validate_design(design: dict[str, Any] | None = None) -> dict[str, Any]:
     stats = design["statistics"]["bootstrap"]
     if stats["repetitions"] != 10000 or stats["seed"] != 20251022:
         raise ValueError("bootstrap repetitions/seed mismatch")
+    if design["statistics"]["paired_test"]["name"] != "wilcoxon_signed_rank":
+        raise ValueError("paired test mismatch")
+    if design["statistics"]["paired_test"]["zero_method"] != "wilcox":
+        raise ValueError("wilcoxon zero_method mismatch")
+    if design["statistics"]["multiplicity"]["method"] != "holm":
+        raise ValueError("multiplicity method mismatch")
+    if design["endpoints"]["primary_fidelity"] != list(PRIMARY_FIDELITY_ENDPOINTS):
+        raise ValueError("primary fidelity endpoints mismatch")
+    if design["endpoints"]["primary_maintenance_cost"] != PRIMARY_COST_ENDPOINT:
+        raise ValueError("primary cost endpoint mismatch")
+
+
+def validate_design(design: dict[str, Any] | None = None) -> dict[str, Any]:
+    design = design if design is not None else design_document()
+    if design["schema_version"] != SCHEMA_VERSION:
+        raise ValueError("unsupported design schema")
+    if design.get("amendment") != AMENDMENT:
+        raise ValueError("amendment must be V2.5A")
+    if design["gate_status"] != GATE_STATUS:
+        raise ValueError("gate_status must be PASS after V2.5A estimation amendment")
+    if design.get("blocker") is not None:
+        raise ValueError("blocker must be null after V2.5A")
+    if design["study_framing"] != "estimation_first":
+        raise ValueError("study_framing must be estimation_first")
+    ps = design["practical_significance"]
+    if ps["status"] != "NOT_DEFINED_AT_PROFILE_LEVEL":
+        raise ValueError("practical significance must be NOT_DEFINED_AT_PROFILE_LEVEL")
+    if ps.get("numeric_margins") != "not_invented":
+        raise ValueError("numeric margins must remain not_invented")
+    for endpoint in PRIMARY_FIDELITY_ENDPOINTS:
+        block = ps["per_endpoint"][endpoint]
+        if block["practical_benefit_margin"] is not None or block["acceptable_harm_margin"] is not None:
+            raise ValueError(f"{endpoint} margins must remain null")
+    _validate_shared_matrices(design)
+    if design["claim_status"]["C4"] != "UNPROVEN":
+        raise ValueError("C4 must remain UNPROVEN")
+    for claim in ("C1_forecasting_superiority", "C2_adaptive_refresh_superiority"):
+        if claim not in design["withdrawn_claims"]:
+            raise ValueError(f"{claim} must remain withdrawn")
     return {
         "design_fingerprint": fingerprint(design),
         "gate_status": design["gate_status"],
         "blocker": design["blocker"],
+        "amendment": design["amendment"],
+        "study_framing": design["study_framing"],
     }
 
 
 def write_frozen_config_files(root: Path = REPO_ROOT) -> dict[str, str]:
     design = design_document()
-    json_path = root / "configs" / "materna_confirmatory_v1.json"
-    yaml_path = root / "configs" / "materna_confirmatory_v1.yaml"
+    json_path = root / "configs" / "materna_confirmatory_v1_1.json"
+    yaml_path = root / "configs" / "materna_confirmatory_v1_1.yaml"
     json_path.write_text(canonical_json(design) + "\n", encoding="utf-8")
     yaml_path.write_text(
-        "# Frozen by V2.5 — authoritative twin is materna_confirmatory_v1.json\n"
+        "# Frozen by V2.5A estimation amendment — authoritative twin is "
+        "materna_confirmatory_v1_1.json\n"
+        "# Previous V2.5 freeze preserved at materna_confirmatory_v1.{json,yaml}\n"
         + emit_yaml(design),
         encoding="utf-8",
     )
     cohort_info = validate_cohort_manifest()
+    legacy = validate_legacy_provenance()
     design_info = validate_design(design)
     return {
         "design_fingerprint": design_info["design_fingerprint"],
@@ -511,15 +658,18 @@ def write_frozen_config_files(root: Path = REPO_ROOT) -> dict[str, str]:
         "kept_vms_sha256": file_sha256(KEPT_VMS),
         "gate_status": design_info["gate_status"],
         "blocker": design_info["blocker"],
+        "amendment": design_info["amendment"],
+        **legacy,
     }
 
 
-def frozen_hashes() -> dict[str, str]:
+def frozen_hashes() -> dict[str, Any]:
     if not CONFIG_JSON.is_file():
         raise FileNotFoundError(CONFIG_JSON)
     design = read_json(CONFIG_JSON)
     design_info = validate_design(design)
     cohort_info = validate_cohort_manifest()
+    legacy = validate_legacy_provenance()
     return {
         "design_fingerprint": design_info["design_fingerprint"],
         "config_json_sha256": file_sha256(CONFIG_JSON),
@@ -529,4 +679,7 @@ def frozen_hashes() -> dict[str, str]:
         "kept_vms_sha256": file_sha256(KEPT_VMS),
         "gate_status": design_info["gate_status"],
         "blocker": design_info["blocker"],
+        "amendment": design_info["amendment"],
+        "study_framing": design_info["study_framing"],
+        **legacy,
     }
