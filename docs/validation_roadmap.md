@@ -64,7 +64,7 @@ This roadmap specifies future gates, not authorization to execute them. The sole
 
 ## V2.4C — TASK-ALIGNED PROFILE PREDICTION
 
-**STATUS: IN PROGRESS**
+**STATUS: PASS — task-aligned study complete; review required**
 
 - **Objective:** test direct future mean/p95 prediction against the four previously fixed point strategies, on the same 18 development VMs/eight origins only.
 - **Required artifacts:** [profile investigation](profile_predictor_investigation.md), managed RF/Ridge task-aligned predictions, per-VM/tier errors, costs/state and timestamp-only seasonal availability across 1,576 VMs.
@@ -190,6 +190,8 @@ Managed exploratory diagnosis completed on the fixed 18 development VMs, eight o
 
 Current prerequisite: V2.4B is complete and requires review. No single adequate two-resource predictor was selected; V2.5/V3 remain blocked pending explicit predictor disposition. No result authorizes automatic predictor integration.
 
-V2.4B record: source `ff7388ab3ec122d3f528e45216adc5882cacbc13`; managed run `2026-10-22T004212.427895Z-62f5727e20e2-905e675d`; 18 development VMs, identical eight origins, four candidates, all288 leads. 265 tests passed. Direct RF improves recursion but loses to seasonal on CPU and has large state cost; no production integration is recommended. See the design investigation for full metrics, mixed resource findings and limitations.
+V2.4B record: source `ff7388ab3ec122d3f528e45216adc5882cacbc13`; managed run `2026-10-22T004212.427895Z-62f5727e20e2-905e675d`; 18 development VMs, identical eight origins, four candidates, all 288 leads. 265 tests passed. Direct RF improves recursion but loses to seasonal on CPU and has large state cost; no production integration is recommended. See the design investigation for full metrics, mixed resource findings and limitations.
 
-Current prerequisite: V2.4C task-aligned profile prediction is the active bounded investigation; V2.5/V3 remain blocked. No production predictor or policy change is included.
+Current prerequisite: V2.4C is complete and requires review/disposition. Seasonal-naive is the strongest tested scalar-profile reference and equals trailing-window PW refresh content. No learned predictor integration is recommended. V2.5/V3 remain blocked.
+
+V2.4C record: source `d579c46be0691e72db87814fbd86f636b05e7d3b`, study-v2 run `2026-10-22T071114.218486Z-807040bbf43c-322dd54d`; same 18 development VMs/eight origins, six methods, 1,728 resource/profile rows and a timestamp-only 1,576-VM availability audit. 274 tests passed. The metadata-v1 generation is superseded unchanged. See [task-aligned investigation](profile_predictor_investigation.md) for A/B/C/D disposition, seasonal/PW identity and unresolved availability/residual/claim contracts. No full run follows automatically.
