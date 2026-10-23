@@ -1,124 +1,114 @@
-# V4B / V4B.2 — Google ClusterData 2019 Acquisition & Canonical Preprocessing
+# Google ClusterData 2019 Acquisition (V4B → V4B.3)
 
-**Disposition: `ZERO_COST_BOUNDED_SUBSET_REQUIRED`**  
-**Blocker:** `frozen_queries_exceed_zero_cost_guards_unpartitioned_full_scans`  
-**Billing:** `billingEnabled=false` (zero-spend / sandbox) on the configured quota project  
-**No Google rows acquired; no Static/PW/Full-Rewrite outcomes; no paid resources created.**
+**V4B.3 disposition: `READY_FOR_ZERO_COST_ACQUISITION`**  
+**Chosen cells (outcome-blind cost ranking): `e`, `g`**  
+**Projected cumulative query bytes: 825.671983 GiB (headroom 74.328017 GiB under 900 GiB)**  
+**Executed query-processing bytes this gate: 0**  
+**Billing: `billingEnabled=false` throughout; no paid resources created.**  
+**No DynAPM/PW/Static/Full-Rewrite outcomes.**
 
-V4B froze outcome-blind rules. V4B.1 added the budget-safe runner. V4B.2 verified
-billing disabled, dry-ran frozen queries 01–05, and **refused all execution**
-because processed bytes exceed the immutable 10 GiB guard (and 02/03 also exceed
-the 900 GiB cumulative free-tier headroom). V4A remains PASS. Population /
-normalization / entity semantics are unchanged.
+V4A protocol fingerprint remains
+`4067689f6147a4eba191ad578c1b061af71c3d50b6342ce88a3d8498fb7b4226`.
+Entity/ALLOC_SET/300s/request-normalization semantics are unchanged. Cell
+*scope* is narrowed solely by free-tier cost constraints.
 
-## Frozen identities
+## Frozen plan identities
 
 | Item | Identity |
 |---|---|
-| V4A protocol | `4067689f6147a4eba191ad578c1b061af71c3d50b6342ce88a3d8498fb7b4226` |
-| Acquisition config fingerprint | `7ca95beaba84f4af9583a1592e38f6a684147bcfbf11bbb4e4bd7ab6c826b91d` |
-| Config JSON SHA-256 | `0c76dee14c6a646a670c2c83f76fdf38c7559e68ca0423823611142e9ab87ba9` |
-| Config YAML SHA-256 | `2fe648f924fb8c0329c979939e761401dfc6d092ac54e58e85a8988cb7bce1cc` |
-| Config | `configs/google2019_acquisition_v1.{json,yaml}` |
+| Plan | `configs/google2019_zero_cost_plan_v1.{json,yaml}` |
+| Plan fingerprint | `f9f4bb846adfe9a303eb3d63f2efba84f7aa233ae4b990eb0b292cb30d76cfba` |
+| Plan JSON SHA-256 | `e547c3b7046c2f7f14d99dc8e06af16a929967a03f3f15b31d071591a1d15342` |
+| Plan YAML SHA-256 | `e7496a3fe78403ea3cb00f0dc8d35dbfa04742c6d3ed23afd9177416c83f9f9b` |
+| Cost matrix | `configs/google2019_v4b3_cost_matrix.json` |
+| Metadata summary | `configs/google2019_v4b3_table_metadata_summary.json` |
+| `20_usage_minimal.sql` | `3e6a250381cd0105508813813970873c72cd9dd144c5a74b9032aae55aa226b7` |
+| `21_events_minimal.sql` | `a70068b5ffea8f0bad285cdcd26b8e49dbc3a4b13cdbf8cf3a61ec2dc12de077` |
 
-## Official tables and fields
+## Table metadata (free `get_table`)
 
-Official public project: `google.com:google-cluster-data`; datasets
-`clusterdata_2019_a` … `_h`, location US.
+All cells `a`–`h`, tables `instance_usage` / `instance_events`:
 
-| Table | Fields used |
-|---|---|
-| `instance_usage` | `start_time`, `end_time`, `collection_id`, `instance_index`, `collection_type`, `average_usage.cpus`, `average_usage.memory` |
-| `instance_events` | `time`, `collection_id`, `instance_index`, `collection_type`, `resource_request.cpus`, `resource_request.memory` |
+- **Partitioning:** none
+- **Clustering:** none
+- **Logical size (examples):** cell `a` usage ≈ 2.10 TiB / 7.58e9 rows; events ≈ 0.39 TiB / 1.72e9 rows
+- Smallest usage+events minimal-column pair: cell **`e`** (~406.60 GiB)
+- Largest: cell **`c`** (~587.80 GiB)
 
-## Zero-cost / billing gate (V4B.2)
+`INFORMATION_SCHEMA` probes remain **Forbidden** for this public project. Schema
+and previews use free `get_table` + `tabledata.list` / `list_rows` only.
 
-| Check | Result |
-|---|---|
-| ADC | present |
-| `google-cloud-bigquery` | present |
-| `gcloud` / `bq` | present |
-| Quota project | resolved from ADC / `--billing-project` (not committed) |
-| `billingEnabled` | **false** (re-checked before dry-runs) |
-| Billing account linked | none |
-| Paid trial / reservations / paid storage | not created |
-| Local V4 execution ledger | 0 executed bytes |
+Representative leaf fields confirmed via preview: `average_usage.cpus|memory`,
+`resource_request.cpus|memory`. Never select whole nested structs or `SELECT *`
+(cell `a` `SELECT *` usage dry-run ≈ 2104.71 GiB vs leaf CPU+memory projection
+≈ 395.09 GiB).
 
-Hard controls:
+## Projection cost matrix (dry-run only)
 
-- dry-run before every query class;
-- record `total_bytes_processed`;
-- enforce `maximum_bytes_billed` = **10 GiB** (not raised);
-- cumulative executed-byte ledger cap = **900 GiB** / month for V4;
-- prior monthly free-tier usage treated as **unverified** → conservative;
-- if `billingEnabled==true` → stop with `BILLING_ENABLED_ZERO_SPEND_NOT_GUARANTEED`.
+Per cell, minimal required columns (`collection_type=1`):
 
-Time filters are **not** a cost guarantee: tables are unpartitioned on
-`start_time`, so `[7d,15d)` still full-scans cell tables.
-
-## Dry-run results (queries unchanged in selection semantics)
-
-SQL files 02–05 received a BigQuery-compatible rewrite of the unambiguous-request
-CTE only (`COUNT(DISTINCT …)` moved off `ANY_VALUE` aliases). Selection rules,
-filters, strata, and ALLOC_SET population are unchanged.
-
-| Query | File SHA-256 (prefix) | Dry-run bytes | GiB | Guard 10 GiB | 900 GiB headroom | Decision |
-|---|---|---:|---:|---|---|---|
-| `01_schema_probe.sql` | `3bc2d8fffd058c3369f9cd8bb731416d1cf401f04ef395ab49e55fa314d5bcfc` | n/a | n/a | n/a | n/a | **REFUSE** (`INFORMATION_SCHEMA` Forbidden) |
-| `02_bounded_population.sql` | `9005356694a919420cdb43faae774ef44b6c772c2b40031909cfcfcf57d3df0f` | 981,313,230,072 | 913.92 | no | no | **REFUSE** |
-| `03_bounded_validation_extract.sql` | `0e0486af4aee26eba292a6c9ea75e163c75c9eed2a021c13a5dc4cbf8b2f0eb3` | 981,313,230,072 | 913.92 | no | no | **REFUSE** |
-| `04_full_cell_population.sql` (cell `a`) | `1fb83d4a8952d574315aa829c59563d30a45e3578eecbca19c61b202c73da26b` | 506,658,530,736 | 471.86 | no | yes | **REFUSE** |
-| `05_full_cell_extract.sql` (cell `a`) | `0d42c95070a6da023c1ff7f624417932f20cc1a7d2d93563a3cce61615e77cd0` | 506,658,530,736 | 471.86 | no | yes | **REFUSE** |
-
-Cumulative **executed** free-tier usage for V4: **0 bytes**.
-
-## Bounded extract
-
-**Not executed.** Planned cells `a`,`b`, days `[7,15)`, frozen strata unchanged.
-Rows/entities/duration from Google: none.
-
-## Projected full-acquisition volume (estimate only; not executed)
-
-| Projection | Bytes | GiB | TiB |
+| Cell | Usage ID+CPU+Mem (GiB) | Events ID+req CPU+Mem (GiB) | Pair sum (GiB) |
 |---|---:|---:|---:|
-| Full-cell extract dry-run (cell `a`) | 506,658,530,736 | 471.86 | 0.461 |
-| Eight cells if similar to `a` | 4,053,268,245,888 | 3,774.90 | 3.686 |
+| e | 338.493 | 68.103 | **406.596** |
+| g | 350.719 | 68.357 | **419.076** |
+| h | 372.040 | 54.073 | 426.112 |
+| b | 378.268 | 63.789 | 442.057 |
+| f | 401.994 | 52.715 | 454.709 |
+| a | 395.093 | 76.769 | 471.863 |
+| d | 414.313 | 94.873 | 509.186 |
+| c | 435.222 | 152.580 | 587.803 |
 
-Far above free-tier / 900 GiB headroom. Storage for canonical Parquet is not
-measured (no extract). Do **not** run full export under zero-cost policy.
+Tracked machine-readable matrix: `configs/google2019_v4b3_cost_matrix.json`.
 
-## Why `ZERO_COST_BOUNDED_SUBSET_REQUIRED`
+## Plan alternatives (cell `e` evidence)
 
-Scientific population rules remain valid. The blocker is **scan engineering**:
-unpartitioned public tables make even the frozen “bounded” validation SQL scan
-~914 GiB. Next step (separate task) must redesign a deterministic,
-outcome-blind byte-reduction path (e.g. staged entity-key discovery that still
-obeys ALLOC_SET / continuity / request rules) **without** raising guards,
-enabling billing, or selecting on PW performance.
+| Plan | Dry-run GiB | Verdict |
+|---|---:|---|
+| Separate minimal usage + events | 338.493 + 68.103 = **406.596** | **cheapest valid** |
+| Single joined query (same leaf columns) | 406.596 | equal bytes; worse for local streaming |
+| Usage with `[7d,15d)` time filter | 338.493 | **identical** — no scan reduction |
+| Two-stage identity then full usage | 241.780 + 338.493 | redundant full-table re-read |
+| Frozen pair `a`+`b` separate minimal | **913.919** | **exceeds 900 GiB cap** |
 
-## Frozen outcome-blind population rules
+`TABLESAMPLE` is forbidden for the scientific corpus (non-deterministic blocks).
 
-| Rule | Freeze |
+## Chosen zero-cost replication subset
+
+**Rule (outcome-blind):** rank cells by ascending minimal pair dry-run bytes;
+take the longest prefix with sum ≤ 900 GiB.
+
+**Result:** `e`, then `g` (825.671983 GiB). Frozen `a`,`b` cannot fit safely.
+
+Entity eligibility rules are **not** relaxed to save cost.
+
+## Future execution plan (not executed in V4B.3)
+
+Order (local streamed artifacts; no BigQuery destination tables):
+
+1. `21_events_minimal` cell `e` — expect 68.103194 GiB — guard = exact dry-run bytes
+2. `20_usage_minimal` cell `e` — expect 338.492611 GiB — guard = exact dry-run bytes
+3. `21_events_minimal` cell `g` — expect 68.357208 GiB — guard = exact dry-run bytes
+4. `20_usage_minimal` cell `g` — expect 350.718970 GiB — guard = exact dry-run bytes
+
+| Metric | Value |
 |---|---|
-| Cells | all `a`–`h`; bounded validation uses `a`,`b` |
-| Entity | `(cell, collection_id, instance_index)` |
-| Population | `collection_type=1` (`ALLOC_SET`) only |
-| Lifetime | ≥7 days; ≥2,000 aligned 300s slots |
-| Selection | metadata / continuity / request only |
-| Forbidden | method outcomes, fidelity, Materna-effect similarity |
+| Worst-case cumulative | 825.671983 GiB |
+| Cap | 900 GiB |
+| Headroom | 74.328017 GiB |
+| Per-query `maximum_bytes_billed` | may exceed legacy 10 GiB **only** under billing-disabled + these frozen dry-runs + cumulative ≤900 GiB |
 
-## Normalization (unchanged)
+Local post-processing: causal request alignment, `usage/request` normalization
+(no clip >1), 300s cadence, duplicate/missingness rules from V4B; manifests with
+query/job IDs, bytes, hashes.
 
-```text
-cpu_utilization    = average_usage.cpus   / request_cpu
-memory_utilization = average_usage.memory / request_memory
-```
+**Failure rules:** re-dry-run immediately before each execution; abort if billing
+enabled, if dry-run bytes differ from frozen expectation by >1%, if projected
+cumulative >900 GiB, or if any query exceeds its frozen guard. Do not raise
+guards to force a run.
 
-Latest unambiguous positive request with `event.time <= usage.start_time`.
-Utilization >1 preserved. No interpolation.
+## Historical notes
 
-## Canonical artifacts
-
-Managed (gitignored) dry-run provenance:
-`data/google2019/provenance_dry_run_v4b2/`. No canonical extract directory was
-written. Secrets/tokens/billing IDs are never committed.
+- V4B/V4B.1/V4B.2: access bootstrap; joined bounded SQL refused at ~914 GiB.
+- V4B.3 replaces that path with minimal-column separate scans and cell subset
+  `{e,g}`. Legacy SQL under `queries/google2019/0*.sql` remains for provenance
+  but is **not** the zero-cost execution plan.

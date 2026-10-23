@@ -142,12 +142,12 @@ This roadmap specifies future gates, not authorization to execute them. The sole
 
 ## V4B — CORPUS ACQUISITION / CONTINUITY EXPORT
 
-**STATUS: BLOCKED — V4B.2 zero-cost dry-runs refuse execution (unpartitioned full scans)**
+**STATUS: BLOCKED on execution — V4B.3 plan READY_FOR_ZERO_COST_ACQUISITION (cells e,g)**
 
 - **Objective:** acquire a reproducible, outcome-blind Google 2019 export under the frozen adaptation (budgeted BigQuery; pin snapshot/hashes; continuity + request-coverage filters only).
-- **Required artifacts:** [acquisition record](google2019_acquisition.md); `configs/google2019_acquisition_v1.{json,yaml}`; guarded SQL and canonical preprocessing; authorized project/budget; bounded export manifests/hashes; eligible-entity count before any PW/Static run.
-- **Current result (V4B.2):** `billingEnabled=false`; dry-runs of frozen queries 01–05 recorded. Bounded extract **not** executed: 02/03 ≈913.92 GiB and 04/05 (cell a) ≈471.86 GiB exceed the 10 GiB guard (02/03 also exceed 900 GiB free-tier headroom). Disposition `ZERO_COST_BOUNDED_SUBSET_REQUIRED`.
-- **PASS criteria:** bounded extraction and canonical manifests complete after recorded dry-runs; acquisition reproducible without secrets in Git; filters performance-blind; protocol mapping from V4A unchanged; zero cloud spend.
+- **Required artifacts:** [acquisition record](google2019_acquisition.md); `configs/google2019_zero_cost_plan_v1.{json,yaml}`; cost matrix/metadata summaries; minimal-column SQL; guarded local canonicalization.
+- **Current result (V4B.3):** billing disabled; free metadata + dry-run projection matrix complete; executed bytes = 0. Frozen pair `a,b` infeasible (~913.92 GiB). Plan freezes separate minimal scans for cells **`e`,`g`** at **825.67 GiB** (74.33 GiB headroom under 900 GiB). Disposition `READY_FOR_ZERO_COST_ACQUISITION`. **No extract executed in V4B.3.**
+- **PASS criteria for acquisition execution (future):** pre-exec dry-runs match freeze; billing still disabled; cumulative ≤900 GiB; canonical manifests complete; filters performance-blind; V4A mapping unchanged.
 - **Unproven:** second-corpus estimation effects until V5.
 
 ## V5 — SECOND-CORPUS REPLICATION
@@ -201,7 +201,7 @@ Earlier documents used a denser V3–V11 numbering (full Materna + refresh trade
 
 ## Dependency and execution rule
 
-V0, V1A, V1B, V2 and the V2.4 investigation chain through V2.4G are PASS as executions. C1 and C2 are withdrawn. V2.4G disposition is **EMPIRICAL/SYSTEM STUDY VIABLE**. V2.5 / V2.5A is **PASS**. V3 is **PASS** (Materna confirmatory estimation; [results](materna_confirmatory_results.md)). V4A is **PASS** ([corpus selection](independent_corpus_selection.md); Google 2019 ready for acquisition). **V4B / V4B.2 are BLOCKED** ([acquisition record](google2019_acquisition.md); zero-cost subset redesign required). C3 and C4 remain UNPROVEN. V5–V9 follow. Every future experiment still requires explicit scope and authorization. No manuscript prose before V9.
+V0, V1A, V1B, V2 and the V2.4 investigation chain through V2.4G are PASS as executions. C1 and C2 are withdrawn. V2.4G disposition is **EMPIRICAL/SYSTEM STUDY VIABLE**. V2.5 / V2.5A is **PASS**. V3 is **PASS** (Materna confirmatory estimation; [results](materna_confirmatory_results.md)). V4A is **PASS** ([corpus selection](independent_corpus_selection.md); Google 2019 ready for acquisition). **V4B.3 plan is READY** ([acquisition record](google2019_acquisition.md); cells e,g; zero executed bytes). Extraction not yet run. C3 and C4 remain UNPROVEN. V5–V9 follow. Every future experiment still requires explicit scope and authorization. No manuscript prose before V9.
 
 Primary confirmation must exclude the same 18 development-pilot VMs. Candidate confirmatory set is exactly **1,558** IDs before protocol-validity exclusions ([cohort manifest](../configs/materna_confirmatory_cohort_v1.json)). The 199 gap-audit review flags remain diagnostics, not automatic exclusions. Optional whole-corpus description is separate from independent confirmation.
 
@@ -331,6 +331,14 @@ immutable provenance under gitignored `data/google2019/`.
 Zero-cost dry-run gate: `billingEnabled=false` verified; queries 01–05 dry-run;
 all **REFUSE** under 10 GiB guard / 900 GiB headroom; executed ledger = 0;
 no bounded extract; no method outcomes. Disposition
-`ZERO_COST_BOUNDED_SUBSET_REQUIRED`. See
-[google2019_acquisition.md](google2019_acquisition.md). **V4B.2 = BLOCKED**.
-V5 remains blocked until a zero-cost-feasible extract exists.
+`ZERO_COST_BOUNDED_SUBSET_REQUIRED`. **V4B.2 = BLOCKED**.
+
+## V4B.3 execution record
+
+Zero-cost query redesign (dry-runs + free metadata only): unpartitioned tables
+confirmed; projection matrix for cells a–h; separate minimal-column strategy
+selected; cells **`e`,`g`** frozen at 825.67 GiB cumulative; plan
+`configs/google2019_zero_cost_plan_v1.*`; disposition
+`READY_FOR_ZERO_COST_ACQUISITION`; executed bytes still 0. See
+[google2019_acquisition.md](google2019_acquisition.md). **V4B.3 = PASS**
+(plan freeze). Extraction remains a future authorized gate before V5.

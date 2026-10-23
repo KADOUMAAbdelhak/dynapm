@@ -230,7 +230,7 @@ chosen to favor observed pilot effects. See [protocol](protocol.md) and
 
 ## Corrected bounded gate status
 
-V2 passed under causal-timeline-v3 and phase-balanced-hourly-v1; see [pilot record](bounded_pilot.md). After V2.4G (**EMPIRICAL/SYSTEM STUDY VIABLE**), V2.5A amends the confirmatory design to estimation-first (**V2.5 = PASS**) and V3 completes the Materna confirmatory estimation study (**V3 = PASS**; [results](materna_confirmatory_results.md)). V4A freezes Google ClusterData 2019 for independent replication (**V4A = PASS**; [selection](independent_corpus_selection.md)). **V4B / V4B.2 = BLOCKED** ([acquisition](google2019_acquisition.md); zero-cost dry-runs refuse oversized unpartitioned scans). The 18 development entities remain excluded from primary Materna confirmation. C3/C4 remain UNPROVEN.
+V2 passed under causal-timeline-v3 and phase-balanced-hourly-v1; see [pilot record](bounded_pilot.md). After V2.4G (**EMPIRICAL/SYSTEM STUDY VIABLE**), V2.5A amends the confirmatory design to estimation-first (**V2.5 = PASS**) and V3 completes the Materna confirmatory estimation study (**V3 = PASS**; [results](materna_confirmatory_results.md)). V4A freezes Google ClusterData 2019 for independent replication (**V4A = PASS**; [selection](independent_corpus_selection.md)). **V4B.3 zero-cost plan READY** ([acquisition](google2019_acquisition.md); cells e,g; extract not yet executed). The 18 development entities remain excluded from primary Materna confirmation. C3/C4 remain UNPROVEN.
 
 ## V2.4 prerequisite to confirmation freeze
 
@@ -336,10 +336,10 @@ for provenance. C1/C2 remain withdrawn. Profile-level practical significance is
 PASS (V2.5A).** **V3 STATUS: PASS** ([Materna confirmatory estimation results](materna_confirmatory_results.md)).
 **V4A STATUS: PASS** ([independent corpus selection](independent_corpus_selection.md)):
 Google ClusterData 2019 frozen for acquisition under
-`google_clusterdata_2019_replication_protocol_v1`. **V4B / V4B.2 = BLOCKED**
-([acquisition](google2019_acquisition.md)): zero-spend dry-runs complete;
-frozen queries refuse under 10 GiB / 900 GiB caps
-(`ZERO_COST_BOUNDED_SUBSET_REQUIRED`). C3 and C4 remain UNPROVEN. Future
-gates: V5 second-corpus replication; V6 cost benchmark; V7 K8s harness; V8
-operational validation; V9 claim audit / venue decision. Do not claim C3–C6
-before the corresponding gates pass.
+`google_clusterdata_2019_replication_protocol_v1`. **V4B.3 = PASS (plan)**
+([acquisition](google2019_acquisition.md)): zero-cost plan frozen for cells
+`e`,`g` at ~825.67 GiB under the 900 GiB cap
+(`READY_FOR_ZERO_COST_ACQUISITION`); no extract executed yet. C3 and C4 remain
+UNPROVEN. Future gates: V5 second-corpus replication; V6 cost benchmark; V7 K8s
+harness; V8 operational validation; V9 claim audit / venue decision. Do not
+claim C3–C6 before the corresponding gates pass.
