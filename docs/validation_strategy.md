@@ -230,7 +230,7 @@ chosen to favor observed pilot effects. See [protocol](protocol.md) and
 
 ## Corrected bounded gate status
 
-V2 passed under causal-timeline-v3 and phase-balanced-hourly-v1; see [pilot record](bounded_pilot.md). After V2.4G (**EMPIRICAL/SYSTEM STUDY VIABLE**), V2.5A amends the confirmatory design to estimation-first (**V2.5 = PASS**) and V3 completes the Materna confirmatory estimation study (**V3 = PASS**; [results](materna_confirmatory_results.md)). **V4 = NEXT**. The 18 development entities remain excluded from primary confirmation. C3/C4 remain UNPROVEN.
+V2 passed under causal-timeline-v3 and phase-balanced-hourly-v1; see [pilot record](bounded_pilot.md). After V2.4G (**EMPIRICAL/SYSTEM STUDY VIABLE**), V2.5A amends the confirmatory design to estimation-first (**V2.5 = PASS**) and V3 completes the Materna confirmatory estimation study (**V3 = PASS**; [results](materna_confirmatory_results.md)). V4A freezes Google ClusterData 2019 for independent replication (**V4A = PASS**; [selection](independent_corpus_selection.md)). **V4B = NEXT**. The 18 development entities remain excluded from primary Materna confirmation. C3/C4 remain UNPROVEN.
 
 ## V2.4 prerequisite to confirmation freeze
 
@@ -334,7 +334,10 @@ original margin-blocked freeze remains at `configs/materna_confirmatory_v1.*`
 for provenance. C1/C2 remain withdrawn. Profile-level practical significance is
 **`NOT_DEFINED_AT_PROFILE_LEVEL`** (numeric margins not invented). **V2.5 STATUS:
 PASS (V2.5A).** **V3 STATUS: PASS** ([Materna confirmatory estimation results](materna_confirmatory_results.md)).
-**V4 = NEXT** — independent production-corpus suitability/acquisition. C3 and C4
-remain UNPROVEN. Future gates: V5 second-corpus replication; V6 cost benchmark;
-V7 K8s harness; V8 operational validation; V9 claim audit / venue decision. Do
-not claim C3–C6 before the corresponding gates pass.
+**V4A STATUS: PASS** ([independent corpus selection](independent_corpus_selection.md)):
+Google ClusterData 2019 frozen for acquisition under
+`google_clusterdata_2019_replication_protocol_v1`. **V4B = NEXT** (budgeted
+outcome-blind export). C3 and C4 remain UNPROVEN. Future gates: V5 second-corpus
+replication; V6 cost benchmark; V7 K8s harness; V8 operational validation; V9
+claim audit / venue decision. Do not claim C3–C6 before the corresponding gates
+pass.

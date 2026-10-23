@@ -130,22 +130,32 @@ This roadmap specifies future gates, not authorization to execute them. The sole
 - **Reviewer concern addressed:** credible Materna confirmation under estimation framing; TOCS 10–11 applied to real traces under the non-adaptive scope.
 - **Unproven:** external validity (V4–V5), maintenance-cost budgets (V6), operational benefit C4 (V7–V8).
 
-## V4 — INDEPENDENT PRODUCTION-CORPUS SUITABILITY / ACQUISITION
+## V4A — INDEPENDENT CORPUS SELECTION / PROTOCOL-FIT FREEZE
 
-**STATUS: NEXT — after V3 PASS; Materna confirmation remains separate**
+**STATUS: PASS — CORPUS READY FOR ACQUISITION (Google ClusterData 2019)**
 
-- **Objective:** select and acquire (or refuse) an independent production corpus for generalization; prefer continuing the Google ClusterData 2019 suitability track when still valid.
-- **Required artifacts:** formal suitability/licensing/acquisition report; reproducible adapters and hashes; eligibility audit; no confirmatory Materna outcome use in corpus choice.
-- **PASS criteria:** meaningful domain diversity and CPU/memory/time/horizon suitability decided before second-corpus benefit evaluation; acquisition reproducible without secrets in Git.
-- **Unproven:** actual second-corpus effects until V5.
+- **Objective:** select the strongest second production corpus for independent replication of the frozen V3 estimation study; freeze protocol-fit adaptation without running DynAPM/PW outcomes.
+- **Required artifacts:** [independent corpus selection](independent_corpus_selection.md); `configs/google_clusterdata_2019_replication_protocol_v1.{json,yaml}`; official-source audit of Google 2019, Alibaba 2018, Alibaba 2026 MaaS `instance_week_5min`, and checked alternatives.
+- **PASS criteria (met):** disposition frozen; preferred corpus justified by protocol fit (not expected effects); adaptation specifies entity/units/cadence/eligibility; V3 methods/RQs/statistics inherited unchanged; no Materna redesign; no second-corpus outcomes.
+- **Disposition:** Google ClusterData 2019 preferred; Alibaba 2018 optional backup; MaaS week-5min not preferred for 24h+24h five-minute replication.
+- **Unproven:** eligible continuous-entity count, BigQuery export cost, and any second-corpus effects (V4B/V5).
+
+## V4B — CORPUS ACQUISITION / CONTINUITY EXPORT
+
+**STATUS: NEXT — after V4A PASS**
+
+- **Objective:** acquire a reproducible, outcome-blind Google 2019 export under the frozen adaptation (budgeted BigQuery; pin snapshot/hashes; continuity + request-coverage filters only).
+- **Required artifacts:** authorized project/budget record; pinned SQL; export manifests/hashes; eligible-entity count before any PW/Static run.
+- **PASS criteria:** acquisition reproducible without secrets in Git; filters performance-blind; protocol mapping from V4A unchanged.
+- **Unproven:** second-corpus estimation effects until V5.
 
 ## V5 — SECOND-CORPUS REPLICATION
 
-**STATUS: PLANNED — requires V4 PASS**
+**STATUS: PLANNED — requires V4B PASS**
 
-- **Objective:** replicate the frozen non-adaptive maintenance/cadence study on the acquired corpus (preferably Google ClusterData 2019 if V4 affirms suitability).
-- **Required artifacts:** locked replication protocol; paired per-corpus effects; heterogeneity/negative-transfer report.
-- **PASS criteria:** no post-outcome eligibility tuning; uncertainty and limitations transparent; C3 only if practical-benefit criteria hold or the claim is narrowed.
+- **Objective:** replicate the frozen non-adaptive maintenance/cadence estimation study on the acquired Google 2019 cohort under `google_clusterdata_2019_replication_protocol_v1`.
+- **Required artifacts:** locked replication run; paired F1–F3 effects; heterogeneity/negative-transfer report.
+- **PASS criteria:** no post-outcome eligibility tuning; uncertainty and limitations transparent; C3 only with explicit unit/domain limits.
 - **Unproven:** domains outside tested corpora; operational effects.
 
 ## V6 — MAINTENANCE-COST / SERVICE BENCHMARK
@@ -190,7 +200,7 @@ Earlier documents used a denser V3–V11 numbering (full Materna + refresh trade
 
 ## Dependency and execution rule
 
-V0, V1A, V1B, V2 and the V2.4 investigation chain through V2.4G are PASS as executions. C1 and C2 are withdrawn. V2.4G disposition is **EMPIRICAL/SYSTEM STUDY VIABLE**. V2.5 / V2.5A is **PASS** (estimation-first confirmatory design). V3 is **PASS** (Materna confirmatory estimation study; see [results](materna_confirmatory_results.md)). **V4 is NEXT** (independent production-corpus suitability/acquisition). C3 and C4 remain UNPROVEN. V6 cost, V7–V8 system (C4), and V9 claim/venue gates follow. Every future experiment still requires explicit scope and authorization. No manuscript prose before V9.
+V0, V1A, V1B, V2 and the V2.4 investigation chain through V2.4G are PASS as executions. C1 and C2 are withdrawn. V2.4G disposition is **EMPIRICAL/SYSTEM STUDY VIABLE**. V2.5 / V2.5A is **PASS**. V3 is **PASS** (Materna confirmatory estimation; [results](materna_confirmatory_results.md)). V4A is **PASS** ([corpus selection](independent_corpus_selection.md); Google 2019 ready for acquisition). **V4B is NEXT**. C3 and C4 remain UNPROVEN. V5–V9 follow. Every future experiment still requires explicit scope and authorization. No manuscript prose before V9.
 
 Primary confirmation must exclude the same 18 development-pilot VMs. Candidate confirmatory set is exactly **1,558** IDs before protocol-validity exclusions ([cohort manifest](../configs/materna_confirmatory_cohort_v1.json)). The 199 gap-audit review flags remain diagnostics, not automatic exclusions. Optional whole-corpus description is separate from independent confirmation.
 
@@ -290,4 +300,13 @@ run `2026-10-22T150748.006454Z-9be95e6c23a5-87fdc2de`; output manifest
 `f1da7159691467338d8d759a1830a4118c52713ab8eefa49c3770e6a1a0064be`. Eligible
 1,558 / excluded 0; 7,790/7,790 method×VM complete; F1–F3 estimation reported.
 See [materna_confirmatory_results.md](materna_confirmatory_results.md).
-**V3 = PASS**; **V4 = NEXT**. C3/C4 UNPROVEN.
+**V3 = PASS**.
+
+## V4A execution record
+
+Independent corpus selection/protocol-fit freeze: disposition **CORPUS READY FOR
+ACQUISITION**; preferred **Google ClusterData 2019**; protocol fingerprint
+`4067689f6147a4eba191ad578c1b061af71c3d50b6342ce88a3d8498fb7b4226`. See
+[independent_corpus_selection.md](independent_corpus_selection.md). No full
+dataset download; no second-corpus outcomes. **V4A = PASS**; **V4B = NEXT**.
+C3/C4 UNPROVEN.
