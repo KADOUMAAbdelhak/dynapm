@@ -1,16 +1,42 @@
-# Google ClusterData 2019 Acquisition (V4B → V4B.3)
+# Google ClusterData 2019 Acquisition (V4B → V4B.4)
 
-**V4B.3 disposition: `READY_FOR_ZERO_COST_ACQUISITION`**  
-**Chosen cells (outcome-blind cost ranking): `e`, `g`**  
-**Projected cumulative query bytes: 825.671983 GiB (headroom 74.328017 GiB under 900 GiB)**  
-**Executed query-processing bytes this gate: 0**  
+**V4B.4 disposition: `ACQUISITION_BLOCKED`**  
+**Blocker:** `insufficient_local_disk_for_frozen_extract_uncompressed_upper_bound`  
+**Chosen cells (unchanged): `e`, `g`**  
+**Fresh dry-runs: match frozen estimates exactly (0% delta); SQL hashes unchanged**  
+**Executed query-processing bytes: 0** (no source scan started)  
+**Local disk:** ~105.7 GiB free vs ~990.8 GiB required (1.2× uncompressed upper bound for e+g)  
 **Billing: `billingEnabled=false` throughout; no paid resources created.**  
 **No DynAPM/PW/Static/Full-Rewrite outcomes.**
 
 V4A protocol fingerprint remains
 `4067689f6147a4eba191ad578c1b061af71c3d50b6342ce88a3d8498fb7b4226`.
 Entity/ALLOC_SET/300s/request-normalization semantics are unchanged. Cell
-*scope* is narrowed solely by free-tier cost constraints.
+*scope* remains the V4B.3 cost-feasible subset `{e,g}`.
+
+## V4B.4 preflight (execution refused)
+
+| Check | Result |
+|---|---|
+| Plan fingerprint | `f9f4bb846adfe9a303eb3d63f2efba84f7aa233ae4b990eb0b292cb30d76cfba` OK |
+| `billingEnabled` | false |
+| Ledger | 0 bytes |
+| Dry-run e usage | 338.492611 GiB = frozen |
+| Dry-run e events | 68.103194 GiB = frozen |
+| Dry-run g usage | 350.718970 GiB = frozen |
+| Dry-run g events | 68.357208 GiB = frozen |
+| Projected cumulative | 825.671983 GiB ≤ 900 GiB |
+| Local free disk | ~105.7 GiB |
+| Required (1.2× e+g upper bound) | ~990.8 GiB |
+| Execution | **refused** |
+
+Tracked records: `configs/google2019_v4b4_preflight_summary.json`,
+`configs/google2019_v4b4_acquisition_record.json`.  
+Executor (gated): `dynapm/scripts/task29_google2019_execute_acquisition.py`.
+
+**Resolution:** provide ≥ ~991 GiB free local disk (or an attached volume with that
+headroom), then re-run preflight and execute without changing cells/SQL. Do not
+subsample or alter population rules to fit disk.
 
 ## Frozen plan identities
 
