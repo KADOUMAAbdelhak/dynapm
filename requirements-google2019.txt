@@ -1,0 +1,4 @@
+# Optional BigQuery client for V4B/V4B.1 Google ClusterData 2019 acquisition.
+# Install into the project venv only when running budget-guarded dry-runs/extracts:
+#   .venv/bin/pip install -r requirements-google2019.txt
+google-cloud-bigquery>=3.25

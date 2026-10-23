@@ -14,6 +14,8 @@ _mplconfig/
 *.log
 
 data/raw/
+# Managed Google 2019 extracts, dry-run provenance, and job metadata (no secrets).
+data/google2019/
 results/*
 !results/README.md
 dynapm/results/

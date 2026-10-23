@@ -142,11 +142,11 @@ This roadmap specifies future gates, not authorization to execute them. The sole
 
 ## V4B — CORPUS ACQUISITION / CONTINUITY EXPORT
 
-**STATUS: BLOCKED — Google Cloud credentials/billing/client unavailable**
+**STATUS: BLOCKED — V4B.1 bootstrap: ADC + billing project still required**
 
 - **Objective:** acquire a reproducible, outcome-blind Google 2019 export under the frozen adaptation (budgeted BigQuery; pin snapshot/hashes; continuity + request-coverage filters only).
 - **Required artifacts:** [acquisition record](google2019_acquisition.md); `configs/google2019_acquisition_v1.{json,yaml}`; guarded SQL and canonical preprocessing; authorized project/budget; bounded export manifests/hashes; eligible-entity count before any PW/Static run.
-- **Current result:** population/normalization/query/preprocessing rules frozen and synthetic pipeline tests pass. No `bq`/`gcloud`, BigQuery client, ADC, or billing project was available, so authenticated dry-run bytes/costs and the bounded extract could not be obtained. Disposition `ACQUISITION_BLOCKED`.
+- **Current result (V4B.1):** population/normalization/query rules unchanged; Python `google-cloud-bigquery` client installed; budget-safe dry-run/execute CLI ready. Application Default Credentials and an explicit billing/quota project are still missing, so no authenticated dry-run or bounded extract ran. Disposition `ACQUISITION_BLOCKED` (`google_cloud_adc_and_billing_project_unavailable`).
 - **PASS criteria:** bounded extraction and canonical manifests complete after recorded dry-runs; acquisition reproducible without secrets in Git; filters performance-blind; protocol mapping from V4A unchanged.
 - **Unproven:** second-corpus estimation effects until V5.
 
@@ -201,7 +201,7 @@ Earlier documents used a denser V3–V11 numbering (full Materna + refresh trade
 
 ## Dependency and execution rule
 
-V0, V1A, V1B, V2 and the V2.4 investigation chain through V2.4G are PASS as executions. C1 and C2 are withdrawn. V2.4G disposition is **EMPIRICAL/SYSTEM STUDY VIABLE**. V2.5 / V2.5A is **PASS**. V3 is **PASS** (Materna confirmatory estimation; [results](materna_confirmatory_results.md)). V4A is **PASS** ([corpus selection](independent_corpus_selection.md); Google 2019 ready for acquisition). **V4B is BLOCKED** ([acquisition record](google2019_acquisition.md); credentials/billing/client unavailable). C3 and C4 remain UNPROVEN. V5–V9 follow. Every future experiment still requires explicit scope and authorization. No manuscript prose before V9.
+V0, V1A, V1B, V2 and the V2.4 investigation chain through V2.4G are PASS as executions. C1 and C2 are withdrawn. V2.4G disposition is **EMPIRICAL/SYSTEM STUDY VIABLE**. V2.5 / V2.5A is **PASS**. V3 is **PASS** (Materna confirmatory estimation; [results](materna_confirmatory_results.md)). V4A is **PASS** ([corpus selection](independent_corpus_selection.md); Google 2019 ready for acquisition). **V4B / V4B.1 are BLOCKED** ([acquisition record](google2019_acquisition.md); ADC + billing project unavailable). C3 and C4 remain UNPROVEN. V5–V9 follow. Every future experiment still requires explicit scope and authorization. No manuscript prose before V9.
 
 Primary confirmation must exclude the same 18 development-pilot VMs. Candidate confirmatory set is exactly **1,558** IDs before protocol-validity exclusions ([cohort manifest](../configs/materna_confirmatory_cohort_v1.json)). The 199 gap-audit review flags remain diagnostics, not automatic exclusions. Optional whole-corpus description is separate from independent confirmation.
 
@@ -316,7 +316,16 @@ dataset download; no second-corpus outcomes. **V4A = PASS**. C3/C4 UNPROVEN.
 Google 2019 acquisition/preprocessing freeze: disposition **`ACQUISITION_BLOCKED`**.
 Population, normalization, SQL, and canonical pipeline frozen and tested on
 synthetic fixtures. No authenticated dry-run, no Google rows, no method
-outcomes. Blocker:
-`google_cloud_credentials_billing_project_and_bigquery_client_unavailable`.
-See [google2019_acquisition.md](google2019_acquisition.md). **V4B = BLOCKED**.
-V5 remains blocked until a billed BigQuery dry-run and bounded extract pass.
+outcomes. See [google2019_acquisition.md](google2019_acquisition.md).
+**V4B = BLOCKED**.
+
+## V4B.1 execution record
+
+BigQuery access bootstrap: `google-cloud-bigquery` installed; guarded
+`--dry-run-all` / `--execute-bounded` runner with `maximum_bytes_billed` and
+immutable provenance under gitignored `data/google2019/`. Query SQL hashes
+unchanged. Still blocked on missing ADC + billing/quota project
+(`google_cloud_adc_and_billing_project_unavailable`). Exact operator commands
+are listed in [google2019_acquisition.md](google2019_acquisition.md).
+**V4B.1 = BLOCKED**. V5 remains blocked until billed dry-runs and the bounded
+extract pass.

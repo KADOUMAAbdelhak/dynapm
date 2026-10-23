@@ -1,22 +1,24 @@
-# V4B — Google ClusterData 2019 Acquisition & Canonical Preprocessing
+# V4B / V4B.1 — Google ClusterData 2019 Acquisition & Canonical Preprocessing
 
 **Disposition: `ACQUISITION_BLOCKED`**  
-**Blocker:** `google_cloud_credentials_billing_project_and_bigquery_client_unavailable`  
+**Blocker:** `google_cloud_adc_and_billing_project_unavailable`  
+**V4B.1:** Python BigQuery client installed; ADC + billing/quota project still required.  
 **No Google rows acquired; no Static/PW/Full-Rewrite outcomes computed.**
 
-V4B froze and locally validated the acquisition/preprocessing pipeline against
-synthetic schema fixtures, but safely stopped before a BigQuery dry-run or
-bounded extraction. This is not a dataset-suitability reversal: V4A remains
-PASS. Acquisition requires authenticated dry-runs and a billed project.
+V4B froze outcome-blind population/normalization/SQL/canonical rules. V4B.1
+adds a budget-safe dry-run/execute runner and installs `google-cloud-bigquery` in
+the project environment, but **stops before any authenticated query** until you
+complete the human auth steps below. V4A remains PASS. Query SQL hashes are
+unchanged from V4B.
 
 ## Frozen identities
 
 | Item | Identity |
 |---|---|
 | V4A protocol | `4067689f6147a4eba191ad578c1b061af71c3d50b6342ce88a3d8498fb7b4226` |
-| Acquisition config fingerprint | `ed1743237f24e87944f2e4adb2eab2d49d5544e146aba183aefe279fe243ffea` |
-| Config JSON SHA-256 | `4766c9175575a71f81241d021fba5564ccf684cd293d3c1bd93a35a2b9b6d8b1` |
-| Config YAML SHA-256 | `5769bbd9bfa9e86adffa665be79508c1d7403941788169966000899e175376f9` |
+| Acquisition config fingerprint | `8a850d8c5318c7cf029d8940d74e3c29a80b7b494c8332e5bfc37e66a087867c` |
+| Config JSON SHA-256 | `d91cc92103410753f0893393f037671b69c8339048fc9d605829ade90ac337a2` |
+| Config YAML SHA-256 | `446f495852ad61f11cc99e3ca9017e0a7380685ce61c707485b565136046f9e0` |
 | Config | `configs/google2019_acquisition_v1.{json,yaml}` |
 
 ## Official tables and fields
@@ -35,44 +37,82 @@ Sources: [trace README](https://github.com/google/cluster-data/blob/master/Clust
 [v3 proto](https://github.com/google/cluster-data/blob/master/clusterdata_trace_format_v3.proto),
 [CC-BY-4.0 licence](https://github.com/google/cluster-data#license).
 
-## Access and budget guard
+## Access and budget guard (V4B.1)
 
-Local inspection found:
+Local inspection after V4B.1 tooling:
 
-- no `bq`, `gcloud`, or `gsutil`;
-- no `google-cloud-bigquery` Python package;
-- no Application Default Credentials;
-- no billing project environment setting.
+| Check | Status |
+|---|---|
+| `google-cloud-bigquery` in `.venv` | present |
+| `bq` / `gcloud` CLI | absent |
+| Application Default Credentials | **absent** |
+| Billing / quota project | **absent** (not fabricated) |
 
-The guarded dry-run command stopped with exit 2 and the blocker above. It did
-not contact BigQuery or execute SQL.
+Dry-run and bounded execution are refused. No BigQuery API call was made.
+
+Optional dependency file: `requirements-google2019.txt`.  
+Managed extracts/provenance (gitignored): `data/google2019/`.  
+Secrets, tokens, service-account keys, and billing IDs are never committed.
 
 Official on-demand pricing at freeze time is $6.25/TiB processed, with the first
 1 TiB/month/account listed as free. Remaining free allowance is unknown and is
-never assumed. Every new query class requires:
+never assumed. Default `maximum_bytes_billed` guard is **10 GiB** (cap, not an
+estimate). Every new query class requires:
 
 1. authenticated BigQuery dry-run;
 2. recorded processed bytes and pre-free-tier cost;
 3. explicit `maximum_bytes_billed`;
-4. approval before execution.
+4. refusal when dry-run bytes exceed the guard;
+5. approval before execution.
 
 Time predicates on `instance_usage`/`instance_events` are **not** a cost
 guarantee: those tables are not documented as partitioned on `start_time`, so a
 `[7d,15d)` filter may still scan a full cell table. Dry-run bytes, not the SQL
 window, determine billed cost.
 
-Because dry-run access was unavailable:
-
-| Query class | Dry-run bytes | Cost estimate | Executed |
-|---|---:|---:|---|
-| Schema probe | unavailable | unavailable | no |
-| Bounded population | unavailable | unavailable | no |
-| Bounded validation extract | unavailable | unavailable | no |
-| Full-cell population | unavailable | unavailable | no |
-| Full-cell extract | unavailable | unavailable | no |
+| Query class | Dry-run bytes | Cost estimate | Fits 10 GiB guard | Executed |
+|---|---:|---:|---|---|
+| Schema probe (`01`) | unavailable | unavailable | n/a | no |
+| Bounded population (`02`) | unavailable | unavailable | n/a | no |
+| Bounded validation extract (`03`) | unavailable | unavailable | n/a | no |
+| Full-cell population (`04`, cell `a`) | unavailable | unavailable | n/a | no |
+| Full-cell extract (`05`, cell `a`) | unavailable | unavailable | n/a | no |
 
 No query-specific byte/cost estimate is fabricated from the documented
-~2.4 TiB compressed corpus size.
+~2.4 TiB compressed corpus size. Full acquisition cost/storage remains unknown.
+
+## Exact human actions required (do these, then re-run V4B.1)
+
+Replace `YOUR_BILLING_PROJECT` with your real billed GCP project ID. Do not invent one.
+
+```bash
+# 1) SDK (once) for ADC login
+brew install --cask google-cloud-sdk
+
+# 2) Create/select a billed project; enable BigQuery API in Console
+#    https://console.cloud.google.com/projectcreate
+#    https://console.cloud.google.com/apis/library/bigquery.googleapis.com
+
+# 3) Application Default Credentials
+gcloud auth application-default login
+gcloud auth application-default set-quota-project YOUR_BILLING_PROJECT
+export GOOGLE_CLOUD_PROJECT=YOUR_BILLING_PROJECT
+
+# 4) Client (already installed in this workspace; re-run if needed)
+.venv/bin/pip install -r requirements-google2019.txt
+
+# 5) Verify (exits 0 only when ADC + billing project are usable)
+.venv/bin/python -m dynapm.scripts.task28_google2019_acquisition \
+  --access-check --billing-project YOUR_BILLING_PROJECT
+
+# 6) Dry-run frozen queries 01–05 (no execution)
+.venv/bin/python -m dynapm.scripts.task28_google2019_acquisition \
+  --dry-run-all --billing-project YOUR_BILLING_PROJECT
+
+# 7) Only if 01–03 fit the 10 GiB guard: bounded extract (cells a,b; days [7,15))
+.venv/bin/python -m dynapm.scripts.task28_google2019_acquisition \
+  --execute-bounded --billing-project YOUR_BILLING_PROJECT
+```
 
 ## Frozen outcome-blind population rules
 
@@ -125,21 +165,18 @@ data.
 
 ## Canonical format and manifests
 
-`write_canonical_artifacts` immutably writes:
+`write_canonical_artifacts` immutably writes under a managed directory:
 
 - `canonical_usage.parquet`;
 - `entity_manifest.parquet`;
 - `rejected_rows.parquet`;
-- `manifest.json`.
+- `manifest.json` (query/job/config hashes, continuity summary, file SHA-256).
 
-Canonical columns include cell/entity key, trace-relative `timestamp_us`,
-normalized CPU/memory, raw normalized usage/request audit fields, causal request
-event time, source table IDs, and source-row SHA-256. Manifests record
-repository-relative query path/hash, extraction time, row/entity/cell counts,
-file hashes, preprocessing fingerprint, and exclusion reasons. Existing output
-directories are never overwritten.
+CLI also records dry-run/execution provenance JSON under
+`data/google2019/` (gitignored). Scientific identity paths remain
+repository-relative only.
 
-## Reproducible SQL
+## Reproducible SQL (unchanged from V4B)
 
 | Query | SHA-256 |
 |---|---|
@@ -148,9 +185,6 @@ directories are never overwritten.
 | `03_bounded_validation_extract.sql` | `5619a565996527bf519a618b9485f39a006bb418e8bbd6b40f7fdabd388aa8fa` |
 | `04_full_cell_population.sql` | `d3ec8ced459fb22b6342551c7b5d504e6fb0a9a7049b3e3cd1d211be8b5ed3d9` |
 | `05_full_cell_extract.sql` | `206bf9161750b4d28046a27a1fd980180b1c8b7d8d36b8b08fba33106661c674` |
-
-These hashes are embedded in the acquisition config. Any SQL change invalidates
-the config and tests.
 
 ## Bounded extract result
 
@@ -166,13 +200,8 @@ the config and tests.
 The bounded extraction requirement therefore did **not** pass. A full export
 was not estimated or attempted.
 
-## Resolution required
+## Full-acquisition disposition
 
-1. Install `google-cloud-bigquery` (or official `bq` CLI).
-2. Supply an authenticated ADC identity and billed project with BigQuery API.
-3. Dry-run all five query classes and record bytes/costs.
-4. Execute bounded cells `a`,`b` only if each query is under an approved cap.
-5. Validate bounded canonical manifests and continuity.
-6. Estimate full-cell acquisition; only then choose full vs deterministic subset.
-
-Until these steps pass, V5 replication remains blocked.
+`ACQUISITION_BLOCKED` — awaiting ADC + explicit billing project, then real
+dry-run bytes for queries 01–05 before any bounded execute or full-export
+decision (`READY_FOR_FULL_ACQUISITION` / `BOUNDED_SUBSET_REQUIRED`).

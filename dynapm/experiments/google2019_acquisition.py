@@ -26,7 +26,7 @@ CONFIG_YAML = REPO_ROOT / "configs" / "google2019_acquisition_v1.yaml"
 
 SCHEMA_VERSION = "google2019-acquisition-v1"
 DISPOSITION = "ACQUISITION_BLOCKED"
-BLOCKER_CODE = "google_cloud_credentials_billing_project_and_bigquery_client_unavailable"
+BLOCKER_CODE = "google_cloud_adc_and_billing_project_unavailable"
 CELLS = tuple("abcdefgh")
 BOUNDED_CELLS = ("a", "b")
 PRICE_USD_PER_TIB = 6.25
@@ -35,6 +35,9 @@ DEFAULT_MAXIMUM_BYTES_BILLED = 10 * 1024**3  # 10 GiB: guard, not an estimate.
 MIN_VALID_SLOTS = 2000
 MIN_SPAN_US = 7 * 24 * 3600 * 1_000_000
 CADENCE_US = 300 * 1_000_000
+MANAGED_ROOT = REPO_ROOT / "data" / "google2019"
+BOUNDED_EXTRACT_QUERY = "03_bounded_validation_extract.sql"
+FULL_CELL_DRY_RUN_CELL = "a"  # representative cell for template dry-runs only
 
 QUERY_FILES = (
     "01_schema_probe.sql",
@@ -91,10 +94,43 @@ class AccessStatus:
     billing_project: str | None
     dry_run_possible: bool
     blocker_code: str | None
+    missing: tuple[str, ...]
+
+
+class BudgetExceeded(AcquisitionBlocked):
+    """Dry-run bytes exceed the configured maximum_bytes_billed guard."""
 
 
 def query_hashes(root: Path = QUERY_ROOT) -> dict[str, str]:
     return {name: file_sha256(root / name) for name in QUERY_FILES}
+
+
+def human_bootstrap_actions() -> list[str]:
+    """Exact operator actions required before any authenticated dry-run."""
+    return [
+        "Install Google Cloud SDK once (provides gcloud for ADC login): "
+        "brew install --cask google-cloud-sdk",
+        "Create or select a billed GCP project with the BigQuery API enabled "
+        "(Console → project create / billing linked; enable BigQuery API). "
+        "Do not invent a project ID.",
+        "Authenticate Application Default Credentials: "
+        "gcloud auth application-default login",
+        "Bind the ADC quota/billing project (replace YOUR_BILLING_PROJECT): "
+        "gcloud auth application-default set-quota-project YOUR_BILLING_PROJECT",
+        "Export the billing/quota project for this shell: "
+        "export GOOGLE_CLOUD_PROJECT=YOUR_BILLING_PROJECT",
+        "Ensure the Python client is installed in the project venv: "
+        ".venv/bin/pip install -r requirements-google2019.txt",
+        "Verify access (no query execution): "
+        ".venv/bin/python -m dynapm.scripts.task28_google2019_acquisition "
+        "--access-check --billing-project YOUR_BILLING_PROJECT",
+        "Dry-run frozen query classes 01–05: "
+        ".venv/bin/python -m dynapm.scripts.task28_google2019_acquisition "
+        "--dry-run-all --billing-project YOUR_BILLING_PROJECT",
+        "If 01–03 fit the guard, execute only the frozen bounded extract: "
+        ".venv/bin/python -m dynapm.scripts.task28_google2019_acquisition "
+        "--execute-bounded --billing-project YOUR_BILLING_PROJECT",
+    ]
 
 
 def acquisition_document() -> dict[str, Any]:
@@ -108,14 +144,16 @@ def acquisition_document() -> dict[str, Any]:
         "blocker": {
             "code": BLOCKER_CODE,
             "detail": (
-                "No bq/gcloud CLI, google-cloud-bigquery package, Application Default "
-                "Credentials, or billing project is available. Therefore no authenticated "
-                "dry-run byte estimate or bounded query may be executed safely."
+                "The Python google-cloud-bigquery client is available in the project "
+                "environment, but Application Default Credentials and an explicit "
+                "billing/quota project are not configured. Authenticated dry-runs and "
+                "bounded extraction are refused until both are present."
             ),
             "resolution": (
-                "Provide a billed Google Cloud project, enable BigQuery, authenticate ADC, "
-                "install google-cloud-bigquery, then run guarded dry-runs before extraction."
+                "Authenticate ADC, set an explicit billed GOOGLE_CLOUD_PROJECT / "
+                "--billing-project, then run guarded dry-runs before any extraction."
             ),
+            "human_bootstrap_actions": human_bootstrap_actions(),
         },
         "official_source": {
             "project": "google.com:google-cluster-data",
@@ -297,10 +335,29 @@ def estimate_on_demand_cost_usd(processed_bytes: int) -> float:
     return float(processed_bytes / TIB * PRICE_USD_PER_TIB)
 
 
-def inspect_access() -> AccessStatus:
+def fits_guard(processed_bytes: int, maximum_bytes_billed: int = DEFAULT_MAXIMUM_BYTES_BILLED) -> bool:
+    return int(processed_bytes) <= int(maximum_bytes_billed)
+
+
+def _has_adc() -> bool:
+    import os
+
+    env_path = os.environ.get("GOOGLE_APPLICATION_CREDENTIALS")
+    if env_path and Path(env_path).is_file():
+        return True
+    adc_path = Path.home() / ".config" / "gcloud" / "application_default_credentials.json"
+    return adc_path.is_file()
+
+
+def _env_billing_project() -> str | None:
+    import os
+
+    return os.environ.get("GOOGLE_CLOUD_PROJECT") or os.environ.get("GCLOUD_PROJECT")
+
+
+def inspect_access(billing_project: str | None = None) -> AccessStatus:
     """Inspect access without printing account names or credential contents."""
     import importlib.util
-    import os
     import shutil
 
     has_client = False
@@ -309,18 +366,46 @@ def inspect_access() -> AccessStatus:
         has_client = spec is not None
     except (ImportError, ModuleNotFoundError, ValueError):
         has_client = False
-    adc_path = Path.home() / ".config" / "gcloud" / "application_default_credentials.json"
-    project = os.environ.get("GOOGLE_CLOUD_PROJECT") or os.environ.get("GCLOUD_PROJECT")
-    possible = bool(has_client and adc_path.exists() and project)
+    has_adc = _has_adc()
+    project = billing_project or _env_billing_project()
+    missing: list[str] = []
+    if not has_client:
+        missing.append("python_bigquery_client")
+    if not has_adc:
+        missing.append("application_default_credentials")
+    if not project:
+        missing.append("billing_project")
+    possible = not missing
     return AccessStatus(
         bigquery_cli=shutil.which("bq") is not None,
         gcloud_cli=shutil.which("gcloud") is not None,
         python_bigquery_client=has_client,
-        application_default_credentials=adc_path.exists(),
+        application_default_credentials=has_adc,
         billing_project=project,
         dry_run_possible=possible,
         blocker_code=None if possible else BLOCKER_CODE,
+        missing=tuple(missing),
     )
+
+
+def load_query_sql(name: str, *, cell: str | None = None) -> str:
+    """Load a frozen query; render {{CELL}} only for full-cell templates."""
+    if name not in QUERY_FILES:
+        raise ValueError(f"unknown query file: {name}")
+    if name.startswith(("04_", "05_")):
+        if cell is None:
+            raise ValueError("--cell is required for cell-template queries")
+        return render_cell_query(name, cell)
+    return (QUERY_ROOT / name).read_text(encoding="utf-8")
+
+
+def _require_access(billing_project: str) -> AccessStatus:
+    if not billing_project or not str(billing_project).strip():
+        raise AcquisitionBlocked(BLOCKER_CODE)
+    status = inspect_access(billing_project=billing_project)
+    if not status.dry_run_possible:
+        raise AcquisitionBlocked(BLOCKER_CODE)
+    return status
 
 
 def dry_run_query(
@@ -328,11 +413,10 @@ def dry_run_query(
     *,
     billing_project: str,
     maximum_bytes_billed: int = DEFAULT_MAXIMUM_BYTES_BILLED,
+    query_name: str | None = None,
 ) -> dict[str, Any]:
     """Authenticated dry-run. Never executes a query."""
-    status = inspect_access()
-    if not status.dry_run_possible:
-        raise AcquisitionBlocked(BLOCKER_CODE)
+    _require_access(billing_project)
     from google.cloud import bigquery  # type: ignore[import-not-found]
 
     client = bigquery.Client(project=billing_project)
@@ -341,16 +425,159 @@ def dry_run_query(
         use_query_cache=False,
         maximum_bytes_billed=maximum_bytes_billed,
     )
+    started = utc_now()
     job = client.query(sql, job_config=job_config, location="US")
-    processed = int(job.total_bytes_processed)
+    processed = int(job.total_bytes_processed or 0)
     return {
+        "query_name": query_name,
         "query_sha256": hashlib.sha256(sql.encode("utf-8")).hexdigest(),
         "processed_bytes": processed,
-        "estimated_on_demand_cost_usd_before_free_tier": estimate_on_demand_cost_usd(processed),
+        "estimated_on_demand_cost_usd_before_free_tier": estimate_on_demand_cost_usd(
+            processed
+        ),
         "maximum_bytes_billed": maximum_bytes_billed,
+        "fits_guard": fits_guard(processed, maximum_bytes_billed),
         "location": "US",
+        "billing_project_configured": True,
         "dry_run": True,
         "executed": False,
+        "timestamp": started,
+        "time_filter_not_cost_guarantee": True,
+    }
+
+
+def execute_query_guarded(
+    sql: str,
+    *,
+    billing_project: str,
+    maximum_bytes_billed: int = DEFAULT_MAXIMUM_BYTES_BILLED,
+    query_name: str | None = None,
+) -> dict[str, Any]:
+    """Dry-run first; execute only when dry-run bytes fit the guard."""
+    dry = dry_run_query(
+        sql,
+        billing_project=billing_project,
+        maximum_bytes_billed=maximum_bytes_billed,
+        query_name=query_name,
+    )
+    if not dry["fits_guard"]:
+        raise BudgetExceeded(
+            f"dry-run {dry['processed_bytes']} bytes exceeds guard "
+            f"{maximum_bytes_billed}"
+        )
+    from google.cloud import bigquery  # type: ignore[import-not-found]
+
+    client = bigquery.Client(project=billing_project)
+    job_config = bigquery.QueryJobConfig(
+        dry_run=False,
+        use_query_cache=False,
+        maximum_bytes_billed=maximum_bytes_billed,
+    )
+    started = utc_now()
+    job = client.query(sql, job_config=job_config, location="US")
+    frame = job.to_dataframe(create_bqstorage_client=False)
+    executed_bytes = int(job.total_bytes_processed or 0)
+    return {
+        **dry,
+        "dry_run": False,
+        "executed": True,
+        "execution_timestamp": started,
+        "job_id": job.job_id,
+        "execution_bytes": executed_bytes,
+        "row_count": int(len(frame)),
+        "dataframe": frame,
+    }
+
+
+def dry_run_all_query_classes(
+    *,
+    billing_project: str,
+    maximum_bytes_billed: int = DEFAULT_MAXIMUM_BYTES_BILLED,
+    full_cell: str = FULL_CELL_DRY_RUN_CELL,
+) -> list[dict[str, Any]]:
+    """Dry-run frozen query classes 01–05. Templates use one representative cell."""
+    if full_cell not in CELLS:
+        raise ValueError("full_cell must be one of a..h")
+    records: list[dict[str, Any]] = []
+    for name in QUERY_FILES:
+        cell = full_cell if name.startswith(("04_", "05_")) else None
+        sql = load_query_sql(name, cell=cell)
+        record = dry_run_query(
+            sql,
+            billing_project=billing_project,
+            maximum_bytes_billed=maximum_bytes_billed,
+            query_name=name,
+        )
+        if cell is not None:
+            record = {**record, "rendered_cell": cell}
+        records.append(record)
+    return records
+
+
+def write_query_provenance(
+    records: list[dict[str, Any]],
+    *,
+    output_dir: Path | None = None,
+    kind: str = "dry_run",
+) -> dict[str, Any]:
+    """Persist dry-run/execution provenance under the gitignored managed root."""
+    root = Path(output_dir) if output_dir is not None else MANAGED_ROOT / "provenance"
+    root.mkdir(parents=True, exist_ok=True)
+    serializable = []
+    for record in records:
+        item = {k: v for k, v in record.items() if k != "dataframe"}
+        serializable.append(item)
+    payload = {
+        "schema_version": SCHEMA_VERSION,
+        "kind": kind,
+        "v4a_protocol_fingerprint": v4a_hashes()["protocol_fingerprint"],
+        "preprocessing_config_fingerprint": frozen_hashes()["config_fingerprint"],
+        "query_file_sha256": query_hashes(),
+        "records": serializable,
+        "method_outcomes_computed": False,
+        "written_at": utc_now(),
+    }
+    path = root / f"{kind}_provenance.json"
+    if path.exists():
+        raise FileExistsError(f"immutable provenance already exists: {path}")
+    path.write_text(canonical_json(payload) + "\n", encoding="utf-8")
+    return {**payload, "path": "data/google2019/provenance/" + path.name, "sha256": file_sha256(path)}
+
+
+def execute_bounded_validation_extract(
+    *,
+    billing_project: str,
+    maximum_bytes_billed: int = DEFAULT_MAXIMUM_BYTES_BILLED,
+    output_dir: Path | None = None,
+) -> dict[str, Any]:
+    """Execute only the frozen bounded extract after a passing dry-run."""
+    sql = load_query_sql(BOUNDED_EXTRACT_QUERY)
+    result = execute_query_guarded(
+        sql,
+        billing_project=billing_project,
+        maximum_bytes_billed=maximum_bytes_billed,
+        query_name=BOUNDED_EXTRACT_QUERY,
+    )
+    frame = result.pop("dataframe")
+    out = Path(output_dir) if output_dir is not None else (
+        MANAGED_ROOT / "bounded_validation"
+    )
+    write_query_provenance(
+        [{k: v for k, v in result.items()}],
+        output_dir=out / "provenance",
+        kind="bounded_execution",
+    )
+    manifest = write_canonical_artifacts(
+        frame,
+        out / "canonical",
+        query_name=BOUNDED_EXTRACT_QUERY,
+        extraction_timestamp=result["execution_timestamp"],
+        job_provenance=result,
+    )
+    return {
+        "execution": result,
+        "manifest": manifest,
+        "output_root": "data/google2019/bounded_validation",
     }
 
 
@@ -508,6 +735,7 @@ def write_canonical_artifacts(
     *,
     query_name: str,
     extraction_timestamp: str | None = None,
+    job_provenance: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Write immutable canonical Parquet + manifests. Refuses overwrite."""
     output_dir = Path(output_dir)
@@ -522,6 +750,46 @@ def write_canonical_artifacts(
     entities.to_parquet(entities_path, index=False)
     details["rejected"].to_parquet(rejected_path, index=False)
     query_path = QUERY_ROOT / query_name
+    continuity = {
+        "entities_with_missing_slots": int(
+            (entities["missing_slots"] > 0).sum() if len(entities) else 0
+        ),
+        "entities_with_request_change": int(
+            entities["has_request_change"].sum() if len(entities) else 0
+        ),
+        "total_missing_slots": int(
+            entities["missing_slots"].sum() if len(entities) else 0
+        ),
+        "min_timestamp_us": (
+            int(canonical["timestamp_us"].min()) if len(canonical) else None
+        ),
+        "max_timestamp_us": (
+            int(canonical["timestamp_us"].max()) if len(canonical) else None
+        ),
+        "duration_us": (
+            int(canonical["timestamp_us"].max() - canonical["timestamp_us"].min())
+            if len(canonical)
+            else None
+        ),
+        "cadence_us": CADENCE_US,
+    }
+    job_meta = None
+    if job_provenance is not None:
+        job_meta = {
+            key: job_provenance[key]
+            for key in (
+                "query_name",
+                "query_sha256",
+                "processed_bytes",
+                "execution_bytes",
+                "job_id",
+                "maximum_bytes_billed",
+                "fits_guard",
+                "execution_timestamp",
+                "estimated_on_demand_cost_usd_before_free_tier",
+            )
+            if key in job_provenance
+        }
     manifest = {
         "schema_version": SCHEMA_VERSION,
         "preprocessing_config_fingerprint": frozen_hashes()["config_fingerprint"],
@@ -530,9 +798,10 @@ def write_canonical_artifacts(
             "path": f"queries/google2019/{query_name}",
             "sha256": file_sha256(query_path),
         },
+        "job_provenance": job_meta,
         "source_tables": sorted(
-            set(canonical["usage_source_table"])
-            | set(canonical["request_source_table"])
+            set(canonical["usage_source_table"].astype(str))
+            | set(canonical["request_source_table"].astype(str))
         ),
         "extraction_timestamp": extraction_timestamp or utc_now(),
         "row_count": int(len(canonical)),
@@ -540,8 +809,9 @@ def write_canonical_artifacts(
         "eligible_entity_count": (
             int(entities["eligible"].sum()) if len(entities) else 0
         ),
-        "cell_count": int(canonical["cell"].nunique()),
-        "cells": sorted(canonical["cell"].unique().tolist()),
+        "cell_count": int(canonical["cell"].nunique()) if len(canonical) else 0,
+        "cells": sorted(canonical["cell"].astype(str).unique().tolist()),
+        "continuity": continuity,
         "files": {
             path.name: {
                 "sha256": file_sha256(path),

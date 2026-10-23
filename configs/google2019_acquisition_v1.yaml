@@ -4,9 +4,19 @@ gate: V4B
 v4a_protocol_fingerprint: 4067689f6147a4eba191ad578c1b061af71c3d50b6342ce88a3d8498fb7b4226
 disposition: ACQUISITION_BLOCKED
 blocker:
-  code: google_cloud_credentials_billing_project_and_bigquery_client_unavailable
-  detail: "No bq/gcloud CLI, google-cloud-bigquery package, Application Default Credentials, or billing project is available. Therefore no authenticated dry-run byte estimate or bounded query may be executed safely."
-  resolution: "Provide a billed Google Cloud project, enable BigQuery, authenticate ADC, install google-cloud-bigquery, then run guarded dry-runs before extraction."
+  code: google_cloud_adc_and_billing_project_unavailable
+  detail: "The Python google-cloud-bigquery client is available in the project environment, but Application Default Credentials and an explicit billing/quota project are not configured. Authenticated dry-runs and bounded extraction are refused until both are present."
+  resolution: "Authenticate ADC, set an explicit billed GOOGLE_CLOUD_PROJECT / --billing-project, then run guarded dry-runs before any extraction."
+  human_bootstrap_actions:
+    - "Install Google Cloud SDK once (provides gcloud for ADC login): brew install --cask google-cloud-sdk"
+    - Create or select a billed GCP project with the BigQuery API enabled (Console → project create / billing linked; enable BigQuery API). Do not invent a project ID.
+    - "Authenticate Application Default Credentials: gcloud auth application-default login"
+    - "Bind the ADC quota/billing project (replace YOUR_BILLING_PROJECT): gcloud auth application-default set-quota-project YOUR_BILLING_PROJECT"
+    - "Export the billing/quota project for this shell: export GOOGLE_CLOUD_PROJECT=YOUR_BILLING_PROJECT"
+    - "Ensure the Python client is installed in the project venv: .venv/bin/pip install -r requirements-google2019.txt"
+    - "Verify access (no query execution): .venv/bin/python -m dynapm.scripts.task28_google2019_acquisition --access-check --billing-project YOUR_BILLING_PROJECT"
+    - "Dry-run frozen query classes 01–05: .venv/bin/python -m dynapm.scripts.task28_google2019_acquisition --dry-run-all --billing-project YOUR_BILLING_PROJECT"
+    - "If 01–03 fit the guard, execute only the frozen bounded extract: .venv/bin/python -m dynapm.scripts.task28_google2019_acquisition --execute-bounded --billing-project YOUR_BILLING_PROJECT"
 official_source:
   project: "google.com:google-cluster-data"
   datasets:

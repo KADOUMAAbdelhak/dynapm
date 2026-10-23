@@ -1,7 +1,8 @@
-"""V4B acquisition guard and canonical preprocessing tests."""
+"""V4B/V4B.1 acquisition guard and canonical preprocessing tests."""
 from __future__ import annotations
 
 from pathlib import Path
+from unittest.mock import patch
 
 import numpy as np
 import pandas as pd
@@ -15,16 +16,22 @@ from dynapm.experiments.google2019_acquisition import (
     CONFIG_YAML,
     DISPOSITION,
     AcquisitionBlocked,
+    BudgetExceeded,
     canonicalize_extract,
     dry_run_query,
     estimate_on_demand_cost_usd,
+    execute_query_guarded,
+    fits_guard,
     frozen_hashes,
+    human_bootstrap_actions,
     inspect_access,
     acquisition_document,
+    load_query_sql,
     query_hashes,
     render_cell_query,
     validate_acquisition_document,
     write_canonical_artifacts,
+    write_query_provenance,
 )
 
 
@@ -64,6 +71,9 @@ def test_config_frozen_blocked_without_fabricated_estimates():
     assert doc["budget_guard"]["dry_run_records"] == []
     assert doc["budget_guard"]["estimated_processed_bytes"] is None
     assert doc["budget_guard"]["estimated_cost_usd"] is None
+    assert doc["v4a_protocol_fingerprint"] == (
+        "4067689f6147a4eba191ad578c1b061af71c3d50b6342ce88a3d8498fb7b4226"
+    )
     validate_acquisition_document(doc)
 
 
@@ -75,6 +85,9 @@ def test_query_files_hash_and_safe_cell_rendering():
     assert "clusterdata_2019_c.instance_usage" in rendered
     with pytest.raises(ValueError, match="cell must"):
         render_cell_query("04_full_cell_population.sql", "z")
+    assert "clusterdata_2019_a" in load_query_sql(
+        "04_full_cell_population.sql", cell="a"
+    )
 
 
 def test_normalization_causal_requests_changes_and_no_clipping():
@@ -135,6 +148,7 @@ def test_immutable_manifest_and_relative_scientific_paths(tmp_path):
     assert manifest["eligible_entity_count"] == 1
     assert manifest["query"]["path"].startswith("queries/google2019/")
     assert not manifest["query"]["path"].startswith("/")
+    assert manifest["continuity"]["cadence_us"] == CADENCE_US
     assert (out / "manifest.json").is_file()
     with pytest.raises(FileExistsError, match="immutable"):
         write_canonical_artifacts(
@@ -149,8 +163,65 @@ def test_access_blocker_stops_dry_run_when_unavailable():
     if status.dry_run_possible:
         pytest.skip("BigQuery dry-run access is present on this machine")
     assert status.blocker_code == BLOCKER_CODE
+    assert status.missing
     with pytest.raises(AcquisitionBlocked, match=BLOCKER_CODE):
         dry_run_query("SELECT 1", billing_project="unavailable-test-project")
+
+
+def test_bootstrap_actions_are_exact_and_do_not_invent_project():
+    actions = human_bootstrap_actions()
+    joined = "\n".join(actions)
+    assert "gcloud auth application-default login" in joined
+    assert "YOUR_BILLING_PROJECT" in joined
+    assert "do not invent" in joined.lower() or "Do not invent" in joined
+    assert "fabricat" not in joined.lower()
+
+
+def test_guard_refuses_execution_above_budget():
+    assert fits_guard(10 * 1024**3)
+    assert not fits_guard(10 * 1024**3 + 1)
+    dry = {
+        "query_name": "03_bounded_validation_extract.sql",
+        "query_sha256": "abc",
+        "processed_bytes": 11 * 1024**3,
+        "estimated_on_demand_cost_usd_before_free_tier": 1.0,
+        "maximum_bytes_billed": 10 * 1024**3,
+        "fits_guard": False,
+        "location": "US",
+        "billing_project_configured": True,
+        "dry_run": True,
+        "executed": False,
+        "timestamp": "2026-10-23T00:00:00Z",
+        "time_filter_not_cost_guarantee": True,
+    }
+    with patch(
+        "dynapm.experiments.google2019_acquisition.dry_run_query",
+        return_value=dry,
+    ):
+        with pytest.raises(BudgetExceeded, match="exceeds guard"):
+            execute_query_guarded(
+                "SELECT 1",
+                billing_project="example-project",
+                maximum_bytes_billed=10 * 1024**3,
+            )
+
+
+def test_provenance_write_is_immutable_and_relative(tmp_path):
+    records = [
+        {
+            "query_name": "01_schema_probe.sql",
+            "processed_bytes": 123,
+            "fits_guard": True,
+            "dry_run": True,
+            "executed": False,
+        }
+    ]
+    payload = write_query_provenance(records, output_dir=tmp_path, kind="dry_run")
+    assert payload["path"].startswith("data/google2019/")
+    assert not payload["path"].startswith("/")
+    assert payload["method_outcomes_computed"] is False
+    with pytest.raises(FileExistsError, match="immutable"):
+        write_query_provenance(records, output_dir=tmp_path, kind="dry_run")
 
 
 def test_acquisition_module_does_not_compute_method_outcomes():
