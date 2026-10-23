@@ -1,0 +1,132 @@
+# V4B acquisition/preprocessing freeze; JSON is authoritative
+schema_version: google2019-acquisition-v1
+gate: V4B
+v4a_protocol_fingerprint: 4067689f6147a4eba191ad578c1b061af71c3d50b6342ce88a3d8498fb7b4226
+disposition: ACQUISITION_BLOCKED
+blocker:
+  code: google_cloud_credentials_billing_project_and_bigquery_client_unavailable
+  detail: "No bq/gcloud CLI, google-cloud-bigquery package, Application Default Credentials, or billing project is available. Therefore no authenticated dry-run byte estimate or bounded query may be executed safely."
+  resolution: "Provide a billed Google Cloud project, enable BigQuery, authenticate ADC, install google-cloud-bigquery, then run guarded dry-runs before extraction."
+official_source:
+  project: "google.com:google-cluster-data"
+  datasets:
+    - clusterdata_2019_a
+    - clusterdata_2019_b
+    - clusterdata_2019_c
+    - clusterdata_2019_d
+    - clusterdata_2019_e
+    - clusterdata_2019_f
+    - clusterdata_2019_g
+    - clusterdata_2019_h
+  tables:
+    - instance_usage
+    - instance_events
+  location: US
+  license: CC-BY-4.0
+  schema_url: "https://github.com/google/cluster-data/blob/master/clusterdata_trace_format_v3.proto"
+budget_guard:
+  pricing_reference_url: "https://cloud.google.com/bigquery/pricing"
+  on_demand_usd_per_tib_at_freeze: 6.25
+  first_tib_month_note: Official pricing lists first 1 TiB/month/account free; do not assume remaining allowance.
+  dry_run_required_before_every_new_query_class: true
+  execute_requires_explicit_maximum_bytes_billed: true
+  default_guard_bytes_not_estimate: 10737418240
+  dry_run_records:
+    []
+  estimated_processed_bytes: null
+  estimated_cost_usd: null
+  time_predicates_may_not_prune_unpartitioned_tables: true
+  bounded_time_filter_not_a_cost_guarantee: "instance_usage/instance_events are not documented as partitioned on start_time. A [7d,15d) predicate may still scan a full cell table; dry-run bytes, not the SQL filter, determine cost."
+population:
+  eligible_cells:
+    - a
+    - b
+    - c
+    - d
+    - e
+    - f
+    - g
+    - h
+  bounded_validation_cells:
+    - a
+    - b
+  collection_type: 1
+  collection_semantics: ALLOC_SET instances only
+  reason: avoid task/alloc parent-child double counting
+  entity_key:
+    - cell
+    - collection_id
+    - instance_index
+  minimum_valid_aligned_slots: 2000
+  minimum_span_us: 604800000000
+  minimum_span_days: 7
+  bounded_interval_us:
+    - 604800000000
+    - 1296000000000
+  bounded_selection: "up to two FARM_FINGERPRINT-ranked entities per (cell, has_request_change, has_missing_slot) metadata stratum"
+  forbidden_selection_inputs:
+    - Static/PW/Full-Rewrite outputs
+    - profile fidelity
+    - Materna effects
+normalization:
+  usage_cpu: instance_usage.average_usage.cpus (NCU)
+  usage_memory: instance_usage.average_usage.memory (normalized RAM)
+  request_cpu: instance_events.resource_request.cpus (NCU)
+  request_memory: instance_events.resource_request.memory (normalized RAM)
+  cpu_formula: average_usage.cpus / latest_positive_request.cpus
+  memory_formula: average_usage.memory / latest_positive_request.memory
+  request_alignment: latest unambiguous positive request event with event.time <= usage.start_time
+  zero_missing_request: row invalid; never divide or carry backward from future
+  changing_request: re-align each usage window causally
+  utilization_above_one: preserve; never clip
+cadence_and_missingness:
+  nominal_cadence_seconds: 300
+  bucket_rule: "floor(start_time / 300s) * 300s"
+  short_lifetime_edge_windows: retain if duration is positive and <=300s
+  duplicate_rule: "within entity+bucket choose greatest end_time, then smallest source-row SHA-256"
+  ambiguous_same_time_requests: exclude event timestamp unless request pair is unique
+  missing_slots: "leave absent; never interpolate, forward-fill, or upsample"
+  finite_nonnegative_usage_required: true
+  positive_requests_required: true
+eligibility:
+  bootstrap_fraction: 0.3
+  profile_window: "(t-24h,t]"
+  profile_min_paired_slots: 200
+  truth_window: "(t,t+24h]"
+  truth_min_paired_slots: 200
+  hourly_evaluation: true
+  minimum_total_observations_guidance: 2000
+  performance_based_exclusion: false
+queries:
+  root: queries/google2019
+  sha256:
+    01_schema_probe.sql: 3bc2d8fffd058c3369f9cd8bb731416d1cf401f04ef395ab49e55fa314d5bcfc
+    02_bounded_population.sql: a6eddc6b7b6f7808c96f1834c5fc4c24b412c0c707159c693a4e4cb0e7b2f516
+    03_bounded_validation_extract.sql: 5619a565996527bf519a618b9485f39a006bb418e8bbd6b40f7fdabd388aa8fa
+    04_full_cell_population.sql: d3ec8ced459fb22b6342551c7b5d504e6fb0a9a7049b3e3cd1d211be8b5ed3d9
+    05_full_cell_extract.sql: 206bf9161750b4d28046a27a1fd980180b1c8b7d8d36b8b08fba33106661c674
+canonical_output:
+  format: parquet
+  columns:
+    - cell
+    - collection_id
+    - instance_index
+    - timestamp_us
+    - cpu_utilization
+    - memory_utilization
+    - average_cpu_ncu
+    - average_memory_normalized_ram
+    - request_cpu_ncu
+    - request_memory_normalized_ram
+    - request_event_time_us
+    - usage_source_table
+    - request_source_table
+    - source_row_sha256
+  timestamp_semantics: trace-relative microseconds at nominal bucket start
+  scientific_identity_paths: repository-relative only
+  immutable_write: true
+execution_guards:
+  method_outcomes_computed: false
+  full_dataset_downloaded: false
+  bounded_extract_executed: false
+  large_export_authorized: false

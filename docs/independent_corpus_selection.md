@@ -2,7 +2,7 @@
 
 **Disposition: `CORPUS READY FOR ACQUISITION`**  
 **Preferred corpus: Google ClusterData 2019**  
-**V4B acquisition: MAY START** (under the frozen adaptation + acquisition gates below)
+**V4B acquisition: MAY START** (under the frozen adaptation + acquisition gates below). Later V4B record: **`ACQUISITION_BLOCKED`** on missing BigQuery credentials/billing/client ([acquisition](google2019_acquisition.md)); V4A disposition is unchanged.
 
 Documentation/protocol-fit audit only. No full dataset download. No DynAPM/PW
 outcome experiment. No Materna confirmatory redesign. Ranking uses protocol fit,
