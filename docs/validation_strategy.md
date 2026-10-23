@@ -230,7 +230,7 @@ chosen to favor observed pilot effects. See [protocol](protocol.md) and
 
 ## Corrected bounded gate status
 
-V2 passed under causal-timeline-v3 and phase-balanced-hourly-v1; see [pilot record](bounded_pilot.md). After V2.4G (**EMPIRICAL/SYSTEM STUDY VIABLE**), V2.5A amends the confirmatory design to estimation-first (**V2.5 = PASS**) and V3 completes the Materna confirmatory estimation study (**V3 = PASS**; [results](materna_confirmatory_results.md)). V4A freezes Google ClusterData 2019 for independent replication (**V4A = PASS**; [selection](independent_corpus_selection.md)). **V4B.4 acquisition BLOCKED** ([acquisition](google2019_acquisition.md); insufficient local disk; extract not started). The 18 development entities remain excluded from primary Materna confirmation. C3/C4 remain UNPROVEN.
+V2 passed under causal-timeline-v3 and phase-balanced-hourly-v1; see [pilot record](bounded_pilot.md). After V2.4G (**EMPIRICAL/SYSTEM STUDY VIABLE**), V2.5A amends the confirmatory design to estimation-first (**V2.5 = PASS**) and V3 completes the Materna confirmatory estimation study (**V3 = PASS**; [results](materna_confirmatory_results.md)). V4A freezes Google ClusterData 2019 for independent replication (**V4A = PASS**; [selection](independent_corpus_selection.md)). **V4B.5 streaming acquisition READY** ([acquisition](google2019_acquisition.md); extract not started). The 18 development entities remain excluded from primary Materna confirmation. C3/C4 remain UNPROVEN.
 
 ## V2.4 prerequisite to confirmation freeze
 
@@ -336,11 +336,12 @@ for provenance. C1/C2 remain withdrawn. Profile-level practical significance is
 PASS (V2.5A).** **V3 STATUS: PASS** ([Materna confirmatory estimation results](materna_confirmatory_results.md)).
 **V4A STATUS: PASS** ([independent corpus selection](independent_corpus_selection.md)):
 Google ClusterData 2019 frozen for acquisition under
-`google_clusterdata_2019_replication_protocol_v1`. **V4B.3 = PASS (plan)**;
-**V4B.4 = BLOCKED** ([acquisition](google2019_acquisition.md)): dry-runs match
-frozen e,g plan but local disk (~106 GiB free) cannot hold the extract upper
-bound (~991 GiB required); executed bytes remain 0. Next after a successful
-extract: **V4C** protocol/cohort validation. C3 and C4 remain UNPROVEN. Future
-gates: V5 second-corpus replication; V6 cost benchmark; V7 K8s harness; V8
-operational validation; V9 claim audit / venue decision. Do not claim C3–C6
-before the corresponding gates pass.
+`google_clusterdata_2019_replication_protocol_v1`. **V4B.5 = PASS
+(streaming redesign)** ([acquisition](google2019_acquisition.md)): local size
+no longer equated to bytes-processed; per-cell streaming plan ready for e,g
+under ~105 GiB free with 20 GiB reserve (runtime guard for conservative g).
+Extract not yet executed. Next after extract: **V4C** protocol/cohort
+validation. C3 and C4 remain UNPROVEN. Future gates: V5 second-corpus
+replication; V6 cost benchmark; V7 K8s harness; V8 operational validation; V9
+claim audit / venue decision. Do not claim C3–C6 before the corresponding gates
+pass.

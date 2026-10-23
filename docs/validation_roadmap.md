@@ -142,12 +142,12 @@ This roadmap specifies future gates, not authorization to execute them. The sole
 
 ## V4B — CORPUS ACQUISITION / CONTINUITY EXPORT
 
-**STATUS: BLOCKED — V4B.4 local disk insufficient for frozen e,g extract**
+**STATUS: READY_FOR_STREAMING_ACQUISITION — V4B.5 disk-efficient redesign (extract not yet run)**
 
 - **Objective:** acquire a reproducible, outcome-blind Google 2019 export under the frozen adaptation (budgeted BigQuery; pin snapshot/hashes; continuity + request-coverage filters only).
-- **Required artifacts:** [acquisition record](google2019_acquisition.md); `configs/google2019_zero_cost_plan_v1.{json,yaml}`; V4B.4 preflight/acquisition records; gated executor; canonical manifests after a successful extract.
-- **Current result (V4B.4):** billing disabled; fresh dry-runs match frozen plan (0% delta); executed bytes remain **0**. Local free disk ~105.7 GiB vs ~990.8 GiB required (1.2× uncompressed upper bound). Disposition `ACQUISITION_BLOCKED`. No raw/canonical Google rows written.
-- **PASS criteria for acquisition execution:** ≥~991 GiB free local disk; pre-exec dry-runs match freeze; billing still disabled; cumulative ≤900 GiB; canonical manifests complete; filters performance-blind; V4A mapping unchanged.
+- **Required artifacts:** [acquisition record](google2019_acquisition.md); `configs/google2019_streaming_plan_v1.{json,yaml}`; storage estimate; chunked writer/disk guards; canonical manifests after extract.
+- **Current result (V4B.5):** corrected local-size model (not bytes-processed); streaming per-cell events→usage→canonical; peak point ~40.6 GiB for e+g staging vs ~85 GiB usable (20 GiB reserve). Conservative g band ~96 GiB → runtime disk guard. Cells/SQL unchanged. Executed bytes **0**.
+- **PASS criteria for acquisition execution:** streaming preflight; billing disabled; cumulative scan ≤900 GiB; disk guards; canonical manifests; V4A mapping unchanged.
 - **Next after successful acquisition:** **V4C — Google protocol/cohort validation** (not PW/Static outcomes).
 - **Unproven:** second-corpus estimation effects until V5.
 
@@ -202,7 +202,7 @@ Earlier documents used a denser V3–V11 numbering (full Materna + refresh trade
 
 ## Dependency and execution rule
 
-V0, V1A, V1B, V2 and the V2.4 investigation chain through V2.4G are PASS as executions. C1 and C2 are withdrawn. V2.4G disposition is **EMPIRICAL/SYSTEM STUDY VIABLE**. V2.5 / V2.5A is **PASS**. V3 is **PASS** (Materna confirmatory estimation; [results](materna_confirmatory_results.md)). V4A is **PASS** ([corpus selection](independent_corpus_selection.md); Google 2019 ready for acquisition). **V4B.4 acquisition is BLOCKED** ([acquisition record](google2019_acquisition.md); insufficient local disk; zero executed bytes). V4C not opened. C3 and C4 remain UNPROVEN. V5–V9 follow. Every future experiment still requires explicit scope and authorization. No manuscript prose before V9.
+V0, V1A, V1B, V2 and the V2.4 investigation chain through V2.4G are PASS as executions. C1 and C2 are withdrawn. V2.4G disposition is **EMPIRICAL/SYSTEM STUDY VIABLE**. V2.5 / V2.5A is **PASS**. V3 is **PASS** (Materna confirmatory estimation; [results](materna_confirmatory_results.md)). V4A is **PASS** ([corpus selection](independent_corpus_selection.md); Google 2019 ready for acquisition). **V4B.5 streaming plan is READY** ([acquisition record](google2019_acquisition.md); extract not yet run; zero executed bytes). V4C opens after successful extract. C3 and C4 remain UNPROVEN. V5–V9 follow. Every future experiment still requires explicit scope and authorization. No manuscript prose before V9.
 
 Primary confirmation must exclude the same 18 development-pilot VMs. Candidate confirmatory set is exactly **1,558** IDs before protocol-validity exclusions ([cohort manifest](../configs/materna_confirmatory_cohort_v1.json)). The 199 gap-audit review flags remain diagnostics, not automatic exclusions. Optional whole-corpus description is separate from independent confirmation.
 
@@ -346,9 +346,15 @@ selected; cells **`e`,`g`** frozen at 825.67 GiB cumulative; plan
 ## V4B.4 execution record
 
 Execute frozen zero-cost acquisition: preflight PASS on billing/SQL/dry-runs;
-**STOP** on local disk (`~105.7 GiB` free << `~990.8 GiB` required). No query
-execution; ledger 0; disposition `ACQUISITION_BLOCKED`. Records:
-`configs/google2019_v4b4_preflight_summary.json`,
-`configs/google2019_v4b4_acquisition_record.json`. See
-[google2019_acquisition.md](google2019_acquisition.md). **V4B.4 = BLOCKED**.
-V4C remains gated on a successful extract.
+**STOP** on invalid local-size proxy (`bytes processed` ≠ disk). Ledger 0;
+disposition `ACQUISITION_BLOCKED`. **V4B.4 = BLOCKED**.
+
+## V4B.5 execution record
+
+Disk-efficient redesign: Parquet/zstd calibrated storage model; streaming
+events→index→usage→canonical per cell; 20 GiB free reserve; chunk
+flush/atomic finalize/checkpoints. Disposition
+`READY_FOR_STREAMING_ACQUISITION` (conservative g uncertainty → runtime guard).
+Configs: `google2019_streaming_plan_v1.*`, `google2019_v4b5_storage_estimate.json`.
+Executed bytes still 0. See [google2019_acquisition.md](google2019_acquisition.md).
+**V4B.5 = PASS**. Extraction remains the next authorized step before V4C.

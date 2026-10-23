@@ -1,42 +1,84 @@
-# Google ClusterData 2019 Acquisition (V4B → V4B.4)
+# Google ClusterData 2019 Acquisition (V4B → V4B.5)
 
-**V4B.4 disposition: `ACQUISITION_BLOCKED`**  
-**Blocker:** `insufficient_local_disk_for_frozen_extract_uncompressed_upper_bound`  
-**Chosen cells (unchanged): `e`, `g`**  
-**Fresh dry-runs: match frozen estimates exactly (0% delta); SQL hashes unchanged**  
-**Executed query-processing bytes: 0** (no source scan started)  
-**Local disk:** ~105.7 GiB free vs ~990.8 GiB required (1.2× uncompressed upper bound for e+g)  
-**Billing: `billingEnabled=false` throughout; no paid resources created.**  
-**No DynAPM/PW/Static/Full-Rewrite outcomes.**
+**V4B.5 disposition: `READY_FOR_STREAMING_ACQUISITION`**  
+**Note:** `g_fraction_uncertain_runtime_disk_guard_required` (conservative g band)  
+**Cells / SQL / V4A semantics: unchanged (`e`,`g`; minimal templates)**  
+**Query-scan projection: 825.67 GiB ≤ 900 GiB cap (unchanged)**  
+**Executed query bytes this gate: 0**  
+**Billing: `billingEnabled=false`; no GCS / BQ destination tables / paid services**  
+**No DynAPM/PW outcomes.**
 
 V4A protocol fingerprint remains
 `4067689f6147a4eba191ad578c1b061af71c3d50b6342ce88a3d8498fb7b4226`.
-Entity/ALLOC_SET/300s/request-normalization semantics are unchanged. Cell
-*scope* remains the V4B.3 cost-feasible subset `{e,g}`.
 
-## V4B.4 preflight (execution refused)
+## V4B.5 — corrected local storage + streaming plan
 
-| Check | Result |
+### Old vs corrected storage logic
+
+| | V4B.4 (wrong) | V4B.5 (corrected) |
+|---|---|---|
+| Local size proxy | BigQuery **bytes processed** | Output **row count × schema × Parquet/zstd** |
+| e+g “required” | ~990.8 GiB (1.2× scan) | Peak **~40.6 GiB** point / **~96.2 GiB** conservative |
+| Usable disk (~105 free − 20 reserve) | ~85 GiB | ~85 GiB |
+| Fits point peak? | no (wrong metric) | **yes** |
+| Fits conservative peak? | n/a | **no** → runtime guard before `g` |
+
+Bytes processed measure columnar **scan** cost, not result payload. Unpartitioned
+filters do not shrink scan bytes, but they do shrink returned ALLOC_SET rows.
+
+Estimation inputs: free `get_table` row counts, stratified `list_rows`
+`collection_type` fractions, local synthetic Parquet/zstd calibration
+(200k rows) × 1.5 safety on bytes/row. No large calibration queries.
+
+### Streaming architecture (per cell; e then g)
+
+1. Acquire `instance_events` → chunked zstd Parquet  
+2. Build local request-history index  
+3. Stream `instance_usage` pages; causal join + normalize incrementally  
+4. Write **canonical** chunked Parquet (retains usage+request audit fields)  
+5. Do **not** keep a full uncompressed raw usage copy  
+6. Validate cell `e` before starting `g`  
+7. Never hold both cells’ raw streams simultaneously  
+
+Preferred transport: paginated query results / Arrow batches → local Parquet.
+No destination tables; no GCS export. Storage Read API not enabled in this
+freeze (only if later verified zero-cost for temporary results).
+
+### Peak disk (planning)
+
+| Stage | Point GiB | Conservative GiB |
+|---|---:|---:|
+| Cell `e` streaming peak | 4.48 | 11.99 |
+| Cell `g` streaming peak | 38.93 | 94.01 |
+| During `g` with `e` canonical retained | **40.58** | **96.20** |
+| Both canonical retained | 28.98 | 82.61 |
+
+With ~105 GiB free and **20 GiB** reserve (~85 usable): cell `e` authorized;
+`e`+`g` point peak authorized; conservative `g` band requires abort/external
+volume if realized. Disk guard refuses before exhaustion; checkpoints allow
+resume without rescanning completed queries.
+
+### Retained audit fields (canonical)
+
+`cell`, `collection_id`, `instance_index`, `timestamp_us`, utilizations,
+`average_*`, `request_*`, `request_event_time_us`, source tables,
+`source_row_sha256` — enough to recompute `usage/request` offline. Plus job
+ID, SQL SHA, query bytes, row counts, exclusions, artifact hashes.
+
+### Frozen streaming identities
+
+| Item | Identity |
 |---|---|
-| Plan fingerprint | `f9f4bb846adfe9a303eb3d63f2efba84f7aa233ae4b990eb0b292cb30d76cfba` OK |
-| `billingEnabled` | false |
-| Ledger | 0 bytes |
-| Dry-run e usage | 338.492611 GiB = frozen |
-| Dry-run e events | 68.103194 GiB = frozen |
-| Dry-run g usage | 350.718970 GiB = frozen |
-| Dry-run g events | 68.357208 GiB = frozen |
-| Projected cumulative | 825.671983 GiB ≤ 900 GiB |
-| Local free disk | ~105.7 GiB |
-| Required (1.2× e+g upper bound) | ~990.8 GiB |
-| Execution | **refused** |
+| Streaming plan | `configs/google2019_streaming_plan_v1.{json,yaml}` |
+| Plan fingerprint | `10fdebfe5a2acc004ae0f70c3c84509f52a14f4c34b3e627498dc96d8c5d6688` |
+| Storage estimate | `configs/google2019_v4b5_storage_estimate.json` |
+| Module | `dynapm/experiments/google2019_streaming.py` |
 
-Tracked records: `configs/google2019_v4b4_preflight_summary.json`,
-`configs/google2019_v4b4_acquisition_record.json`.  
-Executor (gated): `dynapm/scripts/task29_google2019_execute_acquisition.py`.
+## V4B.4 preflight (historical; superseded metric)
 
-**Resolution:** provide ≥ ~991 GiB free local disk (or an attached volume with that
-headroom), then re-run preflight and execute without changing cells/SQL. Do not
-subsample or alter population rules to fit disk.
+V4B.4 correctly verified billing/SQL/dry-runs but refused on an invalid local-size
+proxy (~990 GiB). Records retained under `configs/google2019_v4b4_*`. Streaming
+redesign replaces that disk gate; cells/SQL unchanged.
 
 ## Frozen plan identities
 
