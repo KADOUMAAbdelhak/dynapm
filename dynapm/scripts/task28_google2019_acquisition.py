@@ -1,7 +1,7 @@
-"""Guarded V4B/V4B.1 Google ClusterData 2019 acquisition utility.
+"""Guarded V4B/V4B.2 Google ClusterData 2019 acquisition utility.
 
-No method outcomes. Dry-run is mandatory before any query execution.
-Credentials, tokens, and billing secrets are never written to Git.
+Zero cloud spend: billingEnabled must be false before any dry-run/execute.
+No method outcomes. Credentials/tokens/secrets are never written to Git.
 """
 from __future__ import annotations
 
@@ -9,27 +9,38 @@ import argparse
 from dataclasses import asdict
 from pathlib import Path
 
+import pandas as pd
+
 from dynapm.core.provenance import canonical_json
 from dynapm.experiments.google2019_acquisition import (
     AcquisitionBlocked,
+    BillingEnabledBlocked,
     BudgetExceeded,
     DEFAULT_MAXIMUM_BYTES_BILLED,
+    cumulative_executed_bytes,
     dry_run_all_query_classes,
     dry_run_query,
     execute_bounded_validation_extract,
     frozen_hashes,
     human_bootstrap_actions,
     inspect_access,
+    inspect_billing_state,
+    load_byte_ledger,
     load_query_sql,
+    resolve_quota_project,
     write_canonical_artifacts,
     write_query_provenance,
 )
-import pandas as pd
+
+
+def _project(args) -> str | None:
+    return resolve_quota_project(args.billing_project)
 
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--access-check", action="store_true")
+    parser.add_argument("--billing-check", action="store_true")
     parser.add_argument("--bootstrap-instructions", action="store_true")
     parser.add_argument("--dry-run-all", action="store_true")
     parser.add_argument("--execute-bounded", action="store_true")
@@ -59,34 +70,65 @@ def main(argv=None):
         print(canonical_json({"human_bootstrap_actions": human_bootstrap_actions()}))
         return
 
-    if args.access_check:
-        status = inspect_access(billing_project=args.billing_project)
-        print(
-            canonical_json(
-                {
-                    **asdict(status),
-                    "hashes": frozen_hashes(),
-                    "human_bootstrap_actions": (
-                        human_bootstrap_actions() if not status.dry_run_possible else []
-                    ),
+    if args.billing_check or args.access_check:
+        project = _project(args)
+        status = inspect_access(billing_project=project)
+        payload: dict = {**asdict(status), "hashes": frozen_hashes()}
+        if project:
+            try:
+                billing = inspect_billing_state(project)
+                payload["billing"] = asdict(billing)
+            except AcquisitionBlocked as exc:
+                payload["billing"] = {
+                    "blocker_code": str(exc),
+                    "zero_spend_guaranteed": False,
                 }
-            )
-        )
+        else:
+            payload["billing"] = None
+        payload["byte_ledger"] = {
+            "cumulative_executed_bytes": cumulative_executed_bytes(),
+            "prior_monthly_usage_verified": load_byte_ledger().get(
+                "prior_monthly_usage_verified"
+            ),
+        }
         if not status.dry_run_possible:
+            payload["human_bootstrap_actions"] = human_bootstrap_actions()
+            print(canonical_json(payload))
             raise SystemExit(2)
+        billing = payload.get("billing") or {}
+        if billing.get("billing_enabled"):
+            print(canonical_json(payload))
+            raise SystemExit(4)
+        if args.billing_check and not billing.get("zero_spend_guaranteed"):
+            print(canonical_json(payload))
+            raise SystemExit(2)
+        print(canonical_json(payload))
         return
 
     if args.dry_run_all:
-        if not args.billing_project:
-            raise SystemExit("--billing-project is required for dry-run-all")
+        project = _project(args)
+        if not project:
+            raise SystemExit("--billing-project or ADC quota_project_id is required")
         try:
             records = dry_run_all_query_classes(
-                billing_project=args.billing_project,
+                billing_project=project,
                 maximum_bytes_billed=args.maximum_bytes_billed,
                 full_cell=args.cell or "a",
             )
             if args.output_dir is not None:
-                write_query_provenance(records, output_dir=args.output_dir, kind="dry_run")
+                write_query_provenance(
+                    records, output_dir=args.output_dir, kind="dry_run"
+                )
+        except BillingEnabledBlocked as exc:
+            print(
+                canonical_json(
+                    {
+                        "status": "BILLING_ENABLED_ZERO_SPEND_NOT_GUARANTEED",
+                        "blocker": str(exc),
+                    }
+                )
+            )
+            raise SystemExit(4) from exc
         except AcquisitionBlocked as exc:
             print(
                 canonical_json(
@@ -98,18 +140,39 @@ def main(argv=None):
                 )
             )
             raise SystemExit(2) from exc
-        print(canonical_json({"status": "DRY_RUN_COMPLETE", "records": records}))
+        print(
+            canonical_json(
+                {
+                    "status": "DRY_RUN_COMPLETE",
+                    "quota_project": project,
+                    "cumulative_executed_bytes": cumulative_executed_bytes(),
+                    "records": records,
+                }
+            )
+        )
         return
 
     if args.execute_bounded:
-        if not args.billing_project:
-            raise SystemExit("--billing-project is required for execute-bounded")
+        project = _project(args)
+        if not project:
+            raise SystemExit("--billing-project or ADC quota_project_id is required")
         try:
             result = execute_bounded_validation_extract(
-                billing_project=args.billing_project,
+                billing_project=project,
                 maximum_bytes_billed=args.maximum_bytes_billed,
                 output_dir=args.output_dir,
             )
+        except BillingEnabledBlocked as exc:
+            print(
+                canonical_json(
+                    {
+                        "status": "BILLING_ENABLED_ZERO_SPEND_NOT_GUARANTEED",
+                        "blocker": str(exc),
+                        "executed": False,
+                    }
+                )
+            )
+            raise SystemExit(4) from exc
         except BudgetExceeded as exc:
             print(
                 canonical_json(
@@ -132,7 +195,6 @@ def main(argv=None):
                 )
             )
             raise SystemExit(2) from exc
-        # Drop any non-serializable leftovers.
         print(
             canonical_json(
                 {
@@ -143,6 +205,7 @@ def main(argv=None):
                     "entity_count": result["manifest"]["entity_count"],
                     "cells": result["manifest"]["cells"],
                     "output_root": result["output_root"],
+                    "cumulative_executed_bytes": cumulative_executed_bytes(),
                     "method_outcomes_computed": False,
                 }
             )
@@ -150,16 +213,27 @@ def main(argv=None):
         return
 
     if args.dry_run_query:
-        if not args.billing_project:
-            raise SystemExit("--billing-project is required for dry-run")
+        project = _project(args)
+        if not project:
+            raise SystemExit("--billing-project or ADC quota_project_id is required")
         try:
             sql = load_query_sql(args.dry_run_query, cell=args.cell)
             result = dry_run_query(
                 sql,
-                billing_project=args.billing_project,
+                billing_project=project,
                 maximum_bytes_billed=args.maximum_bytes_billed,
                 query_name=args.dry_run_query,
             )
+        except BillingEnabledBlocked as exc:
+            print(
+                canonical_json(
+                    {
+                        "status": "BILLING_ENABLED_ZERO_SPEND_NOT_GUARANTEED",
+                        "blocker": str(exc),
+                    }
+                )
+            )
+            raise SystemExit(4) from exc
         except AcquisitionBlocked as exc:
             print(
                 canonical_json(
@@ -193,8 +267,8 @@ def main(argv=None):
         return
 
     parser.error(
-        "choose --access-check, --bootstrap-instructions, --dry-run-all, "
-        "--dry-run-query, --execute-bounded, or --canonicalize-input"
+        "choose --access-check, --billing-check, --bootstrap-instructions, "
+        "--dry-run-all, --dry-run-query, --execute-bounded, or --canonicalize-input"
     )
 
 

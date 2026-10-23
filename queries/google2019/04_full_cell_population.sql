@@ -20,13 +20,19 @@ request_events_raw AS (
     AND resource_request.memory > 0
 ),
 request_events AS (
-  SELECT
-    collection_id, instance_index, collection_type, request_event_time,
-    ANY_VALUE(request_cpu) AS request_cpu,
-    ANY_VALUE(request_memory) AS request_memory
-  FROM request_events_raw
-  GROUP BY collection_id, instance_index, collection_type, request_event_time
-  HAVING COUNT(DISTINCT FORMAT('%g/%g', request_cpu, request_memory)) = 1
+  -- Unambiguous same-timestamp requests only. Inner COUNT uses base columns
+  -- (not ANY_VALUE aliases) to avoid BigQuery "aggregations of aggregations".
+  SELECT * EXCEPT(n_distinct_requests)
+  FROM (
+    SELECT
+      collection_id, instance_index, collection_type, request_event_time,
+      ANY_VALUE(request_cpu) AS request_cpu,
+      ANY_VALUE(request_memory) AS request_memory,
+      COUNT(DISTINCT FORMAT('%g/%g', request_cpu, request_memory)) AS n_distinct_requests
+    FROM request_events_raw
+    GROUP BY collection_id, instance_index, collection_type, request_event_time
+  )
+  WHERE n_distinct_requests = 1
 ),
 aligned AS (
   SELECT

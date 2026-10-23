@@ -25,17 +25,23 @@ CONFIG_JSON = REPO_ROOT / "configs" / "google2019_acquisition_v1.json"
 CONFIG_YAML = REPO_ROOT / "configs" / "google2019_acquisition_v1.yaml"
 
 SCHEMA_VERSION = "google2019-acquisition-v1"
-DISPOSITION = "ACQUISITION_BLOCKED"
+DISPOSITION = "ZERO_COST_BOUNDED_SUBSET_REQUIRED"
 BLOCKER_CODE = "google_cloud_adc_and_billing_project_unavailable"
+BILLING_ENABLED_BLOCKER = "BILLING_ENABLED_ZERO_SPEND_NOT_GUARANTEED"
+ZERO_COST_SCAN_BLOCKER = "frozen_queries_exceed_zero_cost_guards_unpartitioned_full_scans"
 CELLS = tuple("abcdefgh")
 BOUNDED_CELLS = ("a", "b")
 PRICE_USD_PER_TIB = 6.25
+GIB = 1024**3
 TIB = 1024**4
-DEFAULT_MAXIMUM_BYTES_BILLED = 10 * 1024**3  # 10 GiB: guard, not an estimate.
+DEFAULT_MAXIMUM_BYTES_BILLED = 10 * GIB  # 10 GiB: guard, not an estimate.
+# Hard zero-cost headroom for V4 executed bytes this month (below 1 TiB free tier).
+ZERO_COST_CUMULATIVE_EXECUTION_CAP_BYTES = 900 * GIB
 MIN_VALID_SLOTS = 2000
 MIN_SPAN_US = 7 * 24 * 3600 * 1_000_000
 CADENCE_US = 300 * 1_000_000
 MANAGED_ROOT = REPO_ROOT / "data" / "google2019"
+LEDGER_PATH = MANAGED_ROOT / "v4_byte_ledger.json"
 BOUNDED_EXTRACT_QUERY = "03_bounded_validation_extract.sql"
 FULL_CELL_DRY_RUN_CELL = "a"  # representative cell for template dry-runs only
 
@@ -97,8 +103,22 @@ class AccessStatus:
     missing: tuple[str, ...]
 
 
+@dataclass(frozen=True)
+class BillingState:
+    project_id: str
+    billing_enabled: bool
+    billing_account_name: str
+    zero_spend_guaranteed: bool
+    blocker_code: str | None
+    source: str
+
+
 class BudgetExceeded(AcquisitionBlocked):
     """Dry-run bytes exceed the configured maximum_bytes_billed guard."""
+
+
+class BillingEnabledBlocked(AcquisitionBlocked):
+    """Project has billing enabled; zero cloud spend cannot be guaranteed."""
 
 
 def query_hashes(root: Path = QUERY_ROOT) -> dict[str, str]:
@@ -142,18 +162,21 @@ def acquisition_document() -> dict[str, Any]:
         "v4a_protocol_fingerprint": v4a["protocol_fingerprint"],
         "disposition": DISPOSITION,
         "blocker": {
-            "code": BLOCKER_CODE,
+            "code": ZERO_COST_SCAN_BLOCKER,
             "detail": (
-                "The Python google-cloud-bigquery client is available in the project "
-                "environment, but Application Default Credentials and an explicit "
-                "billing/quota project are not configured. Authenticated dry-runs and "
-                "bounded extraction are refused until both are present."
+                "Zero-spend project (billingEnabled=false) obtained real dry-run bytes, "
+                "but frozen queries 02/03 scan ~913.92 GiB and 04/05 (cell a) scan "
+                "~471.86 GiB because instance_usage/instance_events are unpartitioned. "
+                "All exceed the immutable 10 GiB maximum_bytes_billed guard; 02/03 also "
+                "exceed the 900 GiB cumulative free-tier headroom. No query was executed."
             ),
             "resolution": (
-                "Authenticate ADC, set an explicit billed GOOGLE_CLOUD_PROJECT / "
-                "--billing-project, then run guarded dry-runs before any extraction."
+                "Redesign scan/engineering for a deterministic outcome-blind subset that "
+                "preserves ALLOC_SET entity/continuity/request rules while reducing "
+                "processed bytes under the 10 GiB guard—without raising guards or "
+                "enabling billing."
             ),
-            "human_bootstrap_actions": human_bootstrap_actions(),
+            "human_bootstrap_actions": [],
         },
         "official_source": {
             "project": "google.com:google-cluster-data",
@@ -170,12 +193,59 @@ def acquisition_document() -> dict[str, Any]:
             "pricing_reference_url": "https://cloud.google.com/bigquery/pricing",
             "on_demand_usd_per_tib_at_freeze": PRICE_USD_PER_TIB,
             "first_tib_month_note": "Official pricing lists first 1 TiB/month/account free; do not assume remaining allowance.",
+            "zero_cloud_spend_required": True,
+            "require_billing_enabled_false": True,
+            "billing_enabled_blocker": BILLING_ENABLED_BLOCKER,
             "dry_run_required_before_every_new_query_class": True,
             "execute_requires_explicit_maximum_bytes_billed": True,
             "default_guard_bytes_not_estimate": DEFAULT_MAXIMUM_BYTES_BILLED,
-            "dry_run_records": [],
-            "estimated_processed_bytes": None,
+            "cumulative_execution_cap_bytes": ZERO_COST_CUMULATIVE_EXECUTION_CAP_BYTES,
+            "cumulative_execution_cap_gib": 900,
+            "prior_monthly_usage_assumed_unknown": True,
+            "dry_run_records": [
+                {
+                    "query": "01_schema_probe.sql",
+                    "processed_bytes": None,
+                    "decision": "REFUSE",
+                    "reason": "INFORMATION_SCHEMA Forbidden on public project",
+                },
+                {
+                    "query": "02_bounded_population.sql",
+                    "processed_bytes": 981313230072,
+                    "decision": "REFUSE",
+                    "reason": "exceeds 10 GiB guard and 900 GiB cumulative headroom",
+                },
+                {
+                    "query": "03_bounded_validation_extract.sql",
+                    "processed_bytes": 981313230072,
+                    "decision": "REFUSE",
+                    "reason": "exceeds 10 GiB guard and 900 GiB cumulative headroom",
+                },
+                {
+                    "query": "04_full_cell_population.sql",
+                    "rendered_cell": "a",
+                    "processed_bytes": 506658530736,
+                    "decision": "REFUSE",
+                    "reason": "exceeds 10 GiB guard",
+                },
+                {
+                    "query": "05_full_cell_extract.sql",
+                    "rendered_cell": "a",
+                    "processed_bytes": 506658530736,
+                    "decision": "REFUSE",
+                    "reason": "exceeds 10 GiB guard",
+                },
+            ],
+            "estimated_processed_bytes": 981313230072,
             "estimated_cost_usd": None,
+            "projected_full_acquisition_query_bytes_cell_a": 506658530736,
+            "projected_full_acquisition_query_bytes_eight_cells_if_similar": (
+                8 * 506658530736
+            ),
+            "bounded_extract_executed": False,
+            "zero_cost_project_id_note": (
+                "quota project resolved at runtime; never commit secrets"
+            ),
             "time_predicates_may_not_prune_unpartitioned_tables": True,
             "bounded_time_filter_not_a_cost_guarantee": (
                 "instance_usage/instance_events are not documented as partitioned on "
@@ -269,7 +339,11 @@ def validate_acquisition_document(doc: dict[str, Any] | None = None) -> dict[str
     ):
         raise ValueError("V4A protocol fingerprint mismatch")
     if doc["disposition"] != DISPOSITION:
-        raise ValueError("disposition must remain ACQUISITION_BLOCKED without dry-runs")
+        raise ValueError(f"disposition must match module freeze ({DISPOSITION})")
+    if doc["budget_guard"].get("zero_cloud_spend_required") is not True:
+        raise ValueError("zero cloud spend remains required")
+    if doc["execution_guards"].get("bounded_extract_executed"):
+        raise ValueError("bounded extract must remain unexecuted under current guards")
     if doc["population"]["eligible_cells"] != list(CELLS):
         raise ValueError("eligible cells must be a..h")
     if doc["population"]["collection_type"] != 1:
@@ -355,6 +429,196 @@ def _env_billing_project() -> str | None:
     return os.environ.get("GOOGLE_CLOUD_PROJECT") or os.environ.get("GCLOUD_PROJECT")
 
 
+def _adc_quota_project() -> str | None:
+    """Read quota_project_id from ADC JSON without exposing secrets."""
+    import os
+
+    candidates: list[Path] = []
+    env_path = os.environ.get("GOOGLE_APPLICATION_CREDENTIALS")
+    if env_path:
+        candidates.append(Path(env_path))
+    candidates.append(
+        Path.home() / ".config" / "gcloud" / "application_default_credentials.json"
+    )
+    for path in candidates:
+        if not path.is_file():
+            continue
+        try:
+            data = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            continue
+        quota = data.get("quota_project_id")
+        if isinstance(quota, str) and quota.strip():
+            return quota.strip()
+    return None
+
+
+def resolve_quota_project(explicit: str | None = None) -> str | None:
+    return explicit or _env_billing_project() or _adc_quota_project()
+
+
+def _billing_state_from_payload(
+    project_id: str, payload: dict[str, Any], *, source: str
+) -> BillingState:
+    enabled = bool(payload.get("billingEnabled", False))
+    account = str(payload.get("billingAccountName") or "")
+    if enabled:
+        return BillingState(
+            project_id=project_id,
+            billing_enabled=True,
+            billing_account_name=account,
+            zero_spend_guaranteed=False,
+            blocker_code=BILLING_ENABLED_BLOCKER,
+            source=source,
+        )
+    return BillingState(
+        project_id=project_id,
+        billing_enabled=False,
+        billing_account_name=account,
+        zero_spend_guaranteed=True,
+        blocker_code=None,
+        source=source,
+    )
+
+
+def _inspect_billing_via_http(project_id: str) -> BillingState | None:
+    try:
+        import google.auth  # type: ignore[import-not-found]
+        import google.auth.transport.requests  # type: ignore[import-not-found]
+    except ImportError:
+        return None
+    credentials, _ = google.auth.default(
+        scopes=["https://www.googleapis.com/auth/cloud-platform"]
+    )
+    session = google.auth.transport.requests.AuthorizedSession(credentials)
+    url = (
+        "https://cloudbilling.googleapis.com/v1/projects/"
+        f"{project_id}/billingInfo"
+    )
+    response = session.get(url, timeout=60)
+    if response.status_code != 200:
+        return None
+    return _billing_state_from_payload(
+        project_id, response.json(), source="cloudbilling.googleapis.com"
+    )
+
+
+def _inspect_billing_via_gcloud(project_id: str) -> BillingState | None:
+    import shutil
+    import subprocess
+
+    if shutil.which("gcloud") is None:
+        return None
+    completed = subprocess.run(
+        [
+            "gcloud",
+            "billing",
+            "projects",
+            "describe",
+            project_id,
+            "--format=json",
+        ],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    if completed.returncode != 0:
+        return None
+    try:
+        payload = json.loads(completed.stdout)
+    except json.JSONDecodeError:
+        return None
+    return _billing_state_from_payload(
+        project_id, payload, source="gcloud billing projects describe"
+    )
+
+
+def inspect_billing_state(project_id: str) -> BillingState:
+    """Verify Cloud Billing billingEnabled. Refuses when billing is on."""
+    if not project_id or not str(project_id).strip():
+        raise AcquisitionBlocked(BLOCKER_CODE)
+    state = _inspect_billing_via_http(project_id) or _inspect_billing_via_gcloud(
+        project_id
+    )
+    if state is None:
+        raise AcquisitionBlocked("billing_info_unavailable")
+    return state
+
+
+def require_zero_cost_project(project_id: str) -> BillingState:
+    state = inspect_billing_state(project_id)
+    if state.billing_enabled or not state.zero_spend_guaranteed:
+        raise BillingEnabledBlocked(BILLING_ENABLED_BLOCKER)
+    return state
+
+
+def load_byte_ledger(path: Path = LEDGER_PATH) -> dict[str, Any]:
+    if not path.is_file():
+        return {
+            "schema_version": "google2019-v4-byte-ledger-v1",
+            "executed_entries": [],
+            "cumulative_executed_bytes": 0,
+            "prior_monthly_usage_verified": False,
+            "cap_bytes": ZERO_COST_CUMULATIVE_EXECUTION_CAP_BYTES,
+        }
+    return read_json(path)
+
+
+def cumulative_executed_bytes(path: Path = LEDGER_PATH) -> int:
+    return int(load_byte_ledger(path).get("cumulative_executed_bytes") or 0)
+
+
+def projected_cumulative_bytes(
+    additional_bytes: int, path: Path = LEDGER_PATH
+) -> int:
+    return cumulative_executed_bytes(path) + int(additional_bytes)
+
+
+def fits_zero_cost_headroom(
+    additional_bytes: int,
+    *,
+    path: Path = LEDGER_PATH,
+    cap_bytes: int = ZERO_COST_CUMULATIVE_EXECUTION_CAP_BYTES,
+) -> bool:
+    return projected_cumulative_bytes(additional_bytes, path) <= int(cap_bytes)
+
+
+def record_executed_bytes(
+    *,
+    query_name: str,
+    executed_bytes: int,
+    job_id: str | None,
+    path: Path = LEDGER_PATH,
+) -> dict[str, Any]:
+    """Append an executed-query entry to the local V4 acquisition byte ledger."""
+    ledger = load_byte_ledger(path)
+    entry = {
+        "query_name": query_name,
+        "executed_bytes": int(executed_bytes),
+        "job_id": job_id,
+        "recorded_at": utc_now(),
+    }
+    entries = list(ledger.get("executed_entries") or [])
+    entries.append(entry)
+    cumulative = int(sum(int(item["executed_bytes"]) for item in entries))
+    if cumulative > ZERO_COST_CUMULATIVE_EXECUTION_CAP_BYTES:
+        raise BudgetExceeded(
+            f"ledger cumulative {cumulative} exceeds zero-cost cap "
+            f"{ZERO_COST_CUMULATIVE_EXECUTION_CAP_BYTES}"
+        )
+    payload = {
+        "schema_version": "google2019-v4-byte-ledger-v1",
+        "executed_entries": entries,
+        "cumulative_executed_bytes": cumulative,
+        "prior_monthly_usage_verified": False,
+        "cap_bytes": ZERO_COST_CUMULATIVE_EXECUTION_CAP_BYTES,
+        "updated_at": utc_now(),
+    }
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(canonical_json(payload) + "\n", encoding="utf-8")
+    return payload
+
+
 def inspect_access(billing_project: str | None = None) -> AccessStatus:
     """Inspect access without printing account names or credential contents."""
     import importlib.util
@@ -367,7 +631,7 @@ def inspect_access(billing_project: str | None = None) -> AccessStatus:
     except (ImportError, ModuleNotFoundError, ValueError):
         has_client = False
     has_adc = _has_adc()
-    project = billing_project or _env_billing_project()
+    project = resolve_quota_project(billing_project)
     missing: list[str] = []
     if not has_client:
         missing.append("python_bigquery_client")
@@ -399,13 +663,15 @@ def load_query_sql(name: str, *, cell: str | None = None) -> str:
     return (QUERY_ROOT / name).read_text(encoding="utf-8")
 
 
-def _require_access(billing_project: str) -> AccessStatus:
-    if not billing_project or not str(billing_project).strip():
+def _require_access(billing_project: str) -> tuple[AccessStatus, BillingState]:
+    project = resolve_quota_project(billing_project)
+    if not project:
         raise AcquisitionBlocked(BLOCKER_CODE)
-    status = inspect_access(billing_project=billing_project)
+    status = inspect_access(billing_project=project)
     if not status.dry_run_possible:
         raise AcquisitionBlocked(BLOCKER_CODE)
-    return status
+    billing = require_zero_cost_project(project)
+    return status, billing
 
 
 def dry_run_query(
@@ -415,29 +681,71 @@ def dry_run_query(
     maximum_bytes_billed: int = DEFAULT_MAXIMUM_BYTES_BILLED,
     query_name: str | None = None,
 ) -> dict[str, Any]:
-    """Authenticated dry-run. Never executes a query."""
-    _require_access(billing_project)
+    """Authenticated dry-run. Never executes a query. Requires billingEnabled=false."""
+    _, billing = _require_access(billing_project)
     from google.cloud import bigquery  # type: ignore[import-not-found]
 
-    client = bigquery.Client(project=billing_project)
+    client = bigquery.Client(project=billing.project_id)
     job_config = bigquery.QueryJobConfig(
         dry_run=True,
         use_query_cache=False,
         maximum_bytes_billed=maximum_bytes_billed,
     )
     started = utc_now()
-    job = client.query(sql, job_config=job_config, location="US")
-    processed = int(job.total_bytes_processed or 0)
+    try:
+        job = client.query(sql, job_config=job_config, location="US")
+        processed = int(job.total_bytes_processed or 0)
+        error = None
+    except Exception as exc:  # noqa: BLE001 — record dry-run refusal, do not execute
+        from google.api_core import exceptions as gexc  # type: ignore[import-not-found]
+
+        if not isinstance(
+            exc,
+            (
+                gexc.GoogleAPICallError,
+                gexc.RetryError,
+            ),
+        ):
+            raise
+        processed = None
+        error = {
+            "type": type(exc).__name__,
+            "message": str(exc).split("\n", 1)[0][:500],
+        }
+    if processed is None:
+        decision = "REFUSE"
+        fits = False
+        headroom = False
+        projected = cumulative_executed_bytes()
+    else:
+        fits = fits_guard(processed, maximum_bytes_billed)
+        headroom = fits_zero_cost_headroom(processed)
+        projected = projected_cumulative_bytes(processed)
+        decision = "EXECUTE_CANDIDATE" if fits and headroom else "REFUSE"
     return {
         "query_name": query_name,
         "query_sha256": hashlib.sha256(sql.encode("utf-8")).hexdigest(),
+        "query_file_sha256": (
+            query_hashes().get(query_name) if query_name in QUERY_FILES else None
+        ),
         "processed_bytes": processed,
-        "estimated_on_demand_cost_usd_before_free_tier": estimate_on_demand_cost_usd(
-            processed
+        "estimated_on_demand_cost_usd_before_free_tier": (
+            None
+            if processed is None
+            else estimate_on_demand_cost_usd(processed)
         ),
         "maximum_bytes_billed": maximum_bytes_billed,
-        "fits_guard": fits_guard(processed, maximum_bytes_billed),
+        "fits_guard": fits,
+        "fits_zero_cost_headroom": headroom,
+        "projected_cumulative_executed_bytes": projected,
+        "cumulative_executed_bytes_before": cumulative_executed_bytes(),
+        "zero_cost_cap_bytes": ZERO_COST_CUMULATIVE_EXECUTION_CAP_BYTES,
+        "decision": decision,
+        "error": error,
         "location": "US",
+        "quota_project": billing.project_id,
+        "billing_enabled": billing.billing_enabled,
+        "zero_spend_guaranteed": billing.zero_spend_guaranteed,
         "billing_project_configured": True,
         "dry_run": True,
         "executed": False,
@@ -453,7 +761,9 @@ def execute_query_guarded(
     maximum_bytes_billed: int = DEFAULT_MAXIMUM_BYTES_BILLED,
     query_name: str | None = None,
 ) -> dict[str, Any]:
-    """Dry-run first; execute only when dry-run bytes fit the guard."""
+    """Dry-run first; execute only under zero-cost billing + byte guards."""
+    # Re-check billing immediately before any execution path.
+    require_zero_cost_project(resolve_quota_project(billing_project) or billing_project)
     dry = dry_run_query(
         sql,
         billing_project=billing_project,
@@ -465,9 +775,16 @@ def execute_query_guarded(
             f"dry-run {dry['processed_bytes']} bytes exceeds guard "
             f"{maximum_bytes_billed}"
         )
+    if not dry["fits_zero_cost_headroom"]:
+        raise BudgetExceeded(
+            f"projected cumulative {dry['projected_cumulative_executed_bytes']} "
+            f"exceeds zero-cost cap {ZERO_COST_CUMULATIVE_EXECUTION_CAP_BYTES}"
+        )
+    # Final billing check immediately before the paid-capable API call.
+    billing = require_zero_cost_project(dry["quota_project"])
     from google.cloud import bigquery  # type: ignore[import-not-found]
 
-    client = bigquery.Client(project=billing_project)
+    client = bigquery.Client(project=billing.project_id)
     job_config = bigquery.QueryJobConfig(
         dry_run=False,
         use_query_cache=False,
@@ -477,14 +794,22 @@ def execute_query_guarded(
     job = client.query(sql, job_config=job_config, location="US")
     frame = job.to_dataframe(create_bqstorage_client=False)
     executed_bytes = int(job.total_bytes_processed or 0)
+    ledger = record_executed_bytes(
+        query_name=query_name or "anonymous.sql",
+        executed_bytes=executed_bytes,
+        job_id=job.job_id,
+    )
     return {
         **dry,
         "dry_run": False,
         "executed": True,
+        "decision": "EXECUTED",
         "execution_timestamp": started,
         "job_id": job.job_id,
         "execution_bytes": executed_bytes,
         "row_count": int(len(frame)),
+        "cumulative_executed_bytes_after": ledger["cumulative_executed_bytes"],
+        "billing_enabled_at_execution": billing.billing_enabled,
         "dataframe": frame,
     }
 
@@ -498,6 +823,7 @@ def dry_run_all_query_classes(
     """Dry-run frozen query classes 01–05. Templates use one representative cell."""
     if full_cell not in CELLS:
         raise ValueError("full_cell must be one of a..h")
+    require_zero_cost_project(resolve_quota_project(billing_project) or billing_project)
     records: list[dict[str, Any]] = []
     for name in QUERY_FILES:
         cell = full_cell if name.startswith(("04_", "05_")) else None

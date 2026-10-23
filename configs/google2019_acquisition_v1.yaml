@@ -2,21 +2,13 @@
 schema_version: google2019-acquisition-v1
 gate: V4B
 v4a_protocol_fingerprint: 4067689f6147a4eba191ad578c1b061af71c3d50b6342ce88a3d8498fb7b4226
-disposition: ACQUISITION_BLOCKED
+disposition: ZERO_COST_BOUNDED_SUBSET_REQUIRED
 blocker:
-  code: google_cloud_adc_and_billing_project_unavailable
-  detail: "The Python google-cloud-bigquery client is available in the project environment, but Application Default Credentials and an explicit billing/quota project are not configured. Authenticated dry-runs and bounded extraction are refused until both are present."
-  resolution: "Authenticate ADC, set an explicit billed GOOGLE_CLOUD_PROJECT / --billing-project, then run guarded dry-runs before any extraction."
+  code: frozen_queries_exceed_zero_cost_guards_unpartitioned_full_scans
+  detail: "Zero-spend project (billingEnabled=false) obtained real dry-run bytes, but frozen queries 02/03 scan ~913.92 GiB and 04/05 (cell a) scan ~471.86 GiB because instance_usage/instance_events are unpartitioned. All exceed the immutable 10 GiB maximum_bytes_billed guard; 02/03 also exceed the 900 GiB cumulative free-tier headroom. No query was executed."
+  resolution: Redesign scan/engineering for a deterministic outcome-blind subset that preserves ALLOC_SET entity/continuity/request rules while reducing processed bytes under the 10 GiB guard—without raising guards or enabling billing.
   human_bootstrap_actions:
-    - "Install Google Cloud SDK once (provides gcloud for ADC login): brew install --cask google-cloud-sdk"
-    - Create or select a billed GCP project with the BigQuery API enabled (Console → project create / billing linked; enable BigQuery API). Do not invent a project ID.
-    - "Authenticate Application Default Credentials: gcloud auth application-default login"
-    - "Bind the ADC quota/billing project (replace YOUR_BILLING_PROJECT): gcloud auth application-default set-quota-project YOUR_BILLING_PROJECT"
-    - "Export the billing/quota project for this shell: export GOOGLE_CLOUD_PROJECT=YOUR_BILLING_PROJECT"
-    - "Ensure the Python client is installed in the project venv: .venv/bin/pip install -r requirements-google2019.txt"
-    - "Verify access (no query execution): .venv/bin/python -m dynapm.scripts.task28_google2019_acquisition --access-check --billing-project YOUR_BILLING_PROJECT"
-    - "Dry-run frozen query classes 01–05: .venv/bin/python -m dynapm.scripts.task28_google2019_acquisition --dry-run-all --billing-project YOUR_BILLING_PROJECT"
-    - "If 01–03 fit the guard, execute only the frozen bounded extract: .venv/bin/python -m dynapm.scripts.task28_google2019_acquisition --execute-bounded --billing-project YOUR_BILLING_PROJECT"
+    []
 official_source:
   project: "google.com:google-cluster-data"
   datasets:
@@ -38,13 +30,49 @@ budget_guard:
   pricing_reference_url: "https://cloud.google.com/bigquery/pricing"
   on_demand_usd_per_tib_at_freeze: 6.25
   first_tib_month_note: Official pricing lists first 1 TiB/month/account free; do not assume remaining allowance.
+  zero_cloud_spend_required: true
+  require_billing_enabled_false: true
+  billing_enabled_blocker: BILLING_ENABLED_ZERO_SPEND_NOT_GUARANTEED
   dry_run_required_before_every_new_query_class: true
   execute_requires_explicit_maximum_bytes_billed: true
   default_guard_bytes_not_estimate: 10737418240
+  cumulative_execution_cap_bytes: 966367641600
+  cumulative_execution_cap_gib: 900
+  prior_monthly_usage_assumed_unknown: true
   dry_run_records:
-    []
-  estimated_processed_bytes: null
+    -
+      query: 01_schema_probe.sql
+      processed_bytes: null
+      decision: REFUSE
+      reason: INFORMATION_SCHEMA Forbidden on public project
+    -
+      query: 02_bounded_population.sql
+      processed_bytes: 981313230072
+      decision: REFUSE
+      reason: exceeds 10 GiB guard and 900 GiB cumulative headroom
+    -
+      query: 03_bounded_validation_extract.sql
+      processed_bytes: 981313230072
+      decision: REFUSE
+      reason: exceeds 10 GiB guard and 900 GiB cumulative headroom
+    -
+      query: 04_full_cell_population.sql
+      rendered_cell: a
+      processed_bytes: 506658530736
+      decision: REFUSE
+      reason: exceeds 10 GiB guard
+    -
+      query: 05_full_cell_extract.sql
+      rendered_cell: a
+      processed_bytes: 506658530736
+      decision: REFUSE
+      reason: exceeds 10 GiB guard
+  estimated_processed_bytes: 981313230072
   estimated_cost_usd: null
+  projected_full_acquisition_query_bytes_cell_a: 506658530736
+  projected_full_acquisition_query_bytes_eight_cells_if_similar: 4053268245888
+  bounded_extract_executed: false
+  zero_cost_project_id_note: quota project resolved at runtime; never commit secrets
   time_predicates_may_not_prune_unpartitioned_tables: true
   bounded_time_filter_not_a_cost_guarantee: "instance_usage/instance_events are not documented as partitioned on start_time. A [7d,15d) predicate may still scan a full cell table; dry-run bytes, not the SQL filter, determine cost."
 population:
@@ -111,10 +139,10 @@ queries:
   root: queries/google2019
   sha256:
     01_schema_probe.sql: 3bc2d8fffd058c3369f9cd8bb731416d1cf401f04ef395ab49e55fa314d5bcfc
-    02_bounded_population.sql: a6eddc6b7b6f7808c96f1834c5fc4c24b412c0c707159c693a4e4cb0e7b2f516
-    03_bounded_validation_extract.sql: 5619a565996527bf519a618b9485f39a006bb418e8bbd6b40f7fdabd388aa8fa
-    04_full_cell_population.sql: d3ec8ced459fb22b6342551c7b5d504e6fb0a9a7049b3e3cd1d211be8b5ed3d9
-    05_full_cell_extract.sql: 206bf9161750b4d28046a27a1fd980180b1c8b7d8d36b8b08fba33106661c674
+    02_bounded_population.sql: 9005356694a919420cdb43faae774ef44b6c772c2b40031909cfcfcf57d3df0f
+    03_bounded_validation_extract.sql: 0e0486af4aee26eba292a6c9ea75e163c75c9eed2a021c13a5dc4cbf8b2f0eb3
+    04_full_cell_population.sql: 1fb83d4a8952d574315aa829c59563d30a45e3578eecbca19c61b202c73da26b
+    05_full_cell_extract.sql: 0d42c95070a6da023c1ff7f624417932f20cc1a7d2d93563a3cce61615e77cd0
 canonical_output:
   format: parquet
   columns:

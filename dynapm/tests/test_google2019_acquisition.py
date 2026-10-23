@@ -10,25 +10,34 @@ import pytest
 
 from dynapm.core.provenance import file_sha256, fingerprint, read_json
 from dynapm.experiments.google2019_acquisition import (
+    BILLING_ENABLED_BLOCKER,
     BLOCKER_CODE,
     CADENCE_US,
     CONFIG_JSON,
     CONFIG_YAML,
     DISPOSITION,
+    ZERO_COST_CUMULATIVE_EXECUTION_CAP_BYTES,
+    ZERO_COST_SCAN_BLOCKER,
     AcquisitionBlocked,
+    BillingEnabledBlocked,
+    BillingState,
     BudgetExceeded,
     canonicalize_extract,
     dry_run_query,
     estimate_on_demand_cost_usd,
     execute_query_guarded,
     fits_guard,
+    fits_zero_cost_headroom,
     frozen_hashes,
     human_bootstrap_actions,
     inspect_access,
     acquisition_document,
     load_query_sql,
+    projected_cumulative_bytes,
     query_hashes,
+    record_executed_bytes,
     render_cell_query,
+    require_zero_cost_project,
     validate_acquisition_document,
     write_canonical_artifacts,
     write_query_provenance,
@@ -64,13 +73,20 @@ def source_frame(n=2017):
     )
 
 
-def test_config_frozen_blocked_without_fabricated_estimates():
+def test_config_frozen_zero_cost_subset_required_from_dry_runs():
     doc = acquisition_document()
-    assert doc["disposition"] == DISPOSITION == "ACQUISITION_BLOCKED"
-    assert doc["blocker"]["code"] == BLOCKER_CODE
-    assert doc["budget_guard"]["dry_run_records"] == []
-    assert doc["budget_guard"]["estimated_processed_bytes"] is None
-    assert doc["budget_guard"]["estimated_cost_usd"] is None
+    assert doc["disposition"] == DISPOSITION == "ZERO_COST_BOUNDED_SUBSET_REQUIRED"
+    assert doc["blocker"]["code"] == ZERO_COST_SCAN_BLOCKER
+    assert doc["budget_guard"]["zero_cloud_spend_required"] is True
+    assert doc["budget_guard"]["cumulative_execution_cap_bytes"] == (
+        ZERO_COST_CUMULATIVE_EXECUTION_CAP_BYTES
+    )
+    assert doc["budget_guard"]["default_guard_bytes_not_estimate"] == 10 * 1024**3
+    records = doc["budget_guard"]["dry_run_records"]
+    assert len(records) == 5
+    assert all(r["decision"] == "REFUSE" for r in records)
+    assert doc["budget_guard"]["bounded_extract_executed"] is False
+    assert doc["execution_guards"]["method_outcomes_computed"] is False
     assert doc["v4a_protocol_fingerprint"] == (
         "4067689f6147a4eba191ad578c1b061af71c3d50b6342ce88a3d8498fb7b4226"
     )
@@ -187,6 +203,9 @@ def test_guard_refuses_execution_above_budget():
         "estimated_on_demand_cost_usd_before_free_tier": 1.0,
         "maximum_bytes_billed": 10 * 1024**3,
         "fits_guard": False,
+        "fits_zero_cost_headroom": True,
+        "projected_cumulative_executed_bytes": 11 * 1024**3,
+        "quota_project": "example-project",
         "location": "US",
         "billing_project_configured": True,
         "dry_run": True,
@@ -195,6 +214,16 @@ def test_guard_refuses_execution_above_budget():
         "time_filter_not_cost_guarantee": True,
     }
     with patch(
+        "dynapm.experiments.google2019_acquisition.require_zero_cost_project",
+        return_value=BillingState(
+            project_id="example-project",
+            billing_enabled=False,
+            billing_account_name="",
+            zero_spend_guaranteed=True,
+            blocker_code=None,
+            source="test",
+        ),
+    ), patch(
         "dynapm.experiments.google2019_acquisition.dry_run_query",
         return_value=dry,
     ):
@@ -204,6 +233,38 @@ def test_guard_refuses_execution_above_budget():
                 billing_project="example-project",
                 maximum_bytes_billed=10 * 1024**3,
             )
+
+
+def test_billing_enabled_blocks_zero_spend_path():
+    enabled = BillingState(
+        project_id="paid-project",
+        billing_enabled=True,
+        billing_account_name="billingAccounts/123",
+        zero_spend_guaranteed=False,
+        blocker_code=BILLING_ENABLED_BLOCKER,
+        source="test",
+    )
+    with patch(
+        "dynapm.experiments.google2019_acquisition.inspect_billing_state",
+        return_value=enabled,
+    ):
+        with pytest.raises(BillingEnabledBlocked, match=BILLING_ENABLED_BLOCKER):
+            require_zero_cost_project("paid-project")
+
+
+def test_byte_ledger_enforces_cumulative_cap(tmp_path):
+    ledger = tmp_path / "ledger.json"
+    record_executed_bytes(
+        query_name="toy.sql",
+        executed_bytes=100,
+        job_id="job-1",
+        path=ledger,
+    )
+    assert projected_cumulative_bytes(50, path=ledger) == 150
+    assert fits_zero_cost_headroom(50, path=ledger)
+    assert not fits_zero_cost_headroom(
+        ZERO_COST_CUMULATIVE_EXECUTION_CAP_BYTES, path=ledger
+    )
 
 
 def test_provenance_write_is_immutable_and_relative(tmp_path):
