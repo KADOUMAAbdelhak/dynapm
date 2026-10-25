@@ -2,3 +2,5 @@
 # Install into the project venv only when running budget-guarded dry-runs/extracts:
 #   .venv/bin/pip install -r requirements-google2019.txt
 google-cloud-bigquery>=3.25
+# V4B.7: Storage Read API for temporary query-result tables (free for anon temps).
+google-cloud-bigquery-storage>=2.24

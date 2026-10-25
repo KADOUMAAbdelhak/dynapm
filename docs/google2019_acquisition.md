@@ -1,4 +1,17 @@
-# Google ClusterData 2019 Acquisition (V4B → V4B.5)
+# Google ClusterData 2019 Acquisition (V4B → V4B.7)
+
+**V4B.7 disposition: `CELL_E_ACQUIRED`** (cell `g` deferred this month)  
+**Recovery:** Storage Read of temporary query results (anonymous table; free per BQ pricing)  
+**Google-side cumulative (incl. failed V4B.6 usage scan + retry): 745.088 GiB / 900 GiB**  
+**Cell `g` not queried** — remaining ~154.9 GiB insufficient for the frozen `g` pair (~419 GiB)  
+**Billing: `billingEnabled=false`; no GCS / permanent destination tables**  
+**No DynAPM/PW outcomes.**
+
+Record: `configs/google2019_v4b7_recovery_record.json`
+
+---
+
+## V4B.5 (historical) — streaming plan freeze
 
 **V4B.5 disposition: `READY_FOR_STREAMING_ACQUISITION`**  
 **Note:** `g_fraction_uncertain_runtime_disk_guard_required` (conservative g band)  
