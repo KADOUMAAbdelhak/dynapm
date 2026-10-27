@@ -23,7 +23,9 @@ from dynapm.experiments.google2019_zero_cost_plan import (
 )
 
 
-def test_plan_frozen_ready_under_cap():
+def test_plan_frozen_ready_under_cap(tmp_path, monkeypatch):
+    ledger = tmp_path / "isolated_empty_ledger.json"
+    monkeypatch.setattr("dynapm.experiments.google2019_zero_cost_plan.cumulative_executed_bytes", lambda: cumulative_executed_bytes(ledger))
     doc = load_plan()
     assert doc["disposition"] == DISPOSITION == "READY_FOR_ZERO_COST_ACQUISITION"
     assert doc["cell_selection"]["chosen_cells"] == list(CHOSEN_CELLS)
@@ -32,7 +34,7 @@ def test_plan_frozen_ready_under_cap():
     assert doc["frozen_ab_pair_bytes"] > ZERO_COST_CUMULATIVE_EXECUTION_CAP_BYTES
     assert doc["plan_execution_authorized"] is False
     assert doc["executed_bytes_this_task"] == 0
-    assert cumulative_executed_bytes() == 0
+    assert cumulative_executed_bytes(ledger) == 0
     info = validate_zero_cost_plan(doc)
     assert info["plan_fingerprint"] == fingerprint(doc)
     assert info["plan_json_sha256"] == file_sha256(PLAN_JSON)

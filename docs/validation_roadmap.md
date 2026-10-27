@@ -142,7 +142,7 @@ This roadmap specifies future gates, not authorization to execute them. The sole
 
 ## V4B — CORPUS ACQUISITION / CONTINUITY EXPORT
 
-**STATUS: READY_FOR_STREAMING_ACQUISITION — V4B.5 disk-efficient redesign (extract not yet run)**
+**STATUS: RAW CELL E VERIFIED; OLD CANONICAL SUPERSEDED; V4B.8 CORRECTION PENDING**
 
 - **Objective:** acquire a reproducible, outcome-blind Google 2019 export under the frozen adaptation (budgeted BigQuery; pin snapshot/hashes; continuity + request-coverage filters only).
 - **Required artifacts:** [acquisition record](google2019_acquisition.md); `configs/google2019_streaming_plan_v1.{json,yaml}`; storage estimate; chunked writer/disk guards; canonical manifests after extract.
@@ -150,6 +150,22 @@ This roadmap specifies future gates, not authorization to execute them. The sole
 - **PASS criteria for acquisition execution:** streaming preflight; billing disabled; cumulative scan ≤900 GiB; disk guards; canonical manifests; V4A mapping unchanged.
 - **Next after successful acquisition:** **V4C — Google protocol/cohort validation** (not PW/Static outcomes).
 - **Unproven:** second-corpus estimation effects until V5.
+
+## V4B.8 — LOCAL CANONICAL CORRECTION
+
+**STATUS: PENDING — raw acquisition verified; old canonical invalid**
+
+- **Objective:** apply frozen unambiguous positive-request history locally without rescanning raw data in BigQuery.
+- **Evidence:** raw/old preservation hashes, new generation identity/lineage, full-row independent normalization/ASOF/eligibility checks, regression/full tests.
+- **PASS:** corrected generation VERIFIED, old generation rejected for replication, zero query bytes, raw and legacy bytes unchanged.
+
+## V4C — GOOGLE CORPUS/COHORT PROTOCOL VALIDATION
+
+**STATUS: BLOCKED UNTIL V4B.8 VERIFIED**
+
+- **Objective:** validate corpus adapter, timeline/bootstrap/window rules, eligibility and cell scope without method outcomes.
+- **Required:** corrected generation manifest/hashes; outcome-blind cohort/protocol freeze; explicit treatment of deferred cell g.
+- **Boundary:** V4B.8 does not authorize V5 replication outcomes or further cloud scans.
 
 ## V5 — SECOND-CORPUS REPLICATION
 
@@ -202,7 +218,7 @@ Earlier documents used a denser V3–V11 numbering (full Materna + refresh trade
 
 ## Dependency and execution rule
 
-V0, V1A, V1B, V2 and the V2.4 investigation chain through V2.4G are PASS as executions. C1 and C2 are withdrawn. V2.4G disposition is **EMPIRICAL/SYSTEM STUDY VIABLE**. V2.5 / V2.5A is **PASS**. V3 is **PASS** (Materna confirmatory estimation; [results](materna_confirmatory_results.md)). V4A is **PASS** ([corpus selection](independent_corpus_selection.md); Google 2019 ready for acquisition). **V4B.5 streaming plan is READY** ([acquisition record](google2019_acquisition.md); extract not yet run; zero executed bytes). V4C opens after successful extract. C3 and C4 remain UNPROVEN. V5–V9 follow. Every future experiment still requires explicit scope and authorization. No manuscript prose before V9.
+V0, V1A, V1B, V2 and the V2.4 investigation chain through V2.4G are PASS as executions. C1 and C2 are withdrawn. V2.4G disposition is **EMPIRICAL/SYSTEM STUDY VIABLE**. V2.5 / V2.5A is **PASS**. V3 is **PASS** (Materna confirmatory estimation; [results](materna_confirmatory_results.md)). V4A is **PASS** ([corpus selection](independent_corpus_selection.md); Google 2019 ready for acquisition). **Raw cell e is VERIFIED; the old canonical generation is SUPERSEDED/invalid; V4B.8 local correction is PENDING** ([correction](google2019_local_correction.md)). Existing scans consumed 745.088415 GiB; this correction executes zero query bytes. V4C follows a verified corrected generation. C3 and C4 remain UNPROVEN. V5–V9 follow. Every future experiment still requires explicit scope and authorization. No manuscript prose before V9.
 
 Primary confirmation must exclude the same 18 development-pilot VMs. Candidate confirmatory set is exactly **1,558** IDs before protocol-validity exclusions ([cohort manifest](../configs/materna_confirmatory_cohort_v1.json)). The 199 gap-audit review flags remain diagnostics, not automatic exclusions. Optional whole-corpus description is separate from independent confirmation.
 

@@ -28,3 +28,7 @@ models/
 
 # Locally generated dataset selection and provenance, alongside tooling.
 dynapm/data/*.json
+
+# Local editor rules and acquisition logs; never scientific source.
+.cursor/
+logs/

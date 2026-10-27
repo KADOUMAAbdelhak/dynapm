@@ -376,11 +376,9 @@ def stream_job_to_parquet(
 
 def build_request_index(events_path: Path) -> dict[tuple[int, int], tuple[np.ndarray, np.ndarray, np.ndarray]]:
     """Map (collection_id, instance_index) → sorted (time, request_cpu, request_memory)."""
-    table = pq.read_table(
-        events_path,
-        columns=["time", "collection_id", "instance_index", "request_cpu", "request_memory"],
-    )
-    frame = table.to_pandas()
+    from dynapm.experiments.google2019_requests import prepare_request_history
+    table = pq.read_table(events_path, columns=["time", "collection_id", "instance_index", "request_cpu", "request_memory"])
+    frame, _, _, _ = prepare_request_history(table.to_pandas())
     buckets: dict[tuple[int, int], list[tuple[int, float, float]]] = defaultdict(list)
     for row in frame.itertuples(index=False):
         key = (int(row.collection_id), int(row.instance_index))

@@ -58,13 +58,16 @@ def test_current_workspace_disk_is_unsafe_for_frozen_plan():
 
 def test_blocked_record_is_tracked_and_secret_free(tmp_path):
     out = tmp_path / "acquisition_record.json"
-    record = write_blocked_acquisition_record(
-        "insufficient_local_disk_for_cell_e_uncompressed_upper_bound",
-        preflight_payload={"all_dry_runs_match_within_1pct": True},
-        output_path=out,
-    )
-    assert record["disposition"] == "ACQUISITION_BLOCKED"
-    assert record["executed_query_bytes"] == 0
+    # Unit records describe a supplied ledger state, not the live workstation.
+    for previous_bytes in (0, 123456):
+        with patch("dynapm.experiments.google2019_execute_acquisition.cumulative_executed_bytes", return_value=previous_bytes):
+            record = write_blocked_acquisition_record(
+                "insufficient_local_disk_for_cell_e_uncompressed_upper_bound",
+                preflight_payload={"all_dry_runs_match_within_1pct": True},
+                output_path=out,
+            )
+        assert record["disposition"] == "ACQUISITION_BLOCKED"
+        assert record["executed_query_bytes"] == previous_bytes
     assert record["method_outcomes_computed"] is False
     assert record["cohort_frozen"] is False
     assert record["raw_artifacts_written"] is False
