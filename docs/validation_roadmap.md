@@ -167,7 +167,7 @@ This roadmap specifies future gates, not authorization to execute them. The sole
 - **Required:** corrected generation manifest/hashes; outcome-blind cohort/protocol freeze; explicit treatment of deferred cell g.
 - **Current evidence:** [V4C.1 clock audit](google2019_clock_contract.md), `configs/google2019_v4c1_validation_record.json`, `configs/google2019_replication_cohort_v2.json`, and `configs/google2019_current_protocol.json`: 62,444/62,451 availability-aware eligible e candidates; the same 1,000 identity-hash provisional selections. Earlier v1 records remain historical.
 - **Resolved e blocker:** [V4C.1 completed-slot contract](google2019_clock_contract.md) explicitly separates measurement, availability and read clocks; containment/visibility/maturity checks pass. V2 canonical normalization stays verified.
-- **Next:** separately authorize g acquisition and validate it under the same v2 clock/selection contract, then freeze the final two-cell cohort. No outcomes before those gates.
+- **Current staged amendment:** V4D freezes e-first execution readiness without completing two-cell V4C. g still requires independent acquisition/validation and cohort binding; see V4D/V5A/V5B below.
 - **Boundary:** this metadata audit does not authorize V5 replication outcomes or further cloud scans.
 
 ## V4C.1 — GOOGLE MEASUREMENT / AVAILABILITY / READ CLOCKS
@@ -179,14 +179,37 @@ This roadmap specifies future gates, not authorization to execute them. The sole
 - **PASS:** all 462,821,691 rows fit their bins; zero retained overlaps/crossings/duplicate slots; 62,444 eligible entities and 1,000 cohort members unchanged; leakage/integrity tests pass.
 - **Boundary:** no queries, g acquisition, policy outcomes, or V3 changes. Per-cell readiness is not final V4C completion or V5 authorization.
 
-## V5 — SECOND-CORPUS REPLICATION
+## V4D — SEQUENTIAL GOOGLE REPLICATION FREEZE + SHARED EVALUATOR
 
-**STATUS: BLOCKED UNTIL V4C PASS, CELL G VALIDATION AND FINAL TWO-CELL FREEZE**
+**STATUS: PASS — synthetic/integrity validation; zero real Google outcomes**
 
-- **Objective:** replicate the frozen non-adaptive maintenance/cadence estimation study on the acquired Google 2019 cohort under `google_clusterdata_2019_replication_protocol_v1`.
-- **Required artifacts:** locked replication run; paired F1–F3 effects; heterogeneity/negative-transfer report.
-- **PASS criteria:** no post-outcome eligibility tuning; uncertainty and limitations transparent; C3 only with explicit unit/domain limits.
-- **Unproven:** domains outside tested corpora; operational effects.
+- **Objective:** preregister e then mandatory held-out g before seeing e; make one managed availability-aware evaluator executable.
+- **Artifacts:** [staged contract](google2019_staged_replication.md); `configs/google2019_staged_replication_v1.{json,yaml}`; exact e input binding; `task30_google_replication`; synthetic managed/cache regression tests.
+- **PASS criteria:** five unchanged methods, protocol v2, independent hash cohorts/no backfill, frozen F1–F3 inference/synthesis, no outcome-driven changes, corrected-generation/clock/cohort enforcement, full lightweight suite and input integrity pass.
+- **Amendment:** prospectively replaces the earlier simultaneous two-cell prerequisite for Stage A only. Original protocol/cohort/validation records stay unchanged. Overall V4C remains incomplete.
+- **Unproven:** all Google policy effects, cross-cell consistency, practical/operational benefit. g is within-corpus replication, not another independent corpus.
+
+## V5 — STAGED SECOND-CORPUS REPLICATION
+
+**STATUS: NOT EXECUTED — V5A NEXT; V5B BLOCKED**
+
+### V5A — CELL E FIRST REPLICATION
+
+**STATUS: NEXT — requires separately authorized execution**
+
+- **Objective:** execute the frozen five-method study on exactly the existing 1,000 e entities under Google protocol v2 and the V4D design.
+- **Artifacts:** managed clean-source run, common verified reads/truth, complete method/entity matrix, output manifests/hashes, paired F1–F3 estimates/uncertainty and secondary diagnostics.
+- **PASS criteria:** all frozen outputs/invariants/integrity checks complete; no selective exclusions or tuning; no practical-benefit claim from significance alone.
+- **Unproven:** g replication and other domains; real system benefit. No Google outcomes executed by V4D.
+
+### V5B — CELL G HELD-OUT WITHIN-CORPUS REPLICATION
+
+**STATUS: BLOCKED — g not acquired/validated/bound**
+
+- **Objective:** acquire and independently validate g, apply identical max-1,000 hash rule/no backfill, execute/report regardless of e direction.
+- **Artifacts:** validated corrected canonical/clock/cohort binding, separate managed outcomes, identical per-cell analysis, predefined all-contrast direction/heterogeneity synthesis.
+- **PASS criteria:** zero-spend/monthly/disk acquisition safeguards; valid g input binding; unchanged methods/config/statistics; comparable complete analysis and reporting of both cells. Correctness fixes require versioned amendment and comparable reruns.
+- **Unproven:** independent third corpus, operational effects or edge generalization. No opportunistic pooling or favorable-cell choice.
 
 ## V6 — MAINTENANCE-COST / SERVICE BENCHMARK
 
@@ -230,7 +253,7 @@ Earlier documents used a denser V3–V11 numbering (full Materna + refresh trade
 
 ## Dependency and execution rule
 
-V0, V1A, V1B, V2 and the V2.4 investigation chain through V2.4G are PASS as executions. C1 and C2 are withdrawn. V2.4G disposition is **EMPIRICAL/SYSTEM STUDY VIABLE**. V2.5 / V2.5A is **PASS**. V3 is **PASS** (Materna confirmatory estimation; [results](materna_confirmatory_results.md)). V4A is **PASS** ([corpus selection](independent_corpus_selection.md); Google 2019 ready for acquisition). **Raw cell e is VERIFIED; the old canonical generation is SUPERSEDED/invalid; V4B.8 local correction is VERIFIED; V4C.1 is PASS for cell e; V4C is INCOMPLETE pending g validation and final cohort freeze** ([correction](google2019_local_correction.md)). Existing scans consumed 745.088415 GiB; this correction executes zero query bytes. The v2 availability contract is validated for e; V5 remains blocked until g acquisition/validation, final two-cell freeze and V4C completion. C3 and C4 remain UNPROVEN. V5–V9 follow. Every future experiment still requires explicit scope and authorization. No manuscript prose before V9.
+V0, V1A, V1B, V2 and the V2.4 investigation chain through V2.4G are PASS as executions. C1 and C2 are withdrawn. V2.4G disposition is **EMPIRICAL/SYSTEM STUDY VIABLE**. V2.5 / V2.5A is **PASS**. V3 is **PASS** (Materna confirmatory estimation; [results](materna_confirmatory_results.md)). V4A is **PASS** ([corpus selection](independent_corpus_selection.md); Google 2019 ready for acquisition). **Raw cell e is VERIFIED; the old canonical generation is SUPERSEDED/invalid; V4B.8 local correction is VERIFIED; V4C.1 is PASS for cell e; V4C is INCOMPLETE pending g validation and final cohort freeze** ([correction](google2019_local_correction.md)). Existing scans consumed 745.088415 GiB; this correction executes zero query bytes. The v2 availability contract is validated for e. V4D prospectively freezes sequential execution: V5A e is NEXT (not executed); V5B g remains blocked until its acquisition/validation and independent cohort binding. Overall V4C remains incomplete. C3 and C4 remain UNPROVEN. V5–V9 follow. Every future experiment still requires explicit scope and authorization. No manuscript prose before V9.
 
 Primary confirmation must exclude the same 18 development-pilot VMs. Candidate confirmatory set is exactly **1,558** IDs before protocol-validity exclusions ([cohort manifest](../configs/materna_confirmatory_cohort_v1.json)). The 199 gap-audit review flags remain diagnostics, not automatic exclusions. Optional whole-corpus description is separate from independent confirmation.
 

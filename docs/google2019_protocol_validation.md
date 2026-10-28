@@ -1,6 +1,6 @@
 # Google corpus/cohort protocol validation — V4C
 
-Current status: **V4C.1 AVAILABILITY_CONTRACT_READY for cell e; V4C INCOMPLETE pending g and final two-cell freeze**. No replication authorization.
+Current status: **V4C.1 AVAILABILITY_CONTRACT_READY for cell e; V4C INCOMPLETE pending g and final two-cell freeze**. The prospective [V4D staged amendment](google2019_staged_replication.md) makes V5A e NEXT under unchanged v2 semantics; V5B g remains blocked. No Google outcomes have run. Historical simultaneous-gate statements below describe the earlier audit.
 See the [versioned clock contract and current evidence](google2019_clock_contract.md).
 The original unresolved-clock V4C audit below remains historical evidence; it is
 superseded for current interpretation by the explicit v2 completed-slot contract.

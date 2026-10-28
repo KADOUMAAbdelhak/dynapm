@@ -133,3 +133,25 @@ records both aggregates. Its valid disposition is **ADAPTIVE MAINTENANCE NOT
 JUSTIFIED**. Reactive/ADWIN remain reproducibility controls, not accepted
 architecture; do not tune or add triggers. V2.5/V3 remain blocked pending a
 non-adaptive scope decision; see the [investigation](predictor_free_adaptive_investigation.md).
+
+
+## Supported staged Google evaluator — V4D
+
+Use `python -m dynapm.scripts.task30_google_replication --help`; default invocation
+is input verification only. Real outcomes require explicit `--execute`, a clean
+committed source state and the exact frozen cohort manifest. V4D itself executes
+only synthetic fixtures. See [the prospective contract](google2019_staged_replication.md).
+
+The Google adapter projects completed bins to closing q and uses a nominal-time
+bootstrap split, then calls existing `PreparedVM`/factories/shared replay/metrics/
+accounting/statistics. It fits no model. Physical request ratios use legacy internal
+CPU/memory column aliases without percent rescaling; unavailable provisioning
+capacities are null. `parquet-shards-v1` extends the input inventory without changing
+the Materna CSV adapter. All canonical shard/input/cohort hashes are verified;
+no old canonical generation, unmanaged output, arbitrary cohort or incomplete
+run is reusable. Each cell is separate and g is refused until validated inputs
+are bound. Frozen scientific source hashes prevent silent post-e changes.
+
+Current staged status supersedes historical next-gate prose above: V4D PASS, V5A
+NEXT (not run), V5B BLOCKED; overall V4C incomplete. No Google policy outcomes,
+BigQuery calls, g acquisition or Materna result changes occur in this task.

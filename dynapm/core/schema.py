@@ -14,8 +14,8 @@ MEMORY_CLASSES = ("idle", "low", "medium", "high", "burst")
 class StaticFields:
     vm_id: str
     trace_name: str
-    provisioned_cpu_cores: int
-    provisioned_ram_gb: float
+    provisioned_cpu_cores: int | None
+    provisioned_ram_gb: float | None
     bootstrap_start: pd.Timestamp
     bootstrap_end: pd.Timestamp
     n_total_timesteps: int

@@ -35,10 +35,16 @@ def build_dataset_manifest(root, *, dataset_id, source_name, trace_names,
                            schema_identity, expected_cadence_seconds=300, selection="all-regular-files-v1"):
     """Root is an execution location and is deliberately absent from the manifest."""
     root = Path(root)
-    if selection not in {"all-regular-files-v1", "materna-csv-and-trace-info-v1"}:
+    if selection not in {"all-regular-files-v1", "materna-csv-and-trace-info-v1", "parquet-shards-v1"}:
         raise ValueError("unsupported input selection rule")
     files, ancillary = [], []
     for trace, p in _input_files(root, trace_names):
+        if selection == "parquet-shards-v1":
+            if p.suffix.lower() != ".parquet":
+                raise ValueError("Parquet shard inventory contains a non-Parquet file")
+            files.append(DatasetFile(relative_path(p.relative_to(root)), p.stat().st_size,
+                file_sha256(p), trace, None, "entity_shard"))
+            continue
         is_vm = p.suffix.lower() == ".csv"
         selected = selection == "all-regular-files-v1" or is_vm or p.name == "00-Trace-Info.txt"
         target = files if selected else ancillary

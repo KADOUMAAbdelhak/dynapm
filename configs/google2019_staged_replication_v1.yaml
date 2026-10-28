@@ -1,0 +1,154 @@
+# V4D prospective sequential amendment; no outcomes used.
+amendment: "prospective staged execution; replaces simultaneous two-cell execution prerequisite, not scientific protocol v2"
+artifact_policy: "new managed generation per cell; no legacy cache reuse, complete frozen cohort x five methods, fail on any entity error"
+cohort_policy: "apply identical rule independently; no cross-cell backfill; do not select by utilization, volatility, outcomes or expected effects"
+cohort_selection_rule:
+  maximum_entities_per_cell: 1000
+  mode: lowest_sha256_per_cell
+  provisional_until_availability_contract_validated: true
+  required_cells:
+    - e
+    - g
+  resolved_from: cell-e metadata-only resource feasibility; apply unchanged to g
+  rule_input: "nominal protocol eligibility; no utilization magnitude, volatility or outcome"
+  schema_version: google2019-outcome-blind-cohort-rule-v1
+  selection_salt: google2019-v4c-cohort-v1
+cohort_selection_rule_sha256: b8016d94b3c633d5d73abf7dde8085325b2ebe7630309e3f114a1febd1fa624c
+commitments:
+  acquisition_failure: report g unavailable; no favorable replacement cell or relaxed eligibility
+  correctness_fix: versioned pre-g amendment + regression test + comparable e/g reruns; invalidate superseded outcomes; never patch results
+  g_must_be_analyzed_and_reported_even_if_e_null_or_negative: true
+  google_errors_not_materna_capacity_errors: true
+  no_method_config_statistics_or_cohort_rule_changes_after_e: true
+  no_operational_or_edge_claim: true
+comparison_families:
+  F1_maintenance_vs_none:
+    -
+      control: static
+      treatment: pw_12h
+    -
+      control: static
+      treatment: pw_6h
+    -
+      control: static
+      treatment: pw_3h
+  F2_cadence_increments:
+    -
+      control: pw_12h
+      treatment: pw_6h
+    -
+      control: pw_6h
+      treatment: pw_3h
+  F3_high_cost_limit:
+    -
+      control: pw_3h
+      treatment: full_rewrite
+cross_cell_synthesis:
+  direction_categories: "same_positive, same_negative, same_zero, discordant_or_one_zero based on paired mean signs; descriptive only"
+  global_superiority_claim: false
+  heterogeneity: "g-minus-e mean and median point effects, no new pooled inference or significance test"
+  no_favorable_cell_selection: true
+  no_opportunistic_pooling: true
+  rule: for each predeclared family/contrast/endpoint report e and g mean/median/CI side by side
+  shared_collection_overlap: "report metadata overlap, no post-outcome exclusions"
+execution_in_this_task: none; synthetic validation only
+fidelity_endpoints:
+  - cpu_class_correctness
+  - memory_class_correctness
+  - cpu_p95_profile_mae
+  - memory_p95_profile_mae
+gate: V4D
+methods:
+  - static
+  - pw_12h
+  - pw_6h
+  - pw_3h
+  - full_rewrite
+primary_cost: n_refresh_events
+protocol:
+  clock_contract_sha256: 1917007869550d23fff697e508d73911a01a96e24044936b18378669341e5e94
+  config_json_sha256: 88e11c165a05658fe587878a66ee2816f033957efceb883062b0577d4f98a2c1
+  config_yaml_sha256: c971148f289df76514b88fadf1361f515802bd99c39f9dbfdc618c010ad431ad
+  protocol_fingerprint: 88e11c165a05658fe587878a66ee2816f033957efceb883062b0577d4f98a2c1
+protocol_execution:
+  bootstrap: "Google nominal-time split, not observed-row Materna split"
+  evaluation_cadence_seconds: 3600
+  horizon_slots: 288
+  initialization: Static whole bootstrap; PW cadence-length bootstrap window; Full-Rewrite trailing 24h bootstrap window
+  minimum_paired_slots: 200
+  normalization: "request-normalized ratios; no capacity inference, interpolation or clipping"
+  predictor_or_detector_training: false
+  pw_history_slots: 96
+  runtime_window_hours: 24
+robustness:
+  cell: separate-cell estimates
+  no_additional_confirmatory_tests: true
+  primary: false
+  resource: CPU and memory reported separately
+  volatility: "bootstrap CPU population std(ddof=0); within frozen selected cell cohort tertiles; <=q1 low, <=q2 medium, else high; never selection"
+schema_version: google2019-sequential-replication-design-v1
+scientific_runtime_sha256:
+  dynapm/core/accounting.py: fabe82c06b435d2c520caa4557346a0a526b28ca898f377439e6f25b550b10eb
+  dynapm/core/discretization.py: c43a4e629c3f8a22898398769498cfd402e4d743f77e8f5a4e69e01c44a2b596
+  dynapm/core/evaluation_clock.py: 9174abd52c1b4a0fba1b3066eb91fc378e105d797a4d031ebf673f16a97ea583
+  dynapm/core/features.py: adac86d2fad23914388848a1335737575d01db90159cd6abed602ce68cce798d
+  dynapm/core/forecasting.py: bc736503c4b3b7c72f7ea9668c8560ddaea4e3e734419ac45b5f2d2899fa4eff
+  dynapm/core/ground_truth.py: 2c73a93754381a6525c2dd435f6d3bb7253ab87e7c0f24ac979a113ed4115a8c
+  dynapm/core/provenance.py: e02bd758a550ab1b7ca13c730337c593debbf491c22fc8badd22a4fd610efee7
+  dynapm/core/run_store.py: db0aff578fbf202320449b2aa9ffdbbc4664261d2223219003773632406f0c8d
+  dynapm/core/schema.py: dca390f252e5fcef1ce09b1629ec7614a43d4c0ecc922c64860ed08e789f28a3
+  dynapm/core/temporal.py: 4bfca252c6376d533d45f89379c5d5599df50148911651fa43c0255b81e3b787
+  dynapm/data/bootstrap.py: 2fd6bc6377ffc07e41df25479d9fa3f7899aece3247c0fb6f2dd279938cee3f4
+  dynapm/data/google2019_clock.py: cfce4f711a54fd63d139516e8076a14ae712e64334bca5d45eb11fc70cfa7218
+  dynapm/data/manifests.py: 88891d02a285db722a748d799877933601e6f580815f66361a9d9e67f2a8706a
+  dynapm/eval/replay.py: 313eca3ab93b1e34952e8a9f74fe9d7148c7b02bbb0516d11815da94866de870
+  dynapm/eval/runner_v2.py: a613922ed0092a53ada020028f7eb6df7285010be01e75362f475a98a0c0345f
+  dynapm/experiments/confirmatory_design.py: 9e0f22d2606cf4e6b92593a072a888c5f55d98d81f5a3e032a3c7be357a6a856
+  dynapm/experiments/confirmatory_estimation.py: 10d38ab3be2f7c8cad5ce591632183e368a0a0e6eff56105ad3a7c975cc0bb62
+  dynapm/experiments/confirmatory_execution.py: 76f26b7936fbae747fff550eddc5ca05485a2ea6184b03af1bf7f69ece2491d0
+  dynapm/experiments/google2019_protocol_validation.py: a1d3b40e098f697fcd5092a7438fbfd3760ab91aac5f943190080dc3aa0dcfe2
+  dynapm/experiments/google2019_requests.py: 96a74c015e813bd96d77ea6848815f765e198ee5bfbefcf9285f4d4487ebe234
+  dynapm/experiments/google_replication.py: f65b6cb7234deb567d66b710651892615ce804761ddeee1faa85a6d8f8f1ae20
+  dynapm/experiments/google_staged_design.py: 5b6c13c278f1fed4c431a5dc03521f9b2a25803dc28fbd64b1bc1bc315fdb6e3
+  dynapm/methods/baselines_v2.py: 8184f97ebe283c6173557082dc7df5d9f9935523bb9124ba6d5bdeba453e577b
+  dynapm/methods/factories.py: bc62fe4c5a22cbd9e3e9daae91632e8dfa0934f864134f83d050abc1cdda6331
+  dynapm/scripts/task30_google_replication.py: 458a611bf81ad9acca8ef60f3b20d7cf9cd65505be4a866ac3437587dc2d9687
+secondary:
+  - field writes
+  - field value changes
+  - trigger counters
+  - profile age
+  - bias
+  - eligibility delays
+  - verified read count
+  - exposure
+stages:
+  A:
+    binding_path: configs/google2019_stage_e_binding_v1.json
+    binding_sha256: 6e245ffc24eacbf78d5be0b64254e6fe28716b3b8208720af07ef6c6d5c02f98
+    cell: e
+    cohort_sha256: 992210a9fa2dcf14926178bdb93291c6ebf4a9d0d5220df06742dee952baa39c
+    exact_entities: 1000
+    member_records_sha256: 72509e63e07504d905e78d7c9ace6f70b66b9b6a0c4309a29d0c175471b00b6d
+    role: first Google replication evidence
+  B:
+    binding_path: configs/google2019_stage_g_binding_v1.json
+    cell: g
+    maximum_entities: 1000
+    required_regardless_of_e_direction: true
+    requires_validated_canonical_clock_and_cohort: true
+    role: held-out within-corpus replication; not an independent corpus
+statistics:
+  all_ties: "p=1, effect=0; standardized effect undefined when paired SD is zero"
+  alpha: 0.05
+  alternative: two-sided
+  bootstrap_method: paired entity percentile bootstrap
+  bootstrap_repetitions: 10000
+  bootstrap_seed: 20251022
+  confidence_level: 0.95
+  multiplicity: "Holm independently within F1/F2/F3 across contrasts x four fidelity endpoints plus refresh cost, separately per cell"
+  paired_mean_and_median: true
+  practical_significance: NOT_DEFINED_AT_PROFILE_LEVEL
+  unit: entity
+  wilcoxon_zero_method: wilcox
+status: FROZEN_BEFORE_ANY_GOOGLE_METHOD_OUTCOMES

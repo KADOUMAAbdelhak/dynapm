@@ -230,7 +230,7 @@ chosen to favor observed pilot effects. See [protocol](protocol.md) and
 
 ## Corrected bounded gate status
 
-V2 passed under causal-timeline-v3 and phase-balanced-hourly-v1; see [pilot record](bounded_pilot.md). After V2.4G (**EMPIRICAL/SYSTEM STUDY VIABLE**), V2.5A amends the confirmatory design to estimation-first (**V2.5 = PASS**) and V3 completes the Materna confirmatory estimation study (**V3 = PASS**; [results](materna_confirmatory_results.md)). V4A freezes Google ClusterData 2019 for independent replication (**V4A = PASS**; [selection](independent_corpus_selection.md)). **Raw cell e and V4B.8 corrected canonicalization VERIFIED** ([acquisition](google2019_acquisition.md)). **V4C.1 AVAILABILITY_CONTRACT_READY for e** ([clock contract](google2019_clock_contract.md)); V4C remains incomplete until g validation and final two-cell freeze. Cell g remains absent and V5 remains blocked. The 18 development entities remain excluded from primary Materna confirmation. C3/C4 remain UNPROVEN.
+V2 passed under causal-timeline-v3 and phase-balanced-hourly-v1; see [pilot record](bounded_pilot.md). After V2.4G (**EMPIRICAL/SYSTEM STUDY VIABLE**), V2.5A amends the confirmatory design to estimation-first (**V2.5 = PASS**) and V3 completes the Materna confirmatory estimation study (**V3 = PASS**; [results](materna_confirmatory_results.md)). V4A freezes Google ClusterData 2019 for independent replication (**V4A = PASS**; [selection](independent_corpus_selection.md)). **Raw cell e and V4B.8 corrected canonicalization VERIFIED** ([acquisition](google2019_acquisition.md)). **V4C.1 AVAILABILITY_CONTRACT_READY for e** ([clock contract](google2019_clock_contract.md)); V4C remains incomplete until g validation and final two-cell freeze. Cell g remains absent. V4D prospectively supersedes the simultaneous execution prerequisite for e only: V5A is NEXT; V5B remains blocked; see the staged contract below. The 18 development entities remain excluded from primary Materna confirmation. C3/C4 remain UNPROVEN.
 
 ## V2.4 prerequisite to confirmation freeze
 
@@ -370,8 +370,7 @@ are not Materna provisioned percentages; absolute p95/MAE values cannot be poole
 as equivalent capacity errors. Entity-specific percentile classes do not imply
 equal physical loads. Account for differing exposure, request changes, cell scope
 and collection/instance dependence when interpreting replication. No operational
-benefit follows from offline profile agreement. **V5 requires V4C readiness,
-g acquisition/validation, and the final two-cell freeze; none is waived here.**
+benefit follows from offline profile agreement. **Historical V4C rule:** both cells were required before V5; the prospective V4D staged amendment below supersedes that execution prerequisite for Stage A only.
 
 
 ## V4C.1 — completed-slot availability safeguards
@@ -387,5 +386,30 @@ All e rows passed containment, overlap, duplicate, bootstrap/read/verification
 checks. Eligibility, threshold values and member identities are unchanged.
 Protocol/cohort wrapper hashes change because the clocks are now explicit. V4A
 scientific questions/comparisons/statistics and Materna results remain untouched.
-**V4C.1 PASS for e; V4C incomplete; V5 blocked until g passes the same contract
-and a final two-cell cohort is frozen.** No policy outcomes have been computed.
+**V4C.1 PASS for e; V4C incomplete.** The later V4D amendment allows staged readiness as below. No Google policy outcomes have been computed.
+
+
+## V4D — prospective sequential replication commitment
+
+The [versioned staged contract](google2019_staged_replication.md) is frozen before
+Google outcomes. Stage A uses exactly the unchanged 1,000 e entities. Stage B
+applies the identical max-1,000 identity hash rule independently to validated g;
+no backfill. Acquire, execute and report g regardless of e direction. g is
+held-out within-corpus evidence, not an independent third corpus.
+
+Five unchanged methods and F1/F2/F3 are analyzed per cell at entity level with
+paired mean/median, percentile bootstrap 95% CI (10,000; seed 20251022), two-sided
+Wilcoxon/wilcox and within-family Holm across fidelity and refresh-cost endpoints.
+No practical margins are invented. Report all contrasts side by side using the
+predefined sign/point-heterogeneity synthesis; no opportunistic pooling, favorable
+cell selection or Google/Materna absolute-error equivalence. No methods, settings,
+statistics or selection changes after e; correctness fixes need a versioned
+amendment and comparable reruns. C1/C2 stay withdrawn; C3/C4 remain unproven.
+
+V4D PASS establishes execution readiness, not outcomes. **V5A e NEXT** requires a
+separate execution task. **V5B g BLOCKED** on zero-spend acquisition, corrected
+canonicalization, availability validation and cohort binding. Overall V4C/two-cell
+readiness remains incomplete. Earlier simultaneous-gate records are retained
+without rewriting their frozen protocol/hash/cohort. Alibaba MaaS is only a
+conditional third corpus, with licence/redistribution and one-week fit unresolved;
+no acquisition or experiment is authorized here.
