@@ -2,8 +2,9 @@
 
 Contract: `google-completed-slot-availability-v1`. Protocol configuration:
 `configs/google_clusterdata_2019_replication_protocol_v2.{json,yaml}`.
-Cell-e interval validation is PENDING the committed metadata-only audit. No
-policy outcomes or replication authorization. The old V4A v1 files and all
+Cell-e interval validation: **AVAILABILITY_CONTRACT_READY** (2026-10-28).
+V4C remains incomplete pending g validation/final two-cell freeze. No policy
+outcomes or replication authorization. The old V4A v1 files and all
 Materna/V3 artifacts remain untouched.
 
 ## Three clocks and the explicit analysis view
@@ -117,3 +118,61 @@ Recompute metadata/cohort wrappers with the same identity-hash selection rule;
 compare member identities separately from protocol-bound manifest hashes.
 A ready e contract does not complete V4C: g must be acquired and validated under
 the same contract, and the final two-cell cohort must be frozen before V5.
+
+## Verified cell-e audit (2026-10-28)
+
+Clean producer: `5867341972aea1e316e0a9291c0193e39ffe69e0`. Local immutable audit: `data/google2019/protocol_validation/v4c1-e-91887b860ee5e549`.
+[Execution record](../configs/google2019_v4c1_validation_record.json), [independent evidence](../configs/google2019_v4c1_validation_evidence.json), [current protocol pointer](../configs/google2019_current_protocol.json), and [v2 cohort authority](../configs/google2019_replication_cohort_v2.json) pin all inputs/outputs.
+
+| Timing quantity — retained canonical rows | Count / value |
+|---|---:|
+| Retained rows | 462,821,691 |
+| Exact 300s intervals | 461,835,716 (99.78696439%) |
+| Shorter positive intervals | 985,975 (0.21303561%) |
+| Off-grid source ends | 103,998 (0.02247042%) |
+| Off-grid source starts | 982,229 |
+| Cross-bin/invalid duration/ambiguous rows | 0 / 0 / 0 |
+| Retained overlapping pairs / duplicate slots | 0 / 0 |
+| Contiguous actual interval pairs | 461,807,851 |
+| Positive actual interval gaps | 856,581 |
+| Gaps despite consecutive nominal bins | 724,183 |
+| Gaps across missing nominal bins | 132,398 |
+| Maximum actual interval gap (seconds) | 1,903,739 |
+
+Actual durations range 1–300s; mean 299.64914995s; p50/p95/p99 all 300s. Stored-label→availability delay ranges 1–300s, mean 299.96578898s. Availability→grid-admission hold ranges 0–299s, mean 0.03421102s (p50/p95/p99 zero). All ends lie at/before their own bin close. Full frequency histograms are in `timing_histograms.json`.
+
+The corrected generation already rejected 1,012,660 surplus same-bin rows. Among request-valid pre-dedup interval candidates, 11,123 are exact interval surplus copies across 11,123 groups; others are distinct intervals in a shared bin. Frozen max-end/min-source-SHA selection is not changed. No rejected candidate is admitted, and retained canonical observations have unique intervals/slots.
+
+| Availability-aware metadata | Before V4C.1 | After V4C.1 |
+|---|---:|---:|
+| Acquisition candidates | 62,451 | 62,451 |
+| Eligible entities | 62,444 | 62,444 |
+| Excluded acquisition candidates | 7 | 7 |
+| Bootstrap paired observations | 135,927,515 | 135,927,515 |
+| Valid bootstrap exact-history rows | 126,277,913 | 126,277,913 |
+| 200-slot trailing refresh opportunities | 317,572,992 | 317,572,992 |
+| PW opportunities including inherited 96-slot gate | 309,116,408 | 309,116,408 |
+| Nominal hourly reads | 25,030,381 | 25,030,381 |
+| Verifiable hourly reads | 24,998,548 | 24,998,548 |
+| Read origins without observation | 10,049 | 10,049 |
+
+Among acquisition candidates, 62,446 meet the >=96 paired-bootstrap threshold requirement; 62,444 have >=200 actual samples in the initializer's last 24h bootstrap window (a diagnostic, not a new initialization exclusion). There are 62,450 entities with a trailing-window refresh opportunity and 62,449 with a verifiable hourly origin.
+
+The seven unique exclusions and overlapping reasons are unchanged: five insufficient bootstrap history, one insufficient exact-window eligibility, and two zero-verifiable-origin cases. All counts, nominal periodic ticks and bootstrap thresholds match per entity. All bootstrap source intervals finish by the cut/stream anchor. An independent all-entity comparison verifies first/last/cut/anchor timestamps are exactly +300s, with identical nominal-slot counts. This is the declared closing-label projection, not an unreported row/window shift.
+
+The existing 1,000-member e cohort has **zero additions/removals**. Member-record SHA is `72509e63e07504d905e78d7c9ace6f70b66b9b6a0c4309a29d0c175471b00b6d`. Its new wrapper SHA `992210a9fa2dcf14926178bdb93291c6ebf4a9d0d5220df06742dee952baa39c` changes because it binds the new protocol/clock identity, not because members or selection changed. Keep the same identity-hash salt/cap/eligibility rule for g; the final two-cell cohort remains unfrozen.
+
+| Pinned current identity | SHA-256 |
+|---|---|
+| Protocol v2 fingerprint / JSON | `88e11c165a05658fe587878a66ee2816f033957efceb883062b0577d4f98a2c1` |
+| Protocol v2 YAML | `c971148f289df76514b88fadf1361f515802bd99c39f9dbfdc618c010ad431ad` |
+| Clock contract | `1917007869550d23fff697e508d73911a01a96e24044936b18378669341e5e94` |
+| Audit manifest | `ea3a4ced23c774bf49b5a12bfa8c8b19b9720d959dae3c10b0be318696ac4863` |
+| Eligibility Parquet | `2587ee8ef6975c4152a6e6bd009d6245b983c09279e47b3ef6d32ace8215ece9` |
+| Provisional e cohort | `992210a9fa2dcf14926178bdb93291c6ebf4a9d0d5220df06742dee952baa39c` |
+
+All corrected-generation artifacts were rehashed unchanged before/after execution. The stored start-labelled data, original V4A configs, prior blocked audit/cohort, Materna/V3 artifacts and historical logs remain untouched. RQs/methods/endpoints/F1–F3/statistics are identical to V4A; only Google clock/config identity is versioned. Zero cloud queries/bytes; billing untouched; no g acquisition and no policy outcomes.
+
+Independent verification rescanned all retained intervals and checked completed visibility, bootstrap thresholds, read grids and verification maturity on 16 actual entities, including all seven exclusions. Full lightweight suite: **431 passed, 0 failed, 1 skipped**; **27 focused tests passed**; Python parsing/imports and CLI help passed. No incomplete aggregate passed the visibility/maturity gates.
+
+Availability here models source-interval completion, not measured telemetry ingestion/network delay; the trace provides no delivery timestamps. No operational delivery guarantee or system benefit is inferred. **V4C.1 PASS / AVAILABILITY_CONTRACT_READY for e. V4C is incomplete and V5 is blocked until g acquisition/validation under this same contract and the final two-cell cohort freeze.** New g staging/disk/budget preflight remains necessary.

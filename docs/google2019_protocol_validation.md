@@ -1,7 +1,9 @@
 # Google corpus/cohort protocol validation — V4C
 
-Status: **audit integrity VERIFIED; PROTOCOL_REQUIRES_CORRECTION; V4C BLOCKED**.
-No replication authorization. The current findings below were recorded on 2026-10-28.
+Current status: **V4C.1 AVAILABILITY_CONTRACT_READY for cell e; V4C INCOMPLETE pending g and final two-cell freeze**. No replication authorization.
+See the [versioned clock contract and current evidence](google2019_clock_contract.md).
+The original unresolved-clock V4C audit below remains historical evidence; it is
+superseded for current interpretation by the explicit v2 completed-slot contract.
 The corrected v2 canonical generation is the sole data input. Raw and canonical
 files are read-only; there are no cloud calls or policy outcomes.
 
@@ -112,7 +114,7 @@ dependence structures; many instances may share a collection. Cell-stratified
 reporting and limits on generalization remain necessary. No latency, cost,
 provisioning or heterogeneous-edge benefit follows from this metadata audit.
 
-## Executed evidence (2026-10-28)
+## Original V4C evidence — unresolved start-label clock (historical)
 
 The audit completed without policy execution. Integrity completion is not a
 protocol PASS. The complete metadata artifact inventories all canonical entities;
@@ -185,3 +187,24 @@ These are assumptions-based bounds for audited row-preserving outputs, not obser
 All corrected output hashes and the canonical dataset aggregate SHA were reverified. Raw events/merged usage SHA values remain pinned; raw/part/job/ledger identities were checked unchanged before/after. Legacy canonical input is rejected. Independent core-helper checks reproduce bootstrap thresholds, trailing eligibility and nominal read sets for 16 actual entities, including all seven exclusions, without evaluating a policy. Synthetic/future-value-invariance, hash selection and tampering checks pass. Tests: **404 passed, 0 failed, 1 skipped**; focused tests: **16 passed**. Python parsing/imports and safe CLI help pass. Audit metadata computation took 83.45s; this is not a V5 runtime measurement.
 
 Next scientifically valid task: **V4C.1 — review/freeze the Google availability-clock interpretation and validate a causal adapter, without outcomes**. Preserve the canonical mapping or explicitly version any approved scientific amendment; validate bootstrap visibility, refresh/read ordering, target intervals and maturity together, then regenerate metadata/cohorts as required. Separately acquire and validate g under its authorized budget/disk guards. **V5 remains blocked until corrected V4C readiness, g validation, and a final two-cell cohort freeze.** No BigQuery query bytes, billing action, Static/PW/Full-Rewrite execution, V3 rerun, or method-performance inspection occurred.
+
+
+## V4C.1 — current availability-aware result
+
+The explicit derived closing label q=b+300s and visibility gate end<=read AND
+q<=read resolve the earlier availability ambiguity without modifying canonical
+start labels. The 288 trailing and 288 forward slot sets are mapped explicitly
+in [the contract](google2019_clock_contract.md); no target count, imputation,
+policy parameter or scientific comparison changes. All intervals were audited
+and independently checked: zero crossing/overlap/ambiguous retained intervals.
+
+Cell-e disposition is **AVAILABILITY_CONTRACT_READY**. Eligible counts remain
+62,444/62,451, with the same seven exclusions and the identical 1,000 selected
+members. Bootstrap thresholds and all refresh/read opportunity counts are equal
+per entity; physical cut/read anchors are explicitly +300s. Current authority is
+`configs/google2019_current_protocol.json`, protocol v2, and cohort config v2;
+v1 configs/blocked artifacts remain historical and are not current inputs.
+
+**V4C remains incomplete until g is acquired/validated under the same contract
+and the final two-cell cohort is frozen. V5 stays blocked; no policy outcomes
+or BigQuery queries were run.**

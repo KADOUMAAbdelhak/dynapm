@@ -3,10 +3,10 @@
 Raw cell-e acquisition is VERIFIED. The old `data/google2019/canonical/e/`
 generation remains byte-preserved and is invalid for scientific replication
 because same-time conflicting request pairs were not excluded. Corrected
-canonicalization is VERIFIED. V4C completed the metadata audit but is BLOCKED
-by the aggregate-availability contract ([audit](google2019_protocol_validation.md));
-no Google replication outcomes have been run. Dated execution details below
-retain the V4B.8 handoff state.
+canonicalization is VERIFIED. V4C.1 validated the e availability contract
+([clock contract](google2019_clock_contract.md)); V4C awaits g and final cohort
+validation. No Google replication outcomes have been run. Dated execution
+details below retain the V4B.8 handoff state.
 
 ## Frozen semantics
 

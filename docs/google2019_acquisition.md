@@ -1,6 +1,6 @@
 # Google ClusterData 2019 Acquisition (V4B → V4B.8)
 
-**Current raw cell-e acquisition: VERIFIED. Old canonical: SUPERSEDED/invalid for scientific replication. V4B.8 local correction: VERIFIED; V4C metadata audit completed; BLOCKED by the aggregate-availability contract ([audit](google2019_protocol_validation.md)).** See [local correction](google2019_local_correction.md). Historical records below remain unchanged.
+**Current raw cell-e acquisition: VERIFIED. Old canonical: SUPERSEDED/invalid for scientific replication. V4B.8 local correction: VERIFIED; V4C.1 availability contract READY for e ([clock contract](google2019_clock_contract.md)); V4C incomplete pending g and final cohort.** See [local correction](google2019_local_correction.md). Historical records below remain unchanged.
 
 **V4B.7 disposition: `CELL_E_ACQUIRED`** (cell `g` deferred this month)  
 **Recovery:** Storage Read of temporary query results (anonymous table; free per BQ pricing)  

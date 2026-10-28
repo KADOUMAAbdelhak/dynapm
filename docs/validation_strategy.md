@@ -230,7 +230,7 @@ chosen to favor observed pilot effects. See [protocol](protocol.md) and
 
 ## Corrected bounded gate status
 
-V2 passed under causal-timeline-v3 and phase-balanced-hourly-v1; see [pilot record](bounded_pilot.md). After V2.4G (**EMPIRICAL/SYSTEM STUDY VIABLE**), V2.5A amends the confirmatory design to estimation-first (**V2.5 = PASS**) and V3 completes the Materna confirmatory estimation study (**V3 = PASS**; [results](materna_confirmatory_results.md)). V4A freezes Google ClusterData 2019 for independent replication (**V4A = PASS**; [selection](independent_corpus_selection.md)). **Raw cell e and V4B.8 corrected canonicalization VERIFIED** ([acquisition](google2019_acquisition.md)). **V4C metadata audit completed; PROTOCOL_REQUIRES_CORRECTION** ([audit](google2019_protocol_validation.md)): start-labelled aggregates need an explicit causal availability contract. Cell g remains absent and V5 remains blocked. The 18 development entities remain excluded from primary Materna confirmation. C3/C4 remain UNPROVEN.
+V2 passed under causal-timeline-v3 and phase-balanced-hourly-v1; see [pilot record](bounded_pilot.md). After V2.4G (**EMPIRICAL/SYSTEM STUDY VIABLE**), V2.5A amends the confirmatory design to estimation-first (**V2.5 = PASS**) and V3 completes the Materna confirmatory estimation study (**V3 = PASS**; [results](materna_confirmatory_results.md)). V4A freezes Google ClusterData 2019 for independent replication (**V4A = PASS**; [selection](independent_corpus_selection.md)). **Raw cell e and V4B.8 corrected canonicalization VERIFIED** ([acquisition](google2019_acquisition.md)). **V4C.1 AVAILABILITY_CONTRACT_READY for e** ([clock contract](google2019_clock_contract.md)); V4C remains incomplete until g validation and final two-cell freeze. Cell g remains absent and V5 remains blocked. The 18 development entities remain excluded from primary Materna confirmation. C3/C4 remain UNPROVEN.
 
 ## V2.4 prerequisite to confirmation freeze
 
@@ -336,12 +336,12 @@ for provenance. C1/C2 remain withdrawn. Profile-level practical significance is
 PASS (V2.5A).** **V3 STATUS: PASS** ([Materna confirmatory estimation results](materna_confirmatory_results.md)).
 **V4A STATUS: PASS** ([independent corpus selection](independent_corpus_selection.md)):
 Google ClusterData 2019 frozen for acquisition under
-`google_clusterdata_2019_replication_protocol_v1`. **Raw e acquisition and V4B.8
+`google_clusterdata_2019_replication_protocol_v1` (preserved V4A parent; the current availability extension is v2). **Raw e acquisition and V4B.8
 canonicalization are VERIFIED** ([acquisition](google2019_acquisition.md)).
-**V4C is BLOCKED — PROTOCOL_REQUIRES_CORRECTION** ([audit](google2019_protocol_validation.md)).
-Nominal start labels precede usage-aggregate completion; freeze/validate an explicit
-availability-clock contract before any outcomes. The 1,000-entity e hash cohort
-is provisional; apply the identical outcome-blind rule to g after acquisition.
+**V4C.1 AVAILABILITY_CONTRACT_READY for e** ([clock contract](google2019_clock_contract.md)); V4C remains incomplete.
+The explicit completed-slot projection preserves start labels and 288-slot windows
+while preventing incomplete averages at reads. The same 1,000-entity e hash cohort
+is provisional; apply the identical clock and outcome-blind rule to g after acquisition.
 No final two-cell cohort exists. C3 and C4 remain UNPROVEN. Future gates: V5 second-corpus
 replication; V6 cost benchmark; V7 K8s harness; V8 operational validation; V9
 claim audit / venue decision. Do not claim C3–C6 before the corresponding gates
@@ -353,9 +353,10 @@ pass.
 [V4C protocol validation](google2019_protocol_validation.md) audits all corrected
 cell-e entities without method performance. Seven of 62,451 acquisition candidates
 fail nominal bootstrap/window/truth requirements; the remaining 62,444 are not
-therefore automatically causal-ready. Every start-labelled average ends after
-its label. Resolve physical/logical availability and verification maturity before
-claiming protocol readiness; no implicit retimestamping or V4A change is allowed.
+therefore automatically causal-ready under an unversioned start-label clock.
+V4C.1 now explicitly versions the completed-slot analysis/read projection and
+validates physical availability/maturity; no implicit retimestamping or V4A rewrite
+is allowed. The e contract is ready; g and final cohort validation remain pending.
 
 The provisional selection is identity-only SHA ranking, at most 1,000 eligible
 entities per cell, chosen under a predefined resource budget. It must be applied
@@ -371,3 +372,20 @@ equal physical loads. Account for differing exposure, request changes, cell scop
 and collection/instance dependence when interpreting replication. No operational
 benefit follows from offline profile agreement. **V5 requires V4C readiness,
 g acquisition/validation, and the final two-cell freeze; none is waived here.**
+
+
+## V4C.1 — completed-slot availability safeguards
+
+Use the current v2 Google protocol/config pointer. Measurement [s,e) retains its
+stored b=floor(s/300s)*300s label; analysis q=b+300s is explicit, with admission
+only when e<=read AND q<=read. Trailing (read-24h,read] and forward
+(read,read+24h] use exactly 288 closing slots, >=200 actual paired finite rows,
+and full-horizon maturity. Partial edge intervals remain actual partial samples;
+never assert invented full-bin measurements or telemetry delivery guarantees.
+
+All e rows passed containment, overlap, duplicate, bootstrap/read/verification
+checks. Eligibility, threshold values and member identities are unchanged.
+Protocol/cohort wrapper hashes change because the clocks are now explicit. V4A
+scientific questions/comparisons/statistics and Materna results remain untouched.
+**V4C.1 PASS for e; V4C incomplete; V5 blocked until g passes the same contract
+and a final two-cell cohort is frozen.** No policy outcomes have been computed.

@@ -177,3 +177,16 @@ reset. An ADWIN signal with ineligible content is consumed and diagnosed, never
 latched or converted into a fabricated refresh. Periodic takes precedence; drift
 never shifts the base grid. Budget-extra eligibility is identical to periodic
 content eligibility; only K enters the nonadaptive scheduling interface.
+
+
+## Google corpus clock adapter (V4C.1)
+
+The Google-specific [completed-slot contract](google2019_clock_contract.md) and
+`configs/google2019_current_protocol.json` are authoritative for Google inputs.
+Canonical start labels stay unchanged; the analysis projection uses bin-closing
+q=b+300s and exposes only completed, admitted measurements. Bootstrap follows
+Google V4A's nominal-time split, not Materna's observed-row helper. The 288-slot
+trailing/forward sets, hourly relative phases, core temporal/accounting versions
+and scientific comparisons remain unchanged; physical availability and maturity
+are explicit. This overlay does not change Materna/V3 implementation or results.
+E is clock-validated; g and the final two-cell cohort remain required before V5.
