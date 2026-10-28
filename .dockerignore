@@ -1,0 +1,7 @@
+**
+!dynapm/
+!dynapm/system_validation/
+!dynapm/system_validation/application.py
+!harness/
+!harness/system/
+!harness/system/Dockerfile

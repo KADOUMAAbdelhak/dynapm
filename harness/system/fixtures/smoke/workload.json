@@ -1,0 +1,1 @@
+{"comparative_runs":false,"iterations":1000,"max_elapsed_seconds":1800,"memory_mib":8,"method":"full_rewrite","post_actuation_seconds":30,"real_buckets":1,"role":"SMOKE_ONLY","rps":2,"scenario":"stable","scope":"NON_CLAIM_PLUMBING_ONLY","seed":20251022,"synthetic_bootstrap_slots":288,"synthetic_cpu_millicores":50,"synthetic_memory_mib":48}

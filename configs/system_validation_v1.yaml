@@ -1,0 +1,162 @@
+# V7A scaffold; no comparative trials enabled.
+accounting_schema: refresh-accounting-v1
+claim_trials_enabled: false
+consumer:
+  changed_quantities_only: true
+  cpu_millicores_maximum: 1000
+  cpu_millicores_minimum: 50
+  cpu_millicores_quantum: 10
+  decision_cadence_seconds: 300
+  headroom: 1.2
+  memory_mib_maximum: 512
+  memory_mib_minimum: 64
+  memory_mib_quantum: 4
+  one_inflight_resize: true
+  rule: "ceil(headroom * maintained p95 physical value / quantum) * quantum then clamp; requests=limits; classes diagnostic only"
+  signal_inputs: "CPU/memory maintained p95 only; no SLO feedback, prediction, adaptive detector, smoothing or tuned hysteresis"
+  version: p95-fixed-headroom-quantized-v1
+consumer_only_difference: profile maintenance policy; same workload/seed/consumer/limits/actuation/read rules
+core_protocol: causal-timeline-v3
+endpoints:
+  actuation_latency: patch submission through status.resources AND cgroup enforcement; record rejected/deferred/timeouts/restarts
+  latency_p50_p95_p99: successful arrival-to-completion latency including generator lag; failure/timeout denominator reported separately
+  maintenance_overhead: "separate profile service process CPU/RSS, per-step wall/CPU duration, state bytes and refresh/write/change counts"
+  over_provisioning: "integral max(request-used,0), resource-time units; not money"
+  recommendation_latency: "snapshot read through recommendation computation, wall and process CPU timers"
+  requested_cpu_memory: desired Pod spec and observed status; Guaranteed requests=limits; cgroup confirmation
+  resource_changes: "actual changed CPU/memory allocations, distinct from profile refreshes; churn=sum absolute per-resource changes"
+  slo_violation_rate: "all offered requests, failures included; run-level endpoint"
+  throughput: successful completions within fixed window / window seconds
+  under_provisioning: "observed deficit lower bounds plus CPU throttled-period fraction, memory OOM and SLO; enforced limits censor latent demand"
+  used_cpu_memory: actual CPU-counter rates and cgroup memory working set
+  utilization_efficiency: "resource-time used / resource-time requested, separately CPU and memory"
+future_trials:
+  bootstrap_seconds: 86400
+  bootstrap_source: actual completed telemetry only; no fixture or time compression
+  bootstrap_workload: stable
+  enabled: false
+  independent_run_reset: true
+  measurement_seconds: 172800
+  practical_margins: null
+  precision_power_plan_required: true
+  primary_unit: "independent run/scenario replicate, never requests or telemetry points"
+  randomized_counterbalanced_order_required: true
+  repeats: null
+gate: V7A
+kubernetes:
+  actuation: pods/resize strategic merge; NotRequired restart policy; no rollout fallback
+  application_image: "dynapm-system-workload:v7a"
+  cluster: dynapm-v7a-smoke
+  container: workload
+  context: kind-dynapm-v7a-smoke
+  kind_version: v0.29.0
+  local_docker_only: true
+  namespace: dynapm-v7a-smoke
+  node_image: "kindest/node:v1.33.1@sha256:050072256b9a903bd914c0b2866828150cb229cea0efe5892e2b644d5dd3b34f"
+  note: "installed kind release image; in-place resize beta in this smoke version, re-review supported environment before V8"
+  prometheus_image: "prom/prometheus:v3.2.1@sha256:6927e0919a144aa7616fd0137d4816816d42f6b816de3af269ab065250859a62"
+  python_image: "python:3.13.2-slim@sha256:6b3223eb4d93718828223966ad316909c39813dee3ee9395204940500792b740"
+  resource_qos: "Guaranteed: requests equal limits before/after resize"
+  server_version: v1.33.1
+  workload_pod: application
+methods:
+  - static
+  - pw_12h
+  - pw_6h
+  - pw_3h
+  - full_rewrite
+offline_evaluation_grid: phase-balanced-hourly-v1
+question: "How do the five maintained observation-profile contracts affect the same resource recommender, enforced Kubernetes allocations, application SLO and resource use?"
+references:
+  cpu_millicores: 1000
+  memory_mib: 512
+  rule: "fixed bootstrap reference, never current changing requests"
+scenarios:
+  abrupt_regime_shift:
+    high_memory_mib: 96
+    high_rps: 12
+    low_memory_mib: 32
+    low_rps: 4
+    shift_seconds: 86400
+  burst:
+    burst_seconds: 1200
+    first_burst_seconds: 3600
+    high_memory_mib: 160
+    high_rps: 20
+    low_memory_mib: 32
+    low_rps: 4
+    period_seconds: 18000
+  periodic:
+    high_memory_mib: 96
+    high_rps: 12
+    low_memory_mib: 32
+    low_rps: 2
+    period_seconds: 25200
+  stable:
+    memory_mib: 32
+    rps: 4
+schema_version: system-profile-provisioning-v1
+scientific_runtime_sha256:
+  .dockerignore: 099b5e5c1489abcd0c27327a271c3ef646fbedb983df63c06f7b511796f42eab
+  dynapm/core/accounting.py: fabe82c06b435d2c520caa4557346a0a526b28ca898f377439e6f25b550b10eb
+  dynapm/core/discretization.py: c43a4e629c3f8a22898398769498cfd402e4d743f77e8f5a4e69e01c44a2b596
+  dynapm/core/forecasting.py: bc736503c4b3b7c72f7ea9668c8560ddaea4e3e734419ac45b5f2d2899fa4eff
+  dynapm/core/schema.py: dca390f252e5fcef1ce09b1629ec7614a43d4c0ecc922c64860ed08e789f28a3
+  dynapm/core/temporal.py: 4bfca252c6376d533d45f89379c5d5599df50148911651fa43c0255b81e3b787
+  dynapm/experiments/confirmatory_execution.py: 76f26b7936fbae747fff550eddc5ca05485a2ea6184b03af1bf7f69ece2491d0
+  dynapm/methods/baselines_v2.py: 8184f97ebe283c6173557082dc7df5d9f9935523bb9124ba6d5bdeba453e577b
+  dynapm/methods/factories.py: bc62fe4c5a22cbd9e3e9daae91632e8dfa0934f864134f83d050abc1cdda6331
+  dynapm/scripts/task32_system_harness.py: aff9132f987a8067fd1fb3d4dd2a67f21d7429f318b0b49740af98ed2168abcb
+  dynapm/system_validation/adapter.py: bb5d087971c5fa62d9a0d824f7ea4f102c5a919db745c388e182950b9fd72d3b
+  dynapm/system_validation/application.py: 571da7880ea57442bc5b9497db5b9bf76d19fe922fcee8cc646f8afe38e43834
+  dynapm/system_validation/consumer.py: 9a7ab4613203784862c830c309858dfe218d993aab734a6a9de0568cd977faef
+  dynapm/system_validation/design.py: a6f9a25e1ffa4df04583a67e640995cb02e33efb2fa454d52e088889d8ed5667
+  dynapm/system_validation/smoke.py: 8c464a527a4199ebec7698e10a48d379c29debcef511aa1103df7bc3db03b566
+  dynapm/system_validation/workloads.py: 8e3ed7822f3c71c29aa58bee5917f2b7a1707538f41752c92ec02ab69b6e7477
+  harness/system/Dockerfile: 5ec4a66f5a4ce8e30f49f6b806858ae6dabd05b0e8fc0ac3be79eccf629d841d
+  harness/system/fixtures/smoke/bootstrap.json: 95fb90445ce17ec724a58b5956eabe8ff29373d3901186efd363a0fa948efb55
+  harness/system/fixtures/smoke/workload.json: 04b1e3721e503174b9e0fcfcad6e0858bdaa065345588f7d160412881d724473
+  harness/system/kind.yaml: 43cd82accfd49ed391be83b29a25264e21560f754aebc9c1f7360b4268cf984a
+  harness/system/resources.json: 240e139b74df752d889bce3e4315dcfe6f33d4c2c77420c8d3c70d8613aab7bd
+scope: SCAFFOLD_AND_LOCAL_SMOKE_ONLY
+slo:
+  latency_seconds: 0.25
+  violation: "failed/timed-out/dropped OR arrival-to-completion > target, divided by offered requests"
+smoke:
+  comparative_runs: false
+  iterations: 1000
+  max_elapsed_seconds: 1800
+  memory_mib: 8
+  method: full_rewrite
+  post_actuation_seconds: 30
+  real_buckets: 1
+  rps: 2
+  scenario: stable
+  scope: NON_CLAIM_PLUMBING_ONLY
+  synthetic_bootstrap_slots: 288
+  synthetic_cpu_millicores: 50
+  synthetic_memory_mib: 48
+sources:
+  - "https://github.com/kubernetes-sigs/kind/releases/tag/v0.29.0"
+  - "https://v1-33.docs.kubernetes.io/docs/tasks/configure-pod-container/resize-container-resources/"
+  - "https://prometheus.io/docs/instrumenting/exposition_formats/"
+system_clock: system-completed-bucket-wall-read-v1
+telemetry:
+  bucket_seconds: 300
+  cpu: "counter difference over actual in-bucket source span, cores; no extrapolation"
+  fence: "all source sample times inside [bucket_start,bucket_end]; available only after bucket_end and receipt; incomplete buckets absent"
+  late_read: record wall receive/commit/read times separately from nominal policy slot; never consume incomplete source
+  max_clock_skew_seconds: 2
+  memory: mean of actual cgroup working-set bytes in bucket
+  min_samples: 50
+  min_span_seconds: 270
+  no_clipping: true
+  no_interpolation: true
+  poll_seconds: 5
+workload:
+  arrival: deterministic open loop; overload drops recorded as failures
+  generator_location: "host through fixed localhost kubectl port-forward; transport part of measured system, not production ingress"
+  iterations: 30000
+  max_concurrency: 32
+  seed: 20251022
+  timeout_seconds: 5

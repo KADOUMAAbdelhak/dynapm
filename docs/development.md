@@ -187,3 +187,15 @@ prospective secondary. Technical canonical-purpose provenance never promotes a
 post-hoc result to preregistered primary evidence. See [the formulas, scope,
 failure rules and reporting contract](google2019_collection_robustness.md).
 V4F runs identity-only e metadata and synthetic tests, not real sensitivities.
+
+
+## V7A system harness
+
+See [system validation design](system_validation_design.md). The default
+`python -m dynapm.scripts.task32_system_harness` validates the source-bound
+config without deployment. Only `--smoke` creates a unique local kind cluster,
+using one Full-Rewrite policy, synthetic bootstrap and one real completed five-
+minute telemetry bucket. Clean committed source is required. No comparative or
+claim-generating command exists. Runtime results are ignored under
+`results/system/`; private Kubernetes credentials stay outside results/Git.
+System trials require a separate precision/replication/environment freeze.
