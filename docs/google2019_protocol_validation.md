@@ -1,6 +1,7 @@
 # Google corpus/cohort protocol validation — V4C
 
-Status: **PENDING full local metadata audit**. No replication authorization.
+Status: **audit integrity VERIFIED; PROTOCOL_REQUIRES_CORRECTION; V4C BLOCKED**.
+No replication authorization. The current findings below were recorded on 2026-10-28.
 The corrected v2 canonical generation is the sole data input. Raw and canonical
 files are read-only; there are no cloud calls or policy outcomes.
 
@@ -110,3 +111,77 @@ loads or operational utility. Borg instances and VMs have different entity and
 dependence structures; many instances may share a collection. Cell-stratified
 reporting and limits on generalization remain necessary. No latency, cost,
 provisioning or heterogeneous-edge benefit follows from this metadata audit.
+
+## Executed evidence (2026-10-28)
+
+The audit completed without policy execution. Integrity completion is not a
+protocol PASS. The complete metadata artifact inventories all canonical entities;
+selection is restricted to the acquisition pool and metadata validity rules.
+
+- Clean audit producer: `73f57129d9da2e4f27fcd5eefff289decc62e722`.
+- Local artifact directory: `data/google2019/protocol_validation/v4c-e-3c40f8395c60540a`.
+- [Tracked audit record](../configs/google2019_v4c_validation_record.json).
+- [Independent verification](../configs/google2019_v4c_validation_evidence.json).
+- [Provisional cohort authority/config](../configs/google2019_replication_cohort_v1.json).
+- Audit manifest SHA: `4a05b07f95c5cc89f52017ec14c74ce4c27d83dadee261a409768de971c77824`.
+- Eligibility Parquet SHA: `e99de363baec35e46523ce79a9c5c25cd961cbf5deb84f6db425c88729b55554`.
+- Provisional e cohort SHA: `10f90eb7f3b03cd6c4b40d3eb4c967febb4fd90d55b0d28880d94fb9fc4115e2`.
+- Resolved selection rule SHA: `b8016d94b3c633d5d73abf7dde8085325b2ebe7630309e3f114a1febd1fa624c`.
+
+| Metadata denominator / count | Result |
+|---|---:|
+| Canonical rows | 462,821,691 |
+| Canonical entities | 157,259 |
+| Acquisition candidates | 62,451 |
+| Nominal-time protocol-eligible candidates | 62,444 |
+| Unique excluded acquisition candidates | 7 |
+| Provisional selected e entities | 1,000 |
+| Bootstrap paired observations (62,451 acquisition candidates) | 135,927,515 |
+| Bootstrap valid exact-history rows (62,451 acquisition candidates) | 126,277,913 |
+| 200-slot trailing-window opportunities (62,451 acquisition candidates) | 317,572,992 |
+| PW opportunities including the inherited 96-slot gate (62,451 acquisition candidates) | 309,116,408 |
+| Nominal hourly evaluation origins (62,451 acquisition candidates) | 25,030,381 |
+| Globally verifiable nominal evaluation origins (62,451 acquisition candidates) | 24,998,548 |
+| Verified read origins without an observed sample (62,451 acquisition candidates) | 10,049 |
+| Missing paired nominal slots (62,451 acquisition candidates) | 920,312 |
+| Intervals longer than 300s (62,451 acquisition candidates) | 130,363 |
+
+These opportunity counts are not executed/committed policy refresh counts. All retained resources are finite; CPU and memory nonfinite counts are zero. Every nominally eligible entity has finite bootstrap thresholds. Bootstrap values from after the cut/stream anchor were not used (both source-window end violation counts are zero). No profile correctness, p95 error, policy outputs, treatment effects or significance tests were computed.
+
+### Exclusions (overlapping reasons; seven unique entities)
+
+| Entity (collection, instance) | Bootstrap paired slots | PW opportunities | Verified reads | Frozen reason(s) |
+|---|---:|---:|---:|---|
+| (22146209788, 260) | 2,121 | 123 | 0 | insufficient_globally_verifiable_evaluation_origins |
+| (22146209788, 261) | 1,850 | 0 | 0 | insufficient_exact_grid_feature_or_window_validity; insufficient_globally_verifiable_evaluation_origins |
+| (22146639972, 4863) | 89 | 2,146 | 182 | insufficient_bootstrap_history |
+| (22146639972, 4865) | 77 | 2,193 | 180 | insufficient_bootstrap_history |
+| (28763138846, 262) | 1 | 2,308 | 225 | insufficient_bootstrap_history |
+| (28763138846, 263) | 1 | 1,645 | 137 | insufficient_bootstrap_history |
+| (28763138846, 265) | 1 | 1,499 | 137 | insufficient_bootstrap_history |
+
+Five fail bootstrap history, one lacks eligible profile windows, and two have zero verifiable read origins; one entity has both latter failures. No entity is excluded for low coverage percentages alone, utilization magnitude, volatility, or method behavior.
+
+### Causal-visibility disposition
+
+All **462,821,691 rows** across **157,259 entities** have `source_end_time_us > timestamp_us`; the maximum difference is **300 seconds**. `timestamp_us` is a start label, not proof of aggregate availability. The existing direct-index replay would read that aggregate before its source window completes if labels were treated as physical event times.
+
+This is an unresolved **clock/adapter contract**, not evidence of bad method outcomes (none exist) or invalid request normalization. A consistently completed-bucket logical clock may be a possible clarification, but no such mapping is silently imposed here. Physical availability, target labels and verification maturity must be defined and tested together. V4C cannot certify causality by checking ordered labels alone. The current v2 canonical files remain VERIFIED as a faithful implementation of the frozen start-label mapping; no data or V4A files are rewritten. Disposition: **PROTOCOL_REQUIRES_CORRECTION**.
+
+### Outcome-blind provisional cohort and V5 planning
+
+The 16-GiB/48h resource rule selects the bounded hash branch. The e cohort contains exactly 1,000 of 62,444 nominally eligible entities. Rank uses identity only; independent reimplementation reproduced all selections, and changing threshold/value/fake-outcome columns leaves selection unchanged. Apply the same salt, cap and eligibility rules to g; at most 2,000 entities / 10,000 method×entity runs. The final two-cell cohort is not frozen. Any availability correction requires a new eligibility/cohort validation before outcomes.
+
+| Planning scope | Entities | Method×entity runs | Verified origins | Evaluation records (five methods) | Output reservation GiB | Four-worker wall range, h |
+|---|---:|---:|---:|---:|---:|---:|
+| All nominally eligible e | 62,444 | 312,220 | 24,997,687 | 124,988,435 | 164.76 | 4.49–324.75 |
+| Provisional selected e | 1,000 | 5,000 | 396,569 | 1,982,845 | 3.60 | 0.07–5.15 |
+| e+g planning projection | 2,000 | 10,000 | 793,138 | 3,965,690 | 6.20 | 0.14–10.31 |
+
+These are assumptions-based bounds for audited row-preserving outputs, not observed policy runtimes or benchmark results. All-eligible e needs a conservative 164.76-GiB output reservation, beyond the declared 16-GiB budget and current free disk. The selected-output projection is locally practical under the declared planning assumptions; g input/staging storage is additional, g length/counts are unknown, and both costs and disk must be reassessed before V5. This audit is not authorization to execute 10,000 method runs.
+
+### Independent verification and exact next task
+
+All corrected output hashes and the canonical dataset aggregate SHA were reverified. Raw events/merged usage SHA values remain pinned; raw/part/job/ledger identities were checked unchanged before/after. Legacy canonical input is rejected. Independent core-helper checks reproduce bootstrap thresholds, trailing eligibility and nominal read sets for 16 actual entities, including all seven exclusions, without evaluating a policy. Synthetic/future-value-invariance, hash selection and tampering checks pass. Tests: **404 passed, 0 failed, 1 skipped**; focused tests: **16 passed**. Python parsing/imports and safe CLI help pass. Audit metadata computation took 83.45s; this is not a V5 runtime measurement.
+
+Next scientifically valid task: **V4C.1 — review/freeze the Google availability-clock interpretation and validate a causal adapter, without outcomes**. Preserve the canonical mapping or explicitly version any approved scientific amendment; validate bootstrap visibility, refresh/read ordering, target intervals and maturity together, then regenerate metadata/cohorts as required. Separately acquire and validate g under its authorized budget/disk guards. **V5 remains blocked until corrected V4C readiness, g validation, and a final two-cell cohort freeze.** No BigQuery query bytes, billing action, Static/PW/Full-Rewrite execution, V3 rerun, or method-performance inspection occurred.

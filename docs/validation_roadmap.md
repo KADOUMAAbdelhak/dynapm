@@ -161,15 +161,18 @@ This roadmap specifies future gates, not authorization to execute them. The sole
 
 ## V4C — GOOGLE CORPUS/COHORT PROTOCOL VALIDATION
 
-**STATUS: NEXT — V4B.8 VERIFIED**
+**STATUS: BLOCKED — PROTOCOL_REQUIRES_CORRECTION; cell-e metadata audit completed**
 
 - **Objective:** validate corpus adapter, timeline/bootstrap/window rules, eligibility and cell scope without method outcomes.
 - **Required:** corrected generation manifest/hashes; outcome-blind cohort/protocol freeze; explicit treatment of deferred cell g.
-- **Boundary:** V4B.8 does not authorize V5 replication outcomes or further cloud scans.
+- **Evidence:** [V4C audit](google2019_protocol_validation.md), `configs/google2019_v4c_validation_record.json`, and `configs/google2019_replication_cohort_v1.json`: 62,444/62,451 nominally eligible e candidates; 1,000 identity-hash provisional selections.
+- **Blocker:** start labels precede completion of the source usage aggregates; an explicit availability/target/maturity contract is required. V2 canonical normalization stays verified.
+- **Next:** V4C.1 availability-clock interpretation/causal adapter validation, without outcomes; g acquisition/validation and final two-cell freeze remain mandatory.
+- **Boundary:** this metadata audit does not authorize V5 replication outcomes or further cloud scans.
 
 ## V5 — SECOND-CORPUS REPLICATION
 
-**STATUS: BLOCKED UNTIL V4C PASS**
+**STATUS: BLOCKED UNTIL V4C PASS, CELL G VALIDATION AND FINAL TWO-CELL FREEZE**
 
 - **Objective:** replicate the frozen non-adaptive maintenance/cadence estimation study on the acquired Google 2019 cohort under `google_clusterdata_2019_replication_protocol_v1`.
 - **Required artifacts:** locked replication run; paired F1–F3 effects; heterogeneity/negative-transfer report.
@@ -218,7 +221,7 @@ Earlier documents used a denser V3–V11 numbering (full Materna + refresh trade
 
 ## Dependency and execution rule
 
-V0, V1A, V1B, V2 and the V2.4 investigation chain through V2.4G are PASS as executions. C1 and C2 are withdrawn. V2.4G disposition is **EMPIRICAL/SYSTEM STUDY VIABLE**. V2.5 / V2.5A is **PASS**. V3 is **PASS** (Materna confirmatory estimation; [results](materna_confirmatory_results.md)). V4A is **PASS** ([corpus selection](independent_corpus_selection.md); Google 2019 ready for acquisition). **Raw cell e is VERIFIED; the old canonical generation is SUPERSEDED/invalid; V4B.8 local correction is VERIFIED; V4C is NEXT** ([correction](google2019_local_correction.md)). Existing scans consumed 745.088415 GiB; this correction executes zero query bytes. V4C must now validate/freeze the corpus/cohort protocol; V5 remains blocked until V4C PASS. C3 and C4 remain UNPROVEN. V5–V9 follow. Every future experiment still requires explicit scope and authorization. No manuscript prose before V9.
+V0, V1A, V1B, V2 and the V2.4 investigation chain through V2.4G are PASS as executions. C1 and C2 are withdrawn. V2.4G disposition is **EMPIRICAL/SYSTEM STUDY VIABLE**. V2.5 / V2.5A is **PASS**. V3 is **PASS** (Materna confirmatory estimation; [results](materna_confirmatory_results.md)). V4A is **PASS** ([corpus selection](independent_corpus_selection.md); Google 2019 ready for acquisition). **Raw cell e is VERIFIED; the old canonical generation is SUPERSEDED/invalid; V4B.8 local correction is VERIFIED; V4C completed a metadata audit but is BLOCKED by its availability-clock contract** ([correction](google2019_local_correction.md)). Existing scans consumed 745.088415 GiB; this correction executes zero query bytes. V4C.1 must resolve/validate aggregate availability without outcomes; V5 remains blocked until V4C PASS, g acquisition/validation and a final two-cell freeze. C3 and C4 remain UNPROVEN. V5–V9 follow. Every future experiment still requires explicit scope and authorization. No manuscript prose before V9.
 
 Primary confirmation must exclude the same 18 development-pilot VMs. Candidate confirmatory set is exactly **1,558** IDs before protocol-validity exclusions ([cohort manifest](../configs/materna_confirmatory_cohort_v1.json)). The 199 gap-audit review flags remain diagnostics, not automatic exclusions. Optional whole-corpus description is separate from independent confirmation.
 

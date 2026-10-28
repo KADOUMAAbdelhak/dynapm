@@ -230,7 +230,7 @@ chosen to favor observed pilot effects. See [protocol](protocol.md) and
 
 ## Corrected bounded gate status
 
-V2 passed under causal-timeline-v3 and phase-balanced-hourly-v1; see [pilot record](bounded_pilot.md). After V2.4G (**EMPIRICAL/SYSTEM STUDY VIABLE**), V2.5A amends the confirmatory design to estimation-first (**V2.5 = PASS**) and V3 completes the Materna confirmatory estimation study (**V3 = PASS**; [results](materna_confirmatory_results.md)). V4A freezes Google ClusterData 2019 for independent replication (**V4A = PASS**; [selection](independent_corpus_selection.md)). **V4B.5 streaming acquisition READY** ([acquisition](google2019_acquisition.md); extract not started). The 18 development entities remain excluded from primary Materna confirmation. C3/C4 remain UNPROVEN.
+V2 passed under causal-timeline-v3 and phase-balanced-hourly-v1; see [pilot record](bounded_pilot.md). After V2.4G (**EMPIRICAL/SYSTEM STUDY VIABLE**), V2.5A amends the confirmatory design to estimation-first (**V2.5 = PASS**) and V3 completes the Materna confirmatory estimation study (**V3 = PASS**; [results](materna_confirmatory_results.md)). V4A freezes Google ClusterData 2019 for independent replication (**V4A = PASS**; [selection](independent_corpus_selection.md)). **Raw cell e and V4B.8 corrected canonicalization VERIFIED** ([acquisition](google2019_acquisition.md)). **V4C metadata audit completed; PROTOCOL_REQUIRES_CORRECTION** ([audit](google2019_protocol_validation.md)): start-labelled aggregates need an explicit causal availability contract. Cell g remains absent and V5 remains blocked. The 18 development entities remain excluded from primary Materna confirmation. C3/C4 remain UNPROVEN.
 
 ## V2.4 prerequisite to confirmation freeze
 
@@ -336,12 +336,38 @@ for provenance. C1/C2 remain withdrawn. Profile-level practical significance is
 PASS (V2.5A).** **V3 STATUS: PASS** ([Materna confirmatory estimation results](materna_confirmatory_results.md)).
 **V4A STATUS: PASS** ([independent corpus selection](independent_corpus_selection.md)):
 Google ClusterData 2019 frozen for acquisition under
-`google_clusterdata_2019_replication_protocol_v1`. **V4B.5 = PASS
-(streaming redesign)** ([acquisition](google2019_acquisition.md)): local size
-no longer equated to bytes-processed; per-cell streaming plan ready for e,g
-under ~105 GiB free with 20 GiB reserve (runtime guard for conservative g).
-Extract not yet executed. Next after extract: **V4C** protocol/cohort
-validation. C3 and C4 remain UNPROVEN. Future gates: V5 second-corpus
+`google_clusterdata_2019_replication_protocol_v1`. **Raw e acquisition and V4B.8
+canonicalization are VERIFIED** ([acquisition](google2019_acquisition.md)).
+**V4C is BLOCKED — PROTOCOL_REQUIRES_CORRECTION** ([audit](google2019_protocol_validation.md)).
+Nominal start labels precede usage-aggregate completion; freeze/validate an explicit
+availability-clock contract before any outcomes. The 1,000-entity e hash cohort
+is provisional; apply the identical outcome-blind rule to g after acquisition.
+No final two-cell cohort exists. C3 and C4 remain UNPROVEN. Future gates: V5 second-corpus
 replication; V6 cost benchmark; V7 K8s harness; V8 operational validation; V9
 claim audit / venue decision. Do not claim C3–C6 before the corresponding gates
 pass.
+
+
+## V4C — Google cohort and semantic safeguards (2026-10-28)
+
+[V4C protocol validation](google2019_protocol_validation.md) audits all corrected
+cell-e entities without method performance. Seven of 62,451 acquisition candidates
+fail nominal bootstrap/window/truth requirements; the remaining 62,444 are not
+therefore automatically causal-ready. Every start-labelled average ends after
+its label. Resolve physical/logical availability and verification maturity before
+claiming protocol readiness; no implicit retimestamping or V4A change is allowed.
+
+The provisional selection is identity-only SHA ranking, at most 1,000 eligible
+entities per cell, chosen under a predefined resource budget. It must be applied
+unchanged to g, with no favorable-effect/volatility selection or cross-cell
+backfill. All entity exclusions are protocol/presence based. A reviewed semantic
+amendment requires regenerating eligibility/cohorts before outcomes; the final
+two-cell cohort is unfrozen until both cells pass.
+
+Preserve RQ1–RQ4/F1–F3 and within-corpus paired estimation. Google request ratios
+are not Materna provisioned percentages; absolute p95/MAE values cannot be pooled
+as equivalent capacity errors. Entity-specific percentile classes do not imply
+equal physical loads. Account for differing exposure, request changes, cell scope
+and collection/instance dependence when interpreting replication. No operational
+benefit follows from offline profile agreement. **V5 requires V4C readiness,
+g acquisition/validation, and the final two-cell freeze; none is waived here.**
