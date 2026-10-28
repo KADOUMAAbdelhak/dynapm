@@ -215,3 +215,28 @@ def test_snapshot_explicitly_records_actual_wall_read_after_commit():
     r=a.observe(p,wall_ns=p['logical_slot_ns'])
     assert r['snapshot_wall_time_ns']>=r['last_commit_wall_ns']
     assert r['last_nominal_slot_ns']==p['logical_slot_ns']
+
+
+def test_committed_refresh_is_canonical_json_serializable():
+    from dynapm.core.provenance import canonical_json
+    a=ProfileAdapter('full_rewrite',ANCHOR,D,FIXTURE);p=payload()
+    r=a.observe(p,wall_ns=p['logical_slot_ns'])
+    assert '2026-01-01T00:05:00+00:00' in canonical_json(r)
+    assert isinstance(r['refresh_log'][0]['actual_commit_time'],str)
+
+
+def test_profile_service_real_http_round_trip():
+    import subprocess,sys,time
+    from dynapm.system_validation.smoke import http,free_port,wait_http
+    port=free_port();url=f'http://127.0.0.1:{port}'
+    process=subprocess.Popen([sys.executable,'-m','dynapm.system_validation.adapter','--repo',str(ROOT),'--port',str(port)],stdout=subprocess.DEVNULL,stderr=subprocess.PIPE)
+    try:
+        wait_http(url+'/healthz',timeout=20)
+        initial=http(url+'/initialize',dict(method='full_rewrite',anchor_ns=ANCHOR))
+        assert initial['accounting']['n_refresh_events']==0
+        result=http(url+'/observe',payload())
+        assert result['accounting']['n_refresh_events']==1
+        assert isinstance(result['refresh_log'][0]['actual_commit_time'],str)
+        assert http(url+'/snapshot')['real_observations']==1
+    finally:
+        process.terminate();process.communicate(timeout=10)

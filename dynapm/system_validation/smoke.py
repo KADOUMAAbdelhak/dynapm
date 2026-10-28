@@ -3,6 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 import json,os,shutil,socket,subprocess,sys,tempfile,threading,time,uuid,urllib.request
 from urllib.parse import urlparse,quote
+from urllib.error import HTTPError
 from dynapm.core.provenance import (SourceProvenance,DataConfig,ModelConfig,PolicyConfig,StatisticsConfig,
     ExperimentConfigProvenance,CohortManifest,CohortEntity,prepare_experiment,read_json,fingerprint,file_sha256,utc_now)
 from dynapm.core.run_store import RunSession,OutputSpec,write_json
@@ -20,7 +21,10 @@ LOGS=['build','kind','application','prometheus','profile_service','application_p
 def http(url,payload=None):
     data=None if payload is None else json.dumps(payload,allow_nan=False).encode()
     request=urllib.request.Request(url,data=data,headers={'Content-Type':'application/json'})
-    with urllib.request.urlopen(request,timeout=5) as response:return json.load(response)
+    try:
+        with urllib.request.urlopen(request,timeout=5) as response:return json.load(response)
+    except HTTPError as error:
+        raise RuntimeError('http_request_failed:'+str(error.code)+':'+error.read(2000).decode(errors='replace')) from error
 
 
 def text_http(url):

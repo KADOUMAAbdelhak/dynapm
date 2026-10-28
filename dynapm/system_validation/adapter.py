@@ -69,7 +69,7 @@ class ProfileAdapter:
     def _snapshot(self):
         return dict(scope='NON_CLAIM_SMOKE_SYNTHETIC_BOOTSTRAP',snapshot_wall_time_ns=time.time_ns(),method_id=self.method_id,profile=self.policy.profile.to_json(),
             accounting=self.policy.accounting_metrics(),last_nominal_slot_ns=self.last_slot,last_commit_wall_ns=self.last_commit_wall_ns,
-            refresh_log=self.policy.refresh_log,real_observations=len(self.observations),
+            refresh_log=[e.to_dict() for e in self.policy.accounting.refresh_events],real_observations=len(self.observations),
             maintenance_step_wall_seconds=list(self.step_wall),maintenance_step_cpu_seconds=list(self.step_cpu),
             state_bytes=len(canonical_json(self.policy.profile.to_json()).encode()))
 
