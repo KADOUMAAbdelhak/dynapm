@@ -230,7 +230,7 @@ chosen to favor observed pilot effects. See [protocol](protocol.md) and
 
 ## Corrected bounded gate status
 
-V2 passed under causal-timeline-v3 and phase-balanced-hourly-v1; see [pilot record](bounded_pilot.md). After V2.4G (**EMPIRICAL/SYSTEM STUDY VIABLE**), V2.5A amends the confirmatory design to estimation-first (**V2.5 = PASS**) and V3 completes the Materna confirmatory estimation study (**V3 = PASS**; [results](materna_confirmatory_results.md)). V4A freezes Google ClusterData 2019 for independent replication (**V4A = PASS**; [selection](independent_corpus_selection.md)). **Raw cell e and V4B.8 corrected canonicalization VERIFIED** ([acquisition](google2019_acquisition.md)). **V4C.1 AVAILABILITY_CONTRACT_READY for e** ([clock contract](google2019_clock_contract.md)); V4C remains incomplete until g validation and final two-cell freeze. Cell g remains absent. V4D prospectively supersedes the simultaneous execution prerequisite for e only: V5A is NEXT; V5B remains blocked; see the staged contract below. The 18 development entities remain excluded from primary Materna confirmation. C3/C4 remain UNPROVEN.
+V2 passed under causal-timeline-v3 and phase-balanced-hourly-v1; see [pilot record](bounded_pilot.md). After V2.4G (**EMPIRICAL/SYSTEM STUDY VIABLE**), V2.5A amends the confirmatory design to estimation-first (**V2.5 = PASS**) and V3 completes the Materna confirmatory estimation study (**V3 = PASS**; [results](materna_confirmatory_results.md)). V4A freezes Google ClusterData 2019 for independent replication (**V4A = PASS**; [selection](independent_corpus_selection.md)). **Raw cell e and V4B.8 corrected canonicalization VERIFIED** ([acquisition](google2019_acquisition.md)). **V4C.1 AVAILABILITY_CONTRACT_READY for e** ([clock contract](google2019_clock_contract.md)); V4C remains incomplete until g validation and final two-cell freeze. Cell g remains absent. V4D prospectively supersedes the simultaneous execution prerequisite for e only: V4E / V5A is PASS; V5B remains mandatory and blocked; see the staged contract below. The 18 development entities remain excluded from primary Materna confirmation. C3/C4 remain UNPROVEN.
 
 ## V2.4 prerequisite to confirmation freeze
 
@@ -406,10 +406,28 @@ cell selection or Google/Materna absolute-error equivalence. No methods, setting
 statistics or selection changes after e; correctness fixes need a versioned
 amendment and comparable reruns. C1/C2 stay withdrawn; C3/C4 remain unproven.
 
-V4D PASS establishes execution readiness, not outcomes. **V5A e NEXT** requires a
-separate execution task. **V5B g BLOCKED** on zero-spend acquisition, corrected
+V4D PASS establishes execution readiness, not outcomes. **V4E / V5A e PASS** is recorded in [the factual findings](google2019_stage_a_results.md). **V5B g BLOCKED** on zero-spend acquisition, corrected
 canonicalization, availability validation and cohort binding. Overall V4C/two-cell
 readiness remains incomplete. Earlier simultaneous-gate records are retained
 without rewriting their frozen protocol/hash/cohort. Alibaba MaaS is only a
 conditional third corpus, with licence/redistribution and one-week fit unresolved;
 no acquisition or experiment is authorized here.
+
+
+## V4E — Stage-A evidence boundary
+
+The frozen cell-e study completed all 1,000 entities × five methods from clean
+source with no exclusions or invalidated attempts. Independent reconciliation
+verifies all profiles, schedules, common forward truth and 30 paired analyses
+(n=1,000 each), plus hashes/cache integrity. See [the exact estimates and
+provenance](google2019_stage_a_results.md). Mean fidelity estimates favor
+maintenance/faster cadence with increased refresh counts; per-entity effects are
+heterogeneous. All 30 prespecified tests are Holm-distinguishable, which does not
+establish practical or operational benefit. No margins, methods or designs change.
+
+Stage B remains mandatory regardless of e direction, with the same independent
+hash selection, no backfill, same methods/statistics and predefined synthesis.
+The frozen Stage-B spec and whole staged-design hashes are unchanged. There is
+no g outcome/data access, Materna result modification or absolute-error pooling.
+C1/C2 remain withdrawn; broader generalization and operational/edge claims remain
+unproven. V4C is incomplete; V5 remains blocked until g replication.

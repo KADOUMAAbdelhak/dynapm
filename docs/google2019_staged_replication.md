@@ -1,6 +1,8 @@
 # V4D — Prospective staged Google replication
 
-**Status: design frozen before any Google method outcomes.** This gate implements
+**Status: design frozen before any Google method outcomes.** Subsequent **V4E
+Stage-A e execution PASS** is recorded in [the findings](google2019_stage_a_results.md);
+g remains mandatory and unexecuted. The V4D preparation record below implements
 and tests the evaluator with synthetic data only. It does not execute Stage A or B.
 The versioned design is `configs/google2019_staged_replication_v1.{json,yaml}`;
 `configs/google2019_current_protocol.json` is the current status/pointer.

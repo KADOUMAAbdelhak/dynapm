@@ -187,20 +187,31 @@ This roadmap specifies future gates, not authorization to execute them. The sole
 - **Artifacts:** [staged contract](google2019_staged_replication.md); `configs/google2019_staged_replication_v1.{json,yaml}`; exact e input binding; `task30_google_replication`; synthetic managed/cache regression tests.
 - **PASS criteria:** five unchanged methods, protocol v2, independent hash cohorts/no backfill, frozen F1–F3 inference/synthesis, no outcome-driven changes, corrected-generation/clock/cohort enforcement, full lightweight suite and input integrity pass.
 - **Amendment:** prospectively replaces the earlier simultaneous two-cell prerequisite for Stage A only. Original protocol/cohort/validation records stay unchanged. Overall V4C remains incomplete.
-- **Unproven:** all Google policy effects, cross-cell consistency, practical/operational benefit. g is within-corpus replication, not another independent corpus.
+- **Unproven at V4D completion:** Google policy effects. V4E below now records Stage A; cross-cell consistency and practical/operational benefit remain unproven. g is within-corpus replication, not another independent corpus.
+
+## V4E — GOOGLE STAGE-A CELL-E REPLICATION
+
+**STATUS: PASS — 1,000 entities; 5,000/5,000 evaluations; independent integrity/statistics reconciliation PASS**
+
+- **Objective:** execute Stage A exactly as frozen, retaining all selected entities and every prespecified comparison.
+- **Artifacts:** [factual findings](google2019_stage_a_results.md); `configs/google2019_v4e_validation_record.json`; sealed managed scientific run and separate read-only verification generation.
+- **PASS criteria met:** clean source `ab2434f`; frozen design/protocol/cohort; 396,569 common verified reads and 1,982,845 records; exact schedules/counters/content/truth; 30 comparisons with 1,000 paired entities; all hashes/cache/CI/Wilcoxon/Holm checks; no invalidated attempts or outcome-based exclusions.
+- **Boundary:** all effects are estimates without practical margins. No operational superiority or Google/Materna absolute-error equivalence. No g access or design changes.
+- **Next:** mandatory held-out g acquisition/validation and unchanged Stage-B replication under separate authorization. V4C stays incomplete and full V5 stays blocked until g replication.
 
 ## V5 — STAGED SECOND-CORPUS REPLICATION
 
-**STATUS: NOT EXECUTED — V5A NEXT; V5B BLOCKED**
+**STATUS: BLOCKED UNTIL G REPLICATION — V5A / V4E PASS; V5B REQUIRED**
 
 ### V5A — CELL E FIRST REPLICATION
 
-**STATUS: NEXT — requires separately authorized execution**
+**STATUS: PASS — completed as V4E; see factual findings**
 
 - **Objective:** execute the frozen five-method study on exactly the existing 1,000 e entities under Google protocol v2 and the V4D design.
 - **Artifacts:** managed clean-source run, common verified reads/truth, complete method/entity matrix, output manifests/hashes, paired F1–F3 estimates/uncertainty and secondary diagnostics.
 - **PASS criteria:** all frozen outputs/invariants/integrity checks complete; no selective exclusions or tuning; no practical-benefit claim from significance alone.
-- **Unproven:** g replication and other domains; real system benefit. No Google outcomes executed by V4D.
+- **Evidence:** all 5,000/5,000 evaluations and independent checks pass; no execution fixes, exclusions or invalidated attempts.
+- **Unproven:** g replication and other domains; practical/operational benefit. V4D was preparation only; actual e outcomes belong to V4E.
 
 ### V5B — CELL G HELD-OUT WITHIN-CORPUS REPLICATION
 
@@ -253,7 +264,7 @@ Earlier documents used a denser V3–V11 numbering (full Materna + refresh trade
 
 ## Dependency and execution rule
 
-V0, V1A, V1B, V2 and the V2.4 investigation chain through V2.4G are PASS as executions. C1 and C2 are withdrawn. V2.4G disposition is **EMPIRICAL/SYSTEM STUDY VIABLE**. V2.5 / V2.5A is **PASS**. V3 is **PASS** (Materna confirmatory estimation; [results](materna_confirmatory_results.md)). V4A is **PASS** ([corpus selection](independent_corpus_selection.md); Google 2019 ready for acquisition). **Raw cell e is VERIFIED; the old canonical generation is SUPERSEDED/invalid; V4B.8 local correction is VERIFIED; V4C.1 is PASS for cell e; V4C is INCOMPLETE pending g validation and final cohort freeze** ([correction](google2019_local_correction.md)). Existing scans consumed 745.088415 GiB; this correction executes zero query bytes. The v2 availability contract is validated for e. V4D prospectively freezes sequential execution: V5A e is NEXT (not executed); V5B g remains blocked until its acquisition/validation and independent cohort binding. Overall V4C remains incomplete. C3 and C4 remain UNPROVEN. V5–V9 follow. Every future experiment still requires explicit scope and authorization. No manuscript prose before V9.
+V0, V1A, V1B, V2 and the V2.4 investigation chain through V2.4G are PASS as executions. C1 and C2 are withdrawn. V2.4G disposition is **EMPIRICAL/SYSTEM STUDY VIABLE**. V2.5 / V2.5A is **PASS**. V3 is **PASS** (Materna confirmatory estimation; [results](materna_confirmatory_results.md)). V4A is **PASS** ([corpus selection](independent_corpus_selection.md); Google 2019 ready for acquisition). **Raw cell e is VERIFIED; the old canonical generation is SUPERSEDED/invalid; V4B.8 local correction is VERIFIED; V4C.1 is PASS for cell e; V4C is INCOMPLETE pending g validation and final cohort freeze** ([correction](google2019_local_correction.md)). Existing scans consumed 745.088415 GiB; this correction executes zero query bytes. The v2 availability contract is validated for e. V4D prospectively freezes sequential execution: V4E / V5A e is PASS ([findings](google2019_stage_a_results.md)); V5B g remains mandatory and blocked until its acquisition/validation, independent cohort binding and replication. Full V5 remains blocked until g replication. Overall V4C remains incomplete. C3 and C4 remain UNPROVEN. V5–V9 follow. Every future experiment still requires explicit scope and authorization. No manuscript prose before V9.
 
 Primary confirmation must exclude the same 18 development-pilot VMs. Candidate confirmatory set is exactly **1,558** IDs before protocol-validity exclusions ([cohort manifest](../configs/materna_confirmatory_cohort_v1.json)). The 199 gap-audit review flags remain diagnostics, not automatic exclusions. Optional whole-corpus description is separate from independent confirmation.
 

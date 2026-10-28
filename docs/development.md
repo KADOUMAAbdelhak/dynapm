@@ -155,3 +155,19 @@ are bound. Frozen scientific source hashes prevent silent post-e changes.
 Current staged status supersedes historical next-gate prose above: V4D PASS, V5A
 NEXT (not run), V5B BLOCKED; overall V4C incomplete. No Google policy outcomes,
 BigQuery calls, g acquisition or Materna result changes occur in this task.
+
+
+## V4E — sealed Stage-A execution
+
+[Stage-A e findings](google2019_stage_a_results.md) and
+`configs/google2019_v4e_validation_record.json` identify the exact clean source,
+scientific fingerprint/run, immutable outputs and independent managed verifier.
+All 5,000 evaluations and output/statistical checks pass; no production code was
+changed. Generated scientific outputs remain ignored and untouched. The factual
+documentation commit is separate from the execution source commit.
+
+Current status supersedes prior V4D readiness prose: Stage A PASS, Stage B required
+and unexecuted, V4C incomplete, V5 blocked until g replication. Do not reinterpret
+e estimates as practical/operational benefit or change any frozen g parameter,
+selection or statistical rule. No cloud/g/Materna-result access is authorized by
+this status note.
