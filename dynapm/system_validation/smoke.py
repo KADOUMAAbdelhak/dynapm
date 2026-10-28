@@ -27,6 +27,11 @@ def text_http(url):
     with urllib.request.urlopen(url,timeout=5) as response:return response.read().decode()
 
 
+def successful_post_enforcement(records,confirmed_at_ns):
+    """A patch acknowledgement is not actual allocation enforcement."""
+    return any(r['success'] and r['sent_at'] is not None and r['sent_at']>confirmed_at_ns/1e9 for r in records)
+
+
 def free_port():
     with socket.socket() as s:s.bind(('127.0.0.1',0));return s.getsockname()[1]
 
@@ -189,16 +194,16 @@ def run_smoke(repo):
                     if resources_match(state.get('resources'),recommendation) and resources_match(actual['spec']['containers'][0]['resources'],recommendation) and abs(observed['cpu_limit_cores']*1000-recommendation['cpu_millicores'])<1e-6 and observed['memory_limit_bytes']==recommendation['memory_mib']*2**20:break
                     time.sleep(1)
                 else:raise RuntimeError('resize_not_confirmed_by_status_and_cgroup')
-                actuation_latency=time.perf_counter()-start
+                actuation_latency=time.perf_counter()-start;confirmed_at_ns=time.time_ns()
                 write_json(run.path/'outputs/actuation.json',dict(initial=initial,patch=patched,observed=actual,cgroup=observed,
-                    patch_submitted_at_ns=sent,confirmed_at_ns=time.time_ns(),latency_seconds=actuation_latency,
+                    patch_submitted_at_ns=sent,confirmed_at_ns=confirmed_at_ns,latency_seconds=actuation_latency,
                     resource_change_count=1,cpu_churn_millicores=abs(1000-recommendation['cpu_millicores']),memory_churn_mib=abs(512-recommendation['memory_mib']),same_pod_uid=True))
                 while time.time()<b+duration:
                     sample=http(app+'/telemetry');sample['received_at_ns']=time.time_ns();samples.append(sample);time.sleep(1)
                 load_thread.join(timeout=d['workload']['timeout_seconds']+10)
                 if load_thread.is_alive() or not answer.get('requests'):raise RuntimeError('generator_did_not_complete')
                 requests=answer['requests']
-                if not any(r['success'] and r['sent_at'] is not None and r['sent_at']>sent/1e9 for r in requests):raise ValueError('no_successful_request_after_actual_resize')
+                if not successful_post_enforcement(requests,confirmed_at_ns):raise ValueError('no_successful_request_after_actual_resize')
                 up=http(prom+'/api/v1/query?query='+quote('up{job="dynapm-application"}'))
                 if up.get('status')!='success' or not any(v['value'][1]=='1' for v in up['data']['result']):raise ValueError('prometheus_target_not_scraped')
                 write_json(run.path/'outputs/prometheus_up.json',up)

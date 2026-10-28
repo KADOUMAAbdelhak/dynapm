@@ -200,3 +200,18 @@ def test_prometheus_native_wrapper_retains_pinned_upstream_and_no_remote_pull():
     p=next(x for x in r['items'] if x['kind']=='Pod' and x['metadata']['name']=='prometheus')
     assert p['spec']['containers'][0]['image']==d['kubernetes']['prometheus_local_image']
     assert p['spec']['containers'][0]['imagePullPolicy']=='Never'
+
+
+def test_success_must_follow_confirmed_enforcement_not_patch_acknowledgement():
+    from dynapm.system_validation.smoke import successful_post_enforcement
+    records=[dict(success=True,sent_at=1.5)]
+    assert not successful_post_enforcement(records,2*10**9)
+    records.append(dict(success=True,sent_at=2.1))
+    assert successful_post_enforcement(records,2*10**9)
+
+
+def test_snapshot_explicitly_records_actual_wall_read_after_commit():
+    a=ProfileAdapter('full_rewrite',ANCHOR,D,FIXTURE);p=payload()
+    r=a.observe(p,wall_ns=p['logical_slot_ns'])
+    assert r['snapshot_wall_time_ns']>=r['last_commit_wall_ns']
+    assert r['last_nominal_slot_ns']==p['logical_slot_ns']
