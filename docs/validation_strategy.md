@@ -431,3 +431,26 @@ The frozen Stage-B spec and whole staged-design hashes are unchanged. There is
 no g outcome/data access, Materna result modification or absolute-error pooling.
 C1/C2 remain withdrawn; broader generalization and operational/edge claims remain
 unproven. V4C is incomplete; V5 remains blocked until g replication.
+
+
+## V4F — collection dependence sensitivity, secondary only
+
+The fixed e identity cohort contains 130 collections with unequal representation:
+56 singletons, maximum 158 members, top five 44.7% of entities. The identity-only
+[audit and secondary freeze](google2019_collection_robustness.md) precede all g
+outcomes. No real collection-aware outcomes are computed in this task.
+
+The original entity-level estimates, CIs, paired tests/Holm and F1/F2/F3 remain
+primary and unchanged. Secondary whole-collection bootstrap CIs for the same
+entity-mean estimand accompany separately labeled equal-collection mean and
+median-of-means estimates. B=10,000/seed=20251022/95% are inherited, not tuned.
+Retain all collections/members; no outcome or cluster-size exclusion. Direction
+counts are descriptive with exact zero ties, not new tests or practical margins.
+
+Future e sensitivity is explicitly post-hoc; g secondary robustness uses the
+identical prospectively frozen procedure. Report both estimands and both cells,
+including disagreement, without pooling entities or selecting favorable weights
+or cells. Collection independence is an assumption, and inverse HHI describes
+concentration rather than effective inferential sample size. Neither adjustment
+proves operational benefit or completes generalization. Stage B remains required
+under its unaltered primary design/cohort rule; V4C incomplete, V5 blocked.

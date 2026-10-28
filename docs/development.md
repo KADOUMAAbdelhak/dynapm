@@ -171,3 +171,19 @@ and unexecuted, V4C incomplete, V5 blocked until g replication. Do not reinterpr
 e estimates as practical/operational benefit or change any frozen g parameter,
 selection or statistical rule. No cloud/g/Materna-result access is authorized by
 this status note.
+
+
+## V4F — separate collection robustness postprocessor
+
+`python -m dynapm.scripts.task31_google_collection_robustness --cell g` validates
+the secondary spec only, without reading primary outcomes or g data. Future
+authorized postprocessing requires `--execute --primary-run PATH`, clean
+committed source, a sealed matching-cell canonical primary, and exact frozen
+spec/source/parent hashes. It runs no policies or acquisition.
+
+The output is a new managed derived generation; original primary files and
+statistics remain untouched. Every summary labels e post-hoc versus g
+prospective secondary. Technical canonical-purpose provenance never promotes a
+post-hoc result to preregistered primary evidence. See [the formulas, scope,
+failure rules and reporting contract](google2019_collection_robustness.md).
+V4F runs identity-only e metadata and synthetic tests, not real sensitivities.

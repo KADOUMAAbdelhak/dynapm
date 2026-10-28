@@ -191,3 +191,24 @@ artifact hashes, clock audit/eligibility/cohort lineage and exactly 1,000 frozen
 identities; g preflight refuses its absent validated binding. Ledger/e cohort
 hashes remain unchanged. No actual e/g method outcomes, acquisition/cloud queries
 or Materna scientific result modifications occur.
+
+
+## V4F — collection-aware secondary supplement before Stage B
+
+[The secondary collection contract](google2019_collection_robustness.md) and
+`configs/google2019_collection_robustness_v1.{json,yaml}` freeze a separate
+collection sensitivity procedure. The primary staged JSON/YAML, cohort/methods,
+entity-level F1/F2/F3 analysis, Wilcoxon/Holm and no-practical-margin framing remain
+unchanged. This authorized supplement does not substitute for primary statistics
+or retrospectively preregister e. Any real e collection analysis is **post-hoc**;
+the identical procedure is **prospective secondary robustness for g**.
+
+Always report original primary entity estimates beside cluster-adjusted
+entity-mean uncertainty and the distinct equal-collection mean/median-of-means
+estimates. Whole clusters are resampled with all selected members/multiplicity,
+B=10,000, seed=20251022, nominal 95% percentile CIs. Retain every singleton and
+large collection. No new secondary p-values/Holm family, practical margin,
+cohort weighting/selection or favorable-estimand choice. Both cells remain
+separate first; descriptive magnitude/direction/heterogeneity only, no pooled
+entities or favorable-cell selection. Stage B remains mandatory. V4F itself
+audits e identities and synthetic tests only; no real secondary outcomes run.

@@ -199,6 +199,17 @@ This roadmap specifies future gates, not authorization to execute them. The sole
 - **Boundary:** all effects are estimates without practical margins. No operational superiority or Google/Materna absolute-error equivalence. No g access or design changes.
 - **Next:** mandatory held-out g acquisition/validation and unchanged Stage-B replication under separate authorization. V4C stays incomplete and full V5 stays blocked until g replication.
 
+## V4F — COLLECTION-AWARE GOOGLE SECONDARY ROBUSTNESS FREEZE
+
+**STATUS: PASS — metadata audit and secondary procedure frozen before g outcomes**
+
+- **Objective:** quantify Stage-A collection concentration and prospectively fix g sensitivity to within-collection dependence, without replacing primary entity inference.
+- **Artifacts:** [secondary contract](google2019_collection_robustness.md); `configs/google2019_collection_robustness_v1.{json,yaml}`; `configs/google2019_v4f_structure_audit.json`; separate managed postprocessor and synthetic tests.
+- **Structure:** 1,000 entities / 130 collections; 56 singletons; median size 2, max 158; top five 44.7%; inverse HHI 18.90 is concentration, not inferential sample size.
+- **PASS criteria:** whole-cluster bootstrap and deterministic paired aggregation; unmodified primary F1–F3/Holm; separate equal-collection estimand; no size/outcome exclusions, new p-values, practical margins, pooling or favorable-cell selection; e post-hoc/g prospective labels enforced; primary Stage-B hashes unchanged.
+- **Boundary:** no real collection-aware e/g outcome analysis in V4F. A future e analysis is post-hoc sensitivity; g secondary is prospectively frozen and must accompany g reporting. Primary Stage A remains intact.
+- **Unproven:** independence across collections/cells, nominal CI coverage under remaining dependence, operational/practical benefit. V4C remains incomplete and V5 blocked until mandatory g replication.
+
 ## V5 — STAGED SECOND-CORPUS REPLICATION
 
 **STATUS: BLOCKED UNTIL G REPLICATION — V5A / V4E PASS; V5B REQUIRED**
@@ -218,7 +229,7 @@ This roadmap specifies future gates, not authorization to execute them. The sole
 **STATUS: BLOCKED — g not acquired/validated/bound**
 
 - **Objective:** acquire and independently validate g, apply identical max-1,000 hash rule/no backfill, execute/report regardless of e direction.
-- **Artifacts:** validated corrected canonical/clock/cohort binding, separate managed outcomes, identical per-cell analysis, predefined all-contrast direction/heterogeneity synthesis.
+- **Artifacts:** validated corrected canonical/clock/cohort binding, separate managed primary outcomes, identical per-cell primary analysis and V4F secondary collection sensitivity, predefined all-contrast direction/heterogeneity synthesis.
 - **PASS criteria:** zero-spend/monthly/disk acquisition safeguards; valid g input binding; unchanged methods/config/statistics; comparable complete analysis and reporting of both cells. Correctness fixes require versioned amendment and comparable reruns.
 - **Unproven:** independent third corpus, operational effects or edge generalization. No opportunistic pooling or favorable-cell choice.
 
@@ -264,7 +275,7 @@ Earlier documents used a denser V3–V11 numbering (full Materna + refresh trade
 
 ## Dependency and execution rule
 
-V0, V1A, V1B, V2 and the V2.4 investigation chain through V2.4G are PASS as executions. C1 and C2 are withdrawn. V2.4G disposition is **EMPIRICAL/SYSTEM STUDY VIABLE**. V2.5 / V2.5A is **PASS**. V3 is **PASS** (Materna confirmatory estimation; [results](materna_confirmatory_results.md)). V4A is **PASS** ([corpus selection](independent_corpus_selection.md); Google 2019 ready for acquisition). **Raw cell e is VERIFIED; the old canonical generation is SUPERSEDED/invalid; V4B.8 local correction is VERIFIED; V4C.1 is PASS for cell e; V4C is INCOMPLETE pending g validation and final cohort freeze** ([correction](google2019_local_correction.md)). Existing scans consumed 745.088415 GiB; this correction executes zero query bytes. The v2 availability contract is validated for e. V4D prospectively freezes sequential execution: V4E / V5A e is PASS ([findings](google2019_stage_a_results.md)); V5B g remains mandatory and blocked until its acquisition/validation, independent cohort binding and replication. Full V5 remains blocked until g replication. Overall V4C remains incomplete. C3 and C4 remain UNPROVEN. V5–V9 follow. Every future experiment still requires explicit scope and authorization. No manuscript prose before V9.
+V0, V1A, V1B, V2 and the V2.4 investigation chain through V2.4G are PASS as executions. C1 and C2 are withdrawn. V2.4G disposition is **EMPIRICAL/SYSTEM STUDY VIABLE**. V2.5 / V2.5A is **PASS**. V3 is **PASS** (Materna confirmatory estimation; [results](materna_confirmatory_results.md)). V4A is **PASS** ([corpus selection](independent_corpus_selection.md); Google 2019 ready for acquisition). **Raw cell e is VERIFIED; the old canonical generation is SUPERSEDED/invalid; V4B.8 local correction is VERIFIED; V4C.1 is PASS for cell e; V4C is INCOMPLETE pending g validation and final cohort freeze** ([correction](google2019_local_correction.md)). Existing scans consumed 745.088415 GiB; this correction executes zero query bytes. The v2 availability contract is validated for e. V4D prospectively freezes sequential execution: V4E / V5A e is PASS ([findings](google2019_stage_a_results.md)); V5B g remains mandatory and blocked until its acquisition/validation, independent cohort binding and replication. Full V5 remains blocked until g replication. V4F freezes secondary collection robustness only: future e post-hoc, g prospective; primary inference remains unchanged. Overall V4C remains incomplete. C3 and C4 remain UNPROVEN. V5–V9 follow. Every future experiment still requires explicit scope and authorization. No manuscript prose before V9.
 
 Primary confirmation must exclude the same 18 development-pilot VMs. Candidate confirmatory set is exactly **1,558** IDs before protocol-validity exclusions ([cohort manifest](../configs/materna_confirmatory_cohort_v1.json)). The 199 gap-audit review flags remain diagnostics, not automatic exclusions. Optional whole-corpus description is separate from independent confirmation.
 
