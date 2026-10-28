@@ -44,7 +44,7 @@ class ProfileAdapter:
         self.history=pd.DataFrame({METRICS[0]:100*fixture['cpu_millicores']/design['references']['cpu_millicores'],
             METRICS[1]:100*fixture['memory_mib']/design['references']['memory_mib']},index=idx)
         cpu_th=compute_thresholds(self.history,METRICS[0]);mem_th=compute_thresholds(self.history,METRICS[1])
-        profile=ProfileInstance(StaticFields('application','kind-local-smoke',None,None,idx[0],anchor,288),
+        profile=ProfileInstance(StaticFields('application','kind-local-smoke',None,None,idx[0],anchor,288+design['smoke']['real_buckets']),
             DynamicFields('idle','idle',0.,0.),{k:anchor for k in ['cpu_class','memory_class','predicted_cpu_p95_next_24h','predicted_mem_p95_next_24h']})
         self.policy=factory_for(method)(profile,cpu_th,mem_th,bootstrap_cpu_series=self.history[METRICS[0]],bootstrap_mem_series=self.history[METRICS[1]])
         self.last_slot=anchor_ns;self.last_commit_wall_ns=time.time_ns();self.step_wall=[];self.step_cpu=[];self.observations=[]

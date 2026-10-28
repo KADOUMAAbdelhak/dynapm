@@ -25,7 +25,7 @@ def offered_trace(scenario,duration,design,*,smoke=False):
 def run_load(url,trace,start_wall,*,timeout=5.,concurrency=32,stop_event=None):
     """Bounded concurrency; overload is recorded as dropped offered work, never hidden."""
     records=[];lock=threading.Lock();slots=threading.BoundedSemaphore(concurrency)
-    start_mono=time.monotonic()+max(0,start_wall-time.time())
+    start_mono=time.monotonic()+start_wall-time.time()  # Preserve a late generator start in arrival-to-completion latency.
     def send(index,event):
         scheduled=start_wall+event['offset_seconds'];sent=time.time();due=start_mono+event['offset_seconds']
         try:

@@ -247,10 +247,9 @@ def test_resize_preflight_checks_permissions_without_actuation():
     from dynapm.system_validation.smoke import resize_preflight
     class Fake:
         def pod(self):return {'spec':{'containers':[{'resources':{'requests':{'cpu':'1','memory':'512Mi'},'limits':{'cpu':'1','memory':'512Mi'}}}]}}
-        def call(self,args,**kw):
-            assert kw['controller'] and '--dry-run=server' in args and '--subresource=resize' in args
-            self.args=args
-            return json.dumps({'spec':resource_patch({'cpu_millicores':50,'memory_mib':64})['spec']})
+        def resize(self,target,*,dry_run=False):
+            assert dry_run
+            return {'spec':resource_patch(target)['spec']}
     k=Fake();r=resize_preflight(k,D)
     assert r['server_dry_run'] and r['unchanged_actual_resources']['limits']['cpu']=='1'
 
@@ -260,7 +259,7 @@ def test_resize_preflight_rejects_unvalidated_target():
     from dynapm.system_validation.smoke import resize_preflight
     class Fake:
         def pod(self):return {'spec':{'containers':[{'resources':{'requests':{'cpu':'1','memory':'512Mi'},'limits':{'cpu':'1','memory':'512Mi'}}}]}}
-        def call(self,*args,**kw):return json.dumps(self.pod())
+        def resize(self,*args,**kw):return self.pod()
     with pytest.raises(ValueError,match='preflight'):resize_preflight(Fake(),D)
 
 
@@ -287,3 +286,35 @@ def test_optional_local_installer_verifies_frozen_hash_before_writing(monkeypatc
     (cache/'kind').write_bytes(b'tampered')
     with pytest.raises(ValueError,match='hash_mismatch'):install_tools.install(repo,cache)
     assert (target/'kind').read_bytes()==b'fixture-binary'
+
+
+def test_actual_and_dry_run_resize_explicitly_request_json():
+    import json
+    class Fake:
+        def run(self,args,**kw):self.args=args;return json.dumps({'kind':'Pod'})
+    c=Fake();k=Kube(c,'/tmp/private/config','dynapm-v7a-smoke-test',D)
+    r=k.resize(dict(cpu_millicores=60,memory_mib=64))
+    assert r['kind']=='Pod' and c.args[-2:]==['-o','json'] and '--as' in c.args
+    assert '--dry-run=server' not in c.args
+    k.resize(dict(cpu_millicores=60,memory_mib=64),dry_run=True)
+    assert '--dry-run=server' in c.args and c.args[c.args.index('-o')+1]=='json'
+
+
+def test_generator_late_start_is_included_in_arrival_latency(monkeypatch):
+    from dynapm.system_validation import workloads
+    monkeypatch.setattr(workloads.time,'time',lambda:100.)
+    monkeypatch.setattr(workloads.time,'monotonic',lambda:50.)
+    monkeypatch.setattr(workloads.time,'sleep',lambda seconds:None)
+    class Reply:
+        status=200
+        def __enter__(self):return self
+        def __exit__(self,*args):pass
+        def read(self):return b'{}'
+    monkeypatch.setattr(workloads.urllib.request,'urlopen',lambda *args,**kw:Reply())
+    r=workloads.run_load('http://not-requested.invalid',[dict(offset_seconds=0,iterations=1,memory_mib=0,seed=1)],90.)
+    assert r[0]['latency_seconds']==10. and r[0]['completed_at']-r[0]['scheduled_at']==10.
+
+
+def test_profile_total_slots_match_managed_smoke_cohort():
+    a=ProfileAdapter('full_rewrite',ANCHOR,D,FIXTURE)
+    assert a.snapshot()['profile']['static']['n_total_timesteps']==288+D['smoke']['real_buckets']

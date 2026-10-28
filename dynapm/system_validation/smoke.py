@@ -69,14 +69,18 @@ class Kube:
         if controller:prefix+=['--as',f'system:serviceaccount:{ns}:profile-consumer']
         return self.commands.run(prefix+args,log=log,timeout=timeout)
     def pod(self):return json.loads(self.call(['get','pod','application','-o','json'],controller=True))
+    def resize(self,recommendation,*,dry_run=False):
+        args=['patch','pod','application','--subresource=resize','--type=strategic',
+            '-p',json.dumps(resource_patch(recommendation)),'-o','json']
+        if dry_run:args.append('--dry-run=server')
+        return json.loads(self.call(args,controller=True))
 
 
 def resize_preflight(kube,design):
     """Check kubectl's subresource read+patch permissions without actuation."""
     before=kube.pod()['spec']['containers'][0]['resources']
     target=dict(cpu_millicores=design['consumer']['cpu_millicores_minimum'],memory_mib=design['consumer']['memory_mib_minimum'])
-    dry=json.loads(kube.call(['patch','pod','application','--subresource=resize','--type=strategic',
-        '--dry-run=server','-p',json.dumps(resource_patch(target)),'-o','json'],controller=True))
+    dry=kube.resize(target,dry_run=True)
     after=kube.pod()['spec']['containers'][0]['resources']
     if before!=after or not resources_match(dry['spec']['containers'][0]['resources'],target):
         raise ValueError('resize_preflight_invalid_or_changed_allocation')
@@ -207,7 +211,7 @@ def run_smoke(repo):
                 write_json(run.path/'outputs/recommendation.json',dict(recommendation=recommendation,wall_seconds=rec_latency,cpu_seconds=rec_cpu))
                 initial=kube.pod();initial_id=initial['metadata']['uid'];initial_restarts=initial['status']['containerStatuses'][0]['restartCount']
                 if resources_match(initial['spec']['containers'][0]['resources'],recommendation):raise ValueError('smoke_must_demonstrate_real_allocation_change')
-                sent=time.time_ns();start=time.perf_counter();patched=json.loads(kube.call(['patch','pod','application','--subresource=resize','--type=strategic','-p',json.dumps(resource_patch(recommendation))],controller=True))
+                sent=time.time_ns();start=time.perf_counter();patched=kube.resize(recommendation)
                 actual=None;observed=None
                 while time.perf_counter()-start<60:
                     actual=kube.pod();observed=http(app+'/telemetry');state=actual['status']['containerStatuses'][0]
