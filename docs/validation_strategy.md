@@ -454,3 +454,17 @@ or cells. Collection independence is an assumption, and inverse HHI describes
 concentration rather than effective inferential sample size. Neither adjustment
 proves operational benefit or completes generalization. Stage B remains required
 under its unaltered primary design/cohort rule; V4C incomplete, V5 blocked.
+
+
+## V7A scope boundary
+
+The [frozen system harness](system_validation_design.md) implements five existing
+observation-policy adapters and one identical p95-to-resource consumer. One real
+Kubernetes plumbing smoke is verified under purpose `smoke`, with explicitly
+synthetic bootstrap. No comparative trials were run. C4/C5 remain UNPROVEN.
+Before V8: real measured bootstrap, recurrent controlled trial execution,
+dedicated hardware/software and timing-compatibility freeze, warm-up/cost
+attribution, failure/deferred-resize handling, trial-count/precision plan,
+randomized order and practical-benefit/harm criteria. Requests are not replicates;
+independent run/scenario replicates are the unit. Kubernetes-only evidence cannot
+establish heterogeneous edge/continuum generalization.

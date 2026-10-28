@@ -199,3 +199,11 @@ minute telemetry bucket. Clean committed source is required. No comparative or
 claim-generating command exists. Runtime results are ignored under
 `results/system/`; private Kubernetes credentials stay outside results/Git.
 System trials require a separate precision/replication/environment freeze.
+
+
+V7A has one verified real-cluster smoke; see the factual record in
+`configs/system_v7a_smoke_validation_record.json`. It proves completed telemetry,
+profile-service serialization, fixed recommendation and actual resize plumbing.
+It uses a synthetic bootstrap and must never be reused as comparative/system
+claim evidence. Optional pinned CLI tools are installed only under ignored
+`.local-tools/`; the runner does not download or install them automatically.

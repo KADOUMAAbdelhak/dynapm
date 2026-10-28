@@ -244,7 +244,7 @@ This roadmap specifies future gates, not authorization to execute them. The sole
 
 ## V7 — KUBERNETES PROFILE→RESOURCE-MANAGEMENT HARNESS
 
-**STATUS: PARTIAL — V7A scaffold implemented; actual smoke PENDING**
+**STATUS: PARTIAL — V7A plumbing PASS; comparative trial harness/design not validated**
 
 - **Objective:** working Kubernetes telemetry → profile service → fixed provisioning consumer → resource decision loop.
 - **Required artifacts:** environment/deployment configs; observed decision/actuation traces; workload scenarios; policy isolation; trial plan frozen.
@@ -253,11 +253,11 @@ This roadmap specifies future gates, not authorization to execute them. The sole
 
 ## V7A — FROZEN SYSTEM QUESTION + LOCAL HARNESS SCAFFOLD
 
-**STATUS: PENDING actual clean-source Kubernetes smoke**
+**STATUS: PASS — isolated real Kubernetes smoke, not comparative evidence**
 
 - **Objective:** real telemetry → existing observation-policy profile service → identical fixed p95 consumer → enforced Pod resource change.
 - **Required artifacts:** [system design](system_validation_design.md), `configs/system_validation_v1.*`, `harness/system/`, managed single-method non-claim smoke with actual cgroup/status proof.
-- **PASS criteria:** all unit checks and one local plumbing smoke pass, no comparative trials or corpus-driven tuning; source/config/input/output manifests validate.
+- **PASS criteria:** all unit checks and one local plumbing smoke pass, no comparative trials or corpus-driven tuning; source/config/input/output manifests validate. Established from clean source `35bdb5d`, 542 passed/0 failed/1 skipped; [factual verification record](../configs/system_v7a_smoke_validation_record.json). Synthetic bootstrap is expressly limited to smoke.
 - **Unproven:** C4/C5, multi-method trials, power/precision/trial-count plan, overhead budgets, dedicated platform and operational margins. V8 remains blocked pending those prerequisites and authorization.
 
 ## V8 — REPEATED OPERATIONAL / SYSTEM VALIDATION

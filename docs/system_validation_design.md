@@ -174,21 +174,40 @@ credential-helper hangs for public images without changing personal credentials)
 It refuses remote Docker/Kubernetes endpoints, never selects an existing cluster,
 and deletes only its own created cluster in a finally block. It does not change
 global kubeconfig, prune images, query BigQuery or load research-corpus outputs.
-Images may remain cached. Status prints at most30s apart while waiting/measuring;
+Images may remain cached. Status prints at most 30s apart while waiting/measuring;
 subprocesses have bounded timeouts and smoke has an elapsed-time guard.
 
 ### Smoke limitations and verification state
 
 One Full-Rewrite policy, one trivial stable workload (2rps,1000iterations,8MiB),
-one real completed300s bucket. The explicitly synthetic constant288-slot fixture
-is only past-state scaffolding:50m CPU /48MiB memory. One fresh bucket cannot
-replace a24h bootstrap. Consequently the resulting p95 is dominated by the
-fixture, and its60m/64MiB recommendation demonstrates wiring and actual resource
+one real completed 300s bucket. The explicitly synthetic constant 288-slot fixture
+is only past-state scaffolding: 50m CPU /48MiB memory. One fresh bucket cannot
+replace a 24h bootstrap. Consequently the resulting p95 is dominated by the
+fixture, and its 60m/64MiB recommendation demonstrates wiring and actual resource
 enforcement only. It establishes neither workload suitability nor scientific
 profile fidelity. No five-method comparison is executed.
 
-**Actual cluster smoke: PENDING.** A factual verification record will be added
-after the clean-source run. No system benefit claim follows from this gate.
+**Actual cluster smoke: PASS (plumbing only).** Source `35bdb5d871a895067697d26cdde5641d9d3b4e32`;
+run `2026-10-28T202821.479682Z-ff47ce4c3e96-c7850980`; experiment fingerprint `ff47ce4c3e96ba6aa769ced0bc8eaa573ed19b70de062b66002a5013cb0bce77`.
+The [verification record](../configs/system_v7a_smoke_validation_record.json)
+records all 23 output hashes verified, non-claim cache validation,
+claim/config/tamper rejection, unchanged global kubeconfig, and actual status +
+cgroup enforcement of 60m CPU /64MiB without a Pod restart. A successful request
+was sent after confirmed enforcement. The profile committed one refresh/four
+field writes. It was one Full-Rewrite run with 288 synthetic bootstrap slots and
+one real completed 300s bucket, not a five-method comparative experiment.
+Managed evidence: `results/system/runs/ff47ce4c3e96ba6aa769ced0bc8eaa573ed19b70de062b66002a5013cb0bce77/2026-10-28T202821.479682Z-ff47ce4c3e96-c7850980` (ignored, local). Output manifest SHA-256:
+`bac9409f5d525b9d0cb575de993a8baa0e750996b335e69a1df12a60631f6613`. Full suite: 542 passed, 0 failed, 1 skipped.
+
+Six discarded/incomplete plumbing attempts are retained as FAILED: image-import
+failure; intentional interruption to strengthen enforcement/read-clock guards;
+HTTP refresh-event serialization failure; intentional interruption after an RBAC
+dry-run rejection; Kubernetes 1.33 rejecting no-restart memory downscaling; and the resize command
+returning text instead of JSON. The final revision also includes the late generator
+start in arrival-to-completion latency.
+None is comparative evidence, none was patched, and no failed cache is reusable.
+The final source adds regression tests and mandatory server-side resize preflight.
+No system benefit claim follows from this gate.
 
 ## Platform references
 
