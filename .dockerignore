@@ -5,3 +5,4 @@
 !harness/
 !harness/system/
 !harness/system/Dockerfile
+!harness/system/Prometheus.Dockerfile

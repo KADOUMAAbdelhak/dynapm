@@ -189,3 +189,14 @@ def test_prometheus_plain_text_readiness(monkeypatch):
     from dynapm.system_validation import smoke
     monkeypatch.setattr(smoke,'text_http',lambda url:'Prometheus Server is Ready.\n')
     assert 'Ready' in wait_http('http://localhost/-/ready')
+
+
+def test_prometheus_native_wrapper_retains_pinned_upstream_and_no_remote_pull():
+    d=frozen_design(ROOT)
+    dockerfile=(ROOT/'harness/system/Prometheus.Dockerfile').read_text()
+    assert dockerfile.splitlines()[0]=='FROM '+d['kubernetes']['prometheus_image']
+    assert len(dockerfile.splitlines())==2 and dockerfile.splitlines()[1].startswith('LABEL ')
+    r=read_json(ROOT/'harness/system/resources.json')
+    p=next(x for x in r['items'] if x['kind']=='Pod' and x['metadata']['name']=='prometheus')
+    assert p['spec']['containers'][0]['image']==d['kubernetes']['prometheus_local_image']
+    assert p['spec']['containers'][0]['imagePullPolicy']=='Never'

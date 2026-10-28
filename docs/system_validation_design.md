@@ -147,7 +147,10 @@ a claim cache. Clean committed source is mandatory before deployment.
 
 Prerequisites: local Docker engine, kind v0.29.0, kubectl >=1.32 (smoke host1.32.3),
 the repository `.venv`, at least20GiB disk reserve and sufficient Docker memory.
-Images are digest-pinned in config. The installed kind release's Kubernetes
+Base images are digest-pinned in config. A metadata-only Prometheus wrapper
+materializes the native platform for kind import, avoiding missing foreign-platform
+blobs in Docker multi-architecture exports. The exact wrapper image ID/layers are
+recorded, and both application and Prometheus Pods forbid registry pulls. The installed kind release's Kubernetes
 v1.33.1 supports beta in-place resize; review a supported version and re-freeze
 hardware/software before V8. No cloud cluster or cloud credentials are used.
 

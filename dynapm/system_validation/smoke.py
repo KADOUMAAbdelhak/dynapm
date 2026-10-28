@@ -110,6 +110,12 @@ def run_smoke(repo):
         commands.run(['docker','build','-f','harness/system/Dockerfile','-t',image,'.'],log=build_log)
         image_info=json.loads(commands.run(['docker','image','inspect',image]))[0]
         details['application_image_id']=image_info['Id'];details['application_rootfs_layers']=image_info['RootFS']['Layers']
+        # Docker's containerd store may export a multiarch index with absent foreign-platform
+        # blobs. A metadata-only build materializes the pinned native image for kind import.
+        prom_image=d['kubernetes']['prometheus_local_image']
+        commands.run(['docker','build','-f','harness/system/Prometheus.Dockerfile','-t',prom_image,'.'],log=build_log)
+        prom_info=json.loads(commands.run(['docker','image','inspect',prom_image]))[0]
+        details['prometheus_image_id']=prom_info['Id'];details['prometheus_rootfs_layers']=prom_info['RootFS']['Layers']
         dataset=build_dataset_manifest(repo/'harness/system/fixtures',dataset_id='dynapm-system-smoke-v1',source_name='explicit synthetic smoke fixtures',
             trace_names=('smoke',),schema_identity='system-bootstrap-and-workload-fixtures-v1')
         cohort=CohortManifest(dataset.dataset_id,dataset.sha256,'single-application-plumbing-v1',{'minimum_observations':289},
@@ -140,7 +146,7 @@ def run_smoke(repo):
                 write_json(run.path/'outputs/kubernetes_environment.json',details)
                 commands.run(['kind','load','docker-image',image,'--name',cluster],log=run.path/'logs/kind.log')
                 # Pre-load the public pinned image rather than asking containerd for credentials/network.
-                commands.run(['kind','load','docker-image',d['kubernetes']['prometheus_image'],'--name',cluster],log=run.path/'logs/kind.log')
+                commands.run(['kind','load','docker-image',d['kubernetes']['prometheus_local_image'],'--name',cluster],log=run.path/'logs/kind.log')
                 kube.call(['apply','-f','harness/system/resources.json'],log=run.path/'logs/kind.log')
                 kube.call(['wait','--for=condition=Ready','pod/application','pod/prometheus','--timeout=120s'],log=run.path/'logs/kind.log',timeout=150)
                 app_port,prom_port,profile_port=free_port(),free_port(),free_port()
