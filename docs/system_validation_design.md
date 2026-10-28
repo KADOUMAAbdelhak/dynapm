@@ -147,16 +147,21 @@ managed purpose `smoke`, complete environment/source/config/input hashes,
 output manifest and SUCCESS only after validation. Smoke outputs cannot satisfy
 a claim cache. Clean committed source is mandatory before deployment.
 
-Prerequisites: local Docker engine, kind v0.29.0, kubectl >=1.32 (smoke host1.32.3),
-the repository `.venv`, at least20GiB disk reserve and sufficient Docker memory.
+Prerequisites: local Docker engine, kind v0.33.0 and kubectl v1.35.8,
+the repository `.venv`, at least 20GiB disk reserve and sufficient Docker memory.
 Base images are digest-pinned in config. A metadata-only Prometheus wrapper
 materializes the native platform for kind import, avoiding missing foreign-platform
 blobs in Docker multi-architecture exports. The exact wrapper image ID/layers are
-recorded, and both application and Prometheus Pods forbid registry pulls. The installed kind release's Kubernetes
-v1.33.1 supports beta in-place resize; review a supported version and re-freeze
-hardware/software before V8. No cloud cluster or cloud credentials are used.
+recorded, and both application and Prometheus Pods forbid registry pulls. Kubernetes v1.35.8 is pinned for stable in-place resize. The installed
+1.33 stack rejected no-restart memory downscaling during server dry-run; that
+attempt was invalidated. This is a platform correction, not controller tuning.
+Hardware/software still require a dedicated V8 environment freeze. No cloud cluster or cloud credentials are used. Optional binaries live under
+ignored `.local-tools/system-v1/bin`; other platforms may provide matching tools
+on PATH. Exact binary hashes are included in environment provenance.
 
 ```sh
+# Optional Mac ARM64 installer: verifies frozen official binary hashes; no global install.
+.venv/bin/python -m dynapm.system_validation.install_tools
 .venv/bin/python -m dynapm.scripts.task32_system_harness --help
 .venv/bin/python -m dynapm.scripts.task32_system_harness
 # Only after committing clean source; one real 300s bucket, no comparison:
@@ -187,6 +192,6 @@ after the clean-source run. No system benefit claim follows from this gate.
 
 ## Platform references
 
-- [kind0.29 release and image digests](https://github.com/kubernetes-sigs/kind/releases/tag/v0.29.0)
-- [Kubernetes1.33 in-place resize and resize status](https://v1-33.docs.kubernetes.io/docs/tasks/configure-pod-container/resize-container-resources/)
+- [kind 0.33 release and image digests](https://github.com/kubernetes-sigs/kind/releases/tag/v0.33.0)
+- [Kubernetes 1.35 in-place resize and resize status](https://v1-35.docs.kubernetes.io/docs/tasks/configure-pod-container/resize-container-resources/)
 - [Prometheus text exposition](https://prometheus.io/docs/instrumenting/exposition_formats/)

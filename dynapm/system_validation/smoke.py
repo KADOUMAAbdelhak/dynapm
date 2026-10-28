@@ -104,7 +104,8 @@ def environment(commands,design):
     docker=json.loads(commands.run(['docker','info','--format','{{json .}}']))
     return dict(docker={k:docker.get(k) for k in ['ServerVersion','OperatingSystem','Architecture','KernelVersion','NCPU','MemTotal','CgroupVersion']},
         kind=commands.run(['kind','version']).strip(),kubectl_client=json.loads(commands.run(['kubectl','version','--client','-o','json']))['clientVersion'],
-        node_image=design['kubernetes']['node_image'])
+        node_image=design['kubernetes']['node_image'],
+        cli_binary_sha256={name:file_sha256(shutil.which(name,path=commands.env['PATH'])) for name in ['kind','kubectl']})
 
 
 def output_specs():
@@ -125,8 +126,10 @@ def run_smoke(repo):
     guard_local_endpoint(endpoint)
     with tempfile.TemporaryDirectory(prefix='dynapm-system-private-') as temporary:
         private=Path(temporary);os.chmod(private,0o700);dc=private/'docker';dc.mkdir();(dc/'config.json').write_text('{"auths":{}}')
-        env={**os.environ,'DOCKER_HOST':endpoint,'DOCKER_CONFIG':str(dc)}
+        env={**os.environ,'DOCKER_HOST':endpoint,'DOCKER_CONFIG':str(dc),'KUBECONFIG':str(private/'kubeconfig'),
+            'PATH':str(repo/d['kubernetes']['tools_directory'])+os.pathsep+os.environ['PATH']}
         commands=Commands(env,repo);details=environment(commands,d)
+        if details['kubectl_client']['gitVersion']!=d['kubernetes']['kubectl_version']:raise ValueError('kubectl_version_mismatch')
         if not details['kind'].startswith('kind '+d['kubernetes']['kind_version']+' '):raise ValueError('kind_version_mismatch')
         image=d['kubernetes']['application_image'];build_log=private/'build.log'
         commands.run(['docker','build','-f','harness/system/Dockerfile','-t',image,'.'],log=build_log)

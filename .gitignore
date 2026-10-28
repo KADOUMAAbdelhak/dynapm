@@ -32,3 +32,6 @@ dynapm/data/*.json
 # Local editor rules and acquisition logs; never scientific source.
 .cursor/
 logs/
+
+# Optional pinned local Kubernetes CLI tools, never Git content.
+.local-tools/

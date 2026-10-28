@@ -49,16 +49,26 @@ kubernetes:
   cluster: dynapm-v7a-smoke
   container: workload
   context: kind-dynapm-v7a-smoke
-  kind_version: v0.29.0
+  kind_version: v0.33.0
+  kubectl_version: v1.35.8
   local_docker_only: true
   namespace: dynapm-v7a-smoke
-  node_image: "kindest/node:v1.33.1@sha256:050072256b9a903bd914c0b2866828150cb229cea0efe5892e2b644d5dd3b34f"
-  note: "installed kind release image; in-place resize beta in this smoke version, re-review supported environment before V8"
+  node_image: "kindest/node:v1.35.8@sha256:07b2536e30b803ed61d1677a79df6115f798ce64c80f9e22f6ed45afd09323c0"
+  note: pinned stable in-place resize environment; 1.33 rejected no-restart memory decrease; no controller parameter changes
   prometheus_image: "prom/prometheus:v3.2.1@sha256:6927e0919a144aa7616fd0137d4816816d42f6b816de3af269ab065250859a62"
   prometheus_local_image: "dynapm-system-prometheus:v7a"
   python_image: "python:3.13.2-slim@sha256:6b3223eb4d93718828223966ad316909c39813dee3ee9395204940500792b740"
   resource_qos: "Guaranteed: requests equal limits before/after resize"
-  server_version: v1.33.1
+  server_version: v1.35.8
+  tools_by_platform:
+    darwin-arm64:
+      kind:
+        sha256: 0c8c7dbe5e23594a198b786c4bc13dacc101fa6196b0cb0b23a1ca44e61f4b4f
+        url: "https://github.com/kubernetes-sigs/kind/releases/download/v0.33.0/kind-darwin-arm64"
+      kubectl:
+        sha256: b8be50ae0c6665b646fb009f904a52cad30806deee19ab3b4fe5af2d68bd82eb
+        url: "https://dl.k8s.io/release/v1.35.8/bin/darwin/arm64/kubectl"
+  tools_directory: .local-tools/system-v1/bin
   workload_pod: application
 methods:
   - static
@@ -111,14 +121,15 @@ scientific_runtime_sha256:
   dynapm/system_validation/adapter.py: 1c66f9e05204aa51f83f3e653f6cc3659a3e435843fafc340f07ff85560ed80f
   dynapm/system_validation/application.py: 571da7880ea57442bc5b9497db5b9bf76d19fe922fcee8cc646f8afe38e43834
   dynapm/system_validation/consumer.py: 9a7ab4613203784862c830c309858dfe218d993aab734a6a9de0568cd977faef
-  dynapm/system_validation/design.py: 2554710864d576ba48ddd8131095e14e476eefbd943fe79f0ea0ed54e4ed7833
-  dynapm/system_validation/smoke.py: f37d4fe9490d58b3fc4415ceec39cb7253ba877146d0424ae48287f5390fdbde
+  dynapm/system_validation/design.py: 76b7b045dc23d48f58c6c885df9527c15ae60799e367f53108b502deb758c480
+  dynapm/system_validation/install_tools.py: 8bd894ff2ba0f317f5f1b0f0a0bb0df503ae3712386b3987b482c6feab5dadd7
+  dynapm/system_validation/smoke.py: c40c4ad92a6a279fa49a06332fafa123dfd2fbf108e0cb620927271b1c0591ea
   dynapm/system_validation/workloads.py: 8e3ed7822f3c71c29aa58bee5917f2b7a1707538f41752c92ec02ab69b6e7477
   harness/system/Dockerfile: 5ec4a66f5a4ce8e30f49f6b806858ae6dabd05b0e8fc0ac3be79eccf629d841d
   harness/system/Prometheus.Dockerfile: a99a0f122b44604fa6ba55f54902284d4e62f7f3b279a032f0db1cc2818e012a
   harness/system/fixtures/smoke/bootstrap.json: 95fb90445ce17ec724a58b5956eabe8ff29373d3901186efd363a0fa948efb55
   harness/system/fixtures/smoke/workload.json: 04b1e3721e503174b9e0fcfcad6e0858bdaa065345588f7d160412881d724473
-  harness/system/kind.yaml: 43cd82accfd49ed391be83b29a25264e21560f754aebc9c1f7360b4268cf984a
+  harness/system/kind.yaml: f44fa544c814716c56577f7ec0fdba037d21bd495c188afc5a72ed8b7a7e0eee
   harness/system/resources.json: 71dca4b4e0ed45b690733c460bb2ce47b2022870dd0cf7e5be235b09661acd56
 scope: SCAFFOLD_AND_LOCAL_SMOKE_ONLY
 slo:
@@ -139,8 +150,8 @@ smoke:
   synthetic_cpu_millicores: 50
   synthetic_memory_mib: 48
 sources:
-  - "https://github.com/kubernetes-sigs/kind/releases/tag/v0.29.0"
-  - "https://v1-33.docs.kubernetes.io/docs/tasks/configure-pod-container/resize-container-resources/"
+  - "https://github.com/kubernetes-sigs/kind/releases/tag/v0.33.0"
+  - "https://v1-35.docs.kubernetes.io/docs/tasks/configure-pod-container/resize-container-resources/"
   - "https://prometheus.io/docs/instrumenting/exposition_formats/"
 system_clock: system-completed-bucket-wall-read-v1
 telemetry:

@@ -9,7 +9,7 @@ from dynapm.experiments.confirmatory_design import PRIMARY_METHODS,emit_yaml
 SPEC='configs/system_validation_v1.json'
 YAML='configs/system_validation_v1.yaml'
 RUNTIME=('.dockerignore','dynapm/system_validation/design.py','dynapm/system_validation/application.py',
-    'dynapm/system_validation/workloads.py','dynapm/system_validation/adapter.py',
+    'dynapm/system_validation/workloads.py','dynapm/system_validation/install_tools.py','dynapm/system_validation/adapter.py',
     'dynapm/system_validation/consumer.py','dynapm/system_validation/smoke.py',
     'dynapm/scripts/task32_system_harness.py','harness/system/Prometheus.Dockerfile','harness/system/Dockerfile','harness/system/kind.yaml',
     'harness/system/resources.json','harness/system/fixtures/smoke/bootstrap.json',
@@ -65,15 +65,19 @@ def parameters():
             post_actuation_seconds=30,scope='NON_CLAIM_PLUMBING_ONLY',synthetic_bootstrap_slots=288,
             synthetic_cpu_millicores=50,synthetic_memory_mib=48,comparative_runs=False,max_elapsed_seconds=1800),
         kubernetes=dict(cluster='dynapm-v7a-smoke',namespace='dynapm-v7a-smoke',context='kind-dynapm-v7a-smoke',
-            workload_pod='application',container='workload',server_version='v1.33.1',kind_version='v0.29.0',
-            node_image='kindest/node:v1.33.1@sha256:050072256b9a903bd914c0b2866828150cb229cea0efe5892e2b644d5dd3b34f',
+            workload_pod='application',container='workload',server_version='v1.35.8',kind_version='v0.33.0',kubectl_version='v1.35.8',
+            tools_directory='.local-tools/system-v1/bin',
+            tools_by_platform={'darwin-arm64':{
+                'kind':dict(url='https://github.com/kubernetes-sigs/kind/releases/download/v0.33.0/kind-darwin-arm64',sha256='0c8c7dbe5e23594a198b786c4bc13dacc101fa6196b0cb0b23a1ca44e61f4b4f'),
+                'kubectl':dict(url='https://dl.k8s.io/release/v1.35.8/bin/darwin/arm64/kubectl',sha256='b8be50ae0c6665b646fb009f904a52cad30806deee19ab3b4fe5af2d68bd82eb')}},
+            node_image='kindest/node:v1.35.8@sha256:07b2536e30b803ed61d1677a79df6115f798ce64c80f9e22f6ed45afd09323c0',
             python_image='python:3.13.2-slim@sha256:6b3223eb4d93718828223966ad316909c39813dee3ee9395204940500792b740',
             prometheus_image='prom/prometheus:v3.2.1@sha256:6927e0919a144aa7616fd0137d4816816d42f6b816de3af269ab065250859a62',
             application_image='dynapm-system-workload:v7a',prometheus_local_image='dynapm-system-prometheus:v7a',actuation='pods/resize strategic merge; NotRequired restart policy; no rollout fallback',
             resource_qos='Guaranteed: requests equal limits before/after resize',local_docker_only=True,
-            note='installed kind release image; in-place resize beta in this smoke version, re-review supported environment before V8'),
-        sources=['https://github.com/kubernetes-sigs/kind/releases/tag/v0.29.0',
-            'https://v1-33.docs.kubernetes.io/docs/tasks/configure-pod-container/resize-container-resources/',
+            note='pinned stable in-place resize environment; 1.33 rejected no-restart memory decrease; no controller parameter changes'),
+        sources=['https://github.com/kubernetes-sigs/kind/releases/tag/v0.33.0',
+            'https://v1-35.docs.kubernetes.io/docs/tasks/configure-pod-container/resize-container-resources/',
             'https://prometheus.io/docs/instrumenting/exposition_formats/'])
 
 
@@ -118,7 +122,7 @@ def write_design(repo):
         if o['kind']=='Pod':o['metadata']['labels']={'app':'dynapm-workload' if o['metadata']['name']=='application' else 'dynapm-prometheus'}
     write_json(repo/'harness/system/resources.json',objects)
     image=d['kubernetes']['node_image']
-    kind={'kind':'Cluster','apiVersion':'kind.x-k8s.io/v1alpha4','featureGates':{'InPlacePodVerticalScaling':True},
+    kind={'kind':'Cluster','apiVersion':'kind.x-k8s.io/v1alpha4',
         'nodes':[{'role':'control-plane','image':image,'labels':{'dynapm-role':'control'}},
                  {'role':'worker','image':image,'labels':{'dynapm-role':'workload'}}]}
     (repo/'harness/system/kind.yaml').write_text(emit_yaml(kind))

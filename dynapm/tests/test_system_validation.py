@@ -262,3 +262,28 @@ def test_resize_preflight_rejects_unvalidated_target():
         def pod(self):return {'spec':{'containers':[{'resources':{'requests':{'cpu':'1','memory':'512Mi'},'limits':{'cpu':'1','memory':'512Mi'}}}]}}
         def call(self,*args,**kw):return json.dumps(self.pod())
     with pytest.raises(ValueError,match='preflight'):resize_preflight(Fake(),D)
+
+
+def test_no_restart_memory_resize_uses_stable_pinned_environment():
+    d=frozen_design(ROOT)
+    assert d['kubernetes']['server_version']=='v1.35.8'
+    assert d['kubernetes']['kubectl_version']=='v1.35.8'
+    assert d['kubernetes']['kind_version']=='v0.33.0'
+    assert len(d['kubernetes']['tools_by_platform']['darwin-arm64']['kind']['sha256'])==64
+
+
+def test_optional_local_installer_verifies_frozen_hash_before_writing(monkeypatch,tmp_path):
+    import json,hashlib
+    from dynapm.system_validation import install_tools
+    monkeypatch.setattr(install_tools.platform,'system',lambda:'Darwin')
+    monkeypatch.setattr(install_tools.platform,'machine',lambda:'arm64')
+    repo=tmp_path/'repo';(repo/'configs').mkdir(parents=True)
+    cache=tmp_path/'cache';cache.mkdir();(cache/'kind').write_bytes(b'fixture-binary')
+    d={'kubernetes':{'tools_directory':'.local-tools/bin','tools_by_platform':{'darwin-arm64':{'kind':{
+       'url':'https://not-requested.invalid','sha256':hashlib.sha256(b'fixture-binary').hexdigest()}}}}}
+    (repo/'configs/system_validation_v1.json').write_text(json.dumps(d))
+    target=install_tools.install(repo,cache)
+    assert (target/'kind').read_bytes()==b'fixture-binary' and (target/'kind').stat().st_mode&0o111
+    (cache/'kind').write_bytes(b'tampered')
+    with pytest.raises(ValueError,match='hash_mismatch'):install_tools.install(repo,cache)
+    assert (target/'kind').read_bytes()==b'fixture-binary'
