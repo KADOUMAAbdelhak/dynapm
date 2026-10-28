@@ -207,3 +207,14 @@ profile-service serialization, fixed recommendation and actual resize plumbing.
 It uses a synthetic bootstrap and must never be reused as comparative/system
 claim evidence. Optional pinned CLI tools are installed only under ignored
 `.local-tools/`; the runner does not download or install them automatically.
+
+
+## V7B preparation (blocked)
+
+`python -m dynapm.scripts.task33_system_trial_preparation` reports the blocked
+V8 draft and deterministic calibration identities only. It has no execution flag.
+The measured-bootstrap validator reconstructs fixed 24h history from raw sample
+records and rejects missing coverage, future data and counter resets. Its unit
+fixtures are not a real-bootstrap demonstration. See [the exact readiness table,
+resource budget and remaining implementation](system_trial_freeze.md).
+Do not reuse the V7A one-bucket smoke as a calibration or comparative trial runner.

@@ -468,3 +468,17 @@ attribution, failure/deferred-resize handling, trial-count/precision plan,
 randomized order and practical-benefit/harm criteria. Requests are not replicates;
 independent run/scenario replicates are the unit. Kubernetes-only evidence cannot
 establish heterogeneous edge/continuum generalization.
+
+
+## V7B prerequisite: operational criteria and real calibration
+
+The [V7B preparation record](system_trial_freeze.md) is explicitly BLOCKED.
+Measured-bootstrap validation and identity-only plans are unit-tested, but no
+real 24h bootstrap, calibration variance, final repetition count or continuous
+isolated trial executor is established. The V8 draft cannot execute comparisons.
+V7A's 250ms threshold/20% headroom do not justify numeric SLO harm, meaningful
+resource benefit or overhead/churn budgets. Obtain an attributable operational
+contract; do not derive criteria from corpus effects or favorable calibration
+metrics. Precision planning uses independent run/scenario endpoints, not requests,
+and must disclose variance-transport/distribution assumptions and infeasible caps.
+No system superiority, acceptable overhead or completed V8 freeze is claimed.
