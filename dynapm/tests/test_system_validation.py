@@ -163,7 +163,7 @@ def test_context_private_config_least_privilege():
     with pytest.raises(ValueError):Kube(c,'x','unrelated',D)
     role=next(x for x in resource_manifests(D)['items'] if x['kind']=='Role')
     assert role['rules']==[dict(apiGroups=[''],resources=['pods'],resourceNames=['application'],verbs=['get']),
-        dict(apiGroups=[''],resources=['pods/resize'],resourceNames=['application'],verbs=['patch'])]
+        dict(apiGroups=[''],resources=['pods/resize'],resourceNames=['application'],verbs=['get','patch'])]
 
 
 def test_frozen_config_and_no_comparative_path():
@@ -240,3 +240,25 @@ def test_profile_service_real_http_round_trip():
         assert http(url+'/snapshot')['real_observations']==1
     finally:
         process.terminate();process.communicate(timeout=10)
+
+
+def test_resize_preflight_checks_permissions_without_actuation():
+    import json
+    from dynapm.system_validation.smoke import resize_preflight
+    class Fake:
+        def pod(self):return {'spec':{'containers':[{'resources':{'requests':{'cpu':'1','memory':'512Mi'},'limits':{'cpu':'1','memory':'512Mi'}}}]}}
+        def call(self,args,**kw):
+            assert kw['controller'] and '--dry-run=server' in args and '--subresource=resize' in args
+            self.args=args
+            return json.dumps({'spec':resource_patch({'cpu_millicores':50,'memory_mib':64})['spec']})
+    k=Fake();r=resize_preflight(k,D)
+    assert r['server_dry_run'] and r['unchanged_actual_resources']['limits']['cpu']=='1'
+
+
+def test_resize_preflight_rejects_unvalidated_target():
+    import json
+    from dynapm.system_validation.smoke import resize_preflight
+    class Fake:
+        def pod(self):return {'spec':{'containers':[{'resources':{'requests':{'cpu':'1','memory':'512Mi'},'limits':{'cpu':'1','memory':'512Mi'}}}]}}
+        def call(self,*args,**kw):return json.dumps(self.pod())
+    with pytest.raises(ValueError,match='preflight'):resize_preflight(Fake(),D)

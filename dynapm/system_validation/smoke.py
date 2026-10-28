@@ -14,7 +14,7 @@ from dynapm.system_validation.consumer import recommend,resource_patch,resources
 from dynapm.system_validation.workloads import offered_trace,run_load
 
 JSON_OUTPUTS=['design','kubernetes_environment','resources','trace','telemetry','requests','profile_before','profile_after',
-    'recommendation','actuation','metrics','prometheus_up','smoke_diagnostics']
+    'recommendation','actuation','resize_preflight','metrics','prometheus_up','smoke_diagnostics']
 LOGS=['build','kind','application','prometheus','profile_service','application_portforward','prometheus_portforward']
 
 
@@ -69,6 +69,19 @@ class Kube:
         if controller:prefix+=['--as',f'system:serviceaccount:{ns}:profile-consumer']
         return self.commands.run(prefix+args,log=log,timeout=timeout)
     def pod(self):return json.loads(self.call(['get','pod','application','-o','json'],controller=True))
+
+
+def resize_preflight(kube,design):
+    """Check kubectl's subresource read+patch permissions without actuation."""
+    before=kube.pod()['spec']['containers'][0]['resources']
+    target=dict(cpu_millicores=design['consumer']['cpu_millicores_minimum'],memory_mib=design['consumer']['memory_mib_minimum'])
+    dry=json.loads(kube.call(['patch','pod','application','--subresource=resize','--type=strategic',
+        '--dry-run=server','-p',json.dumps(resource_patch(target)),'-o','json'],controller=True))
+    after=kube.pod()['spec']['containers'][0]['resources']
+    if before!=after or not resources_match(dry['spec']['containers'][0]['resources'],target):
+        raise ValueError('resize_preflight_invalid_or_changed_allocation')
+    return dict(server_dry_run=True,unchanged_actual_resources=after,validated_target=target,
+        scope='permission_and_request_validation_only_no_actuation')
 
 
 def wait_http(url,timeout=90):
@@ -158,6 +171,7 @@ def run_smoke(repo):
                 commands.run(['kind','load','docker-image',d['kubernetes']['prometheus_local_image'],'--name',cluster],log=run.path/'logs/kind.log')
                 kube.call(['apply','-f','harness/system/resources.json'],log=run.path/'logs/kind.log')
                 kube.call(['wait','--for=condition=Ready','pod/application','pod/prometheus','--timeout=120s'],log=run.path/'logs/kind.log',timeout=150)
+                write_json(run.path/'outputs/resize_preflight.json',resize_preflight(kube,d))
                 app_port,prom_port,profile_port=free_port(),free_port(),free_port()
                 def spawn(args,logname):
                     f=(run.path/'logs'/logname).open('a');files.append(f)

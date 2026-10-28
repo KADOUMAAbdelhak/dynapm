@@ -89,8 +89,10 @@ Accepted API patches are insufficient: the smoke requires desired spec, actual
 `status.containerStatuses[].resources` and measured cgroup limits all to agree,
 with unchanged Pod UID/restart count and successful post-resize requests. Deferred,
 rejected or timed-out changes fail the smoke; there is no rollout fallback.
-Namespace RBAC permits the controller only to get `application` and patch its
-`pods/resize` subresource. Administration credentials are used for isolated-cluster
+Namespace RBAC permits the controller only to get `application`, and to get/patch
+its named `pods/resize` subresource (kubectl reads it before patching). A server-side
+dry-run validates this path before workload collection and verifies that actual
+allocations remain unchanged. Administration credentials are used for isolated-cluster
 setup only; controller calls impersonate that restricted service account.
 
 ## Workloads frozen before outcomes

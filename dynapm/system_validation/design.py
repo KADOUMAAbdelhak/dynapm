@@ -101,7 +101,7 @@ def resource_manifests(d):
         volumes=[dict(name='config',configMap={'name':'prometheus-config'}),dict(name='data',emptyDir={'sizeLimit':'512Mi'})]))
     role=dict(apiVersion='rbac.authorization.k8s.io/v1',kind='Role',metadata=dict(name='profile-consumer',namespace=ns),
         rules=[dict(apiGroups=[''],resources=['pods'],resourceNames=['application'],verbs=['get']),
-               dict(apiGroups=[''],resources=['pods/resize'],resourceNames=['application'],verbs=['patch'])])
+               dict(apiGroups=[''],resources=['pods/resize'],resourceNames=['application'],verbs=['get','patch'])])
     binding=dict(apiVersion='rbac.authorization.k8s.io/v1',kind='RoleBinding',metadata=dict(name='profile-consumer',namespace=ns),
         roleRef=dict(apiGroup='rbac.authorization.k8s.io',kind='Role',name='profile-consumer'),
         subjects=[dict(kind='ServiceAccount',name='profile-consumer',namespace=ns)])
