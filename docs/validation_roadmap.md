@@ -258,25 +258,25 @@ This roadmap specifies future gates, not authorization to execute them. The sole
 - **Objective:** real telemetry → existing observation-policy profile service → identical fixed p95 consumer → enforced Pod resource change.
 - **Required artifacts:** [system design](system_validation_design.md), `configs/system_validation_v1.*`, `harness/system/`, managed single-method non-claim smoke with actual cgroup/status proof.
 - **PASS criteria:** all unit checks and one local plumbing smoke pass, no comparative trials or corpus-driven tuning; source/config/input/output manifests validate. Established from clean source `35bdb5d`, 542 passed/0 failed/1 skipped; [factual verification record](../configs/system_v7a_smoke_validation_record.json). Synthetic bootstrap is expressly limited to smoke.
-- **Unproven:** C4/C5, multi-method trials, power/precision/trial-count plan, overhead budgets, dedicated platform and operational margins. V8 remains blocked pending those prerequisites and authorization.
+- **Unproven:** C4/C5, multi-method trials, precision/trial-count disposition and controlled hardware. V8 requires calibration and integrity/design readiness; practical margins are NOT_DEFINED and are not an estimation gate.
 
-## V7B — MEASURED BOOTSTRAP, CALIBRATION AND SYSTEM FREEZE
+## V7B — ESTIMATION-FIRST SYSTEM CALIBRATION AND DESIGN FREEZE
 
-**STATUS: BLOCKED — preparation implemented; no real bootstrap/calibration or justified numeric operational criteria**
+**STATUS: CALIBRATION REQUIRED / IN PROGRESS — practical margins are not a blocker**
 
-- **Objective:** real fixed bootstrap, single-method calibration, component cost attribution and prospective operational precision/decision contract.
-- **Artifacts:** [blocked freeze record](system_trial_freeze.md), `configs/system_trials_v8_draft_v1.json`, measured-bootstrap validator, production initialization adapter and deterministic identity-only plans.
-- **Current evidence:** unit fixtures only. Real 24h bootstrap not demonstrated; zero calibration/comparative runs; variance/N unavailable. Continuous repeated Kubernetes executor is not implemented.
-- **Blockers:** owner operational error/resource/control budgets; dedicated host feasibility; continuous collection/isolated process attribution; real calibration and output manifests; justified precision targets and practical run cap.
-- **PASS criteria:** all above evidenced before freezing N and numeric harm/benefit criteria. Never substitute V7A synthetic smoke or treat requests as replicates.
-- **Unproven:** C4/C5. V8 cannot start.
+- **Objective:** real measured bootstrap, neutral PW6 stable/periodic calibration and prospective estimation precision/N disposition.
+- **Current contract:** [estimation-first amendment](system_trial_freeze.md), `configs/system_trials_v8_estimation_v2.json`. 250ms/20% remain engineering parameters; meaningful operational benefit NOT_DEFINED.
+- **Reporting:** scenario-specific independent-run mean/median paired effects, pointwise95% block-bootstrap CIs, resource–SLO Pareto diagnostics, churn/overhead; no p-value-only recommendation or practical superiority claim. Negative/null outcomes are valid.
+- **Execution:** managed serial six-maximum neutral campaign, real24h bootstrap per run, separate processes and raw lineage; no comparative execution.
+- **Remaining evidence:** completed calibration/integrity, hardware interference assessment and prospective CI precision/N or explicit feasibility limitation. No N is chosen from significance.
+- **Unproven:** C4/C5; V8 remains disabled while calibration and design disposition are incomplete.
 
 ## V8 — REPEATED OPERATIONAL / SYSTEM VALIDATION
 
 **STATUS: BLOCKED — requires V6 and completed V7B calibration/design freeze**
 
 - **Objective:** operational benefit and harm estimates under controlled repeated trials (C4/C5 evidence).
-- **Required artifacts:** independent run/scenario replicates; predefined operational magnitude/harm criteria; run-level paired inference.
+- **Required artifacts:** independent run/scenario replicates; estimation-first scenario-specific effects/CIs/Pareto reporting; predefined interpretation with practical benefit NOT_DEFINED; run-level paired inference.
 - **PASS criteria:** preplanned replication; all failed trials reported; C4/C5 support is a separate evidence decision.
 - **Unproven:** heterogeneous edge generalization without a dedicated C6 experiment.
 

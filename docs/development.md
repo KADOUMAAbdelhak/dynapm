@@ -209,7 +209,7 @@ claim evidence. Optional pinned CLI tools are installed only under ignored
 `.local-tools/`; the runner does not download or install them automatically.
 
 
-## V7B preparation (blocked)
+## Historical V7B v1 preparation (superseded by estimation-first Task34)
 
 `python -m dynapm.scripts.task33_system_trial_preparation` reports the blocked
 V8 draft and deterministic calibration identities only. It has no execution flag.
@@ -218,3 +218,16 @@ records and rejects missing coverage, future data and counter resets. Its unit
 fixtures are not a real-bootstrap demonstration. See [the exact readiness table,
 resource budget and remaining implementation](system_trial_freeze.md).
 Do not reuse the V7A one-bucket smoke as a calibration or comparative trial runner.
+
+
+## Current V7B estimation-first calibration
+
+Use `python -m dynapm.scripts.task34_system_calibration`; Task33/v1 is superseded
+preparation history. `--plumbing-check` uses one real bucket without initializing
+a profile. `--run-calibration` executes at most the six predeclared PW6 runs,
+with real24h bootstrap and48h scenarios; there is no comparative method switch.
+See [source freeze, interpretation, status and stop instructions](system_trial_freeze.md).
+Keep source/HEAD unchanged while a managed trial is active; a source change
+invalidates its generation. All campaign state and raw outputs are ignored under
+`results/system_calibration/`. Practical margins are not a blocker and remain
+NOT_DEFINED. A running bootstrap is not completion or permission to run V8.

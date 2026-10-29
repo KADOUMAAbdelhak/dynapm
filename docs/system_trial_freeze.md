@@ -1,225 +1,205 @@
-# V7B — System calibration and confirmatory-freeze preparation
+# V7B — Estimation-first system validation
 
-**STATUS: BLOCKED. There is no completed V8 confirmatory freeze.**
+**Current amendment: estimation-first; neutral calibration required/in progress.**
+Practical margins are **not a gate**. V8 comparative execution remains disabled
+until calibration, prospective repetition/precision disposition and the remaining
+hardware checks are complete. There are no comparative outcomes from this task.
 
-This document distinguishes implemented preparation from unperformed calibration.
-The versioned draft is `configs/system_trials_v8_draft_v1.json` (`system-trial-preparation-v1`).
-Neither calibration execution nor comparative execution is enabled. Numeric
-operational margins, CI precision targets, hardware reservation, practical
-repetition cap and final repetition count are intentionally unset.
+The authoritative amendment is `configs/system_trials_v8_estimation_v2.json`
+(`system-estimation-design-v2`). The v1 preparation at commit `88b5b1f` and
+`configs/system_trials_v8_draft_v1.json` is superseded as the current governance
+contract; its validation/history is retained. In particular, its demand for
+practical margins before calibration no longer applies.
 
-## Evidence and disposition
+## Frozen question, parameters and interpretation
 
-| Requirement | Current evidence |
-|---|---|
-| Measured initialization | Exact-grid raw-sample validation and production-factory initialization implemented; unit fixtures only |
-| Real 24h measured bootstrap | **NOT DEMONSTRATED** |
-| Stable + dynamic calibration | **NOT RUN**; no variance or bootstrap-variability estimate |
-| Repeated isolated trial runner | Identity-only ordered plan implemented; continuous Kubernetes campaign executor **NOT IMPLEMENTED** |
-| Overhead attribution | Component boundaries specified; full component instrumentation **NOT DEMONSTRATED** |
-| Operational criteria | **BLOCKED**: no approved application error/resource/churn/overhead budget found |
-| Repetition count and practical maximum | **NOT FROZEN**: calibration, justified precision targets and compute budget missing |
-| V8 comparisons | **DISABLED** |
+Estimate direction, magnitude, uncertainty, maintenance cost and operational
+resource–SLO trade-offs for Static, PW-12h, PW-6h, PW-3h and Full-Rewrite, using
+one identical profile-p95-to-resource consumer. No predictor/adaptive method is
+introduced. Keep `causal-timeline-v3`, `refresh-accounting-v1`, exact 5min clocks,
+the 250ms violation threshold and 20% recommendation headroom unchanged.
+Those numbers are **experimental/controller parameters only**, not validated
+practical-significance margins. Operationally meaningful benefit remains
+**NOT_DEFINED**. No application-specific error/resource/churn/overhead budgets
+exist, and none is invented.
 
-V7A's single synthetic-bootstrap smoke remains plumbing evidence only. It must not
-supply run-to-run variance, operational benefit, bootstrap variability or a
-calibration-derived N. Its generated outputs are unchanged.
+Negative/null findings are valid. Statistical distinguishability alone cannot
+establish practical superiority. Do not recommend a method from p-values or
+choose a winner when a resource–SLO trade-off exists. An external/application-
+specific contract could justify practical criteria only through a documented
+later amendment; it must not be retrofitted from favorable outcomes.
 
-## Measured bootstrap contract
+## Endpoints and independent unit
 
-Preserve 300-second nominal slots, `causal-timeline-v3` and
-`refresh-accounting-v1`. Keep the fixed 1000m CPU /512MiB normalization reference,
-the five existing factories, V7A controller, workload shapes and seed unchanged.
+The unit is one independently reset run/scenario, never a request or telemetry
+slot. Primary endpoint families remain:
 
-The proposed engineering campaign has 15min cooldown, fresh cluster/application/
-Prometheus/profile/controller state, 30min actual stable warm-up, **24h actual
-stable bootstrap**, then 48h measured scenario. Warm-up and cooldown values are
-preparation choices, not thermally validated freeze evidence. No time compression
-or reuse of another run's bootstrap is permitted.
+- SLO violation rate: failures, timeouts, generator drops or latency >250ms,
+  divided by **all offered requests**.
+- Successful-request p95 arrival-to-completion latency; failures reported jointly.
+  No successful requests means undefined p95, not zero.
+- CPU and memory resource requests/allocation, separately. Desired requests change
+  at API acknowledgement; actual allocation is reported at status **and** cgroup
+  confirmation. A pending or rejected resize is not an enforced resource saving.
+- CPU and memory utilization efficiency, separately, with observed time coverage.
 
-Let bootstrap cover `[b,b+24h]` as 288 completed source buckets closing at
-`b+5min ... b+24h`. Raw source sample times must be within each source bucket,
-finite and nonnegative, and receipt must not precede source time or exceed the
-actual initialization read. Each accepted bucket uses the V7A aggregation rule
-(at least50 samples spanning270s, one application instance, no counter resets).
-All buckets must refer to the same application instance, with no counter reset
-between them. Missing buckets stay missing; never fill, repeat or interpolate.
-The fixed bootstrap must retain at least200 paired finite slots and the last96
-consecutive slots must be complete. Failure rejects that bootstrap, without
-extending its endpoint until favorable data appear.
+Secondary endpoints remain p50/p99 latency, throughput, under/over-provisioning
+proxies, resource changes/churn, recommendation/actuation latency, maintenance CPU,
+memory and runtime. Limits censor latent demand: zero observed deficit does not
+prove sufficient provisioning. Report throttle/OOM and SLO evidence alongside.
 
-Thresholds use only valid bootstrap observations. Initialization uses the
-unchanged production contract: Static whole bootstrap; PW cadence-length trailing
-bootstrap window; Full-Rewrite trailing24h. Runtime windows remain `(t-24h,t]`
-with the existing gates. Initialization remains one separate event, zero runtime
-refreshes. Explicit receipt/source checks reject future data, duplicate buckets,
-bootstrap warm-up contamination and synthetic-smoke role labels.
+## Frozen V8 estimation/reporting procedure
 
-`MeasuredProfileAdapter` implements this initialization in memory. It is **not**
-yet a deployed continuous measured-bootstrap HTTP service. Unit fixtures labelled
-as raw samples test validation only; a JSON role label cannot independently attest
-physical measurement. A real run additionally needs source UID, collection lineage,
-managed hashes and environment evidence from the actual collector.
+Analyze each scenario separately. Pair complete run blocks across methods with
+identical offered workload/seed and randomized/counterbalanced order. Report
+per-block differences, arithmetic mean and median paired effects and pointwise
+95% paired-block percentile bootstrap CIs (B=10,000; seed20251022). Undefined
+endpoints and failed attempts must be reported, not silently excluded to improve
+estimates. With inadequate independent runs, report the uncertainty limitation.
+Requests are not bootstrap units.
 
-## Transition and continuous-run requirements
+Freeze contrasts: each PW vs Static; PW6 vs PW12; PW3 vs PW6; Full-Rewrite vs PW3.
+These are scenario-specific operational contrasts, not a new pooling of Google or
+Materna results. Pointwise CIs do not provide familywise guarantees or operational
+margins. No primary p-value decision/recommendation rule is introduced.
 
-A future executable campaign must start the generator and collector before
-bootstrap and keep them running without an observation gap. Bootstrap resources
-stay fixed at the V7A initial allocation. At nominal close q, scenario workload
-switches on the fixed clock; completed bootstrap is made visible only after q
-and its receipt. Threshold/profile initialization and the first identical consumer
-recommendation/actuation occur after that visibility point. Their delay, churn
-and request consequences belong to the measured interval; do not hide them in a
-policy-specific settling phase. Initialization cannot consume streaming buckets.
-Periodic grids stay anchored to q, regardless of actual processing delay.
+Report resource–SLO Pareto estimates using CPU/memory requests, confirmed CPU/
+memory allocations, violation rate and p95 latency (all minimized). A can be called
+strictly dominated **at the point-estimate level** only if it is no better on
+**every** dimension and strictly worse on at least one. Equal vectors are not
+strict dominance. Undefined dimensions yield no dominance classification. Show
+endpoint CIs, mean and median summaries and any heterogeneity; never promote a
+point-estimate ordering to certain population dominance or practical superiority.
+Otherwise report the trade-off without choosing a winner. Churn and overhead
+accompany every interpretation; resource efficiency alone cannot override harms.
 
-Measurement spans `[q,q+48h)` on actual time. Source and availability times,
-actual reads, requests and actuation confirmations must be retained separately.
-Clock events continue independently of telemetry availability. A collector must
-not stop polling while the controller waits on a resize. This requires a genuine
-continuous executor, not looping the V7A one-bucket smoke.
+## Measured bootstrap and phase transition
 
-## Controlled execution and proposed ordering
+Each run uses a fresh cluster, application instance, Prometheus state, profile
+service and controller. Proposed engineering timing is fixed before calibration:
+15min cooldown, 30min stable warm-up, **24h real stable bootstrap**, then **48h
+measured scenario**, without compression or bootstrap reuse. Warm-up/cooldown
+values are engineering settings, not a claim of validated thermal equilibrium.
 
-Pinned stack: kind0.33.0, Kubernetes/kubectl1.35.8, V7A image digests, controller
-`p95-fixed-headroom-quantized-v1`, fixed scenario seed20251022 and 30,000 CPU-work
-iterations. The optional local CLI binaries remain ignored; no global install or
-version change occurs in this task.
+Bootstrap contains 288 actual five-minute buckets, each requiring >=50 source
+samples spanning >=270s. Source times stay inside the bucket; visibility is after
+its close and receipt. No interpolation, filling, replicated slots or future
+samples. Require >=200 paired finite bootstrap slots and the final96 complete.
+One application instance and monotone counters are required throughout bootstrap;
+reject an unusable fixed window without extending it until data look favorable.
+`measured_bootstrap` reconstructs values from raw sample evidence rather than
+trusting precomputed utilization labels. Labels alone do not attest real data;
+image/source/UID, sample lineage and managed hashes must agree.
 
-Before execution, reserve one awake, mains-powered host without competing
-experiments. Fingerprint host CPU model, architecture, physical/logical CPUs,
-memory, OS, Docker CPU/memory/cgroup settings, exact images, Kubernetes and CLI
-binary versions. Scientifically relevant hardware belongs in compatibility;
-hostname and paths remain execution metadata. Record host load, background-process
-CPU/memory, power, available thermal diagnostics, wall/monotonic deltas and node
-conditions. Unavailable thermal information must remain unavailable. No arbitrary
-"idle" threshold or thermal acceptance budget has been validated here.
+Thresholds use bootstrap only. Initialization uses existing production factories:
+Static whole bootstrap; PW cadence-length trailing bootstrap; Full-Rewrite
+trailing24h. Initialization is separate from refresh accounting. Runtime content
+and PW eligibility remain unchanged; no policy parameters are tuned.
 
-The proposed neutral method is **PW-6h only**, unchanged consumer and parameters.
-Calibration scenarios are **stable and periodic** (7h period). The draft proposes
-three independently recreated runs per scenario to obtain an initial run-variance
-estimate; three is not a claim of adequate precision. Rank scenario/method
-identities by a seeded hash, then use cyclic block orders. The future five-method
-plan balances positions over five blocks; ordering depends on identities and seed,
-never outcomes. There is no backfill, reused bootstrap or parallel trial on the
-same host.
+At bootstrap close q, workload switches at the nominal clock and completed
+bootstrap becomes visible only after q/receipt. Initialization and initial
+consumer actuation occur inside the measured interval, with their delay/churn/
+request consequences retained. Do not hide policy-specific settling costs.
+Collectors/generators continue while the controller works. PW schedules remain
+anchored to q. The measured interval is `[q,q+48h)`; no policy refresh is committed
+at its excluded end. Actual receipts/reads/actuation times remain recorded.
 
-Six calibration runs cost at least **436.5 serial host-hours =18.1875 days** under
-this proposal, excluding cluster setup and failures. One full repetition of five
-methods × four scenarios costs at least1455 host-hours =60.625 days. A repetition
-cap and total compute budget require an explicit feasibility decision. These are
-schedule calculations, not observed runtime or calibration evidence.
+## Calibration only, ordering and compute
 
-## Failure and retry policy
+Calibration uses **PW-6h only**, stable plus the frozen7h periodic scenario, three
+independently recreated runs per scenario (six maximum). This count is for initial
+noise characterization, not a final confirmatory sample-size assertion. The
+identity-hash base order plus cyclic blocks is frozen with seed20251022; selection
+never inspects method outcomes. Offered CPU work remains30,000 iterations and
+all original workload shapes/seed are unchanged.
 
-Retain all attempts and reasons. No automatic retries. Infrastructure invalidation
-includes source/input drift, sleep/clock failures, unusable fixed bootstrap,
-missing required measurement/provenance and environment mismatch. Correctness
-fixes require source versioning and comparable reruns. Host exclusions must be
-decided from infrastructure evidence, before method summaries are examined.
+The serial campaign needs at least436.5 host-hours (18.1875 days), excluding
+cluster setup/failures. A full five-method × four-scenario repetition would need
+at least1455 host-hours (60.625 days). No financial or practical benefit is inferred
+from those schedule calculations. Runs are strictly serial on the local engine.
 
-SLO failures, workload errors, OOMs, rejected/deferred resizes and churn are
-**operational outcomes**, not outcome-based exclusions. A continuous runner must
-keep the load/collector active and retain these harms; V7A's fail-fast smoke is
-not suitable as the repeated-trial executor. One outstanding resize and actual
-status/cgroup confirmation remain mandatory; unresolved resize behavior must be
-implemented consistently before calibration. Do not silently roll out/restart
-or overwrite pending requests.
+Calibration characterizes the actual research workstation; a reserved/dedicated
+host is **not asserted**. Record host CPU/model/memory/OS, Docker allocation,
+Kubernetes1.35.8, kind0.33.0, CLI hashes, image IDs and runtime fingerprints. Log
+load, process CPU/memory, power and available thermal status every30min. Missing
+thermal readings stay missing. Require mains power; prevent idle sleep and detect
+clock discontinuities. Any background interference remains a transport/control
+limitation for a later V8 freeze, not a reason to select favorable runs.
 
-## Endpoints and operational criteria
+## Precision and N: independent of benefit or significance
 
-Independent run/scenario is the unit. Requests and slots are correlated within a
-run and cannot be used as independent replicates.
+Use calibration only for noise, bootstrap variability, feasibility and prospective
+precision planning. Never derive a favorable benefit/harm threshold. Primary CI
+half-width targets and a practical confirmatory repetition cap are currently
+**NOT_DEFINED**; no N is fabricated. If a prospectively justified estimation
+precision target can be supported, freeze N from uncertainty/precision before
+comparisons. Otherwise report the limitation and leave comparative execution
+disabled rather than selecting N by p-values.
 
-Primary scalar endpoints:
+The existing conditional planner documents normal-run and variance-transport
+assumptions, uses an upper SD envelope and rejects all-zero variance as proof of
+precision. Those assumptions are not established by three neutral runs. Bounded/
+degenerate SLO rates need an appropriate uncertainty assessment; a zero observed
+rate does not prove zero uncertainty. Resource/controller quantization may inform
+a reporting-precision discussion but is never a practical-benefit margin.
 
-- SLO violation rate: failures/timeouts/drops or latency beyond the stated target,
-  divided by all offered requests.
-- Successful-request p95 arrival-to-completion latency, with failures reported
-  jointly; missing p95 when no successful requests is not zero.
-- Mean requested CPU cores and mean requested memory bytes, measured over fixed
-  actual time; account for exact confirmed change boundaries.
-- CPU and memory resource-time utilization efficiency, separately.
+## Overhead attribution and failure retention
 
-Secondary: p50/p99 latency, throughput, observed under/over-provisioning proxies,
-resource changes/churn, recommendation/actuation delays and maintenance CPU/RSS/
-runtime. Limits censor demand: zero observed deficit does not prove absence of
-under-provisioning. Pair resource outcomes with SLO/throttling/OOM evidence.
+Processes are separate: generator, collector/orchestrator, profile service and
+controller. Pure recommendation computation uses thread CPU, not a shared
+producer/controller process delta. Record process CPU/RSS and timestamped
+warm-up/bootstrap/measurement baselines. Profile initialization and per-step costs
+are distinct. Prometheus self CPU/RSS is measured separately; this is process
+cost, not all kernel/container storage cost. The collector includes orchestration
+and measurement I/O and is labelled accordingly.
 
-The existing250ms latency threshold and20% headroom are V7A engineering choices.
-They do **not** justify an error budget, allowed SLO-harm margin, meaningful CPU/
-memory saving, efficiency improvement or churn/overhead budget. No approved
-operational contract or deployment-specific valuation was found in the inspected
-system configs/docs. Numeric criteria therefore remain **null**. Required inputs
-are an attributable application SLO/error budget and resource/control/maintenance
-budgets, with rationale, units and comparison direction. Neither Materna/Google
-effects nor favorable smoke/pilot metrics can supply those inputs.
+An instrumented calibration application wraps the **unchanged workload handler**
+to count workload, telemetry and health-handler thread CPU separately, exposing
+these with actual cgroup totals and workset bytes. Container CPU also includes
+server/thread/background cost; resets/uncovered intervals remain visible. Shared
+runtime memory is not falsely allocated to one handler. The separate calibration
+image preserves V7A's image/source and is applied uniformly in any future study.
 
-## Calibration and precision planning
+Actuation records submit, acknowledge, status/cgroup confirmation, rejection,
+queue/defer time and churn. One pending resize is allowed; further decisions are
+logged as skipped while pending, not overwritten. An unresolved resize after60s
+is an operational outcome and remains pending. OOM, SLO failure and rejected/
+deferred actuation are retained, not silently excluded. Unexpected worker/source/
+clock/data corruption invalidates the generation, retaining raw FAILED evidence.
+No automatic retry, output patching or outcome-based replacement.
 
-No calibration results/manifests exist from this task. No SD, variance, confidence
-interval or N is reported as observed. A future campaign must produce managed
-purpose=pilot outputs, source clean and committed, raw measured-bootstrap lineage,
-per-run endpoints, component diagnostics, failures and SHA-verified outputs.
-Smoke/pilot caches must never satisfy a claim request.
-
-`conditional_precision_plan` is a testable planning utility, not a frozen sample
-size. It takes independent run-level calibration endpoints, an externally justified
-CI half-width target and a practical N cap. Under explicit normal-endpoint
-assumptions it uses a one-sided95% chi-square upper SD bound, and searches N using
-Student-t95% half-widths. A conservative contrast SD bound of twice the neutral
-SD envelope permits unknown covariance. The **unproven** assumption remains that
-both compared methods' SDs lie within that neutral envelope. This is not a power
-or significance search and does not guarantee precision for other policies.
-Zero observed variance blocks planning instead of implying small N is adequate.
-
-For bounded, degenerate or non-normal endpoints, especially an all-zero SLO rate,
-this approximation cannot justify final N. Freeze a suitable bounded/distribution-
-robust plan after the operational precision target is justified. Do not quietly
-swap inferential methods after confirmatory outcomes. Choose final N to cover all
-primary endpoint precision goals; report infeasibility if the required N or total
-host-hours exceeds the declared cap. No cap or precision goals have been invented.
-
-## Overhead attribution requirements
-
-| Component | Required measurement boundary | Current readiness |
-|---|---|---|
-| Application | own cgroup CPU, memory, throttling/OOM | V7A instrumentation available |
-| Telemetry | Prometheus container and separate collector process; include probe cost | full attribution unimplemented |
-| Profile maintenance | separate service process CPU/RSS, step CPU/wall, startup versus warm-up versus steady state | V7A partial; measured service integration unimplemented |
-| Controller | separate process from generator; thread CPU for local computation, own RSS/CPU | unimplemented; V7A process timer includes cohosted generator CPU |
-| Actuation | API submit/acknowledge, status generation and actual cgroup enforcement | single-resize V7A proof; recurrent failure retention unimplemented |
-
-Do not label process CPU deltas from a shared generator/controller process as
-exclusive recommendation cost. RSS includes runtime/libraries; profile serialized
-state size is a separate quantity. Do not subtract unrelated-machine timings.
-
-## Tooling and remaining gate
+## Execution, provenance and source freeze
 
 ```sh
-.venv/bin/python -m dynapm.scripts.task33_system_trial_preparation --help
-.venv/bin/python -m dynapm.scripts.task33_system_trial_preparation
+.venv/bin/python -m dynapm.scripts.task34_system_calibration       # plan only
+.venv/bin/python -m dynapm.scripts.task34_system_calibration --help
+# Clean committed source only, real one-bucket I/O check; NO bootstrap claim:
+.venv/bin/python -m dynapm.scripts.task34_system_calibration --plumbing-check
+# Authorized neutral campaign, six trials maximum, no comparative method flag:
+caffeinate -ims .venv/bin/python -u -m dynapm.scripts.task34_system_calibration --run-calibration
 ```
 
-This command reports the blocked draft and identity-only calibration plan. It
-cannot launch Kubernetes, accept `--run`, compare methods or invent a completed
-measurement. `measured_bootstrap` and `MeasuredProfileAdapter` are tested library
-preparation, not evidence of a real collector/executor run.
+Generated outputs stay under ignored `results/system_calibration/`. Every real
+trial uses the managed lifecycle, purpose `pilot`, a unique run ID, explicit
+source/config/input/cohort/environment identities and output hashes. All raw
+sample/response/event streams and operational errors are retained. SUCCESS is
+written only after all required outputs and source/environment integrity checks.
+A pilot or partial real-collection smoke cannot satisfy a claim request. No
+comparative CLI exists. `--maximum-trials` can only bound the predeclared neutral
+campaign to1–6; it cannot introduce another policy.
 
-**V7B = BLOCKED. V8 = BLOCKED.** Resolve operational budgets and host feasibility;
-implement the continuous isolated runner/attribution; perform valid real-bootstrap
-calibration; then freeze justified margins, precision targets, N and total budget
-before any comparative trial. Existing V7A/Google/Materna artifacts remain intact.
+**Keep Git source/HEAD unchanged while a trial is active.** Current managed
+provenance validates source during/finally; edits or new commits invalidate the
+active generation. Status/heartbeat files are generated and ignored. Source fixes
+require a new clean commit and a new run/fingerprint; do not patch old outputs.
+To stop a task-owned campaign, send SIGINT to the Python PID in `ACTIVE.json`;
+cleanup removes only its uniquely named local cluster and records failure.
 
+## Gate disposition
 
-## Preparation verification record
-
-Lightweight suite: **568 passed, 0 failed, 1 skipped**. Python parse/import,
-CLI report, rejection of an execution flag, and preserved V7A output/hash/cache
-checks passed. Draft SHA-256: `b8f026bd210dbf488f7e0d82a38b9129b292e5ca6eb615e92f068f316a341410`.
-There is **no calibration experiment fingerprint, output manifest or empirical
-variance** from this task; this is not a completed managed calibration run.
-A separate local host inventory captured hardware, power, thermal-status command
-output, load and process metadata. It was collected after unit tests on an
-unreserved host, and is explicitly not a quiet baseline or calibration.
-No Kubernetes resources were created and no policy comparisons were executed.
+The **estimation-first interpretation contract is frozen**. Practical margins are
+not a prerequisite. Actual bootstrap/calibration, technical integrity and the
+prospective repetition/precision disposition remain to be evidenced. V8 remains
+disabled until those requirements are satisfied. A started 24h collection is not
+a completed bootstrap; a one-bucket check is not calibration variance. C4/C5
+remain unproven and no system-method superiority is claimed.

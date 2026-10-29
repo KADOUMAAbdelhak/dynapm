@@ -1,4 +1,4 @@
-"""V7B preparation report only; no Kubernetes execution or comparative outcomes."""
+"""Historical V7B v1 preparation (superseded by task34); no Kubernetes execution or comparative outcomes."""
 import argparse
 from pathlib import Path
 from dynapm.core.provenance import canonical_json

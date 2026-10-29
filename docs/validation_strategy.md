@@ -22,7 +22,7 @@ These are candidate claims, not conclusions:
 See the [V2.4G claim disposition table](research_scope_redesign.md) for the full
 SUPPORTED / WITHDRAWN / UNPROVEN ledger used for scope redesign.
 
-A claim decision must address direction, effect magnitude, consistency, uncertainty, and operational relevance where applicable. The [V2.5 / V2.5A confirmatory design freeze](confirmatory_design_freeze.md) locks RQs, cohort, methods, endpoints, F1–F3 comparisons, and statistics as a **pre-specified estimation study**. Profile-level numeric practical-benefit / acceptable-harm margins are explicitly **`NOT_DEFINED_AT_PROFILE_LEVEL`** (not invented; not pilot-calibrated). V3 may establish direction, magnitude, uncertainty, and statistical distinguishability; statistical significance alone must never imply operational superiority (C4 remains for system gates). Separate system/operational margins before V8. Report estimates and intervals even when effects are null or small.
+A claim decision must address direction, effect magnitude, consistency, uncertainty, and operational relevance where applicable. The [V2.5 / V2.5A confirmatory design freeze](confirmatory_design_freeze.md) locks RQs, cohort, methods, endpoints, F1–F3 comparisons, and statistics as a **pre-specified estimation study**. Profile-level numeric practical-benefit / acceptable-harm margins are explicitly **`NOT_DEFINED_AT_PROFILE_LEVEL`** (not invented; not pilot-calibrated). V3 may establish direction, magnitude, uncertainty, and statistical distinguishability; statistical significance alone must never imply operational superiority (C4 remains for system gates). V8 uses the estimation-first system amendment: operationally meaningful benefit is NOT_DEFINED unless an external contract later justifies margins; lack of such margins is not an execution gate. Report estimates and intervals even when effects are null or small.
 
 ## 3. Claim-to-Evidence Matrix
 
@@ -465,20 +465,21 @@ synthetic bootstrap. No comparative trials were run. C4/C5 remain UNPROVEN.
 Before V8: real measured bootstrap, recurrent controlled trial execution,
 dedicated hardware/software and timing-compatibility freeze, warm-up/cost
 attribution, failure/deferred-resize handling, trial-count/precision plan,
-randomized order and practical-benefit/harm criteria. Requests are not replicates;
+randomized order and estimation-first interpretation; operationally meaningful benefit remains NOT_DEFINED without an external contract. Requests are not replicates;
 independent run/scenario replicates are the unit. Kubernetes-only evidence cannot
 establish heterogeneous edge/continuum generalization.
 
 
-## V7B prerequisite: operational criteria and real calibration
+## V7B estimation-first system amendment
 
-The [V7B preparation record](system_trial_freeze.md) is explicitly BLOCKED.
-Measured-bootstrap validation and identity-only plans are unit-tested, but no
-real 24h bootstrap, calibration variance, final repetition count or continuous
-isolated trial executor is established. The V8 draft cannot execute comparisons.
-V7A's 250ms threshold/20% headroom do not justify numeric SLO harm, meaningful
-resource benefit or overhead/churn budgets. Obtain an attributable operational
-contract; do not derive criteria from corpus effects or favorable calibration
-metrics. Precision planning uses independent run/scenario endpoints, not requests,
-and must disclose variance-transport/distribution assumptions and infeasible caps.
-No system superiority, acceptable overhead or completed V8 freeze is claimed.
+The [current system contract](system_trial_freeze.md) supersedes the v1 demand
+for practical margins before calibration. Meaningful operational benefit is
+NOT_DEFINED; 250ms latency/20% headroom remain experimental/controller parameters.
+Freeze scenario-specific independent-run mean/median effects,95% paired-block CIs,
+resource–SLO trade-offs and Pareto point estimates, plus churn and overhead.
+No distinguishability-only superiority or p-value-only recommendation. Negative/
+null results are valid. Only externally supported later contracts may add practical
+margins. Calibration is PW6-only and cannot tune policies or thresholds. It informs
+noise/precision and a prospective N disposition; if precision is unsupported,
+report the limitation without significance-based N. Comparative execution remains
+disabled until actual calibration and integrity/design requirements are complete.

@@ -113,7 +113,7 @@ all future methods.
 Proposed future runs have actual 24h stable bootstrap and 48h measured scenario,
 with fresh state, no compressed policy time and no synthetic bootstrap. These
 runs are **disabled** pending precision/power planning, trial counts,
-randomized/counterbalanced order, practical-benefit/harm margins, platform review
+randomized/counterbalanced order, estimation/precision disposition, platform review
 and separate authorization. Do not tune scenarios using policy outcomes.
 
 ## Operational endpoints and denominators
@@ -214,3 +214,12 @@ No system benefit claim follows from this gate.
 - [kind 0.33 release and image digests](https://github.com/kubernetes-sigs/kind/releases/tag/v0.33.0)
 - [Kubernetes 1.35 in-place resize and resize status](https://v1-35.docs.kubernetes.io/docs/tasks/configure-pod-container/resize-container-resources/)
 - [Prometheus text exposition](https://prometheus.io/docs/instrumenting/exposition_formats/)
+
+
+### V7B estimation-first amendment
+
+The [current system trial contract](system_trial_freeze.md) supersedes any V7A
+requirement for practical margins before execution. The 250ms/20% settings remain
+engineering parameters; operationally meaningful benefit stays NOT_DEFINED.
+Neutral calibration may proceed to characterize noise; comparative runs require
+its integrity and prospective N/precision disposition, not invented harm margins.
