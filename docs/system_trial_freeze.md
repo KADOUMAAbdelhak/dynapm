@@ -227,3 +227,14 @@ initialization). Latest lightweight suite: **594 passed,0 failed,1 skipped**.
 New source/isolation/full-summary tests do not change any workload/controller
 parameter. Calibration starts only from a clean committed source; no completed
 replicate, variance, N or practical benefit is asserted at launch.
+
+## V7C.1 clock correctness amendment
+
+The original first attempt failed during warm-up and is not calibration evidence.
+See [clock forensics and rejection evidence](system_clock_diagnosis.md). The strict
+source/receipt invariant is unchanged. New attempts preserve rejected response
+bodies outside scientific telemetry, bind diagnostics to run/source hashes, and
+record local wall/monotonic timing. This amendment changes diagnostics/source
+identity, not the methods, controller, bootstrap or measurement duration. A
+replacement is limited to one PW-6h stable anchor after a successful managed
+plumbing check; no automatic second long replicate is authorized.

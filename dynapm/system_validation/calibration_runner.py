@@ -12,6 +12,7 @@ from dynapm.data.manifests import build_dataset_manifest
 from dynapm.system_validation.design import resource_manifests
 from dynapm.system_validation.estimation_design import frozen_spec,calibration_plan
 from dynapm.system_validation.calibration_workers import process_stats,write_line
+from dynapm.system_validation.clock_observations import ObservationClock,receive_observation
 from dynapm.system_validation.adapter import aggregate_bucket
 from dynapm.system_validation.consumer import summarize_requests,resource_metrics
 from dynapm.system_validation.system_estimation import allocation_integrals
@@ -26,7 +27,10 @@ LOGS=('build','kind','generator','profile','controller','application','prometheu
 def output_specs():
     return [OutputSpec('outputs/'+x+'.json','calibration-'+x) for x in JSONS]+[
         OutputSpec('outputs/'+x+'.jsonl','calibration-'+x) for x in LINES]+[
-        OutputSpec('logs/'+x+'.log','calibration-'+x) for x in LOGS]
+        OutputSpec('logs/'+x+'.log','calibration-'+x) for x in LOGS]+[
+        OutputSpec('outputs/clock_rejections.jsonl','rejected-nonscientific-clock-evidence'),
+        OutputSpec('outputs/clock_observations.jsonl','accepted-clock-diagnostics'),
+        OutputSpec('outputs/clock_evidence_manifest.json','clock-evidence-integrity')]
 
 
 def local_host_diagnostics():
@@ -197,10 +201,13 @@ def run_trial(repo,trial,*,plumbing_only=False):
             for n in JSONS:write_json(run.path/'outputs'/f'{n}.json',dict(status='PENDING'))
             for n in LINES:(run.path/'outputs'/f'{n}.jsonl').touch()
             for n in LOGS:(run.path/'logs'/f'{n}.log').touch()
+            clock=ObservationClock(run.path,dict(run_id=run.manifest.run_id,
+                experiment_fingerprint=exp.fingerprint,source_commit=source.commit))
             shutil.copyfile(build_log,run.path/'logs/build.log')
             cluster=d['kubernetes']['cluster']+'-'+uuid.uuid4().hex[:8];config=private/'kubeconfig'
             kube=Kube(commands,config,cluster,d);children=[];handles=[];created=False
-            start_mono=time.monotonic();start_wall=time.time();last_heartbeat=0;last_host=0;locals_generator=[None,float('inf')]
+            clock.check_host(time.time_ns(),time.monotonic_ns())
+            last_heartbeat=0;last_host=0;locals_generator=[None,float('inf')]
             def status(stage,**extra):
                 value=dict(stage=stage,source_commit=source.commit,run_id=run.manifest.run_id,pid=os.getpid(),
                     scenario=trial['scenario'],method='pw_6h',block=trial['block'],free_disk_bytes=shutil.disk_usage(repo).free,
@@ -209,7 +216,7 @@ def run_trial(repo,trial,*,plumbing_only=False):
                 print(json.dumps(value),flush=True)
             def check():
                 if shutil.disk_usage(repo).free<20*2**30:raise ValueError('disk_reserve_exhausted')
-                if abs((time.time()-start_wall)-(time.monotonic()-start_mono))>2:raise ValueError('host_sleep_or_clock_discontinuity')
+                clock.check_host(time.time_ns(),time.monotonic_ns())
                 for p in children:
                     if p.poll() is not None:
                         if p is locals_generator[0] and p.returncode==0 and time.time()>=locals_generator[1]-1:continue
@@ -267,11 +274,12 @@ def run_trial(repo,trial,*,plumbing_only=False):
                         now=time.time();stage='WAITING' if now<load_start else 'WARMUP' if now<boot_start else 'BOOTSTRAP' if now<measured else 'MEASUREMENT'
                         if now>=load_start:
                             try:
-                                sample=http(app+'/telemetry');sample['received_at_ns']=time.time_ns()
-                                if sample['sample_time_ns']>sample['received_at_ns'] or abs(sample['sample_time_ns']-sample['received_at_ns'])>2*1e9:raise ValueError('causal_source_clock_failure')
-                                write_line(raw,sample)
-                                if sample['sample_time_ns']<=int(next_q*1e9):samples.append(sample)
+                                observation=receive_observation(app+'/telemetry')
                             except (OSError,RuntimeError) as exc:write_line(bd,dict(kind='MISSING_TELEMETRY',wall_ns=time.time_ns(),error=str(exc)))
+                            else:
+                                # Evidence/persistence failures abort; never downgrade to missing data.
+                                sample=clock.accept(observation,raw)
+                                if sample['sample_time_ns']<=int(next_q*1e9):samples.append(sample)
                         if now>=next_q:
                             payload=None
                             try:
@@ -321,6 +329,7 @@ def run_trial(repo,trial,*,plumbing_only=False):
                     host_reserved=False,neutral_trial_measurement_complete=not plumbing_only,source_commit=source.commit))
                 status('FINISHED',calibration_result='PARTIAL_SMOKE' if plumbing_only else 'COMPLETE_NEUTRAL_TRIAL')
             finally:
+                clock.finalize()
                 for name in ('application','prometheus'):
                     if config.exists():
                         try:(run.path/'logs'/f'{name}.log').write_text(kube.call(['logs',name]))

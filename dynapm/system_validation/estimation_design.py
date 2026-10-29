@@ -3,6 +3,7 @@ from copy import deepcopy
 from pathlib import Path
 from dynapm.core.provenance import fingerprint,read_json,file_sha256
 from dynapm.core.run_store import write_json
+from dynapm.system_validation.clock_observations import SCHEMA as CLOCK_SCHEMA,MAX_CLOCK_DELTA_NS
 from dynapm.system_validation.design import frozen_design
 from dynapm.system_validation.trial_preparation import draft_spec,isolated_trial_plan,PRIMARY
 
@@ -11,7 +12,8 @@ SCHEMA='system-estimation-design-v2'
 RUNTIME=('dynapm/system_validation/estimation_design.py','dynapm/system_validation/system_estimation.py',
  'dynapm/system_validation/calibration_workers.py','dynapm/system_validation/calibration_runner.py',
  'dynapm/scripts/task34_system_calibration.py','dynapm/system_validation/trial_preparation.py',
- 'dynapm/system_validation/application_instrumented.py','harness/system/Calibration.Dockerfile')
+ 'dynapm/system_validation/application_instrumented.py','dynapm/system_validation/clock_observations.py',
+ 'harness/system/Calibration.Dockerfile')
 
 
 def specification(repo):
@@ -55,6 +57,9 @@ def specification(repo):
     d['attribution']['status']='separate worker processes required; no shared generator/controller CPU attribution'
     d['blockers']=[x for x in d['blockers'] if x not in ('operational_margins_unjustified','continuous_isolated_runner_and_attribution_not_implemented','host_reservation_missing')]
     d['blockers'].append('continuous_runner_validation_and_hardware_control_pending')
+    d['clock_observations']=dict(schema=CLOCK_SCHEMA,source_ahead_tolerance_ns=0,
+        maximum_source_receipt_delta_ns=MAX_CLOCK_DELTA_NS,receipt_boundary='complete HTTP body read before JSON decoding',
+        rejection='fail closed; isolated raw body + context/hash; never scientific telemetry')
     d['scientific_runtime_sha256']={p:file_sha256(Path(repo)/p) for p in RUNTIME}
     return d
 

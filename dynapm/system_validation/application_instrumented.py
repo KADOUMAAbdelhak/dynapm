@@ -1,5 +1,5 @@
 """V7B attribution wrapper; unchanged workload CPU/memory operations and responses."""
-import threading,time
+import os,socket,threading,time
 from http.server import ThreadingHTTPServer
 from urllib.parse import urlparse
 from dynapm.system_validation import application as base
@@ -20,7 +20,12 @@ class Handler(base.Handler):
         path=urlparse(self.path).path;kind='work' if path=='/work' else 'telemetry' if path in ('/telemetry','/metrics') else 'health'
         cpu=time.thread_time()
         try:
-            if path=='/telemetry':return self.send(200,{**base.read_cgroup(),**attribution()})
+            if path=='/telemetry':
+                sample=base.read_cgroup()
+                # Same-process clock pair; monotonic epochs are never compared across hosts.
+                sample['source_clock']=dict(wall_ns=time.time_ns(),monotonic_ns=time.monotonic_ns(),
+                    hostname=socket.gethostname(),pid=os.getpid())
+                return self.send(200,{**sample,**attribution()})
             if path=='/metrics':
                 text=base.metrics();values=attribution()
                 for key in ('work_handler_cpu_seconds_total','telemetry_handler_cpu_seconds_total','health_handler_cpu_seconds_total','persistent_workset_bytes'):
