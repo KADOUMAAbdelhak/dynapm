@@ -41,6 +41,14 @@ def local_host_diagnostics():
         context='research workstation, reservation not asserted; not a practical-benefit threshold')
 
 
+def require_isolated_engine(commands,cluster=None):
+    names=commands.run(['docker','ps','--format','{{.Names}}']).splitlines()
+    allowed={cluster+'-control-plane',cluster+'-worker'} if cluster else set()
+    external=[name for name in names if name and name not in allowed]
+    if external:raise ValueError('external_containers_preserved_isolated_engine_required:'+','.join(external))
+    return names
+
+
 def _clean(repo):
     if subprocess.check_output(['git','status','--porcelain'],cwd=repo).strip():raise ValueError('clean_committed_source_required')
 
@@ -49,6 +57,13 @@ def _json_lines(path):
     with Path(path).open() as file:
         for line in file:
             if line.strip():yield json.loads(line)
+
+
+def verify_request_stream(path,expected):
+    ids=[r['request_id'] for r in _json_lines(path)]
+    if len(ids)!=expected or len(set(ids))!=expected or (expected and (min(ids)!=0 or max(ids)!=expected-1)):
+        raise ValueError('incomplete_or_duplicate_request_stream')
+    return expected
 
 
 def _prom_process(prom):
@@ -73,6 +88,8 @@ def summarize(root,plan):
     workload['successful_completed_in_window']=completed_in_window;workload['successful_throughput_rps']=completed_in_window/(end-start)
     rm=resource_metrics(telemetry)
     controller=read_json(root/'outputs/controller_status.json')
+    attribution=read_json(root/'outputs/attribution.json')
+    latest=list(_json_lines(root/'outputs/overhead.jsonl'))
     decisions=list(_json_lines(root/'outputs/decisions.jsonl'))
     initial=read_json(root/'outputs/resize_preflight.json')['unchanged_actual_resources']
     intervals=[(a['sample_time_ns']/1e9,b['sample_time_ns']/1e9) for a,b in zip(telemetry,telemetry[1:])
@@ -104,6 +121,17 @@ def summarize(root,plan):
     row['pod_observation_count']=len(measured_obs)
     row['accounting']=read_json(root/'outputs/profile_final.json')['accounting']
     row['n_refresh_events']=row['accounting']['n_refresh_events']
+    profile_final=read_json(root/'outputs/profile_final.json')
+    row['bootstrap_thresholds']=read_json(root/'outputs/profile_initial.json')['bootstrap_thresholds']
+    row['mean_cpu_used_cores']=rm['mean_cpu_used_cores'];row['mean_memory_used_bytes']=rm['mean_memory_used_bytes']
+    row['maintenance_step_wall_seconds_total']=sum(profile_final['maintenance_step_wall_seconds'])
+    row['maintenance_step_thread_cpu_seconds_total']=sum(attribution['thread_step_cpu_seconds'])
+    measured_overhead=[r for r in latest if r['phase']=='MEASUREMENT']
+    for component in ('profile','controller','generator'):
+        rss=[r[component]['rss_bytes'] for r in measured_overhead if r[component].get('rss_bytes') is not None]
+        row[component+'_rss_p95_bytes']=float(np.quantile(rss,.95)) if rss else None
+    prom_rss=[r['prometheus']['process_resident_memory_bytes'] for r in measured_overhead]
+    row['prometheus_rss_p95_bytes']=float(np.quantile(prom_rss,.95)) if prom_rss else None
     row['bootstrap_cpu_p95']=bootstrap['predicted_cpu_p95_next_24h'];row['bootstrap_memory_p95']=bootstrap['predicted_mem_p95_next_24h']
     starts=[r for r in _json_lines(root/'outputs/overhead.jsonl') if r['phase']=='measurement_start_before_initialization']
     before=starts[0] if starts else None
@@ -118,6 +146,7 @@ def summarize(root,plan):
         values=[r[key] for r in decisions if r['kind']==kind]
         row[name+'_latency_seconds']=dict(count=len(values),median=float(np.median(values)) if values else None,
             p95=float(np.quantile(values,.95)) if values else None)
+        row[name+'_latency_p95_seconds']=row[name+'_latency_seconds']['p95']
     return row
 
 
@@ -143,7 +172,7 @@ def run_trial(repo,trial,*,plumbing_only=False):
         private=Path(temporary);private.chmod(0o700);dc=private/'docker';dc.mkdir();(dc/'config.json').write_text('{"auths":{}}')
         env={**os.environ,'DOCKER_HOST':endpoint,'DOCKER_CONFIG':str(dc),'KUBECONFIG':str(private/'kubeconfig'),
             'PATH':str(repo/d['kubernetes']['tools_directory'])+os.pathsep+os.environ['PATH']}
-        commands=Commands(env,repo);details=environment(commands,d)
+        commands=Commands(env,repo);require_isolated_engine(commands);details=environment(commands,d)
         if details['kubectl_client']['gitVersion']!=d['kubernetes']['kubectl_version'] or not details['kind'].startswith('kind '+d['kubernetes']['kind_version']+' '):raise ValueError('pinned_cli_version_required')
         host=local_host_diagnostics()
         if sys.platform=='darwin' and (not host['power']['available'] or 'AC Power' not in host['power']['stdout']):raise ValueError('mains_power_required')
@@ -193,6 +222,8 @@ def run_trial(repo,trial,*,plumbing_only=False):
                 status('COOLDOWN',seconds_remaining=cooldown)
                 deadline=time.time()+cooldown
                 while time.time()<deadline:time.sleep(min(30,max(0,deadline-time.time())));check()
+                require_isolated_engine(commands)
+                if cluster in commands.run(['kind','get','clusters']).splitlines():raise ValueError('preexisting_cluster_preserved')
                 created=True
                 commands.run(['kind','create','cluster','--name',cluster,'--config','harness/system/kind.yaml','--kubeconfig',str(config),'--wait','120s'],log=run.path/'logs/kind.log',timeout=300)
                 config.chmod(0o600);guard_local_api(kube.call(['config','view','--minify','-o','jsonpath={.clusters[0].cluster.server}']))
@@ -262,11 +293,11 @@ def run_trial(repo,trial,*,plumbing_only=False):
                         if time.monotonic()-last_host>=1800:
                             _clean(repo)
                             if SourceProvenance.capture(repo).commit!=source.commit:raise ValueError('source_commit_changed_during_calibration')
-                            h=local_host_diagnostics();write_line(hosts,h);last_host=time.monotonic()
+                            h=local_host_diagnostics();h['docker_containers']=require_isolated_engine(commands,cluster);write_line(hosts,h);last_host=time.monotonic()
                             if sys.platform=='darwin' and (not h['power']['available'] or 'AC Power' not in h['power']['stdout']):raise ValueError('mains_power_lost')
                         if time.monotonic()-last_heartbeat>=30:
                             status(stage,accepted_bootstrap_slots=accepted,invalid_buckets=missing,
-                                bootstrap_end_seconds=measured,measurement_end_seconds=end,overall_percent=max(0,min(100,(now-load_start)/(end-load_start)*100)))
+                                bootstrap_end_seconds=measured,measurement_end_seconds=plan['measurement_end_seconds'],overall_percent=max(0,min(100,(now-load_start)/(plan['measurement_end_seconds']-load_start)*100)))
                             write_line(overhead,dict(phase=stage,profile=http(plan['profile_url']+'/healthz')['process'],controller=http(plan['controller_stats_url']+'/stats'),generator=http(plan['generator_stats_url']+'/stats'),prometheus=_prom_process(prom),collector=process_stats()))
                             last_heartbeat=time.monotonic()
                         if plumbing_only and time.time()>=load_start+300:break
@@ -276,6 +307,7 @@ def run_trial(repo,trial,*,plumbing_only=False):
                 generator.wait(timeout=d['workload']['timeout_seconds']+20);ctrl.wait(timeout=20)
                 if generator.returncode or ctrl.returncode:raise RuntimeError('calibration_worker_failed')
                 children.remove(generator);children.remove(ctrl)
+                verify_request_stream(run.path/'outputs/requests.jsonl',read_json(run.path/'outputs/generator_status.json')['offered'])
                 if plumbing_only:
                     for name in ('bootstrap_summary','profile_initial','profile_final','attribution'):
                         write_json(run.path/'outputs'/f'{name}.json',dict(status='NOT_INITIALIZED_PARTIAL_REAL_COLLECTION_ONLY'))

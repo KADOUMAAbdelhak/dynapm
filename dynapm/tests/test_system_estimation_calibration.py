@@ -203,3 +203,69 @@ def test_application_handler_attribution_keeps_workload_and_telemetry_separate(m
         assert 'dynapm_application_work_handler_cpu_seconds_total' in text
         assert 'dynapm_application_telemetry_handler_cpu_seconds_total' in text
     finally:server.shutdown();server.server_close();thread.join(timeout=5)
+
+
+def test_other_containers_are_preserved_and_refused():
+    from dynapm.system_validation.calibration_runner import require_isolated_engine
+    class Fake:
+        def run(self,args):
+            assert args==['docker','ps','--format','{{.Names}}']
+            return 'unrelated-database\n'
+    with pytest.raises(ValueError,match='preserved'):require_isolated_engine(Fake())
+
+
+def test_only_owned_cluster_nodes_are_allowed_during_collection():
+    from dynapm.system_validation.calibration_runner import require_isolated_engine
+    class Fake:
+        def run(self,args):return 'unit-control-plane\nunit-worker\n'
+    assert len(require_isolated_engine(Fake(),'unit'))==2
+
+
+def test_complete_trial_summary_with_operational_harm_and_cost_attribution(tmp_path):
+    """Complete synthetic result schema catches errors before a multi-day trial."""
+    from dynapm.system_validation.calibration_runner import summarize
+    from dynapm.core.run_store import write_json
+    root=tmp_path;out=root/'outputs';out.mkdir()
+    def lines(name,rows):
+        (out/(name+'.jsonl')).write_text(''.join(canonical_json(r)+'\n' for r in rows))
+    initial={'requests':{'cpu':'1','memory':'100Mi'},'limits':{'cpu':'1','memory':'100Mi'}}
+    lines('requests',[dict(scheduled_at=t,completed_at=t+.1,latency_seconds=.1,success=True,dropped=False) for t in (-.05,1.,5.)])
+    lines('telemetry',[dict(sample_time_ns=i*5*10**9,instance_id='UNIT',cpu_seconds=i*.2,
+        memory_working_set_bytes=40*2**20,cpu_limit_cores=1.,memory_limit_bytes=100*2**20,
+        cpu_throttled_periods=0,cpu_periods=i,oom_kills=0,
+        work_handler_cpu_seconds_total=i*.15,telemetry_handler_cpu_seconds_total=i*.025,
+        health_handler_cpu_seconds_total=i*.025) for i in range(3)])
+    events=[dict(kind='RECOMMENDATION',disposition='SUBMITTED',acknowledged_ns=2*10**9,
+        recommendation=dict(cpu_millicores=500,memory_mib=50),compute_wall_seconds=.001),
+        dict(kind='ENFORCED',confirmed_ns=4*10**9,actual_resources={'requests':{'cpu':'500m','memory':'50Mi'}},actuation_latency_seconds=2.),
+        dict(kind='POD_OBSERVATION',wall_ns=0,status={'containerStatuses':[dict(restartCount=0,lastState={})]}),
+        dict(kind='POD_OBSERVATION',wall_ns=5*10**9,status={'containerStatuses':[dict(restartCount=1,
+            lastState={'terminated':{'reason':'OOMKilled','finishedAt':'unit-clock'}})]})]
+    lines('decisions',events)
+    baseline=dict(phase='measurement_start_before_initialization',profile={'cpu_seconds':1.},
+        controller={'cpu_seconds':2.},generator={'cpu_seconds':3.},prometheus={'process_cpu_seconds_total':4.})
+    measure=dict(phase='MEASUREMENT',profile={'rss_bytes':100},controller={'rss_bytes':200},
+        generator={'rss_bytes':300},prometheus={'process_cpu_seconds_total':5.,'process_resident_memory_bytes':400})
+    lines('overhead',[baseline,measure])
+    write_json(out/'resize_preflight.json',{'unchanged_actual_resources':initial})
+    write_json(out/'controller_status.json',dict(process={'cpu_seconds':3.},counters={'resource_changes':1}))
+    write_json(out/'profile_initial.json',dict(profile={'dynamic':{'predicted_cpu_p95_next_24h':1.,'predicted_mem_p95_next_24h':10.}},
+        bootstrap_thresholds={'cpu':{'p95':1.},'memory':{'p95':10.}}))
+    write_json(out/'profile_final.json',dict(accounting={'n_refresh_events':0},maintenance_step_wall_seconds=[.002]))
+    write_json(out/'attribution.json',dict(process={'cpu_seconds':2.},thread_step_cpu_seconds=[.001]))
+    r=summarize(root,dict(measurement_start_seconds=0.,measurement_end_seconds=10.,scenario='stable',block=0,design=frozen_spec(ROOT)))
+    assert r['method']=='pw_6h' and r['offered']==2 and r['successful_throughput_rps']==.3
+    assert r['mean_cpu_requested_cores']==.6 and r['mean_cpu_allocated_cores']==.7
+    assert r['application_restarts_observed']==r['observed_oom_terminations_lower_bound']==1
+    assert r['maintenance_process_cpu_seconds']==r['controller_process_cpu_seconds']==r['prometheus_process_cpu_seconds']==1.
+    assert r['maintenance_step_thread_cpu_seconds_total']==.001
+    assert r['profile_rss_p95_bytes']==100 and r['actuation_latency_p95_seconds']==2.
+    assert r['practical_benefit']=='NOT_DEFINED' and not r['policy_comparison']
+    assert isinstance(canonical_json(r),str)
+
+
+@pytest.mark.parametrize('ids',[[0,0],[0],[0,2]])
+def test_missing_duplicate_request_records_rejected(tmp_path,ids):
+    from dynapm.system_validation.calibration_runner import verify_request_stream
+    p=tmp_path/'requests.jsonl';p.write_text(''.join(canonical_json({'request_id':i})+'\n' for i in ids))
+    with pytest.raises(ValueError,match='request_stream'):verify_request_stream(p,2)

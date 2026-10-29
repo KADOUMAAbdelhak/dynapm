@@ -25,6 +25,7 @@ def specification(repo):
     d['engineering_plan']['calibration_count_status']='predeclared neutral-method calibration: 3 runs per scenario, 6 maximum'
     d['engineering_plan']['approval']='execution authorized; reserved host not asserted'
     d['hardware']['calibration_context']='research workstation; background interference monitored, no reservation assertion'
+    d['hardware']['isolated_docker_engine_required']=True
     d['hardware']['calibration_requires_dedicated_host']=False
     d['hardware']['dedicated_host_required']=False
     d['hardware']['comparative_dedicated_host_required']=True

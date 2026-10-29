@@ -116,7 +116,10 @@ all original workload shapes/seed are unchanged.
 The serial campaign needs at least436.5 host-hours (18.1875 days), excluding
 cluster setup/failures. A full five-method × four-scenario repetition would need
 at least1455 host-hours (60.625 days). No financial or practical benefit is inferred
-from those schedule calculations. Runs are strictly serial on the local engine.
+from those schedule calculations. Runs are strictly serial on the local engine. Other running Docker containers
+are refused/preserved before setup and checked during collection; no unrelated
+container or cluster is deleted. Host desktop activity is monitored, not falsely
+asserted absent.
 
 Calibration characterizes the actual research workstation; a reserved/dedicated
 host is **not asserted**. Record host CPU/model/memory/OS, Docker allocation,
@@ -203,3 +206,24 @@ prospective repetition/precision disposition remain to be evidenced. V8 remains
 disabled until those requirements are satisfied. A started 24h collection is not
 a completed bootstrap; a one-bucket check is not calibration variance. C4/C5
 remain unproven and no system-method superiority is claimed.
+
+
+## Technical validation before long collection
+
+A managed physical check at source `242e69e` collected one actual five-minute
+bucket and1200 offered requests with **zero profile initializations**, no synthetic
+bootstrap and no method comparison. Its immutable evidence is purpose=smoke,
+not calibration; source/hash and claim/pilot cache rejection were independently
+verified. It validates the real collector/process plumbing, not a24h bootstrap,
+variance estimate, trial N or practical benefit. Subsequent startup isolation
+checks do not change workloads, policy, controller or measured clocks.
+Live campaign and per-trial status are under ignored `results/system_calibration/`;
+no completed calibration is asserted merely because the campaign was launched.
+
+
+Validation record: `configs/system_v7b_estimation_collector_check.json` indexes
+the immutable physical check (31 hashes,1200 requests,60 samples, no bootstrap
+initialization). Latest lightweight suite: **594 passed,0 failed,1 skipped**.
+New source/isolation/full-summary tests do not change any workload/controller
+parameter. Calibration starts only from a clean committed source; no completed
+replicate, variance, N or practical benefit is asserted at launch.

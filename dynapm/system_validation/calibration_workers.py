@@ -44,7 +44,7 @@ def request_events(plan):
 def stream_load(url,events,start_wall,output,*,timeout=5.,concurrency=32,stop=None):
     """Bounded outstanding requests and streaming sink; no 72h in-memory result list."""
     lock=threading.Lock();slots=threading.BoundedSemaphore(concurrency)
-    start_mono=time.monotonic()+start_wall-time.time();count=0
+    start_mono=time.monotonic()+start_wall-time.time();count=0;sink_errors=[]
     def emit(row):
         with lock:write_line(output,row)
     def send(i,event):
@@ -56,9 +56,12 @@ def stream_load(url,events,start_wall,output,*,timeout=5.,concurrency=32,stop=No
             error=None
         except Exception as exc:success=False;status=None;error=type(exc).__name__
         completed=time.time()
-        emit(dict(request_id=i,scheduled_at=start_wall+event['offset_seconds'],sent_at=sent,completed_at=completed,
-            latency_seconds=time.monotonic()-due,success=success,http_status=status,error=error,dropped=False))
-        slots.release()
+        try:
+            emit(dict(request_id=i,scheduled_at=start_wall+event['offset_seconds'],sent_at=sent,completed_at=completed,
+                latency_seconds=time.monotonic()-due,success=success,http_status=status,error=error,dropped=False))
+        except Exception as exc:
+            with lock:sink_errors.append(type(exc).__name__)
+        finally:slots.release()
     with concurrent.futures.ThreadPoolExecutor(max_workers=concurrency) as pool:
         for i,event in enumerate(events):
             delay=max(0,start_mono+event['offset_seconds']-time.monotonic())
@@ -69,12 +72,17 @@ def stream_load(url,events,start_wall,output,*,timeout=5.,concurrency=32,stop=No
             if slots.acquire(blocking=False):pool.submit(send,i,event)
             else:emit(dict(request_id=i,scheduled_at=start_wall+event['offset_seconds'],sent_at=None,
                 completed_at=time.time(),latency_seconds=None,success=False,http_status=None,error='generator_capacity',dropped=True))
+    if sink_errors:raise RuntimeError('request_sink_failure:'+','.join(sink_errors[:3]))
     return count
 
 
 class CalibrationProfile(MeasuredProfileAdapter):
     def __init__(self,*args,**kwargs):
         self.thread_cpu=[];super().__init__(*args,**kwargs)
+    def _snapshot(self):
+        value=super()._snapshot()
+        value['bootstrap_thresholds']={'cpu':dict(self.policy.cpu_thresholds),'memory':dict(self.policy.mem_thresholds)}
+        return value
     def observe(self,payload,**kwargs):
         before=time.thread_time();result=super().observe(payload,**kwargs)
         with self.lock:

@@ -48,7 +48,7 @@ def calibration_noise(rows):
     for scenario in sorted({r['scenario'] for r in rows}):
         group=[r for r in rows if r['scenario']==scenario]
         if len({r['block'] for r in group})!=len(group):raise ValueError('duplicate_calibration_replicate')
-        for endpoint in PRIMARY+('mean_cpu_allocated_cores','mean_memory_allocated_bytes','bootstrap_cpu_p95','bootstrap_memory_p95','maintenance_process_cpu_seconds','controller_process_cpu_seconds','prometheus_process_cpu_seconds'):
+        for endpoint in PRIMARY+('mean_cpu_allocated_cores','mean_memory_allocated_bytes','bootstrap_cpu_p95','bootstrap_memory_p95','maintenance_process_cpu_seconds','controller_process_cpu_seconds','prometheus_process_cpu_seconds','successful_latency_p50_seconds','successful_latency_p99_seconds','successful_throughput_rps','mean_cpu_used_cores','mean_memory_used_bytes','actuation_latency_p95_seconds','recommendation_latency_p95_seconds','maintenance_step_wall_seconds_total','maintenance_step_thread_cpu_seconds_total','profile_rss_p95_bytes','controller_rss_p95_bytes','prometheus_rss_p95_bytes'):
             values=[r.get(endpoint) for r in group]
             valid=all(v is not None and math.isfinite(float(v)) for v in values)
             out.append(dict(scenario=scenario,endpoint=endpoint,n_runs=len(group),
