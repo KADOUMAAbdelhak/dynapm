@@ -15,6 +15,7 @@ from dynapm.system_validation.calibration_workers import process_stats,write_lin
 from dynapm.system_validation.clock_observations import ObservationClock,receive_observation
 from dynapm.system_validation.host_power import ManagedPowerGuard
 from dynapm.system_validation.host_endurance import require_endurance
+from dynapm.system_validation.trial_preparation import measured_bootstrap
 from dynapm.system_validation.adapter import aggregate_bucket
 from dynapm.system_validation.consumer import summarize_requests,resource_metrics
 from dynapm.system_validation.system_estimation import allocation_integrals
@@ -22,7 +23,7 @@ from dynapm.system_validation.smoke import Commands,Kube,http,text_http,free_por
 
 JSONS=('plan','resources','runtime_environment','resize_preflight','status','bootstrap_summary',
  'profile_initial','profile_final','generator_status','controller_status','summary','attribution','diagnostics')
-LINES=('telemetry','bootstrap_samples','bucket_diagnostics','requests','controller_commands','decisions','profiles','overhead','host_diagnostics')
+LINES=('telemetry','bootstrap_samples','bucket_diagnostics','requests','controller_commands','decisions','profiles','overhead','host_diagnostics','neutral_timing')
 LOGS=('build','kind','generator','profile','controller','application','prometheus','app_portforward','prom_portforward')
 
 
@@ -160,25 +161,28 @@ def summarize(root,plan):
     return row
 
 
-def run_trial(repo,trial,*,plumbing_only=False,host_endurance_run=None):
+def run_trial(repo,trial,*,plumbing_only=False,host_endurance_run=None,bootstrap_only=False):
     repo=Path(repo).resolve();spec=frozen_spec(repo);_clean(repo)
     if not plumbing_only:require_endurance(repo,host_endurance_run)
+    if plumbing_only and bootstrap_only:raise ValueError('exclusive_collection_modes')
     if trial['method']!='pw_6h' or trial['scenario'] not in spec['engineering_plan']['calibration_scenarios']:
         raise ValueError('neutral_pw6_stable_periodic_only')
     if shutil.disk_usage(repo).free<20*2**30:raise ValueError('20GiB_reserve_required')
     source=SourceProvenance.capture(repo);d=deepcopy(spec)
+    if bootstrap_only:
+        trial=dict(trial,minimum_wall_seconds=d['engineering_plan']['cooldown_seconds']+d['engineering_plan']['warmup_seconds']+86400)
     endpoint=os.environ.get('DOCKER_HOST') or subprocess.check_output(['docker','context','inspect','--format','{{.Endpoints.docker.Host}}'],text=True).strip()
     guard_local_endpoint(endpoint)
-    inputs=repo/'results/system_calibration/inputs'/fingerprint({'design':fingerprint(spec),'scenario':trial['scenario'],'plumbing':plumbing_only})/trial['scenario']
+    inputs=repo/'results/system_calibration/inputs'/fingerprint({'design':fingerprint(spec),'scenario':trial['scenario'],'plumbing':plumbing_only,'bootstrap_only':bootstrap_only})/trial['scenario']
     inputs.mkdir(parents=True,exist_ok=True)
-    descriptor=dict(design=spec,scenario=trial['scenario'],method='pw_6h',mode='plumbing' if plumbing_only else 'calibration')
+    descriptor=dict(design=spec,scenario=trial['scenario'],method='pw_6h',mode='plumbing' if plumbing_only else 'bootstrap-only' if bootstrap_only else 'calibration')
     target=inputs/'input.json'
     if target.exists() and read_json(target)!=descriptor:raise ValueError('immutable_input_descriptor_mismatch')
     if not target.exists():write_json(target,descriptor)
     dataset=build_dataset_manifest(inputs.parent,dataset_id='system-calibration-v2',source_name='frozen generator/controller design, no corpus outcomes',
         trace_names=(trial['scenario'],),schema_identity='system-calibration-input-v2')
-    cohort=CohortManifest(dataset.dataset_id,dataset.sha256,'one-neutral-application-v2',{'minimum_observations':200,'expected_nominal_slots':864,'role':'fixed live application; actual samples generated during run'},
-        (CohortEntity(trial['scenario'],'application',True,None,0,temporal_characterization={'count_role':'no preobserved samples; planned grid 864'}),),utc_now())
+    cohort=CohortManifest(dataset.dataset_id,dataset.sha256,'one-neutral-application-v2',{'minimum_observations':200,'expected_nominal_slots':288 if bootstrap_only else 864,'role':'fixed live application; actual samples generated during run'},
+        (CohortEntity(trial['scenario'],'application',True,None,0,temporal_characterization={'count_role':'no preobserved samples; planned grid '+str(288 if bootstrap_only else 864)}),),utc_now())
     with tempfile.TemporaryDirectory(prefix='dynapm-calibration-private-') as temporary:
         private=Path(temporary);private.chmod(0o700);dc=private/'docker';dc.mkdir();(dc/'config.json').write_text('{"auths":{}}')
         env={**os.environ,'DOCKER_HOST':endpoint,'DOCKER_CONFIG':str(dc),'KUBECONFIG':str(private/'kubeconfig'),
@@ -195,11 +199,11 @@ def run_trial(repo,trial,*,plumbing_only=False,host_endurance_run=None):
         commands.run(['docker','build','-f',str(build_context/'harness/system/Calibration.Dockerfile'),'-t',d['kubernetes']['application_image'],str(build_context)],log=build_log)
         commands.run(['docker','build','-f','harness/system/Prometheus.Dockerfile','-t',d['kubernetes']['prometheus_local_image'],'.'],log=build_log)
         details['image_ids']={image:json.loads(commands.run(['docker','image','inspect',image]))[0]['Id'] for image in (d['kubernetes']['application_image'],d['kubernetes']['prometheus_local_image'])}
-        cfg=ExperimentConfigProvenance(DataConfig(dataset.dataset_id,bootstrap_fraction=1/3,minimum_observations=200),
+        cfg=ExperimentConfigProvenance(DataConfig(dataset.dataset_id,bootstrap_fraction=1.0 if bootstrap_only else 1/3,minimum_observations=200),
             ModelConfig(family='unused-observation-only'),(PolicyConfig('pw_6h',periodic_interval_hours=6,observation_window_hours=24),),
             StatisticsConfig(bootstrap_repetitions=0,bootstrap_seed=20251022,test_specification={'enabled':False,'unit':'independent run/scenario'}),
             preprocessing=dict(design_sha256=fingerprint(spec),execution_environment=deepcopy(details),
-                mode='PARTIAL_REAL_COLLECTION_SMOKE' if plumbing_only else 'NEUTRAL_CALIBRATION_REAL_BOOTSTRAP'),
+                mode='PARTIAL_REAL_COLLECTION_SMOKE' if plumbing_only else 'MEASURED_BOOTSTRAP_ONLY_V1' if bootstrap_only else 'NEUTRAL_CALIBRATION_REAL_BOOTSTRAP'),
             analysis=dict(comparative=False,practical_benefit='NOT_DEFINED',scenario=trial['scenario']))
         exp,env_record=prepare_experiment(repo,inputs.parent,cfg,dataset,cohort,{'workload':d['workload']['seed']},
             execution_compatibility_keys=tuple(d['hardware']['compatibility_keys']))
@@ -220,7 +224,7 @@ def run_trial(repo,trial,*,plumbing_only=False,host_endurance_run=None):
                 def status(stage,**extra):
                     value=dict(stage=stage,source_commit=source.commit,run_id=run.manifest.run_id,pid=os.getpid(),
                         scenario=trial['scenario'],method='pw_6h',block=trial['block'],free_disk_bytes=shutil.disk_usage(repo).free,
-                        wall_time=utc_now(),measurement_complete=(stage=='FINISHED' and not plumbing_only),practical_benefit='NOT_DEFINED',**extra)
+                        wall_time=utc_now(),measurement_complete=(stage=='FINISHED' and not plumbing_only and not bootstrap_only),practical_benefit='NOT_DEFINED',**extra)
                     write_json(run.path/'outputs/status.json',value)
                     print(json.dumps(value),flush=True)
                 def check():
@@ -264,11 +268,12 @@ def run_trial(repo,trial,*,plumbing_only=False,host_endurance_run=None):
                     wait_http(app+'/healthz');wait_http(prom+'/-/ready')
                     load_start=(int(time.time())//300+1)*300
                     boot_start=load_start+(0 if plumbing_only else d['engineering_plan']['warmup_seconds'])
-                    measured=boot_start+d['bootstrap']['duration_seconds'];end=measured+d['engineering_plan']['measurement_seconds']
+                    measured=boot_start+d['bootstrap']['duration_seconds'];end=measured+(0 if bootstrap_only else d['engineering_plan']['measurement_seconds'])
                     plan=dict(**trial,design=d,cluster=cluster,app_url=app,load_start_seconds=load_start,
                         bootstrap_start_seconds=boot_start,measurement_start_seconds=measured,measurement_end_seconds=end,
+                        bootstrap_source_pod_uid=kube.pod()['metadata']['uid'],
                         profile_url=f'http://127.0.0.1:{profile_port}',generator_stats_url=f'http://127.0.0.1:{gen_port}',
-                        controller_stats_url=f'http://127.0.0.1:{ctrl_port}',plumbing_only=plumbing_only)
+                        controller_stats_url=f'http://127.0.0.1:{ctrl_port}',plumbing_only=plumbing_only,bootstrap_only=bootstrap_only)
                     if plumbing_only:plan['measurement_end_seconds']=load_start+300
                     plan_file=run.path/'outputs/plan.json';write_json(plan_file,plan)
                     worker=[sys.executable,'-u','-m','dynapm.system_validation.calibration_workers']
@@ -297,11 +302,20 @@ def run_trial(repo,trial,*,plumbing_only=False,host_endurance_run=None):
                                 except ValueError as exc:missing+=1;write_line(bd,dict(kind='INVALID_BUCKET',end_ns=int(next_q*1e9),error=str(exc)))
                                 if boot_start<next_q<=measured and payload:
                                     write_line(boot,dict(role='MEASURED_CGROUP_SAMPLES',end_ns=int(next_q*1e9),samples=samples));accepted+=1
-                                if next_q==measured:
+                                if next_q==measured and kube.pod()['metadata']['uid']!=plan['bootstrap_source_pod_uid']:
+                                    raise ValueError('bootstrap_source_pod_replaced')
+                                if next_q==measured and bootstrap_only:
+                                    boot.flush()
+                                    entries=list(_json_lines(run.path/'outputs/bootstrap_samples.jsonl'))
+                                    measured_history=measured_bootstrap(entries,int(boot_start*1e9),int(measured*1e9),time.time_ns(),d)
+                                    write_json(run.path/'outputs/bootstrap_summary.json',dict(accepted_slots=measured_history.accepted_slots,
+                                        missing_slots=measured_history.missing_slots,evidence_sha256=measured_history.evidence_sha256,
+                                        real_duration_seconds=86400,source_pod_uid=plan['bootstrap_source_pod_uid']))
+                                elif next_q==measured:
                                     before=http(plan['profile_url']+'/healthz');write_line(overhead,dict(phase='measurement_start_before_initialization',profile=before['process'],controller=http(plan['controller_stats_url']+'/stats'),generator=http(plan['generator_stats_url']+'/stats'),prometheus=_prom_process(prom),collector=process_stats()))
                                     initial=http(plan['profile_url']+'/initialize',{});initialized=True
                                     write_json(run.path/'outputs/profile_initial.json',initial)
-                                    write_json(run.path/'outputs/bootstrap_summary.json',dict(accepted_slots=initial['accepted_bootstrap_slots'],missing_slots=initial['missing_bootstrap_slots'],evidence_sha256=initial['bootstrap_evidence_sha256'],real_duration_seconds=86400))
+                                    write_json(run.path/'outputs/bootstrap_summary.json',dict(accepted_slots=initial['accepted_bootstrap_slots'],missing_slots=initial['missing_bootstrap_slots'],evidence_sha256=initial['bootstrap_evidence_sha256'],real_duration_seconds=86400,source_pod_uid=plan['bootstrap_source_pod_uid']))
                                 elif initialized and payload and next_q<end:http(plan['profile_url']+'/observe',payload)
                                 if initialized:
                                     started=time.time_ns();snapshot=http(plan['profile_url']+'/snapshot')
@@ -330,14 +344,21 @@ def run_trial(repo,trial,*,plumbing_only=False,host_endurance_run=None):
                         for name in ('bootstrap_summary','profile_initial','profile_final','attribution'):
                             write_json(run.path/'outputs'/f'{name}.json',dict(status='NOT_INITIALIZED_PARTIAL_REAL_COLLECTION_ONLY'))
                         write_json(run.path/'outputs/summary.json',dict(scope='REAL_COLLECTION_SMOKE_NOT_CALIBRATION',real_completed_buckets=accepted,profile_initializations=0,comparisons=0))
+                    elif bootstrap_only:
+                        if read_json(run.path/'outputs/bootstrap_summary.json').get('real_duration_seconds')!=86400:
+                            raise ValueError('bootstrap_collection_incomplete')
+                        for name in ('profile_initial','profile_final','attribution'):
+                            write_json(run.path/'outputs'/f'{name}.json',dict(status='NOT_INITIALIZED_BOOTSTRAP_ACQUISITION_ONLY'))
+                        write_json(run.path/'outputs/summary.json',dict(scope='MEASURED_BOOTSTRAP_ONLY_NO_POLICY_OUTCOMES',
+                            comparisons=0,profile_initializations=0,measurement_seconds=0))
                     else:
                         write_json(run.path/'outputs/profile_final.json',http(plan['profile_url']+'/snapshot'))
                         write_json(run.path/'outputs/attribution.json',http(plan['profile_url']+'/stats'))
                         write_json(run.path/'outputs/summary.json',summarize(run.path,plan))
                     write_json(run.path/'outputs/diagnostics.json',dict(operationally_meaningful_benefit='NOT_DEFINED',
-                        method='pw_6h',comparisons_run=0,synthetic_bootstrap_used=False,real_bootstrap_complete=initialized,
-                        host_reserved=False,neutral_trial_measurement_complete=not plumbing_only,source_commit=source.commit))
-                    status('FINISHED',calibration_result='PARTIAL_SMOKE' if plumbing_only else 'COMPLETE_NEUTRAL_TRIAL')
+                        method='pw_6h',comparisons_run=0,synthetic_bootstrap_used=False,real_bootstrap_complete=initialized or bootstrap_only,
+                        host_reserved=False,neutral_trial_measurement_complete=not plumbing_only and not bootstrap_only,source_commit=source.commit))
+                    status('FINISHED',calibration_result='PARTIAL_SMOKE' if plumbing_only else 'COMPLETE_MEASURED_BOOTSTRAP_ONLY' if bootstrap_only else 'COMPLETE_NEUTRAL_TRIAL')
                 finally:
                     clock.finalize()
                     for name in ('application','prometheus'):

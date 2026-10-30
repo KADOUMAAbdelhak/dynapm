@@ -8,7 +8,8 @@ from dynapm.core.run_store import write_json
 from dynapm.system_validation.adapter import current_rss_bytes
 from dynapm.system_validation.trial_preparation import measured_bootstrap,MeasuredProfileAdapter
 from dynapm.system_validation.workloads import workload_state
-from dynapm.system_validation.consumer import recommend,resources_match
+from dynapm.system_validation.consumer import recommend,resources_match,cpu_millicores,memory_bytes
+from dynapm.system_validation.timing_probes import ResizeProbe
 from dynapm.system_validation.smoke import Commands,Kube,http
 
 
@@ -129,10 +130,10 @@ def profile_service(plan,root,port):
 
 def controller(plan,root,kubeconfig):
     d=plan['design'];commands=Commands(dict(os.environ),root);last_status=0;last_pod_observation=0
-    kube=Kube(commands,kubeconfig,plan['cluster'],d);pending=None;partial_command=''
+    kube=Kube(commands,kubeconfig,plan['cluster'],d);pending=None;pending_probe=None;pending_skipped_start=0;partial_command=''
     counters=dict(recommendations=0,resource_changes=0,rejected=0,timeout_events=0,skipped_pending=0,
         cpu_churn_millicores=0.,memory_churn_mib=0.,control_observation_failures=0)
-    with (root/'outputs/controller_commands.jsonl').open() as incoming, (root/'outputs/decisions.jsonl').open('w',buffering=1) as out:
+    with (root/'outputs/controller_commands.jsonl').open() as incoming, (root/'outputs/decisions.jsonl').open('w',buffering=1) as out, (root/'outputs/neutral_timing.jsonl').open('a',buffering=1) as timing:
         while True:
             piece=incoming.readline()
             if piece and not piece.endswith('\n'):partial_command+=piece;line=''
@@ -145,9 +146,14 @@ def controller(plan,root,kubeconfig):
                 if pending is not None:
                     counters['skipped_pending']+=1;write_line(out,dict(kind='SKIPPED_INFLIGHT',nominal_time_ns=command['nominal_time_ns']))
                 else:
+                    recommendation_start=time.monotonic_ns()
                     start=time.perf_counter();cpu=time.thread_time();r=recommend(command['snapshot']['profile'],d)
+                    recommendation_end=time.monotonic_ns()
+                    recommendation_wall=time.perf_counter()-start;recommendation_cpu=time.thread_time()-cpu
+                    write_line(timing,dict(kind='RECOMMENDATION_TIMING',method='pw_6h',nominal_time_ns=command['nominal_time_ns'],
+                        start_monotonic_ns=recommendation_start,end_monotonic_ns=recommendation_end))
                     event=dict(kind='RECOMMENDATION',nominal_time_ns=command['nominal_time_ns'],recommendation=r,
-                        compute_wall_seconds=time.perf_counter()-start,compute_thread_cpu_seconds=time.thread_time()-cpu,
+                        compute_wall_seconds=recommendation_wall,compute_thread_cpu_seconds=recommendation_cpu,
                         snapshot_to_recommendation_seconds=(time.time_ns()-command['snapshot_read_started_ns'])/1e9)
                     try:pod=kube.pod();before=pod['spec']['containers'][0]['resources']
                     except (OSError,RuntimeError,KeyError,IndexError,TypeError) as exc:
@@ -159,8 +165,15 @@ def controller(plan,root,kubeconfig):
                     if resources_match(before,r):event['disposition']='UNCHANGED'
                     else:
                         try:
-                            submitted=time.time_ns();ack=kube.resize(r)
-                            event.update(disposition='SUBMITTED',submitted_ns=submitted,acknowledged_ns=time.time_ns(),
+                            submitted_mono=time.monotonic_ns();submitted=time.time_ns();ack=kube.resize(r)
+                            acknowledged_mono=time.monotonic_ns();acknowledged_wall=time.time_ns()
+                            pending_skipped_start=counters['skipped_pending']
+                            pending_probe=ResizeProbe(str(command['nominal_time_ns']),submitted_mono,submitted,
+                                r['cpu_millicores'],r['memory_mib'],
+                                abs(cpu_millicores(before['requests']['cpu'])-r['cpu_millicores'])>=1e-6,
+                                memory_bytes(before['requests']['memory'])!=r['memory_mib']*2**20)
+                            pending_probe.acknowledged(acknowledged_mono,acknowledged_wall)
+                            event.update(disposition='SUBMITTED',submitted_ns=submitted,acknowledged_ns=acknowledged_wall,
                                 requested_generation=ack['metadata'].get('generation'),pod_uid=pod['metadata']['uid'])
                             pending=dict(recommendation=r,submitted_ns=submitted,before=before,pod_uid=pod['metadata']['uid'],timeout_recorded=False)
                         except RuntimeError as exc:
@@ -168,17 +181,29 @@ def controller(plan,root,kubeconfig):
                     write_line(out,event)
             if pending is not None:
                 try:
-                    p=kube.pod();sample=http(plan['app_url']+'/telemetry');s=p['status']['containerStatuses'][0];r=pending['recommendation']
+                    p=kube.pod();telemetry_start=time.monotonic_ns();sample=http(plan['app_url']+'/telemetry');telemetry_end=time.monotonic_ns()
+                    write_line(timing,dict(kind='TELEMETRY_COLLECTION_TIMING',method='pw_6h',start_monotonic_ns=telemetry_start,end_monotonic_ns=telemetry_end))
+                    s=p['status']['containerStatuses'][0];r=pending['recommendation']
+                    actual=s.get('resources')
+                    if actual and pending_probe is not None:
+                        pending_probe.observe(time.monotonic_ns(),time.time_ns(),
+                            pod_cpu_millicores=cpu_millicores(actual['requests']['cpu']),
+                            pod_memory_mib=memory_bytes(actual['requests']['memory'])/2**20,
+                            cgroup_cpu_cores=sample['cpu_limit_cores'],cgroup_memory_bytes=sample['memory_limit_bytes'],
+                            persistent_workset_bytes=sample.get('persistent_workset_bytes'))
                     if p['metadata']['uid']!=pending['pod_uid']:raise ValueError('unexpected_pod_replacement')
                     if resources_match(s.get('resources'),r) and abs(sample['cpu_limit_cores']*1000-r['cpu_millicores'])<1e-6 and sample['memory_limit_bytes']==r['memory_mib']*2**20:
-                        from dynapm.system_validation.consumer import cpu_millicores,memory_bytes
                         counters['resource_changes']+=1
                         counters['cpu_churn_millicores']+=abs(cpu_millicores(pending['before']['requests']['cpu'])-r['cpu_millicores'])
                         counters['memory_churn_mib']+=abs(memory_bytes(pending['before']['requests']['memory'])/2**20-r['memory_mib'])
                         write_line(out,dict(kind='ENFORCED',confirmed_ns=time.time_ns(),submitted_ns=pending['submitted_ns'],
                             actual_resources=s['resources'],cgroup=sample,restarts=s['restartCount'],
                             actuation_latency_seconds=(time.time_ns()-pending['submitted_ns'])/1e9))
-                        pending=None
+                        if pending_probe is not None:
+                            write_line(timing,dict(kind='RESIZE_TIMING',**pending_probe.record(
+                                pending_end_monotonic_ns=time.monotonic_ns(),timeout=pending['timeout_recorded'],
+                                skipped_decisions=counters['skipped_pending']-pending_skipped_start)))
+                        pending=None;pending_probe=None
                     elif time.time_ns()-pending['submitted_ns']>60*10**9 and not pending['timeout_recorded']:
                         counters['timeout_events']+=1;pending['timeout_recorded']=True
                         write_line(out,dict(kind='DEFERRED_BEYOND_60S_OPERATIONAL',wall_ns=time.time_ns(),submitted_ns=pending['submitted_ns']))
@@ -194,7 +219,9 @@ def controller(plan,root,kubeconfig):
             if line or time.monotonic()-last_status>=5:
                 write_json(root/'outputs/controller_status.json',dict(process=process_stats(),counters=counters,pending=pending,complete=False));last_status=time.monotonic()
             time.sleep(1 if pending else .5)
-        if pending:write_line(out,dict(kind='PENDING_AT_END_OPERATIONAL',submitted_ns=pending['submitted_ns']))
+        if pending:
+            write_line(out,dict(kind='PENDING_AT_END_OPERATIONAL',submitted_ns=pending['submitted_ns']))
+            if pending_probe is not None:write_line(timing,dict(kind='RESIZE_TIMING_CENSORED',**pending_probe.record(timeout=True,skipped_decisions=counters['skipped_pending']-pending_skipped_start)))
         write_json(root/'outputs/controller_status.json',dict(process=process_stats(),counters=counters,pending=pending,complete=True))
 
 

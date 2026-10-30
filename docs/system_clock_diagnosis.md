@@ -75,3 +75,10 @@ be attempted as a new generation. A short check cannot prove clock stability for
 prevent automatic continuation beyond the replacement anchor. No automatic
 retry; a further failure requires inspection. No shared bootstrap or compression
 implementation is authorized by this correctness fix.
+
+## Later execution prerequisites
+
+The V7C.1 one-bucket check above was a historical correctness prerequisite.
+V7C.3/V7C.4 supersede it for long execution: require validated >=3h compatible
+host-runtime endurance evidence and the [host operating contract](host_execution.md).
+A short smoke alone does not authorize another anchor.

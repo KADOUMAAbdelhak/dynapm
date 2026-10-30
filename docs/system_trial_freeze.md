@@ -245,5 +245,14 @@ V7C.2 failed during confirmed clamshell sleep on battery, before bootstrap.
 See [host execution contract](host_execution.md). Runtime hardening adds owned
 verified assertions and an independent continuity monitor; scientific clock
 checks, methods, scenarios, controller and durations remain unchanged. Another
-long run requires a completed current-source >=3h managed host observation and
+long run requires a completed compatible-host-runtime >=3h managed host observation and
 separate execution authorization. Endurance validation is pending; V8 stays shut.
+
+## V7C.4 shared prehistory amendment
+
+The3h host-only observation passed. See [host contract](host_execution.md).
+Shared measured-bootstrap artifacts and isolated factory initialization are
+implemented independently of a completed72h anchor; see [shared bootstrap](shared_bootstrap.md).
+The original five methods/parameters and estimation-first study remain unchanged.
+Neutral timing instrumentation is prepared, not executed; see [probe scope](neutral_timing_probes.md).
+No real24h artifact exists yet and no comparative or compressed execution is enabled.

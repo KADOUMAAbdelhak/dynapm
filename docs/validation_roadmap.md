@@ -454,10 +454,20 @@ Executed bytes still 0. See [google2019_acquisition.md](google2019_acquisition.m
 
 ## V7C.3 — execution host hardening
 
-**IN PROGRESS / endurance evidence pending.** V7C.2 failed before bootstrap;
-macOS clamshell sleep on battery is confirmed. Implement owned verified power
-assertions and independent continuity diagnostics, then complete the managed
->=3h non-claim host observation. No72h anchor or V8 comparison starts from a
+**PASS — three-hour host observation independently verified.** V7C.2 failed before bootstrap;
+macOS clamshell sleep on battery is confirmed. Owned verified power assertions and independent continuity diagnostics are
+implemented; the managed >=3h non-claim host observation completed successfully. No72h anchor or V8 comparison starts from a
 five-minute smoke. See [host execution](host_execution.md). This runtime gate
 does not establish host dedication, system benefit, bootstrap-sharing validity
 or compressed-time transportability.
+
+## V7C.4 — shared bootstrap and execution contract
+
+Engineering support is implemented and unit-validated; it does not require a
+completed72h anchor. Host observation PASS is conditional evidence, not dedication
+or forced-sleep protection. Shared acquisition artifacts require genuine24h
+measured history; none exists yet. Five-method initialization preserves production
+semantics and isolates state. Neutral timing probes are prepared only, including
+separate CPU/memory enforcement and censored observations. Next proposed work is
+approved-host bootstrap-only collection, then bounded neutral probes. No anchor,
+compressed validation, comparative V8 or Google acquisition is authorized here.

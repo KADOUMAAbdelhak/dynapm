@@ -82,7 +82,7 @@ observed stability under the recorded policy; it cannot claim to cross an infini
 disabled idle threshold or prove that assertions alone prevented sleep. Record
 that limitation explicitly. No forced-sleep/lid-close test is performed.
 
-Long calibration requires an explicit current-source completed managed endurance
+Long calibration requires an explicit compatible-host-runtime completed managed endurance
 run via `--host-endurance-run <run directory>`; missing/incomplete/unversioned or
 tampered evidence is rejected before workload execution. Another72h anchor is
 not authorized by completing this runtime-hardening task.
@@ -119,3 +119,46 @@ controller/enforcement timings, new real bootstrap collection and fresh system
 calibration/precision planning. Never transfer Mac timings as measurements of
 another machine. Methods, scenarios, controller and estimation endpoints remain
 unchanged by this hardening.
+
+
+## V7C.4 validated boundary and host contract
+
+The host-only run `2026-10-30T135116.779346Z-91d2fda4555f-98babc9b`
+completed on2026-10-30 at18:51 Helsinki. Independent validation records
+10800.100598792 real elapsed seconds,2152 checkpoints, maximum absolute
+wall/monotonic discrepancy92.965167ms and maximum checkpoint gap5.137944834s.
+AC/open lid, boot identity and owned assertions were maintained; PID25250's
+assertions for owner25200 were released. Output-manifest SHA256:
+`530ca9d3919c918147b80514fa6fab2dfcac71cc789fe4cfacedff2a2987254b`.
+The original observation remains labelled with source
+`2f0d15709266b587f1911afa64679e607690de6d`; no result was relabelled.
+
+The operating contract requires AC, open lid, verified run-owned assertions,
+fail-closed monitoring, recorded hardware/environment fingerprint, **no concurrent
+heavy jobs**, and a controlled reboot/update/session maintenance window. Operator
+reservation and background-process diagnostics are required for comparative
+trials. The guard cannot attest that a laptop is dedicated or prohibit deliberate
+lid closure, logout, shutdown or a forced update. No such settings were changed.
+
+A host-safety observation is not a scientific-result cache. Its original SUCCESS,
+manifest and outputs are checked against its ORIGINAL experiment identity.
+`host-runtime-compatibility-v1` additionally compares pinned Git objects for the
+power guard, causal clock guard, observer CLI, generic provenance/run store and
+dataset-manifest code. The entire observer module is compared by AST except its
+validation-only `require_endurance` helper (never called by observation acquisition).
+Hardware/packages, boot identity and recorded power policy must still match.
+Missing source objects or changed relevant runtime fail closed. This permits an
+unrelated shared-bootstrap implementation commit without pretending the old
+observation ran from new source. Generic scientific cache checks still require
+exact source/experiment identity; they were not changed.
+
+Current suitability: conditional development/probes on this guarded Mac; **no72h
+anchor is authorized**; repeated claim-generating V8 is not approved on this
+unreserved interactive laptop. Prefer dedicated always-on owned/institutional
+hardware if physical/session controls cannot be sustained. An engineering starting
+budget is8logical CPUs,16GiB host RAM, enough memory for the existing~8GiB Docker
+allocation, local SSD and>=20GiB free reserve beyond expected outputs. These are
+planning budgets, not validated minimum performance. Migration requires a new
+hardware/package fingerprint and supported OS power adapter, pinned kind/Kubernetes
+smoke, controller/enforcement timing checks, fresh measured bootstrap and fresh
+system calibration/precision planning. Do not transfer Mac timing measurements.

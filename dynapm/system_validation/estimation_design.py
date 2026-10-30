@@ -15,7 +15,10 @@ RUNTIME=('dynapm/system_validation/estimation_design.py','dynapm/system_validati
  'dynapm/scripts/task34_system_calibration.py','dynapm/system_validation/trial_preparation.py',
  'dynapm/system_validation/application_instrumented.py','dynapm/system_validation/clock_observations.py',
  'dynapm/system_validation/host_power.py','dynapm/system_validation/host_endurance.py',
- 'dynapm/scripts/task35_host_endurance.py','harness/system/Calibration.Dockerfile')
+ 'dynapm/scripts/task35_host_endurance.py','dynapm/system_validation/host_certificate.py',
+ 'dynapm/system_validation/shared_bootstrap.py','dynapm/system_validation/timing_probes.py',
+ 'dynapm/scripts/task36_shared_bootstrap.py',
+ 'harness/system/Calibration.Dockerfile')
 
 
 def specification(repo):
@@ -64,7 +67,9 @@ def specification(repo):
         rejection='fail closed; isolated raw body + context/hash; never scientific telemetry')
     d['host_execution']=dict(schema=POWER_SCHEMA,owned_assertions=['PreventUserIdleSystemSleep','PreventSystemSleep'],
         ac_required=True,lid_open_required=True,check_seconds=CHECK_SECONDS,power_check_seconds=POWER_SECONDS,
-        minimum_endurance_seconds=ENDURANCE_SECONDS,global_settings_modified=False,forced_sleep_override=False)
+        minimum_endurance_seconds=ENDURANCE_SECONDS,global_settings_modified=False,forced_sleep_override=False,
+        no_concurrent_heavy_jobs=True,host_fingerprint_required=True,
+        maintenance_and_session='no reboot/update/logout during run; operator-controlled maintenance window')
     d['scientific_runtime_sha256']={p:file_sha256(Path(repo)/p) for p in RUNTIME}
     return d
 

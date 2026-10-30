@@ -29,8 +29,9 @@ def require_endurance(repo,run_path):
         raise ValueError('managed_host_endurance_path_required')
     m=read_json(root/'manifest.json');exp=experiment_from_dict(m['experiment'])
     current=SourceProvenance.capture(repo)
-    if current.dirty or fingerprint(current.identity())!=fingerprint(exp.source.identity()):
-        raise ValueError('host_endurance_source_mismatch')
+    if current.dirty:raise ValueError('host_endurance_source_mismatch')
+    from dynapm.system_validation.host_certificate import require_same_host_runtime
+    require_same_host_runtime(repo,exp.source.commit)
     decision=check_cache(root,exp,'smoke')
     if not decision.reusable:raise ValueError('host_endurance_invalid:'+','.join(decision.reasons))
     summary=read_json(root/'outputs/endurance_summary.json');guard=read_json(root/'outputs/power_guard.json')
@@ -40,6 +41,14 @@ def require_endurance(repo,run_path):
         or guard.get('schema_version')!=SCHEMA or guard.get('failure') is not None
         or guard.get('status')!='RELEASED'):
         raise ValueError('host_endurance_incomplete')
+    # Safety evidence only: the original experiment/cache identity is unchanged.
+    from dynapm.system_validation.host_power import power_state,command
+    checkpoints=[__import__('json').loads(line) for line in (root/'outputs/host_continuity.jsonl').read_text().splitlines()]
+    now=power_state()
+    if not checkpoints or now['boot_epoch_seconds']!=checkpoints[0]['power']['boot_epoch_seconds']:
+        raise ValueError('host_endurance_boot_mismatch')
+    if command(['/usr/bin/pmset','-g','custom'])!=guard['power_settings']:
+        raise ValueError('host_endurance_power_policy_mismatch')
     return root
 
 
