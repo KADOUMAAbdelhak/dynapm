@@ -12,6 +12,9 @@ from dynapm.system_validation.host_power import (ManagedPowerGuard,SCHEMA,CHECK_
     ENDURANCE_SECONDS,MAX_HEARTBEAT_GAP_NS)
 from dynapm.system_validation.estimation_design import frozen_spec
 
+# No random action is performed; the provenance contract still requires an explicit seed map.
+HOST_SEEDS={'host_observation':0}
+
 OUTPUTS=(OutputSpec('outputs/power_guard.json','owned-power-assertion-lifecycle'),
     OutputSpec('outputs/host_continuity.jsonl','host-wall-monotonic-power-checkpoints'),
     OutputSpec('outputs/host_continuity_summary.json','host-continuity-summary'),
@@ -59,7 +62,7 @@ def observe(repo,seconds=ENDURANCE_SECONDS):
     if source.dirty:raise ValueError('clean_committed_source_required')
     spec=frozen_spec(repo)
     descriptor=dict(schema_version='host-endurance-v1',duration_seconds=seconds,
-        power_schema=SCHEMA,check_seconds=CHECK_SECONDS,power_seconds=POWER_SECONDS,
+        seeds=dict(HOST_SEEDS),power_schema=SCHEMA,check_seconds=CHECK_SECONDS,power_seconds=POWER_SECONDS,
         maximum_heartbeat_gap_ns=MAX_HEARTBEAT_GAP_NS,system_design_sha256=fingerprint(spec),
         purpose='host continuity only; no workload, bootstrap, profiles or comparison')
     inputs=repo/'results/host_endurance/inputs'/fingerprint(descriptor)
@@ -72,7 +75,7 @@ def observe(repo,seconds=ENDURANCE_SECONDS):
     cohort=CohortManifest(dataset.dataset_id,dataset.sha256,'one-host-no-application-v1',{'role':'host observation only'},
         (CohortEntity('host','execution-host',True,None,0),),utc_now())
     config=observation_config(dataset.dataset_id,descriptor)
-    exp,env=prepare_experiment(repo,inputs,config,dataset,cohort,{},
+    exp,env=prepare_experiment(repo,inputs,config,dataset,cohort,descriptor['seeds'],
         execution_compatibility_keys=tuple(spec['hardware']['compatibility_keys']))
     with RunSession(repo/'results/host_endurance',exp,env,repo=repo,dataset_root=inputs,
             purpose='smoke',required_outputs=OUTPUTS) as run:

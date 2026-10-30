@@ -195,3 +195,22 @@ def test_host_observation_config_binds_real_cadence_without_profile_semantics():
     assert c.data.sampling_cadence_seconds==c.data.evaluation_cadence_seconds==CHECK_SECONDS
     assert c.data.bootstrap_fraction==c.data.forecast_horizon_steps==c.data.feature_history_slots==0
     assert not c.policies and c.preprocessing['duration_seconds']==10800
+
+
+
+def test_host_observation_managed_identity_has_explicit_seeds(tmp_path,monkeypatch):
+    from dynapm.core.provenance import EnvironmentProvenance,CohortManifest,CohortEntity,prepare_experiment
+    from dynapm.data.manifests import build_dataset_manifest
+    from dynapm.system_validation.host_endurance import HOST_SEEDS,observation_config
+    raw=tmp_path/'raw';(raw/'host').mkdir(parents=True)
+    (raw/'host/observation.json').write_text('{"fixture":true}')
+    dataset=build_dataset_manifest(raw,dataset_id='UNIT',source_name='synthetic host contract',
+        trace_names=('host',),schema_identity='unit')
+    cohort=CohortManifest('UNIT',dataset.sha256,'unit',{'role':'no profile'},
+        (CohortEntity('host','execution-host',True,None,0),),'unit')
+    monkeypatch.setattr(EnvironmentProvenance,'capture',classmethod(lambda cls,*a,**kw:
+        EnvironmentProvenance({'fixture':True},{},{})))
+    config=observation_config('UNIT',{'seeds':dict(HOST_SEEDS),'duration_seconds':10800})
+    exp,_=prepare_experiment(Path(__file__).parents[2],raw,config,dataset,cohort,config.preprocessing['seeds'])
+    assert len(exp.fingerprint)==64 and exp.seeds=={'host_observation':0}
+    assert not exp.config.policies
