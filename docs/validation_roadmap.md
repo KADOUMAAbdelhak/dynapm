@@ -451,3 +451,13 @@ flush/atomic finalize/checkpoints. Disposition
 Configs: `google2019_streaming_plan_v1.*`, `google2019_v4b5_storage_estimate.json`.
 Executed bytes still 0. See [google2019_acquisition.md](google2019_acquisition.md).
 **V4B.5 = PASS**. Extraction remains the next authorized step before V4C.
+
+## V7C.3 — execution host hardening
+
+**IN PROGRESS / endurance evidence pending.** V7C.2 failed before bootstrap;
+macOS clamshell sleep on battery is confirmed. Implement owned verified power
+assertions and independent continuity diagnostics, then complete the managed
+>=3h non-claim host observation. No72h anchor or V8 comparison starts from a
+five-minute smoke. See [host execution](host_execution.md). This runtime gate
+does not establish host dedication, system benefit, bootstrap-sharing validity
+or compressed-time transportability.

@@ -13,11 +13,12 @@ def main():
     mode.add_argument('--plumbing-check',action='store_true',help='one real bucket; NO policy initialization or calibration conclusion')
     mode.add_argument('--run-calibration',action='store_true',help='six maximum independent PW6 stable/periodic trials; >=18 days sequential')
     parser.add_argument('--maximum-trials',type=int,default=6)
+    parser.add_argument('--host-endurance-run',type=Path,help='validated current-source managed >=3h host observation required for long trials')
     args=parser.parse_args();d=frozen_spec(args.repo)
     def terminate(signum,frame):raise KeyboardInterrupt('calibration_termination_requested')
     signal.signal(signal.SIGTERM,terminate)
     if args.plumbing_check:result=dict(run_path=str(run_trial(args.repo,calibration_plan(args.repo)[0],plumbing_only=True)))
-    elif args.run_calibration:result=dict(campaign_record=str(campaign(args.repo,maximum_trials=args.maximum_trials)))
+    elif args.run_calibration:result=dict(campaign_record=str(campaign(args.repo,maximum_trials=args.maximum_trials,host_endurance_run=args.host_endurance_run)))
     else:result=dict(status='ESTIMATION_FIRST_CALIBRATION_REQUIRED',design_sha256=fingerprint(d),
         plan=calibration_plan(args.repo),practical_benefit='NOT_DEFINED',comparative_execution_enabled=False)
     print(canonical_json(result))

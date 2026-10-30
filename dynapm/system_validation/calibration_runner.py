@@ -13,6 +13,8 @@ from dynapm.system_validation.design import resource_manifests
 from dynapm.system_validation.estimation_design import frozen_spec,calibration_plan
 from dynapm.system_validation.calibration_workers import process_stats,write_line
 from dynapm.system_validation.clock_observations import ObservationClock,receive_observation
+from dynapm.system_validation.host_power import ManagedPowerGuard
+from dynapm.system_validation.host_endurance import require_endurance
 from dynapm.system_validation.adapter import aggregate_bucket
 from dynapm.system_validation.consumer import summarize_requests,resource_metrics
 from dynapm.system_validation.system_estimation import allocation_integrals
@@ -30,7 +32,11 @@ def output_specs():
         OutputSpec('logs/'+x+'.log','calibration-'+x) for x in LOGS]+[
         OutputSpec('outputs/clock_rejections.jsonl','rejected-nonscientific-clock-evidence'),
         OutputSpec('outputs/clock_observations.jsonl','accepted-clock-diagnostics'),
-        OutputSpec('outputs/clock_evidence_manifest.json','clock-evidence-integrity')]
+        OutputSpec('outputs/clock_evidence_manifest.json','clock-evidence-integrity'),
+        OutputSpec('outputs/power_guard.json','owned-power-assertion-lifecycle'),
+        OutputSpec('outputs/host_continuity.jsonl','independent-host-continuity'),
+        OutputSpec('outputs/host_continuity_summary.json','host-continuity-summary'),
+        OutputSpec('outputs/host_continuity_failure.json','host-continuity-rejection')]
 
 
 def local_host_diagnostics():
@@ -154,8 +160,9 @@ def summarize(root,plan):
     return row
 
 
-def run_trial(repo,trial,*,plumbing_only=False):
+def run_trial(repo,trial,*,plumbing_only=False,host_endurance_run=None):
     repo=Path(repo).resolve();spec=frozen_spec(repo);_clean(repo)
+    if not plumbing_only:require_endurance(repo,host_endurance_run)
     if trial['method']!='pw_6h' or trial['scenario'] not in spec['engineering_plan']['calibration_scenarios']:
         raise ValueError('neutral_pw6_stable_periodic_only')
     if shutil.disk_usage(repo).free<20*2**30:raise ValueError('20GiB_reserve_required')
@@ -203,151 +210,155 @@ def run_trial(repo,trial,*,plumbing_only=False):
             for n in LOGS:(run.path/'logs'/f'{n}.log').touch()
             clock=ObservationClock(run.path,dict(run_id=run.manifest.run_id,
                 experiment_fingerprint=exp.fingerprint,source_commit=source.commit))
-            shutil.copyfile(build_log,run.path/'logs/build.log')
-            cluster=d['kubernetes']['cluster']+'-'+uuid.uuid4().hex[:8];config=private/'kubeconfig'
-            kube=Kube(commands,config,cluster,d);children=[];handles=[];created=False
-            clock.check_host(time.time_ns(),time.monotonic_ns())
-            last_heartbeat=0;last_host=0;locals_generator=[None,float('inf')]
-            def status(stage,**extra):
-                value=dict(stage=stage,source_commit=source.commit,run_id=run.manifest.run_id,pid=os.getpid(),
-                    scenario=trial['scenario'],method='pw_6h',block=trial['block'],free_disk_bytes=shutil.disk_usage(repo).free,
-                    wall_time=utc_now(),measurement_complete=(stage=='FINISHED' and not plumbing_only),practical_benefit='NOT_DEFINED',**extra)
-                write_json(run.path/'outputs/status.json',value)
-                print(json.dumps(value),flush=True)
-            def check():
-                if shutil.disk_usage(repo).free<20*2**30:raise ValueError('disk_reserve_exhausted')
+            with ManagedPowerGuard(run.path,dict(run_id=run.manifest.run_id,
+                    experiment_fingerprint=exp.fingerprint,source_commit=source.commit)) as power:
+                shutil.copyfile(build_log,run.path/'logs/build.log')
+                cluster=d['kubernetes']['cluster']+'-'+uuid.uuid4().hex[:8];config=private/'kubeconfig'
+                kube=Kube(commands,config,cluster,d);children=[];handles=[];created=False
                 clock.check_host(time.time_ns(),time.monotonic_ns())
-                for p in children:
-                    if p.poll() is not None:
-                        if p is locals_generator[0] and p.returncode==0 and time.time()>=locals_generator[1]-1:continue
-                        raise RuntimeError('worker_exited:'+str(p.args[0]))
-            def spawn(args,log):
-                f=(run.path/'logs'/log).open('a');handles.append(f)
-                p=subprocess.Popen(args,cwd=repo,env=env,stdout=f,stderr=subprocess.STDOUT);children.append(p);return p
-            try:
-                cooldown=0 if plumbing_only else d['engineering_plan']['cooldown_seconds']
-                status('COOLDOWN',seconds_remaining=cooldown)
-                deadline=time.time()+cooldown
-                while time.time()<deadline:time.sleep(min(30,max(0,deadline-time.time())));check()
-                require_isolated_engine(commands)
-                if cluster in commands.run(['kind','get','clusters']).splitlines():raise ValueError('preexisting_cluster_preserved')
-                created=True
-                commands.run(['kind','create','cluster','--name',cluster,'--config','harness/system/kind.yaml','--kubeconfig',str(config),'--wait','120s'],log=run.path/'logs/kind.log',timeout=300)
-                config.chmod(0o600);guard_local_api(kube.call(['config','view','--minify','-o','jsonpath={.clusters[0].cluster.server}']))
-                version=json.loads(kube.call(['version','-o','json']))
-                if version['serverVersion']['gitVersion']!=d['kubernetes']['server_version']:raise ValueError('server_version_mismatch')
-                details.update(kubernetes=version,nodes=json.loads(kube.call(['get','nodes','-o','json'])),host_context=host)
-                write_json(run.path/'outputs/runtime_environment.json',details)
-                for image in (d['kubernetes']['application_image'],d['kubernetes']['prometheus_local_image']):commands.run(['kind','load','docker-image',image,'--name',cluster],log=run.path/'logs/kind.log')
-                manifests=resource_manifests(d)
-                for item in manifests['items']:
-                    if item['kind']=='Pod':item['metadata']['labels']={'app':'dynapm-workload' if item['metadata']['name']=='application' else 'dynapm-prometheus'}
-                write_json(run.path/'outputs/resources.json',manifests)
-                kube.call(['apply','-f',str(run.path/'outputs/resources.json')],log=run.path/'logs/kind.log')
-                kube.call(['wait','--for=condition=Ready','pod/application','pod/prometheus','--timeout=120s'],log=run.path/'logs/kind.log',timeout=150)
-                write_json(run.path/'outputs/resize_preflight.json',resize_preflight(kube,d))
-                app_port,prom_port,profile_port,gen_port,ctrl_port=[free_port() for _ in range(5)]
-                prefix=['kubectl','--kubeconfig',str(config),'--context','kind-'+cluster,'-n',d['kubernetes']['namespace']]
-                spawn(prefix+['port-forward','service/application',f'{app_port}:8080','--address','127.0.0.1'],'app_portforward.log')
-                spawn(prefix+['port-forward','service/prometheus',f'{prom_port}:9090','--address','127.0.0.1'],'prom_portforward.log')
-                app=f'http://127.0.0.1:{app_port}';prom=f'http://127.0.0.1:{prom_port}'
-                wait_http(app+'/healthz');wait_http(prom+'/-/ready')
-                load_start=(int(time.time())//300+1)*300
-                boot_start=load_start+(0 if plumbing_only else d['engineering_plan']['warmup_seconds'])
-                measured=boot_start+d['bootstrap']['duration_seconds'];end=measured+d['engineering_plan']['measurement_seconds']
-                plan=dict(**trial,design=d,cluster=cluster,app_url=app,load_start_seconds=load_start,
-                    bootstrap_start_seconds=boot_start,measurement_start_seconds=measured,measurement_end_seconds=end,
-                    profile_url=f'http://127.0.0.1:{profile_port}',generator_stats_url=f'http://127.0.0.1:{gen_port}',
-                    controller_stats_url=f'http://127.0.0.1:{ctrl_port}',plumbing_only=plumbing_only)
-                if plumbing_only:plan['measurement_end_seconds']=load_start+300
-                plan_file=run.path/'outputs/plan.json';write_json(plan_file,plan)
-                worker=[sys.executable,'-u','-m','dynapm.system_validation.calibration_workers']
-                spawn(worker+['profile','--plan',str(plan_file),'--root',str(run.path),'--port',str(profile_port)],'profile.log')
-                generator=spawn(worker+['generator','--plan',str(plan_file),'--root',str(run.path),'--port',str(gen_port)],'generator.log')
-                locals_generator[:]=[generator,plan['measurement_end_seconds']]
-                ctrl=spawn(worker+['controller','--plan',str(plan_file),'--root',str(run.path),'--port',str(ctrl_port),'--kubeconfig',str(config)],'controller.log')
-                wait_http(plan['profile_url']+'/healthz');wait_http(plan['generator_stats_url']+'/stats');wait_http(plan['controller_stats_url']+'/stats')
-                next_q=load_start+300;samples=[];initialized=False;accepted=0;missing=0
-                with (run.path/'outputs/telemetry.jsonl').open('a',buffering=1) as raw, (run.path/'outputs/bootstrap_samples.jsonl').open('a',buffering=1) as boot, (run.path/'outputs/bucket_diagnostics.jsonl').open('a',buffering=1) as bd, (run.path/'outputs/overhead.jsonl').open('a',buffering=1) as overhead, (run.path/'outputs/profiles.jsonl').open('a',buffering=1) as profiles, (run.path/'outputs/controller_commands.jsonl').open('a',buffering=1) as requests, (run.path/'outputs/host_diagnostics.jsonl').open('a',buffering=1) as hosts:
-                    while time.time()<plan['measurement_end_seconds']+1:
-                        check()
-                        now=time.time();stage='WAITING' if now<load_start else 'WARMUP' if now<boot_start else 'BOOTSTRAP' if now<measured else 'MEASUREMENT'
-                        if now>=load_start:
-                            try:
-                                observation=receive_observation(app+'/telemetry')
-                            except (OSError,RuntimeError) as exc:write_line(bd,dict(kind='MISSING_TELEMETRY',wall_ns=time.time_ns(),error=str(exc)))
-                            else:
-                                # Evidence/persistence failures abort; never downgrade to missing data.
-                                sample=clock.accept(observation,raw)
-                                if sample['sample_time_ns']<=int(next_q*1e9):samples.append(sample)
-                        if now>=next_q:
-                            payload=None
-                            try:
-                                payload=aggregate_bucket(samples,int((next_q-300)*1e9),int(next_q*1e9),d)
-                            except ValueError as exc:missing+=1;write_line(bd,dict(kind='INVALID_BUCKET',end_ns=int(next_q*1e9),error=str(exc)))
-                            if boot_start<next_q<=measured and payload:
-                                write_line(boot,dict(role='MEASURED_CGROUP_SAMPLES',end_ns=int(next_q*1e9),samples=samples));accepted+=1
-                            if next_q==measured:
-                                before=http(plan['profile_url']+'/healthz');write_line(overhead,dict(phase='measurement_start_before_initialization',profile=before['process'],controller=http(plan['controller_stats_url']+'/stats'),generator=http(plan['generator_stats_url']+'/stats'),prometheus=_prom_process(prom),collector=process_stats()))
-                                initial=http(plan['profile_url']+'/initialize',{});initialized=True
-                                write_json(run.path/'outputs/profile_initial.json',initial)
-                                write_json(run.path/'outputs/bootstrap_summary.json',dict(accepted_slots=initial['accepted_bootstrap_slots'],missing_slots=initial['missing_bootstrap_slots'],evidence_sha256=initial['bootstrap_evidence_sha256'],real_duration_seconds=86400))
-                            elif initialized and payload and next_q<end:http(plan['profile_url']+'/observe',payload)
-                            if initialized:
-                                started=time.time_ns();snapshot=http(plan['profile_url']+'/snapshot')
-                                write_line(profiles,dict(nominal_time_ns=int(next_q*1e9),snapshot=snapshot))
-                                if next_q<end:write_line(requests,dict(nominal_time_ns=int(next_q*1e9),snapshot_read_started_ns=started,snapshot=snapshot))
-                            samples=[];next_q+=300
-                        if time.monotonic()-last_host>=1800:
-                            _clean(repo)
-                            if SourceProvenance.capture(repo).commit!=source.commit:raise ValueError('source_commit_changed_during_calibration')
-                            h=local_host_diagnostics();h['docker_containers']=require_isolated_engine(commands,cluster);write_line(hosts,h);last_host=time.monotonic()
-                            if sys.platform=='darwin' and (not h['power']['available'] or 'AC Power' not in h['power']['stdout']):raise ValueError('mains_power_lost')
-                        if time.monotonic()-last_heartbeat>=30:
-                            status(stage,accepted_bootstrap_slots=accepted,invalid_buckets=missing,
-                                bootstrap_end_seconds=measured,measurement_end_seconds=plan['measurement_end_seconds'],overall_percent=max(0,min(100,(now-load_start)/(plan['measurement_end_seconds']-load_start)*100)))
-                            write_line(overhead,dict(phase=stage,profile=http(plan['profile_url']+'/healthz')['process'],controller=http(plan['controller_stats_url']+'/stats'),generator=http(plan['generator_stats_url']+'/stats'),prometheus=_prom_process(prom),collector=process_stats()))
-                            last_heartbeat=time.monotonic()
-                        if plumbing_only and time.time()>=load_start+300:break
-                        time.sleep(min(5,max(.05,next_q-time.time())))
-                    write_line(requests,dict(stop=True))
-                # Expected exits are checked explicitly; no worker failure is silently accepted.
-                generator.wait(timeout=d['workload']['timeout_seconds']+20);ctrl.wait(timeout=20)
-                if generator.returncode or ctrl.returncode:raise RuntimeError('calibration_worker_failed')
-                children.remove(generator);children.remove(ctrl)
-                verify_request_stream(run.path/'outputs/requests.jsonl',read_json(run.path/'outputs/generator_status.json')['offered'])
-                if plumbing_only:
-                    for name in ('bootstrap_summary','profile_initial','profile_final','attribution'):
-                        write_json(run.path/'outputs'/f'{name}.json',dict(status='NOT_INITIALIZED_PARTIAL_REAL_COLLECTION_ONLY'))
-                    write_json(run.path/'outputs/summary.json',dict(scope='REAL_COLLECTION_SMOKE_NOT_CALIBRATION',real_completed_buckets=accepted,profile_initializations=0,comparisons=0))
-                else:
-                    write_json(run.path/'outputs/profile_final.json',http(plan['profile_url']+'/snapshot'))
-                    write_json(run.path/'outputs/attribution.json',http(plan['profile_url']+'/stats'))
-                    write_json(run.path/'outputs/summary.json',summarize(run.path,plan))
-                write_json(run.path/'outputs/diagnostics.json',dict(operationally_meaningful_benefit='NOT_DEFINED',
-                    method='pw_6h',comparisons_run=0,synthetic_bootstrap_used=False,real_bootstrap_complete=initialized,
-                    host_reserved=False,neutral_trial_measurement_complete=not plumbing_only,source_commit=source.commit))
-                status('FINISHED',calibration_result='PARTIAL_SMOKE' if plumbing_only else 'COMPLETE_NEUTRAL_TRIAL')
-            finally:
-                clock.finalize()
-                for name in ('application','prometheus'):
-                    if config.exists():
-                        try:(run.path/'logs'/f'{name}.log').write_text(kube.call(['logs',name]))
-                        except Exception:pass
-                for p in children:
-                    p.terminate()
-                    try:p.wait(timeout=10)
-                    except subprocess.TimeoutExpired:p.kill();p.wait()
-                for f in handles:f.close()
-                if created:commands.run(['kind','delete','cluster','--name',cluster],log=run.path/'logs/kind.log',timeout=120)
+                last_heartbeat=0;last_host=0;locals_generator=[None,float('inf')]
+                def status(stage,**extra):
+                    value=dict(stage=stage,source_commit=source.commit,run_id=run.manifest.run_id,pid=os.getpid(),
+                        scenario=trial['scenario'],method='pw_6h',block=trial['block'],free_disk_bytes=shutil.disk_usage(repo).free,
+                        wall_time=utc_now(),measurement_complete=(stage=='FINISHED' and not plumbing_only),practical_benefit='NOT_DEFINED',**extra)
+                    write_json(run.path/'outputs/status.json',value)
+                    print(json.dumps(value),flush=True)
+                def check():
+                    if shutil.disk_usage(repo).free<20*2**30:raise ValueError('disk_reserve_exhausted')
+                    power.raise_if_failed()
+                    clock.check_host(time.time_ns(),time.monotonic_ns())
+                    for p in children:
+                        if p.poll() is not None:
+                            if p is locals_generator[0] and p.returncode==0 and time.time()>=locals_generator[1]-1:continue
+                            raise RuntimeError('worker_exited:'+str(p.args[0]))
+                def spawn(args,log):
+                    f=(run.path/'logs'/log).open('a');handles.append(f)
+                    p=subprocess.Popen(args,cwd=repo,env=env,stdout=f,stderr=subprocess.STDOUT);children.append(p);return p
+                try:
+                    cooldown=0 if plumbing_only else d['engineering_plan']['cooldown_seconds']
+                    status('COOLDOWN',seconds_remaining=cooldown)
+                    deadline=time.time()+cooldown
+                    while time.time()<deadline:time.sleep(min(30,max(0,deadline-time.time())));check()
+                    require_isolated_engine(commands)
+                    if cluster in commands.run(['kind','get','clusters']).splitlines():raise ValueError('preexisting_cluster_preserved')
+                    created=True
+                    commands.run(['kind','create','cluster','--name',cluster,'--config','harness/system/kind.yaml','--kubeconfig',str(config),'--wait','120s'],log=run.path/'logs/kind.log',timeout=300)
+                    config.chmod(0o600);guard_local_api(kube.call(['config','view','--minify','-o','jsonpath={.clusters[0].cluster.server}']))
+                    version=json.loads(kube.call(['version','-o','json']))
+                    if version['serverVersion']['gitVersion']!=d['kubernetes']['server_version']:raise ValueError('server_version_mismatch')
+                    details.update(kubernetes=version,nodes=json.loads(kube.call(['get','nodes','-o','json'])),host_context=host)
+                    write_json(run.path/'outputs/runtime_environment.json',details)
+                    for image in (d['kubernetes']['application_image'],d['kubernetes']['prometheus_local_image']):commands.run(['kind','load','docker-image',image,'--name',cluster],log=run.path/'logs/kind.log')
+                    manifests=resource_manifests(d)
+                    for item in manifests['items']:
+                        if item['kind']=='Pod':item['metadata']['labels']={'app':'dynapm-workload' if item['metadata']['name']=='application' else 'dynapm-prometheus'}
+                    write_json(run.path/'outputs/resources.json',manifests)
+                    kube.call(['apply','-f',str(run.path/'outputs/resources.json')],log=run.path/'logs/kind.log')
+                    kube.call(['wait','--for=condition=Ready','pod/application','pod/prometheus','--timeout=120s'],log=run.path/'logs/kind.log',timeout=150)
+                    write_json(run.path/'outputs/resize_preflight.json',resize_preflight(kube,d))
+                    app_port,prom_port,profile_port,gen_port,ctrl_port=[free_port() for _ in range(5)]
+                    prefix=['kubectl','--kubeconfig',str(config),'--context','kind-'+cluster,'-n',d['kubernetes']['namespace']]
+                    spawn(prefix+['port-forward','service/application',f'{app_port}:8080','--address','127.0.0.1'],'app_portforward.log')
+                    spawn(prefix+['port-forward','service/prometheus',f'{prom_port}:9090','--address','127.0.0.1'],'prom_portforward.log')
+                    app=f'http://127.0.0.1:{app_port}';prom=f'http://127.0.0.1:{prom_port}'
+                    wait_http(app+'/healthz');wait_http(prom+'/-/ready')
+                    load_start=(int(time.time())//300+1)*300
+                    boot_start=load_start+(0 if plumbing_only else d['engineering_plan']['warmup_seconds'])
+                    measured=boot_start+d['bootstrap']['duration_seconds'];end=measured+d['engineering_plan']['measurement_seconds']
+                    plan=dict(**trial,design=d,cluster=cluster,app_url=app,load_start_seconds=load_start,
+                        bootstrap_start_seconds=boot_start,measurement_start_seconds=measured,measurement_end_seconds=end,
+                        profile_url=f'http://127.0.0.1:{profile_port}',generator_stats_url=f'http://127.0.0.1:{gen_port}',
+                        controller_stats_url=f'http://127.0.0.1:{ctrl_port}',plumbing_only=plumbing_only)
+                    if plumbing_only:plan['measurement_end_seconds']=load_start+300
+                    plan_file=run.path/'outputs/plan.json';write_json(plan_file,plan)
+                    worker=[sys.executable,'-u','-m','dynapm.system_validation.calibration_workers']
+                    spawn(worker+['profile','--plan',str(plan_file),'--root',str(run.path),'--port',str(profile_port)],'profile.log')
+                    generator=spawn(worker+['generator','--plan',str(plan_file),'--root',str(run.path),'--port',str(gen_port)],'generator.log')
+                    locals_generator[:]=[generator,plan['measurement_end_seconds']]
+                    ctrl=spawn(worker+['controller','--plan',str(plan_file),'--root',str(run.path),'--port',str(ctrl_port),'--kubeconfig',str(config)],'controller.log')
+                    wait_http(plan['profile_url']+'/healthz');wait_http(plan['generator_stats_url']+'/stats');wait_http(plan['controller_stats_url']+'/stats')
+                    next_q=load_start+300;samples=[];initialized=False;accepted=0;missing=0
+                    with (run.path/'outputs/telemetry.jsonl').open('a',buffering=1) as raw, (run.path/'outputs/bootstrap_samples.jsonl').open('a',buffering=1) as boot, (run.path/'outputs/bucket_diagnostics.jsonl').open('a',buffering=1) as bd, (run.path/'outputs/overhead.jsonl').open('a',buffering=1) as overhead, (run.path/'outputs/profiles.jsonl').open('a',buffering=1) as profiles, (run.path/'outputs/controller_commands.jsonl').open('a',buffering=1) as requests, (run.path/'outputs/host_diagnostics.jsonl').open('a',buffering=1) as hosts:
+                        while time.time()<plan['measurement_end_seconds']+1:
+                            check()
+                            now=time.time();stage='WAITING' if now<load_start else 'WARMUP' if now<boot_start else 'BOOTSTRAP' if now<measured else 'MEASUREMENT'
+                            if now>=load_start:
+                                try:
+                                    observation=receive_observation(app+'/telemetry')
+                                except (OSError,RuntimeError) as exc:write_line(bd,dict(kind='MISSING_TELEMETRY',wall_ns=time.time_ns(),error=str(exc)))
+                                else:
+                                    # Evidence/persistence failures abort; never downgrade to missing data.
+                                    sample=clock.accept(observation,raw)
+                                    if sample['sample_time_ns']<=int(next_q*1e9):samples.append(sample)
+                            if now>=next_q:
+                                payload=None
+                                try:
+                                    payload=aggregate_bucket(samples,int((next_q-300)*1e9),int(next_q*1e9),d)
+                                except ValueError as exc:missing+=1;write_line(bd,dict(kind='INVALID_BUCKET',end_ns=int(next_q*1e9),error=str(exc)))
+                                if boot_start<next_q<=measured and payload:
+                                    write_line(boot,dict(role='MEASURED_CGROUP_SAMPLES',end_ns=int(next_q*1e9),samples=samples));accepted+=1
+                                if next_q==measured:
+                                    before=http(plan['profile_url']+'/healthz');write_line(overhead,dict(phase='measurement_start_before_initialization',profile=before['process'],controller=http(plan['controller_stats_url']+'/stats'),generator=http(plan['generator_stats_url']+'/stats'),prometheus=_prom_process(prom),collector=process_stats()))
+                                    initial=http(plan['profile_url']+'/initialize',{});initialized=True
+                                    write_json(run.path/'outputs/profile_initial.json',initial)
+                                    write_json(run.path/'outputs/bootstrap_summary.json',dict(accepted_slots=initial['accepted_bootstrap_slots'],missing_slots=initial['missing_bootstrap_slots'],evidence_sha256=initial['bootstrap_evidence_sha256'],real_duration_seconds=86400))
+                                elif initialized and payload and next_q<end:http(plan['profile_url']+'/observe',payload)
+                                if initialized:
+                                    started=time.time_ns();snapshot=http(plan['profile_url']+'/snapshot')
+                                    write_line(profiles,dict(nominal_time_ns=int(next_q*1e9),snapshot=snapshot))
+                                    if next_q<end:write_line(requests,dict(nominal_time_ns=int(next_q*1e9),snapshot_read_started_ns=started,snapshot=snapshot))
+                                samples=[];next_q+=300
+                            if time.monotonic()-last_host>=1800:
+                                _clean(repo)
+                                if SourceProvenance.capture(repo).commit!=source.commit:raise ValueError('source_commit_changed_during_calibration')
+                                h=local_host_diagnostics();h['docker_containers']=require_isolated_engine(commands,cluster);write_line(hosts,h);last_host=time.monotonic()
+                                if sys.platform=='darwin' and (not h['power']['available'] or 'AC Power' not in h['power']['stdout']):raise ValueError('mains_power_lost')
+                            if time.monotonic()-last_heartbeat>=30:
+                                status(stage,accepted_bootstrap_slots=accepted,invalid_buckets=missing,
+                                    bootstrap_end_seconds=measured,measurement_end_seconds=plan['measurement_end_seconds'],overall_percent=max(0,min(100,(now-load_start)/(plan['measurement_end_seconds']-load_start)*100)))
+                                write_line(overhead,dict(phase=stage,profile=http(plan['profile_url']+'/healthz')['process'],controller=http(plan['controller_stats_url']+'/stats'),generator=http(plan['generator_stats_url']+'/stats'),prometheus=_prom_process(prom),collector=process_stats()))
+                                last_heartbeat=time.monotonic()
+                            if plumbing_only and time.time()>=load_start+300:break
+                            time.sleep(min(5,max(.05,next_q-time.time())))
+                        write_line(requests,dict(stop=True))
+                    # Expected exits are checked explicitly; no worker failure is silently accepted.
+                    generator.wait(timeout=d['workload']['timeout_seconds']+20);ctrl.wait(timeout=20)
+                    if generator.returncode or ctrl.returncode:raise RuntimeError('calibration_worker_failed')
+                    children.remove(generator);children.remove(ctrl)
+                    verify_request_stream(run.path/'outputs/requests.jsonl',read_json(run.path/'outputs/generator_status.json')['offered'])
+                    if plumbing_only:
+                        for name in ('bootstrap_summary','profile_initial','profile_final','attribution'):
+                            write_json(run.path/'outputs'/f'{name}.json',dict(status='NOT_INITIALIZED_PARTIAL_REAL_COLLECTION_ONLY'))
+                        write_json(run.path/'outputs/summary.json',dict(scope='REAL_COLLECTION_SMOKE_NOT_CALIBRATION',real_completed_buckets=accepted,profile_initializations=0,comparisons=0))
+                    else:
+                        write_json(run.path/'outputs/profile_final.json',http(plan['profile_url']+'/snapshot'))
+                        write_json(run.path/'outputs/attribution.json',http(plan['profile_url']+'/stats'))
+                        write_json(run.path/'outputs/summary.json',summarize(run.path,plan))
+                    write_json(run.path/'outputs/diagnostics.json',dict(operationally_meaningful_benefit='NOT_DEFINED',
+                        method='pw_6h',comparisons_run=0,synthetic_bootstrap_used=False,real_bootstrap_complete=initialized,
+                        host_reserved=False,neutral_trial_measurement_complete=not plumbing_only,source_commit=source.commit))
+                    status('FINISHED',calibration_result='PARTIAL_SMOKE' if plumbing_only else 'COMPLETE_NEUTRAL_TRIAL')
+                finally:
+                    clock.finalize()
+                    for name in ('application','prometheus'):
+                        if config.exists():
+                            try:(run.path/'logs'/f'{name}.log').write_text(kube.call(['logs',name]))
+                            except Exception:pass
+                    for p in children:
+                        p.terminate()
+                        try:p.wait(timeout=10)
+                        except subprocess.TimeoutExpired:p.kill();p.wait()
+                    for f in handles:f.close()
+                    if created:commands.run(['kind','delete','cluster','--name',cluster],log=run.path/'logs/kind.log',timeout=120)
             run.complete()
             return run.path
 
 
-def campaign(repo,*,maximum_trials=6):
+def campaign(repo,*,maximum_trials=6,host_endurance_run=None):
     """At most the six predeclared neutral trials; stop on first failed attempt."""
     from dynapm.system_validation.system_estimation import calibration_noise
     repo=Path(repo).resolve();d=frozen_spec(repo);_clean(repo)
+    require_endurance(repo,host_endurance_run)
     if type(maximum_trials) is not int or not 1<=maximum_trials<=6:raise ValueError('neutral_campaign_cap_1_to_6')
     root=repo/'results/system_calibration';root.mkdir(parents=True,exist_ok=True)
     active=root/'ACTIVE.json'
@@ -363,7 +374,7 @@ def campaign(repo,*,maximum_trials=6):
     try:
         for trial in calibration_plan(repo)[:maximum_trials]:
             state['attempted_runs']+=1;state['current_trial']=trial;write_json(record,state)
-            path=run_trial(repo,trial)
+            path=run_trial(repo,trial,host_endurance_run=host_endurance_run)
             manifest=read_json(path/'manifest.json')
             state['completed_runs'].append(dict(run_path=str(path.relative_to(repo)),run_id=manifest['run_id'],
                 experiment_fingerprint=manifest['experiment_fingerprint'],output_manifest_sha256=manifest['output_manifest_sha256']))

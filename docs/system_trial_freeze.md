@@ -238,3 +238,12 @@ record local wall/monotonic timing. This amendment changes diagnostics/source
 identity, not the methods, controller, bootstrap or measurement duration. A
 replacement is limited to one PW-6h stable anchor after a successful managed
 plumbing check; no automatic second long replicate is authorized.
+
+## V7C.3 execution-host gate
+
+V7C.2 failed during confirmed clamshell sleep on battery, before bootstrap.
+See [host execution contract](host_execution.md). Runtime hardening adds owned
+verified assertions and an independent continuity monitor; scientific clock
+checks, methods, scenarios, controller and durations remain unchanged. Another
+long run requires a completed current-source >=3h managed host observation and
+separate execution authorization. Endurance validation is pending; V8 stays shut.
