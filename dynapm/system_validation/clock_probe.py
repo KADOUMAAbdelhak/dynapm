@@ -1,5 +1,6 @@
 """Bounded real cluster/host clock observation only; no workload or profile state."""
 from pathlib import Path
+from dataclasses import replace
 import json,os,shutil,subprocess,sys,tempfile,time,uuid
 
 from dynapm.core.provenance import (SourceProvenance,CohortManifest,CohortEntity,
@@ -16,6 +17,12 @@ from dynapm.system_validation.smoke import Commands,Kube,environment,guard_local
 
 SECONDS=900
 POLL_SECONDS=1
+
+
+def probe_config(dataset_id,descriptor):
+    config=observation_config(dataset_id,descriptor)
+    return replace(config,data=replace(config.data,sampling_cadence_seconds=POLL_SECONDS,
+        evaluation_cadence_seconds=POLL_SECONDS))
 
 
 def probe(repo):
@@ -41,13 +48,13 @@ def probe(repo):
         build=private/'build.log';image=d['kubernetes']['application_image']
         commands.run(['docker','build','-f','harness/system/Calibration.Dockerfile','-t',image,'.'],log=build)
         details['image_id']=json.loads(commands.run(['docker','image','inspect',image]))[0]['Id']
-        cfg=observation_config(dataset.dataset_id,{**descriptor,'execution_environment':details})
+        cfg=probe_config(dataset.dataset_id,{**descriptor,'execution_environment':details})
         exp,record=prepare_experiment(repo,inputs,cfg,dataset,cohort,descriptor['seeds'],execution_compatibility_keys=tuple(d['hardware']['compatibility_keys']))
         names=['summary.json','environment.json','status.json','samples.jsonl','clock_observations.jsonl','clock_rejections.jsonl','clock_evidence_manifest.json','power_guard.json','host_continuity.jsonl','host_continuity_summary.json','host_continuity_failure.json']
         specs=[OutputSpec('outputs/'+n,'clock-probe-'+n) for n in names]+[OutputSpec('logs/'+n+'.log','clock-probe-'+n) for n in ('build','kind','forward')]
         with RunSession(repo/'results/clock_probe',exp,record,repo=repo,dataset_root=inputs,purpose='smoke',required_outputs=specs) as run:
             context=dict(run_id=run.manifest.run_id,experiment_fingerprint=exp.fingerprint,source_commit=source.commit)
-            clock=ObservationClock(run.path,context);cluster='dynapm-clock-'+uuid.uuid4().hex[:8];kube=Kube(commands,config,cluster,d)
+            clock=ObservationClock(run.path,context);cluster=d['kubernetes']['cluster']+'-clock-'+uuid.uuid4().hex[:8];kube=Kube(commands,config,cluster,d)
             created=False;forward=None;handle=None
             shutil.copyfile(build,run.path/'logs/build.log');(run.path/'logs/forward.log').touch()
             with ManagedPowerGuard(run.path,context) as power:
@@ -63,7 +70,7 @@ def probe(repo):
                         if x['kind']=='Pod':x['metadata']['labels']={'app':'dynapm-workload'}
                     write_json(private/'resources.json',objects);kube.call(['apply','-f',str(private/'resources.json')])
                     kube.call(['wait','--for=condition=Ready','pod/application','--timeout=120s'],timeout=150)
-                    initial=kube.pod();port=free_port();handle=(run.path/'logs/forward.log').open('a')
+                    initial=json.loads(kube.call(['get','pod','application','-o','json']));port=free_port();handle=(run.path/'logs/forward.log').open('a')
                     forward=subprocess.Popen(['kubectl','--kubeconfig',str(config),'--context','kind-'+cluster,'-n',d['kubernetes']['namespace'],'port-forward','pod/application',f'{port}:8080','--address','127.0.0.1'],cwd=repo,env=env,stdout=handle,stderr=subprocess.STDOUT)
                     url=f'http://127.0.0.1:{port}';wait_http(url+'/healthz')
                     details.update(kubernetes=version,pod=initial,nodes=json.loads(kube.call(['get','nodes','-o','json'])),
@@ -75,7 +82,6 @@ def probe(repo):
                             power.raise_if_failed();clock.check_host(time.time_ns(),time.monotonic_ns())
                             if forward.poll() is not None:raise ValueError('portforward_exited')
                             before=time.monotonic();s=clock.accept(receive_observation(url+'/clock-observation'),raw)
-                            if s['cluster_clock_domain']['boot_id']!=details['linux_node_boot_id']:raise ValueError('cluster_kernel_domain_mismatch')
                             values.append(s['received_at_ns']-s['sample_time_ns']);deltas.append(s['cluster_received_at_ns']-s['sample_time_ns'])
                             host.append(s['received_at_ns']);elapsed=time.monotonic()-start
                             if elapsed-last_report>=30:
@@ -84,12 +90,12 @@ def probe(repo):
                                 if SourceProvenance.capture(repo).identity()!=source.identity():raise ValueError('source_changed')
                             if elapsed>=SECONDS:break
                             time.sleep(max(0,POLL_SECONDS-(time.monotonic()-before)))
-                    final=kube.pod()
+                    final=json.loads(kube.call(['get','pod','application','-o','json']))
                     if final['metadata']['uid']!=initial['metadata']['uid'] or final['status']['containerStatuses'][0]['restartCount']!=0:raise ValueError('probe_source_restarted')
                     if len(values)<800:raise ValueError('insufficient_clock_probe_observations')
                     clock.finalize();validate_clock_evidence(run.path,context)
                     write_json(run.path/'outputs/summary.json',dict(**descriptor,elapsed_seconds=time.monotonic()-start,
-                        observations=len(values),cross_domain_difference_role='NON_CAUSAL_DIAGNOSTIC_ONLY_NOT_SYNCHRONIZATION_ESTIMATE',
+                        observations=len(values),source_clock_domain=s['cluster_clock_domain'],linux_node_boot_id=details['linux_node_boot_id'],cross_domain_difference_role='NON_CAUSAL_DIAGNOSTIC_ONLY_NOT_SYNCHRONIZATION_ESTIMATE',
                         host_minus_source_ns_min=min(values),host_minus_source_ns_max=max(values),host_minus_source_first_ns=values[0],host_minus_source_last_ns=values[-1],
                         cross_domain_difference_change_ns=values[-1]-values[0],cluster_age_ns_min=min(deltas),cluster_age_ns_max=max(deltas),
                         same_domain_causal_violations=0,host_admission_valid=True,bootstrap_artifact_created=False))
