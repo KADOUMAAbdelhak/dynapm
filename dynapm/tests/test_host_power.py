@@ -1,6 +1,7 @@
 """Deterministic OS fixtures only; never change real power settings."""
 import json
 import os
+import plistlib
 import time
 from pathlib import Path
 
@@ -20,9 +21,11 @@ class Host:
     def __init__(self):
         self.active=False;self.ac=True;self.lid='No';self.boot=1700000000
         self.missing=False;self.calls=[];self.spawned=[]
+        self.cell=dict(ExternalConnected=True,ExternalChargeCapable=True,IsCharging=True,CurrentCapacity=86,Amperage=300)
     def read(self,args):
         self.calls.append(args)
         if args[-1]=='batt':return "Now drawing from 'AC Power'\n" if self.ac else "Now drawing from 'Battery Power'\n"
+        if args[-1]=='AppleSmartBattery':return plistlib.dumps([self.cell]).decode()
         if args[0].endswith('ioreg'):return '"AppleClamshellState" = '+self.lid
         if args[-1]=='kern.boottime':return '{ sec = '+str(self.boot)+', usec = 1 }'
         if args[-1]=='custom':return 'AC Power:\n sleep 0\n displaysleep 0\n'
@@ -214,3 +217,44 @@ def test_host_observation_managed_identity_has_explicit_seeds(tmp_path,monkeypat
     exp,_=prepare_experiment(Path(__file__).parents[2],raw,config,dataset,cohort,config.preprocessing['seeds'])
     assert len(exp.fingerprint)==64 and exp.seeds=={'host_observation':0}
     assert not exp.config.policies
+
+
+@pytest.mark.parametrize('charging',[True,False])
+def test_external_ac_independent_of_cell_charging(charging):
+    h=Host();h.cell.update(IsCharging=charging,Amperage=0)
+    h.cell['ChargerData']={'NotChargingReason':16777216 if not charging else 0}
+    state=power_state(h.read)
+    assert state['ac_power'] and state['battery_diagnostics']['IsCharging']==charging
+    assert state['battery_diagnostics']['CurrentCapacity']==86
+
+
+def test_adapter_disconnected_despite_ac_label_fails():
+    h=Host();h.cell['ExternalConnected']=False
+    with pytest.raises(PowerGuardError,match='external_adapter_disconnected'):power_state(h.read)
+
+
+def test_corroborated_battery_drain_despite_ac_label_fails():
+    h=Host();h.cell.update(IsCharging=False,InstantAmperage=-352,
+        PowerTelemetryData={'BatteryPower':-4271,'SystemPowerIn':221,'SystemLoad':4492})
+    with pytest.raises(PowerGuardError,match='external_power_insufficient_battery_draining'):power_state(h.read)
+
+
+def test_charging_hold_still_detects_ac_to_battery_transition(tmp_path):
+    h=Host();h.cell.update(IsCharging=False,Amperage=0)
+    with pytest.raises(PowerGuardError,match='mains_power_lost'):
+        with guard(tmp_path,h) as g:
+            h.ac=False;g.checkpoint(force_power=True)
+    assert not h.active
+
+
+def test_adapter_disconnect_during_observation_is_latched(tmp_path):
+    h=Host()
+    with pytest.raises(PowerGuardError,match='external_adapter_disconnected'):
+        with guard(tmp_path,h) as g:
+            h.cell['ExternalConnected']=False;g.checkpoint(force_power=True)
+    assert read_json(tmp_path/'outputs/power_guard.json')['release_confirmed']
+
+
+def test_missing_external_adapter_diagnostic_fails_closed():
+    h=Host();del h.cell['ExternalConnected']
+    with pytest.raises(PowerGuardError,match='battery_diagnostics_unavailable'):power_state(h.read)

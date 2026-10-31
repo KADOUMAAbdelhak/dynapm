@@ -4,6 +4,7 @@ Assertions prevent ordinary idle sleep, not lid-close/forced sleep. AC and an op
 lid are required. No global power setting or scientific clock tolerance changes.
 """
 import os
+import plistlib
 import re
 import subprocess
 import sys
@@ -33,6 +34,26 @@ def command(args):
     return p.stdout
 
 
+def battery_diagnostics(read=command):
+    """External supply and cell charging are independent; never infer AC from charging."""
+    try:
+        rows=plistlib.loads(read(['/usr/sbin/ioreg','-a','-r','-c','AppleSmartBattery']).encode())
+        b=rows[0]
+        keys=('ExternalConnected','ExternalChargeCapable','IsCharging','FullyCharged',
+              'CurrentCapacity','Amperage','InstantAmperage','AdapterDetails','ChargerData','PowerTelemetryData')
+        def serial(value):
+            if isinstance(value,bytes):return value.hex()
+            if isinstance(value,dict):return {k:serial(v) for k,v in value.items()}
+            if isinstance(value,list):return [serial(v) for v in value]
+            return value
+        result={k:serial(b[k]) for k in keys if k in b}
+        if type(result.get('ExternalConnected')) is not bool:
+            raise ValueError('external_adapter_state_missing')
+        return result
+    except (ValueError,IndexError,KeyError,TypeError,plistlib.InvalidFileException) as exc:
+        raise PowerGuardError('battery_diagnostics_unavailable:'+str(exc)) from exc
+
+
 def power_state(read=command):
     battery=read(['/usr/bin/pmset','-g','batt'])
     lid=read(['/usr/sbin/ioreg','-r','-k','AppleClamshellState','-d','4'])
@@ -44,7 +65,20 @@ def power_state(read=command):
     if closed.group(1)!='No':raise PowerGuardError('lid_closed')
     epoch=re.search(r'\bsec\s*=\s*(\d+)',boot)
     if not epoch:raise PowerGuardError('boot_identity_unavailable')
-    return dict(ac_power=True,lid_open=True,boot_epoch_seconds=int(epoch.group(1)),battery=battery.strip())
+    diagnostics=battery_diagnostics(read)
+    evidence=canonical_json(diagnostics)
+    if not diagnostics['ExternalConnected']:
+        raise PowerGuardError('external_adapter_disconnected:'+evidence)
+    # A charging hold alone is allowed. Corroborated battery drain while input
+    # power is below system load is unsafe even if pmset still labels it AC.
+    telemetry=diagnostics.get('PowerTelemetryData',{})
+    current=diagnostics.get('InstantAmperage',diagnostics.get('Amperage'))
+    measured=[current,telemetry.get('BatteryPower'),telemetry.get('SystemPowerIn'),telemetry.get('SystemLoad')]
+    if all(isinstance(v,(int,float)) for v in measured):
+        if current<0 and telemetry['BatteryPower']<0 and telemetry['SystemPowerIn']<telemetry['SystemLoad']:
+            raise PowerGuardError('external_power_insufficient_battery_draining:'+evidence)
+    return dict(ac_power=True,lid_open=True,boot_epoch_seconds=int(epoch.group(1)),
+                battery=battery.strip(),battery_diagnostics=diagnostics)
 
 
 def assertion_lines(text,pid):

@@ -166,3 +166,24 @@ system calibration/precision planning. Do not transfer Mac timing measurements.
 V7C.6 changes cluster telemetry reception, not host continuity limits. See
 [clock-domain contract](system_clock_domains.md). No bootstrap acquisition is
 automatically launched by clock validation.
+
+## External supply versus battery charging
+
+Host eligibility requires both an attached external adapter and macOS reporting
+AC as the active system source. Cell `IsCharging` is diagnostic, not an eligibility
+condition: charging holds and charge limits are allowed. The prior operator
+preflight that required charging was too strict; the original frozen power gate
+itself already checked AC rather than charging.
+
+The guard now records AppleSmartBattery external/charging state, battery percent,
+current, adapter, charger and power telemetry at each power check. A negative cell
+current corroborated by negative battery power and measured external input below
+system load fails closed as `external_power_insufficient_battery_draining`, even
+if the OS still labels the source AC. Opaque charger reason codes are preserved;
+no undocumented code meaning is inferred. Missing external-adapter diagnostics
+fail closed. No global battery or power settings are changed.
+
+AC loss, closed lid, owned assertion loss, boot changes, unchanged power policy,
+2s wall/monotonic discrepancy and 30s checkpoint-gap limits remain enforced.
+Changed host-runtime code requires a fresh endurance observation; old observations
+retain their original source identities and are not made compatible by this fix.
