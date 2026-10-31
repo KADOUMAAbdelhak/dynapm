@@ -258,3 +258,23 @@ def test_adapter_disconnect_during_observation_is_latched(tmp_path):
 def test_missing_external_adapter_diagnostic_fails_closed():
     h=Host();del h.cell['ExternalConnected']
     with pytest.raises(PowerGuardError,match='battery_diagnostics_unavailable'):power_state(h.read)
+
+
+
+def test_explicit_power_deviation_records_deficit_but_preserves_runtime_gates(tmp_path):
+    h=Host();h.cell.update(IsCharging=False,InstantAmperage=-352,
+        PowerTelemetryData={'BatteryPower':-4271,'SystemPowerIn':221,'SystemLoad':4492})
+    with pytest.raises(PowerGuardError,match='mains_power_lost'):
+        with guard(tmp_path,h,allow_external_power_deficit=True) as g:
+            assert g.cached['external_power_deficit_observed'] is True
+            assert g.cached['authorized_external_power_deficit'] is True
+            h.ac=False;g.checkpoint(force_power=True)
+    assert not h.active
+
+
+@pytest.mark.parametrize('field,value,reason',[('lid','Yes','lid_closed'),('missing',True,'owned_power_assertion_missing'),('boot',1700000001,'host_boot_identity_changed')])
+def test_power_deviation_does_not_waive_lid_assertion_boot(tmp_path,field,value,reason):
+    h=Host()
+    with pytest.raises(PowerGuardError,match=reason):
+        with guard(tmp_path,h,allow_external_power_deficit=True) as g:
+            setattr(h,field,value);g.checkpoint(force_power=True)

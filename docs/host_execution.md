@@ -187,3 +187,21 @@ AC loss, closed lid, owned assertion loss, boot changes, unchanged power policy,
 2s wall/monotonic discrepancy and 30s checkpoint-gap limits remain enforced.
 Changed host-runtime code requires a fresh endurance observation; old observations
 retain their original source identities and are not made compatible by this fix.
+
+## Explicit single-acquisition host deviation
+
+A separately authorized bootstrap-only pilot may use a one-use provenance record
+via `task34 --authorized-host-deviation`. This records acceptance of measured
+battery drain on AC and the absence of current-boot endurance qualification.
+It is not a host endurance PASS. The record is bound to clean source and boot
+UUID, consumed exclusively even on startup failure, and copied with its hash into
+the acquisition configuration and plan. It cannot authorize calibration, smoke,
+comparative methods or repeated acquisition. Strict defaults remain unchanged.
+
+This path records external-power deficit as a monitored diagnostic rather than a
+failure. AC/adapter disconnect, lid closure, assertion loss, unchanged power-policy,
+boot and wall/monotonic continuity, causal/age, telemetry and integrity gates remain
+active. It creates no automatic claim eligibility: final scientific data validity
+and the explicit host-condition deviation require separate terminal dispositions.
+The operator has authorized one 24h bootstrap under this exception; no bootstrap,
+probe or comparative follow-up is automatically authorized.

@@ -54,7 +54,7 @@ def battery_diagnostics(read=command):
         raise PowerGuardError('battery_diagnostics_unavailable:'+str(exc)) from exc
 
 
-def power_state(read=command):
+def power_state(read=command,*,allow_external_power_deficit=False):
     battery=read(['/usr/bin/pmset','-g','batt'])
     lid=read(['/usr/sbin/ioreg','-r','-k','AppleClamshellState','-d','4'])
     boot=read(['/usr/sbin/sysctl','-n','kern.boottime'])
@@ -74,11 +74,15 @@ def power_state(read=command):
     telemetry=diagnostics.get('PowerTelemetryData',{})
     current=diagnostics.get('InstantAmperage',diagnostics.get('Amperage'))
     measured=[current,telemetry.get('BatteryPower'),telemetry.get('SystemPowerIn'),telemetry.get('SystemLoad')]
+    deficit=False
     if all(isinstance(v,(int,float)) for v in measured):
         if current<0 and telemetry['BatteryPower']<0 and telemetry['SystemPowerIn']<telemetry['SystemLoad']:
-            raise PowerGuardError('external_power_insufficient_battery_draining:'+evidence)
+            deficit=True
+            if not allow_external_power_deficit:
+                raise PowerGuardError('external_power_insufficient_battery_draining:'+evidence)
     return dict(ac_power=True,lid_open=True,boot_epoch_seconds=int(epoch.group(1)),
-                battery=battery.strip(),battery_diagnostics=diagnostics)
+                battery=battery.strip(),battery_diagnostics=diagnostics,external_power_deficit_observed=deficit,
+                authorized_external_power_deficit=allow_external_power_deficit)
 
 
 def assertion_lines(text,pid):
@@ -93,8 +97,9 @@ def own_assertions(text,pid):
 
 
 class ManagedPowerGuard:
-    def __init__(self,root,context,*,read=command,spawn=None,platform=None,background=True,startup_timeout=5):
+    def __init__(self,root,context,*,read=command,spawn=None,platform=None,background=True,startup_timeout=5,allow_external_power_deficit=False):
         self.root=Path(root);self.out=self.root/'outputs';self.context=dict(context)
+        self.allow_external_power_deficit=allow_external_power_deficit
         self.read=read;self.spawn=spawn or subprocess.Popen;self.platform=platform or sys.platform
         self.background=background;self.startup_timeout=startup_timeout
         self.process=None;self.thread=None;self.stop_event=threading.Event();self.lock=threading.Lock()
@@ -119,7 +124,7 @@ class ManagedPowerGuard:
     def _snapshot(self):
         if self.process is None or self.process.poll() is not None:
             raise PowerGuardError('power_assertion_process_exited')
-        state=power_state(self.read)
+        state=power_state(self.read,allow_external_power_deficit=self.allow_external_power_deficit)
         settings=self.read(['/usr/bin/pmset','-g','custom'])
         if settings!=self.state['power_settings']:raise PowerGuardError('host_power_policy_changed')
         state['power_settings_sha256']=fingerprint(settings)
@@ -179,10 +184,11 @@ class ManagedPowerGuard:
         write_json(self.failure_path,dict(schema_version=SCHEMA,context=self.context,status='NO_FAILURE'))
         self.state=dict(schema_version=SCHEMA,context=self.context,owner_pid=os.getpid(),assertion_pid=None,
             assertion_types=list(TYPES),flags=['-i','-s','-w'],started_at=utc_now(),ended_at=None,
-            status='PREFLIGHT',release_confirmed=False)
+            status='PREFLIGHT',release_confirmed=False,
+            authorized_external_power_deficit=self.allow_external_power_deficit)
         try:
             # No workload may start until power/lid and this exact child's assertions validate.
-            power_state(self.read)
+            power_state(self.read,allow_external_power_deficit=self.allow_external_power_deficit)
             self.state['power_settings']=self.read(['/usr/bin/pmset','-g','custom'])
             args=['/usr/bin/caffeinate','-i','-s','-w',str(os.getpid())]
             self.process=self.spawn(args,stdin=subprocess.DEVNULL,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL,

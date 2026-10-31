@@ -15,11 +15,14 @@ def main():
     mode.add_argument('--run-calibration',action='store_true',help='six maximum independent PW6 stable/periodic trials; >=18 days sequential')
     parser.add_argument('--maximum-trials',type=int,default=6)
     parser.add_argument('--host-endurance-run',type=Path,help='validated compatible-host-runtime managed >=3h host observation required for long trials')
+    parser.add_argument('--authorized-host-deviation',type=Path,help='explicit one-use bootstrap-only host exception record; not endurance qualification or claim approval')
     args=parser.parse_args();d=frozen_spec(args.repo)
+    if args.authorized_host_deviation is not None and not args.collect_bootstrap_only:
+        parser.error('--authorized-host-deviation requires --collect-bootstrap-only')
     def terminate(signum,frame):raise KeyboardInterrupt('calibration_termination_requested')
     signal.signal(signal.SIGTERM,terminate)
     if args.plumbing_check:result=dict(run_path=str(run_trial(args.repo,calibration_plan(args.repo)[0],plumbing_only=True)))
-    elif args.collect_bootstrap_only:result=dict(run_path=str(run_trial(args.repo,calibration_plan(args.repo)[0],bootstrap_only=True,host_endurance_run=args.host_endurance_run)))
+    elif args.collect_bootstrap_only:result=dict(run_path=str(run_trial(args.repo,calibration_plan(args.repo)[0],bootstrap_only=True,host_endurance_run=args.host_endurance_run,authorized_host_deviation=args.authorized_host_deviation)))
     elif args.run_calibration:result=dict(campaign_record=str(campaign(args.repo,maximum_trials=args.maximum_trials,host_endurance_run=args.host_endurance_run)))
     else:result=dict(status='ESTIMATION_FIRST_CALIBRATION_REQUIRED',design_sha256=fingerprint(d),
         plan=calibration_plan(args.repo),practical_benefit='NOT_DEFINED',comparative_execution_enabled=False)

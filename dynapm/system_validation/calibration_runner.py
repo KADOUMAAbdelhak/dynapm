@@ -161,9 +161,33 @@ def summarize(root,plan):
     return row
 
 
-def run_trial(repo,trial,*,plumbing_only=False,host_endurance_run=None,bootstrap_only=False):
+def consume_host_deviation(repo,record,*,bootstrap_only,plumbing_only):
+    """Explicit one-use bootstrap-only operator exception, never an endurance PASS."""
+    if not bootstrap_only or plumbing_only:raise ValueError('host_deviation_bootstrap_only_required')
+    repo=Path(repo).resolve();path=Path(record).resolve()
+    if not path.is_relative_to(repo/'results/shared_bootstrap') or path.is_symlink():
+        raise ValueError('managed_host_deviation_record_required')
+    value=read_json(path)
+    expected=dict(schema_version='authorized-bootstrap-host-deviation-v1',maximum_acquisitions=1,
+        allow_external_power_deficit=True,current_boot_endurance_waived=True,
+        claim_eligible=False,source_commit=SourceProvenance.capture(repo).commit)
+    if any(value.get(k)!=v for k,v in expected.items()):raise ValueError('invalid_host_deviation_authorization')
+    boot=subprocess.check_output(['/usr/sbin/sysctl','-n','kern.bootsessionuuid'],text=True).strip()
+    if value.get('boot_uuid')!=boot:raise ValueError('host_deviation_boot_mismatch')
+    # Exclusive and persistent: a failed startup consumes this authorization too.
+    with path.with_suffix('.consumed').open('x') as marker:
+        marker.write(json.dumps(dict(record_sha256=file_sha256(path),owner_pid=os.getpid(),consumed_at=utc_now())))
+    return dict(record=value,record_sha256=file_sha256(path),endurance_qualified=False,
+        claim_eligible=False,disposition='SEPARATE_TERMINAL_POWER_DEVIATION_REVIEW_REQUIRED')
+
+
+def run_trial(repo,trial,*,plumbing_only=False,host_endurance_run=None,bootstrap_only=False,authorized_host_deviation=None):
     repo=Path(repo).resolve();spec=frozen_spec(repo);_clean(repo)
-    if not plumbing_only:require_endurance(repo,host_endurance_run)
+    deviation=None
+    if authorized_host_deviation is None:
+        if not plumbing_only:require_endurance(repo,host_endurance_run)
+    else:
+        deviation=consume_host_deviation(repo,authorized_host_deviation,bootstrap_only=bootstrap_only,plumbing_only=plumbing_only)
     if plumbing_only and bootstrap_only:raise ValueError('exclusive_collection_modes')
     if trial['method']!='pw_6h' or trial['scenario'] not in spec['engineering_plan']['calibration_scenarios']:
         raise ValueError('neutral_pw6_stable_periodic_only')
@@ -173,9 +197,9 @@ def run_trial(repo,trial,*,plumbing_only=False,host_endurance_run=None,bootstrap
         trial=dict(trial,minimum_wall_seconds=d['engineering_plan']['cooldown_seconds']+d['engineering_plan']['warmup_seconds']+86400)
     endpoint=os.environ.get('DOCKER_HOST') or subprocess.check_output(['docker','context','inspect','--format','{{.Endpoints.docker.Host}}'],text=True).strip()
     guard_local_endpoint(endpoint)
-    inputs=repo/'results/system_calibration/inputs'/fingerprint({'design':fingerprint(spec),'scenario':trial['scenario'],'plumbing':plumbing_only,'bootstrap_only':bootstrap_only})/trial['scenario']
+    inputs=repo/'results/system_calibration/inputs'/fingerprint({'design':fingerprint(spec),'scenario':trial['scenario'],'plumbing':plumbing_only,'bootstrap_only':bootstrap_only,'host_deviation':deviation})/trial['scenario']
     inputs.mkdir(parents=True,exist_ok=True)
-    descriptor=dict(design=spec,scenario=trial['scenario'],method='pw_6h',mode='plumbing' if plumbing_only else 'bootstrap-only' if bootstrap_only else 'calibration')
+    descriptor=dict(design=spec,scenario=trial['scenario'],method='pw_6h',mode='plumbing' if plumbing_only else 'bootstrap-only' if bootstrap_only else 'calibration',host_deviation=deviation)
     target=inputs/'input.json'
     if target.exists() and read_json(target)!=descriptor:raise ValueError('immutable_input_descriptor_mismatch')
     if not target.exists():write_json(target,descriptor)
@@ -202,7 +226,7 @@ def run_trial(repo,trial,*,plumbing_only=False,host_endurance_run=None,bootstrap
         cfg=ExperimentConfigProvenance(DataConfig(dataset.dataset_id,bootstrap_fraction=1.0 if bootstrap_only else 1/3,minimum_observations=200),
             ModelConfig(family='unused-observation-only'),(PolicyConfig('pw_6h',periodic_interval_hours=6,observation_window_hours=24),),
             StatisticsConfig(bootstrap_repetitions=0,bootstrap_seed=20251022,test_specification={'enabled':False,'unit':'independent run/scenario'}),
-            preprocessing=dict(design_sha256=fingerprint(spec),execution_environment=deepcopy(details),
+            preprocessing=dict(design_sha256=fingerprint(spec),execution_environment=deepcopy(details),host_deviation=deviation,
                 mode='PARTIAL_REAL_COLLECTION_SMOKE' if plumbing_only else 'MEASURED_BOOTSTRAP_ONLY_V1' if bootstrap_only else 'NEUTRAL_CALIBRATION_REAL_BOOTSTRAP'),
             analysis=dict(comparative=False,practical_benefit='NOT_DEFINED',scenario=trial['scenario']))
         exp,env_record=prepare_experiment(repo,inputs.parent,cfg,dataset,cohort,{'workload':d['workload']['seed']},
@@ -215,7 +239,8 @@ def run_trial(repo,trial,*,plumbing_only=False,host_endurance_run=None,bootstrap
             clock=ObservationClock(run.path,dict(run_id=run.manifest.run_id,
                 experiment_fingerprint=exp.fingerprint,source_commit=source.commit))
             with ManagedPowerGuard(run.path,dict(run_id=run.manifest.run_id,
-                    experiment_fingerprint=exp.fingerprint,source_commit=source.commit)) as power:
+                    experiment_fingerprint=exp.fingerprint,source_commit=source.commit),
+                    allow_external_power_deficit=deviation is not None) as power:
                 shutil.copyfile(build_log,run.path/'logs/build.log')
                 cluster=d['kubernetes']['cluster']+'-'+uuid.uuid4().hex[:8];config=private/'kubeconfig'
                 kube=Kube(commands,config,cluster,d);children=[];handles=[];created=False
@@ -269,7 +294,7 @@ def run_trial(repo,trial,*,plumbing_only=False,host_endurance_run=None,bootstrap
                     load_start=(int(time.time())//300+1)*300
                     boot_start=load_start+(0 if plumbing_only else d['engineering_plan']['warmup_seconds'])
                     measured=boot_start+d['bootstrap']['duration_seconds'];end=measured+(0 if bootstrap_only else d['engineering_plan']['measurement_seconds'])
-                    plan=dict(**trial,design=d,cluster=cluster,app_url=app,load_start_seconds=load_start,
+                    plan=dict(**trial,design=d,host_deviation=deviation,cluster=cluster,app_url=app,load_start_seconds=load_start,
                         bootstrap_start_seconds=boot_start,measurement_start_seconds=measured,measurement_end_seconds=end,
                         bootstrap_source_pod_uid=kube.pod()['metadata']['uid'],
                         profile_url=f'http://127.0.0.1:{profile_port}',generator_stats_url=f'http://127.0.0.1:{gen_port}',

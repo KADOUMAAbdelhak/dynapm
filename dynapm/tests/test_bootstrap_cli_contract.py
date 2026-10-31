@@ -32,5 +32,5 @@ def test_bootstrap_only_cli_binds_one_collection_without_campaign(monkeypatch,ca
     monkeypatch.setattr(cli,'campaign',lambda *a,**k:(_ for _ in ()).throw(AssertionError('no campaign')))
     cli.main()
     assert len(calls)==1 and calls[0][0]=={'method':'pw_6h','scenario':'stable'}
-    assert calls[0][1]=={'bootstrap_only':True,'host_endurance_run':Path('UNIT_CERTIFICATE')}
+    assert calls[0][1]=={'bootstrap_only':True,'host_endurance_run':Path('UNIT_CERTIFICATE'),'authorized_host_deviation':None}
     assert 'UNIT_NOT_A_REAL_RUN' in capsys.readouterr().out
