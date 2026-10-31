@@ -10,7 +10,7 @@ production creation and all pilot/claim block/treatment initialization paths. No
 ## Frozen inputs and immutable artifacts
 
 `configs/system_shared_bootstrap_v1.json` pins the implementation contract.
-Artifact schema `shared-measured-bootstrap-v1` requires a clean managed pilot
+Artifact schema `shared-measured-bootstrap-v2` requires a clean managed pilot
 acquisition SUCCESS and valid output hashes, measured-bootstrap provenance,
 24h acquisition within the parent's real execution interval, source Pod/app IDs,
 hardware/image identities, fixed reference resources, actual source/receipt clocks,
@@ -75,3 +75,7 @@ resource actuation remain inside each treatment's measured interval. The library
 performs no pre-actuation. It reuses no measurement outcomes or mutable snapshots.
 A future five-method system executor still needs separately authorized deployment
 and runtime integration validation. No comparative trial is enabled by this API.
+
+V7C.6 uses [separate cluster/host clocks](system_clock_domains.md): host-receipt
+slot membership, validated cluster source causality and host admission before use.
+Historical failed samples are never promoted or reused.

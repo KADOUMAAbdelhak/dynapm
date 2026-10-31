@@ -12,13 +12,20 @@ from dynapm.system_validation.clock_observations import (
     ObservationClock,ClockRejected,MAX_CLOCK_DELTA_NS,receive_observation,validate_clock_evidence)
 
 CONTEXT=dict(run_id='UNIT',experiment_fingerprint='f'*64,source_commit='c'*40)
-NS=1_800_000_000_000_000_000
+NS=1_700_000_000_000_000_000
+DOMAIN=dict(boot_id='UNIT_BOOT',time_namespace='UNIT_TIME_NS',hostname='UNIT')
 
 
 def evidence(source=NS,receipt=None,**sample_fields):
     receipt=source+1_000_000 if receipt is None else receipt
-    sample=dict(sample_time_ns=source,instance_id='UNIT',cpu_seconds=1.,**sample_fields)
-    raw=json.dumps(sample).encode()
+    source_clock=sample_fields.pop('source_clock',dict(wall_ns=source,monotonic_ns=100))
+    if isinstance(source_clock,dict):source_clock={**source_clock,'domain':DOMAIN}
+    sample=dict(sample_time_ns=source,instance_id='UNIT',cpu_seconds=1.,source_clock=source_clock,**sample_fields)
+    source_raw=json.dumps(sample).encode()
+    raw=json.dumps(dict(schema_version='cluster-clock-envelope-v1',raw_payload_base64=base64.b64encode(source_raw).decode(),
+        raw_payload_sha256=hashlib.sha256(source_raw).hexdigest(),cluster_received_at_ns=receipt,
+        cluster_receipt_monotonic_ns=1_010_000_000,cluster_request_wall_ns=receipt-10_000_000,
+        cluster_request_monotonic_ns=1_000_000_000,cluster_clock_domain=DOMAIN)).encode()
     return dict(raw_payload_base64=base64.b64encode(raw).decode(),raw_payload_sha256=hashlib.sha256(raw).hexdigest(),
         request_wall_ns=receipt-10_000_000,request_monotonic_ns=1_000_000_000,
         received_at_ns=receipt,receipt_monotonic_ns=1_010_000_000)
@@ -46,8 +53,8 @@ def test_exact_boundary_is_accepted(store,delta):
     assert c.accept(evidence(NS,NS+delta),out)['received_at_ns']==NS+delta
 
 
-@pytest.mark.parametrize('delta,reason',[(-1,'source_ahead_of_receipt'),
-    (MAX_CLOCK_DELTA_NS+1,'source_receipt_delta_exceeds_2s')])
+@pytest.mark.parametrize('delta,reason',[(-1,'source_ahead_of_cluster_receipt'),
+    (MAX_CLOCK_DELTA_NS+1,'source_cluster_delta_exceeds_2s')])
 def test_rejected_body_durable_and_never_scientific(store,delta,reason):
     c,out=store;obs=evidence(NS,NS+delta)
     with pytest.raises(ClockRejected,match=reason) as exc:c.accept(obs,out)
@@ -144,7 +151,7 @@ def test_runner_declares_clock_outputs_and_uses_single_receipt_path():
     paths={s.path for s in output_specs()}
     assert {'outputs/clock_rejections.jsonl','outputs/clock_observations.jsonl','outputs/clock_evidence_manifest.json'}<=paths
     source=(Path(__file__).parents[1]/'system_validation/calibration_runner.py').read_text()
-    assert "observation=receive_observation(app+'/telemetry')" in source
+    assert "observation=receive_observation(app+'/clock-observation')" in source
     assert "sample=clock.accept(observation,raw)" in source
     import ast
     tree=ast.parse(source)
@@ -168,7 +175,7 @@ def test_evidence_io_error_aborts_before_scientific_write(store,monkeypatch):
 def test_invalid_source_clock_fields_preserved(store):
     c,out=store
     with pytest.raises(ClockRejected,match='invalid_source_clock_diagnostics'):
-        c.accept(evidence(source_clock={'wall_ns':float(NS)}),out)
+        c.accept(evidence(source_clock={'wall_ns':float(NS),'monotonic_ns':100}),out)
     assert validate_clock_evidence(c.root,CONTEXT) and not out.getvalue()
 
 
@@ -178,3 +185,78 @@ def test_nonfinite_json_preserves_raw_bytes_not_nan_object(store):
     e['raw_payload_sha256']=hashlib.sha256(raw).hexdigest()
     with pytest.raises(ClockRejected,match='invalid_telemetry_json'):c.accept(e,out)
     assert validate_clock_evidence(c.root,CONTEXT) and not out.getvalue()
+
+
+def rewrite_envelope(e,**changes):
+    env=json.loads(base64.b64decode(e['raw_payload_base64']));env.update(changes)
+    raw=json.dumps(env).encode()
+    return {**e,'raw_payload_base64':base64.b64encode(raw).decode(),'raw_payload_sha256':hashlib.sha256(raw).hexdigest()}
+
+
+def test_cross_domain_host_behind_source_is_not_causal_failure(store):
+    c,out=store;e=evidence()
+    e['received_at_ns']=NS-4_309_552;e['request_wall_ns']=e['received_at_ns']-10_000_000
+    s=c.accept(e,out)
+    assert s['sample_time_ns']>s['received_at_ns']
+    assert s['sample_time_ns']<=s['cluster_received_at_ns']
+    c.finalize();assert validate_clock_evidence(c.root,CONTEXT)
+    d=json.loads(c.observations.read_text())
+    assert d['cross_domain_delta_role']=='NON_CAUSAL_DIAGNOSTIC_ONLY'
+    assert d['receipt_minus_source_ns']==-4_309_552
+
+
+def test_source_after_cluster_receipt_rejected_despite_later_host(store):
+    c,out=store;e=rewrite_envelope(evidence(),cluster_received_at_ns=NS-1)
+    with pytest.raises(ClockRejected,match='source_ahead_of_cluster_receipt'):c.accept(e,out)
+    assert not out.getvalue();assert validate_clock_evidence(c.root,CONTEXT)
+
+
+def test_no_admission_before_physical_host_receipt(store,monkeypatch):
+    import dynapm.system_validation.clock_observations as module
+    c,out=store;e=evidence();monkeypatch.setattr(module.time,'monotonic_ns',lambda:e['receipt_monotonic_ns']-1)
+    with pytest.raises(ClockRejected,match='admission_before_host_receipt'):c.accept(e,out)
+    assert not out.getvalue()
+
+
+def test_success_admission_order_recorded_before_persistence(store):
+    c,out=store;s=c.accept(evidence(),out)
+    assert s['host_admitted_monotonic_ns']>=1_010_000_000
+    assert s['host_admitted_at_ns']>=s['received_at_ns']
+    assert json.loads(out.getvalue())==s
+
+
+def test_different_linux_time_namespace_rejected(store):
+    c,out=store;e=rewrite_envelope(evidence(),cluster_clock_domain={**DOMAIN,'time_namespace':'OTHER'})
+    with pytest.raises(ClockRejected,match='cluster_clock_domain_mismatch'):c.accept(e,out)
+    assert not out.getvalue()
+
+
+def test_legacy_bare_sample_cannot_satisfy_new_contract(store):
+    c,out=store;raw=b'{"sample_time_ns":1700000000000000000}'
+    e=evidence();e.update(raw_payload_base64=base64.b64encode(raw).decode(),raw_payload_sha256=hashlib.sha256(raw).hexdigest())
+    with pytest.raises(ClockRejected,match='cluster_clock_envelope_required'):c.accept(e,out)
+    assert not out.getvalue()
+
+
+def test_complete_source_response_precedes_cluster_receipt(monkeypatch):
+    from dynapm.system_validation import application_instrumented as app
+    stages=[]
+    class Response:
+        def __enter__(self):return self
+        def read(self):stages.append('complete_source');return b'raw-source'
+        def __exit__(self,*args):pass
+    monkeypatch.setattr(app.urllib.request,'urlopen',lambda *a,**k:Response())
+    monkeypatch.setattr(app,'clock_domain',lambda:DOMAIN)
+    monkeypatch.setattr(app.time,'time_ns',lambda:stages.append('cluster_wall') or 1)
+    monkeypatch.setattr(app.time,'monotonic_ns',lambda:stages.append('cluster_mono') or 2)
+    e=app.receive_in_cluster('unit')
+    assert stages==['cluster_wall','cluster_mono','complete_source','cluster_wall','cluster_mono']
+    assert e['cluster_clock_domain']==DOMAIN
+    assert base64.b64decode(e['raw_payload_base64'])==b'raw-source'
+
+
+def test_host_sleep_guard_unchanged_with_cross_domain_skew(store):
+    c,out=store;e=evidence();e['received_at_ns']=NS-1;e['request_wall_ns']=NS-10_000_001
+    c.accept(e,out);c.check_host(NS,10)
+    with pytest.raises(ClockRejected,match='host_sleep_or_clock_discontinuity'):c.check_host(NS+MAX_CLOCK_DELTA_NS+11,20)
+    assert len(out.getvalue().splitlines())==1

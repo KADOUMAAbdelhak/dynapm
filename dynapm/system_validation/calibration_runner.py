@@ -93,7 +93,7 @@ def summarize(root,plan):
     for r in _json_lines(root/'outputs/requests.jsonl'):
         if start<=r['scheduled_at']<end:requests.append(r)
         if r['success'] and start<=r['completed_at']<end:completed_in_window+=1
-    telemetry=[r for r in _json_lines(root/'outputs/telemetry.jsonl') if start*1e9<=r['sample_time_ns']<=end*1e9]
+    telemetry=[r for r in _json_lines(root/'outputs/telemetry.jsonl') if start*1e9<r['received_at_ns']<=end*1e9]
     workload=summarize_requests(requests,start,end,plan['design']['slo']['latency_seconds'])
     workload['scope']='CALIBRATION_ONE_NEUTRAL_METHOD_NO_POLICY_COMPARISON'
     workload['successful_completed_in_window']=completed_in_window;workload['successful_throughput_rps']=completed_in_window/(end-start)
@@ -289,12 +289,12 @@ def run_trial(repo,trial,*,plumbing_only=False,host_endurance_run=None,bootstrap
                             now=time.time();stage='WAITING' if now<load_start else 'WARMUP' if now<boot_start else 'BOOTSTRAP' if now<measured else 'MEASUREMENT'
                             if now>=load_start:
                                 try:
-                                    observation=receive_observation(app+'/telemetry')
+                                    observation=receive_observation(app+'/clock-observation')
                                 except (OSError,RuntimeError) as exc:write_line(bd,dict(kind='MISSING_TELEMETRY',wall_ns=time.time_ns(),error=str(exc)))
                                 else:
                                     # Evidence/persistence failures abort; never downgrade to missing data.
                                     sample=clock.accept(observation,raw)
-                                    if sample['sample_time_ns']<=int(next_q*1e9):samples.append(sample)
+                                    samples.append(sample)
                             if now>=next_q:
                                 payload=None
                                 try:
@@ -321,7 +321,7 @@ def run_trial(repo,trial,*,plumbing_only=False,host_endurance_run=None,bootstrap
                                     started=time.time_ns();snapshot=http(plan['profile_url']+'/snapshot')
                                     write_line(profiles,dict(nominal_time_ns=int(next_q*1e9),snapshot=snapshot))
                                     if next_q<end:write_line(requests,dict(nominal_time_ns=int(next_q*1e9),snapshot_read_started_ns=started,snapshot=snapshot))
-                                samples=[];next_q+=300
+                                samples=[s for s in samples if s['received_at_ns']>int(next_q*1e9)];next_q+=300
                             if time.monotonic()-last_host>=1800:
                                 _clean(repo)
                                 if SourceProvenance.capture(repo).commit!=source.commit:raise ValueError('source_commit_changed_during_calibration')

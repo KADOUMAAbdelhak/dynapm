@@ -18,9 +18,9 @@ from dynapm.core.run_store import write_json,check_cache
 from dynapm.system_validation.trial_preparation import measured_bootstrap,MeasuredBootstrap,MeasuredProfileAdapter
 from dynapm.experiments.confirmatory_design import PRIMARY_METHODS
 from dynapm.system_validation.host_power import SCHEMA as POWER_SCHEMA,MAX_HEARTBEAT_GAP_NS
-from dynapm.system_validation.clock_observations import MAX_CLOCK_DELTA_NS
+from dynapm.system_validation.clock_observations import MAX_CLOCK_DELTA_NS,validate_clock_evidence
 
-SCHEMA='shared-measured-bootstrap-v1'
+SCHEMA='shared-measured-bootstrap-v2'
 BLOCK_SCHEMA='shared-bootstrap-blocks-v1'
 STEP_NS=300*10**9
 DAY_NS=288*STEP_NS
@@ -30,7 +30,7 @@ FILES=('raw_samples.jsonl','parent_manifest.json','parent_output_manifest.json',
 def content_contract(design):
     return dict(schema_version=SCHEMA,cadence_seconds=300,slots=288,minimum_paired=200,last_complete=96,
         references=design['references'],telemetry=design['telemetry'],
-        protocol=design['core_protocol'],accounting=design['accounting_schema'])
+        protocol=design['core_protocol'],accounting=design['accounting_schema'],system_clock=design['system_clock'])
 
 
 def _no_links(root):
@@ -69,7 +69,7 @@ def _raw_contract(entries,design):
     if any(s.get('cpu_limit_cores')!=design['references']['cpu_millicores']/1000 or
             s.get('memory_limit_bytes')!=design['references']['memory_mib']*2**20 for s in samples):
         raise ValueError('fixed_reference_resources_required_during_bootstrap')
-    if any(not 0<=s['received_at_ns']-s['sample_time_ns']<=MAX_CLOCK_DELTA_NS for s in samples):
+    if any(s.get('clock_schema')!='system-clock-observation-v2' or not 0<=s['cluster_received_at_ns']-s['sample_time_ns']<=MAX_CLOCK_DELTA_NS or s['host_admitted_at_ns']<s['received_at_ns'] for s in samples):
         raise ValueError('bootstrap_sample_clock_invariant')
     times=[s['sample_time_ns'] for s in samples]
     if len(times)!=len(set(times)) or any(b<=a for a,b in zip(times,times[1:])):
@@ -90,6 +90,12 @@ def create_artifact(acquisition_run,artifact_store,design,*,allow_unit_fixture=F
     if content_contract(plan['design'])!=content_contract(design):raise ValueError('bootstrap_content_contract_mismatch')
     raw=parent/'outputs/bootstrap_samples.jsonl'
     entries=[json.loads(line) for line in raw.read_text().splitlines() if line]
+    if not unit_fixture:
+        context=dict(run_id=m['run_id'],experiment_fingerprint=m['experiment_fingerprint'],source_commit=exp.source.commit)
+        validate_clock_evidence(parent,context)
+        accepted={fingerprint(json.loads(line)) for line in (parent/'outputs/telemetry.jsonl').read_text().splitlines() if line}
+        if any(fingerprint(s) not in accepted for entry in entries for s in entry['samples']):
+            raise ValueError('bootstrap_contains_nonadmitted_telemetry')
     available=pd.Timestamp(m['ended_at']).value
     boot=measured_bootstrap(entries,start,end,available,design)
     if boot.evidence_sha256!=summary['evidence_sha256'] or boot.accepted_slots!=summary['accepted_slots']:

@@ -20,19 +20,27 @@ def current_rss_bytes():
 
 
 def aggregate_bucket(samples,start_ns,end_ns,design):
-    t=design['telemetry'];inside=sorted([s for s in samples if start_ns<=s['sample_time_ns']<=end_ns],key=lambda x:x['sample_time_ns'])
+    t=design['telemetry'];inside=sorted([s for s in samples if start_ns<s['received_at_ns']<=end_ns],key=lambda x:x['received_at_ns'])
     if end_ns-start_ns!=t['bucket_seconds']*10**9 or len(inside)<t['min_samples']:raise ValueError('incomplete_telemetry_bucket')
-    times=np.array([s['sample_time_ns'] for s in inside],dtype=np.int64)
-    if np.any(np.diff(times)<=0) or len({s['instance_id'] for s in inside})!=1:raise ValueError('reset_or_duplicate_telemetry')
+    times=np.array([s['received_at_ns'] for s in inside],dtype=np.int64)
+    source_times=np.array([s['sample_time_ns'] for s in inside],dtype=np.int64)
+    if any(s.get('clock_schema')!='system-clock-observation-v2' or
+           not s['sample_time_ns']<=s['cluster_received_at_ns'] or
+           s['host_admitted_at_ns']<s['received_at_ns'] for s in inside):
+        raise ValueError('same_domain_validated_host_admission_required')
+    if np.any(np.diff(times)<=0) or np.any(np.diff(source_times)<=0) or len({s['instance_id'] for s in inside})!=1:raise ValueError('reset_or_duplicate_telemetry')
     span=(times[-1]-times[0])/1e9
     if span<t['min_span_seconds'] or any(b['cpu_seconds']<a['cpu_seconds'] for a,b in zip(inside,inside[1:])):raise ValueError('short_or_reset_measurement_span')
-    cpu=(inside[-1]['cpu_seconds']-inside[0]['cpu_seconds'])/span*1000
+    source_span=(inside[-1]['source_clock']['monotonic_ns']-inside[0]['source_clock']['monotonic_ns'])/1e9
+    if source_span<=0:raise ValueError('invalid_source_monotonic_span')
+    cpu=(inside[-1]['cpu_seconds']-inside[0]['cpu_seconds'])/source_span*1000
     mem=float(np.mean([s['memory_working_set_bytes'] for s in inside]))/2**20
     if not np.isfinite([cpu,mem]).all() or min(cpu,mem)<0:raise ValueError('invalid_telemetry_value')
-    return dict(logical_slot_ns=int(end_ns),source_start_ns=int(times[0]),source_end_ns=int(times[-1]),
-        available_at_ns=max(int(end_ns),max(s['received_at_ns'] for s in inside)),
+    return dict(logical_slot_ns=int(end_ns),host_receipt_start_ns=int(times[0]),host_receipt_end_ns=int(times[-1]),
+        available_at_ns=max(int(end_ns),max(s['host_admitted_at_ns'] for s in inside)),
         cpu_percent=100*cpu/design['references']['cpu_millicores'],memory_percent=100*mem/design['references']['memory_mib'],
-        real_samples=len(inside),source_span_seconds=span,source='REAL_COMPLETED_CGROUP_BUCKET')
+        real_samples=len(inside),source_span_seconds=source_span,host_receipt_span_seconds=span,
+        clock_contract='host-admission-slots-cluster-causal-v2',source='REAL_COMPLETED_CGROUP_BUCKET')
 
 
 class ProfileAdapter:
@@ -51,8 +59,8 @@ class ProfileAdapter:
 
     def observe(self,payload,*,wall_ns=None):
         now=time.time_ns() if wall_ns is None else wall_ns;t=payload['logical_slot_ns']
-        if any(type(payload[k]) is not int for k in ['logical_slot_ns','source_start_ns','source_end_ns','available_at_ns']):raise ValueError('integer_source_clocks_required')
-        if payload['available_at_ns']>now or payload['available_at_ns']<t or payload['source_end_ns']>t or payload['source_start_ns']<t-300*10**9 or payload['source_start_ns']>=payload['source_end_ns']:
+        if any(type(payload[k]) is not int for k in ['logical_slot_ns','host_receipt_start_ns','host_receipt_end_ns','available_at_ns']):raise ValueError('integer_source_clocks_required')
+        if payload['available_at_ns']>now or payload['available_at_ns']<t or payload['host_receipt_end_ns']>t or payload['host_receipt_start_ns']<t-300*10**9 or payload['host_receipt_start_ns']>=payload['host_receipt_end_ns']:
             raise ValueError('incomplete_or_future_measurement_invisible')
         if (t-self.anchor_ns)%(300*10**9) or not np.isfinite([payload['cpu_percent'],payload['memory_percent']]).all() or min(payload['cpu_percent'],payload['memory_percent'])<0:
             raise ValueError('invalid_nominal_observation')

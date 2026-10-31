@@ -23,7 +23,9 @@ def unit_evidence():
     out=[]
     for slot in range(288):
         b=START+slot*STEP
-        samples=[dict(sample_time_ns=b+i*5*10**9,received_at_ns=b+i*5*10**9,
+        samples=[dict(sample_time_ns=b+(i*5+1)*10**9,received_at_ns=b+(i*5+1)*10**9,
+            host_admitted_at_ns=b+(i*5+1)*10**9,cluster_received_at_ns=b+(i*5+1)*10**9,
+            clock_schema='system-clock-observation-v2',source_clock={'monotonic_ns':(slot*300+i*5+1)*10**9},
             instance_id='UNIT_FIXTURE_ONLY',cpu_seconds=(slot*300+i*5)*.01,
             memory_working_set_bytes=40*2**20) for i in range(60)]
         out.append(dict(role='MEASURED_CGROUP_SAMPLES',end_ns=b+STEP,samples=samples))
@@ -83,7 +85,7 @@ def test_future_receipt_and_future_slot_never_initialize(evidence,design):
 
 
 def test_warmup_sample_cannot_enter_bootstrap(evidence,design):
-    records=deepcopy(evidence);records[0]['samples'][0]['sample_time_ns']=START-1
+    records=deepcopy(evidence);records[0]['samples'][0]['received_at_ns']=START-1
     with pytest.raises(ValueError,match='outside'):measured_bootstrap(records,START,END,END,design)
 
 
@@ -121,7 +123,7 @@ def test_observations_after_initialization_do_not_change_bootstrap(evidence,desi
     future=deepcopy(evidence[-1])
     future['end_ns']+=STEP
     for sample in future['samples']:
-        sample['sample_time_ns']+=STEP;sample['received_at_ns']+=STEP;sample['cpu_seconds']*=1e12
+        sample['sample_time_ns']+=STEP;sample['received_at_ns']+=STEP;sample['host_admitted_at_ns']+=STEP;sample['cpu_seconds']*=1e12
     later_stream=list(evidence)+[future]
     assert later_stream[-1]['end_ns']>b.end_ns
     second=MeasuredProfileAdapter('pw_6h',b,design,planned_streaming_slots=576).snapshot()['profile']
@@ -180,3 +182,20 @@ def test_preparation_report_cannot_claim_real_bootstrap_or_variance():
     r=preparation_report(ROOT)
     assert not r['real_bootstrap_demonstrated'] and r['calibration_runs_completed']==0
     assert r['calibration_variance'] is None and r['frozen_repetitions'] is None
+
+
+def test_cross_domain_skew_does_not_move_bootstrap_slots(evidence,design):
+    records=deepcopy(evidence)
+    for e in records:
+        for s in e['samples']:
+            s['sample_time_ns']+=5_000_000_000
+            s['cluster_received_at_ns']+=5_000_000_000
+    b=measured_bootstrap(records,START,END,END,design)
+    assert b.accepted_slots==288 and b.frame.index[-1].value==END
+    # VM source can numerically exceed host bucket boundary; no conversion/fill.
+    assert records[-1]['samples'][-1]['sample_time_ns']>END
+
+
+def test_host_admission_after_initialization_never_enters_bootstrap(evidence,design):
+    records=deepcopy(evidence);records[-1]['samples'][-1]['host_admitted_at_ns']=END+1
+    with pytest.raises(ValueError,match='future'):measured_bootstrap(records,START,END,END,design)

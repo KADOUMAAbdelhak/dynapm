@@ -256,3 +256,11 @@ implemented independently of a completed72h anchor; see [shared bootstrap](share
 The original five methods/parameters and estimation-first study remain unchanged.
 Neutral timing instrumentation is prepared, not executed; see [probe scope](neutral_timing_probes.md).
 No real24h artifact exists yet and no comparative or compressed execution is enabled.
+
+## V7C.6 clock-domain amendment
+
+The historical V7C.1 source/host invariant above is superseded prospectively by
+[cluster causality and host admission](system_clock_domains.md). No cross-domain
+absolute comparison is a causal gate. Logical host-receipt buckets and versioned
+v2 measured/shared bootstrap replace the unsuccessful v1 collection contract.
+Methods, scenarios, controller and24h/48h durations remain unchanged.

@@ -25,7 +25,7 @@ from dynapm.system_validation.adapter import ProfileAdapter, aggregate_bucket
 from dynapm.system_validation.design import frozen_design
 
 SCHEMA = 'system-trial-preparation-v1'
-BOOTSTRAP_SCHEMA = 'measured-system-bootstrap-v1'
+BOOTSTRAP_SCHEMA = 'measured-system-bootstrap-v2'
 PRIMARY = ('slo_violation_rate', 'successful_latency_p95_seconds',
            'mean_cpu_requested_cores', 'mean_memory_requested_bytes',
            'cpu_utilization_efficiency', 'memory_utilization_efficiency')
@@ -52,7 +52,7 @@ def draft_spec(repo):
             slot_seconds=300, minimum_paired_slots=200, last_complete_slots=96,
             workload='stable', initialization='thresholds from valid bootstrap only; production factory initialization',
             missing='absent slots remain missing; no fill or extension; reject insufficient fixed bootstrap',
-            visibility='completed bucket and all source/receipt times <= actual initialization read'),
+            visibility='completed host-receipt bucket; host admission <= initialization read; cluster source <= cluster receipt'),
         engineering_plan=dict(warmup_seconds=1800, cooldown_seconds=900,
             measurement_seconds=172800, neutral_method='pw_6h', calibration_scenarios=['stable', 'periodic'],
             calibration_repetitions_per_scenario=3, calibration_count_status='proposal, not executed or final precision evidence',
@@ -126,8 +126,8 @@ def measured_bootstrap(slot_evidence, start_ns, end_ns, initialization_read_ns, 
         samples = entry['samples']
         if any(type(s[k]) is not int for s in samples for k in ('sample_time_ns','received_at_ns')):
             raise ValueError('integer_sample_clocks_required')
-        if any(not q-step <= s['sample_time_ns'] <= q or s['received_at_ns'] < s['sample_time_ns'] or
-               s['received_at_ns'] > initialization_read_ns for s in samples):
+        if any(not q-step < s['received_at_ns'] <= q or
+               s.get('host_admitted_at_ns',initialization_read_ns+1) > initialization_read_ns for s in samples):
             raise ValueError('future_or_outside_bootstrap_measurement')
         if any(not math.isfinite(s[k]) or s[k] < 0 for s in samples
                for k in ('cpu_seconds','memory_working_set_bytes')):

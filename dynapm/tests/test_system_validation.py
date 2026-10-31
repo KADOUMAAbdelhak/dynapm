@@ -18,7 +18,7 @@ FIXTURE={'role':'SYNTHETIC_SMOKE_FIXTURE','slots':288,'cpu_millicores':50,'memor
 
 def payload(step=1):
     t=ANCHOR+step*300*10**9
-    return dict(logical_slot_ns=t,source_start_ns=t-299*10**9,source_end_ns=t-10**9,available_at_ns=t,cpu_percent=5.,memory_percent=9.375)
+    return dict(logical_slot_ns=t,host_receipt_start_ns=t-299*10**9,host_receipt_end_ns=t-10**9,available_at_ns=t,cpu_percent=5.,memory_percent=9.375)
 
 
 @pytest.mark.parametrize('method',D['methods'])
@@ -41,7 +41,7 @@ def test_overhead_post_commit_and_duplicate_rejection():
     with pytest.raises(ValueError,match='nonincreasing'):a.observe(p,wall_ns=p['logical_slot_ns'])
 
 
-@pytest.mark.parametrize('field,delta',[('available_at_ns',1),('source_end_ns',10**9+1),('source_start_ns',-2*10**9)])
+@pytest.mark.parametrize('field,delta',[('available_at_ns',1),('host_receipt_end_ns',10**9+1),('host_receipt_start_ns',-2*10**9)])
 def test_future_or_outside_bucket_invisible(field,delta):
     a=ProfileAdapter('full_rewrite',ANCHOR,D,FIXTURE);p=payload();now=p['logical_slot_ns'];p[field]+=delta
     with pytest.raises(ValueError,match='incomplete_or_future'):a.observe(p,wall_ns=now)
@@ -64,14 +64,16 @@ def test_gap_absent_not_filled_and_predictors_rejected():
 
 
 def samples():
-    return [dict(sample_time_ns=i*5*10**9,received_at_ns=i*5*10**9,instance_id='pod',cpu_seconds=i*.01,
+    return [dict(sample_time_ns=(i*5+1)*10**9,received_at_ns=(i*5+1)*10**9,
+        host_admitted_at_ns=(i*5+1)*10**9,cluster_received_at_ns=(i*5+1)*10**9,
+        clock_schema='system-clock-observation-v2',source_clock={'monotonic_ns':(i*5+1)*10**9},instance_id='pod',cpu_seconds=i*.01,
         memory_working_set_bytes=48*2**20,cpu_limit_cores=1,memory_limit_bytes=512*2**20,
         cpu_throttled_periods=0,cpu_periods=i,oom_kills=0) for i in range(60)]
 
 
 def test_bucket_actual_span_fixed_reference():
     s=samples();r=aggregate_bucket(s,0,300*10**9,D)
-    assert r['available_at_ns']==300*10**9 and r['source_end_ns']==295*10**9
+    assert r['available_at_ns']==300*10**9 and r['host_receipt_end_ns']==296*10**9
     assert r['cpu_percent']==pytest.approx(.2) and r['memory_percent']==9.375
     for x in s:x['cpu_limit_cores']=.1
     assert aggregate_bucket(s,0,300*10**9,D)==r

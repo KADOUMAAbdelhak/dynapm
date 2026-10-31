@@ -14,6 +14,8 @@ def pinned(tmp_path):
     git('init','-b','dynapm')
     for name in RUNTIME:
         p=repo/name;p.parent.mkdir(parents=True,exist_ok=True);p.write_text('UNIT = 1\n')
+    clock=repo/'dynapm/system_validation/clock_observations.py'
+    clock.write_text('MAX_CLOCK_DELTA_NS=2000000000\nclass ObservationClock:\n    def check_host(self,wall,mono):\n        return wall-mono\n')
     (repo/OBSERVER).write_text('import time\ndef require_endurance():\n    return 1\ndef observe():\n    return time.time()\n')
     git('add','.');git('-c','user.name=UNIT','-c','user.email=unit@example.invalid','commit','-m','unit')
     return repo,git('rev-parse','HEAD')
@@ -75,3 +77,11 @@ def test_request_drain_is_not_a_steady_state_claim():
         {'sent_at':11,'completed_at':20,'success':True}],10)
     assert r['drain_seconds']==1.5 and r['pre_enforcement_requests']==1
     assert r['scope']=='old in-flight request drain only'
+
+
+def test_cluster_reception_does_not_relabel_host_endurance(pinned):
+    repo,commit=pinned;p=repo/'dynapm/system_validation/clock_observations.py'
+    p.write_text(p.read_text()+'\ndef receive_cluster():\n    return 99\n')
+    assert require_same_host_runtime(repo,commit)
+    p.write_text(p.read_text().replace('return wall-mono','return wall+mono'))
+    with pytest.raises(ValueError,match='runtime_mismatch'):require_same_host_runtime(repo,commit)

@@ -151,8 +151,8 @@ def test_measured_worker_http_initialize_and_periodic_commit(tmp_path):
         assert initial['accepted_bootstrap_slots']==288
         for slot in range(1,73):
             q=END+slot*STEP
-            after=http(url+'/observe',dict(logical_slot_ns=q,source_start_ns=q-299*10**9,
-                source_end_ns=q-10**9,available_at_ns=q,cpu_percent=1.,memory_percent=100*40/512))
+            after=http(url+'/observe',dict(logical_slot_ns=q,host_receipt_start_ns=q-299*10**9,
+                host_receipt_end_ns=q-10**9,available_at_ns=q,cpu_percent=1.,memory_percent=100*40/512))
         assert after['accounting']['n_refresh_events']==after['accounting']['n_periodic_refreshes']==1
         assert after['accounting']['n_field_writes']==4
         stats=http(url+'/stats')
@@ -192,6 +192,7 @@ def test_application_handler_attribution_keeps_workload_and_telemetry_separate(m
     from dynapm.system_validation import application_instrumented as a
     monkeypatch.setattr(a.base,'read_cgroup',lambda:dict(instance_id='UNIT',cpu_seconds=1,memory_current_bytes=1,
         memory_working_set_bytes=1,cpu_limit_cores=1,memory_limit_bytes=512*2**20,cpu_throttled_periods=0,oom_kills=0))
+    monkeypatch.setattr(a,'clock_domain',lambda:dict(boot_id='UNIT',time_namespace='UNIT',hostname='UNIT'))
     server=ThreadingHTTPServer(('127.0.0.1',0),a.Handler)
     thread=threading.Thread(target=server.serve_forever,daemon=True);thread.start()
     try:
@@ -230,7 +231,7 @@ def test_complete_trial_summary_with_operational_harm_and_cost_attribution(tmp_p
         (out/(name+'.jsonl')).write_text(''.join(canonical_json(r)+'\n' for r in rows))
     initial={'requests':{'cpu':'1','memory':'100Mi'},'limits':{'cpu':'1','memory':'100Mi'}}
     lines('requests',[dict(scheduled_at=t,completed_at=t+.1,latency_seconds=.1,success=True,dropped=False) for t in (-.05,1.,5.)])
-    lines('telemetry',[dict(sample_time_ns=i*5*10**9,instance_id='UNIT',cpu_seconds=i*.2,
+    lines('telemetry',[dict(sample_time_ns=i*5*10**9,received_at_ns=i*5*10**9,instance_id='UNIT',cpu_seconds=i*.2,
         memory_working_set_bytes=40*2**20,cpu_limit_cores=1.,memory_limit_bytes=100*2**20,
         cpu_throttled_periods=0,cpu_periods=i,oom_kills=0,
         work_handler_cpu_seconds_total=i*.15,telemetry_handler_cpu_seconds_total=i*.025,

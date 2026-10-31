@@ -1,5 +1,8 @@
 # V7C.1 calibration clock diagnosis
 
+Historical analysis; the old cross-domain invariant is superseded prospectively
+by [V7C.6 clock domains](system_clock_domains.md). Original failed evidence is unchanged.
+
 ## Disposition
 
 ROOT_CAUSE_NOT_YET_PROVEN. Campaign `bdc6371f797b4206869068bc6aefd383`

@@ -231,3 +231,10 @@ Keep source/HEAD unchanged while a managed trial is active; a source change
 invalidates its generation. All campaign state and raw outputs are ignored under
 `results/system_calibration/`. Practical margins are not a blocker and remain
 NOT_DEFINED. A running bootstrap is not completion or permission to run V8.
+
+### V7C.6 clock-domain validation
+
+See [system clock domains](system_clock_domains.md). The safe default CLI
+`python -m dynapm.scripts.task37_clock_domain_probe` inspects the fixed bounded
+probe; `--run` starts only clock observations, never bootstrap or policy outcomes.
+No cross-domain offset is used for algorithm admission.

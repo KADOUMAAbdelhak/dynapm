@@ -471,3 +471,10 @@ semantics and isolates state. Neutral timing probes are prepared only, including
 separate CPU/memory enforcement and censored observations. Next proposed work is
 approved-host bootstrap-only collection, then bounded neutral probes. No anchor,
 compressed validation, comparative V8 or Google acquisition is authorized here.
+
+### V7C.6 — Separate cluster and host clock domains
+
+Implementation and bounded neutral clock validation are required before a new
+shared-bootstrap acquisition. See [contract](system_clock_domains.md). V7C.5
+failed on sample401 before any completed bootstrap slot; it remains invalid and
+immutable. No automatic retry,72h anchor or comparative V8 is authorized.

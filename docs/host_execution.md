@@ -142,8 +142,8 @@ lid closure, logout, shutdown or a forced update. No such settings were changed.
 
 A host-safety observation is not a scientific-result cache. Its original SUCCESS,
 manifest and outputs are checked against its ORIGINAL experiment identity.
-`host-runtime-compatibility-v1` additionally compares pinned Git objects for the
-power guard, causal clock guard, observer CLI, generic provenance/run store and
+`host-runtime-compatibility-v2` additionally compares pinned Git objects for the
+power guard, unchanged host-clock invariant AST/limit, observer CLI, generic provenance/run store and
 dataset-manifest code. The entire observer module is compared by AST except its
 validation-only `require_endurance` helper (never called by observation acquisition).
 Hardware/packages, boot identity and recorded power policy must still match.
@@ -162,3 +162,7 @@ planning budgets, not validated minimum performance. Migration requires a new
 hardware/package fingerprint and supported OS power adapter, pinned kind/Kubernetes
 smoke, controller/enforcement timing checks, fresh measured bootstrap and fresh
 system calibration/precision planning. Do not transfer Mac timing measurements.
+
+V7C.6 changes cluster telemetry reception, not host continuity limits. See
+[clock-domain contract](system_clock_domains.md). No bootstrap acquisition is
+automatically launched by clock validation.

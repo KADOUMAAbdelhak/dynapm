@@ -10,6 +10,7 @@ from dynapm.core.run_store import RunSession,OutputSpec,write_json
 from dynapm.data.manifests import build_dataset_manifest
 from dynapm.system_validation.design import frozen_design
 from dynapm.system_validation.adapter import aggregate_bucket
+from dynapm.system_validation.clock_observations import ObservationClock,receive_observation
 from dynapm.system_validation.consumer import recommend,resource_patch,resources_match,summarize_requests,resource_metrics
 from dynapm.system_validation.workloads import offered_trace,run_load
 
@@ -113,7 +114,8 @@ def environment(commands,design):
 
 
 def output_specs():
-    return [OutputSpec('outputs/'+n+'.json','smoke-'+n) for n in JSON_OUTPUTS]+[
+    return [OutputSpec('outputs/clock_'+n+'.jsonl','clock-evidence') for n in ('rejections','observations')]+[
+        OutputSpec('outputs/clock_evidence_manifest.json','clock-integrity'),OutputSpec('outputs/accepted_telemetry.jsonl','clock-admitted-telemetry')]+[OutputSpec('outputs/'+n+'.json','smoke-'+n) for n in JSON_OUTPUTS]+[
         OutputSpec('outputs/application_metrics.prom','real-application-prometheus-exposition'),
         OutputSpec('outputs/profile_metrics.prom','real-profile-service-process-and-step-overhead')]+[
         OutputSpec('logs/'+n+'.log','smoke-'+n+'-log') for n in LOGS]
@@ -157,6 +159,8 @@ def run_smoke(repo):
         experiment,environment_record=prepare_experiment(repo,repo/'harness/system/fixtures',config,dataset,cohort,{'workload':d['workload']['seed']},
             execution_compatibility_keys=('logical_cpus','memory_bytes'))
         with RunSession(repo/'results/system',experiment,environment_record,repo=repo,dataset_root=repo/'harness/system/fixtures',purpose='smoke',required_outputs=output_specs()) as run:
+            clock=ObservationClock(run.path,dict(run_id=run.manifest.run_id,experiment_fingerprint=experiment.fingerprint,source_commit=experiment.source.commit))
+            telemetry_evidence=(run.path/'outputs/accepted_telemetry.jsonl').open('a')
             for name in LOGS:(run.path/'logs'/f'{name}.log').touch()
             shutil.copyfile(build_log,run.path/'logs/build.log')
             write_json(run.path/'outputs/design.json',d);write_json(run.path/'outputs/resources.json',read_json(repo/'harness/system/resources.json'))
@@ -197,8 +201,7 @@ def run_smoke(repo):
                 def load():answer['requests']=run_load(app,trace,b,timeout=d['workload']['timeout_seconds'],concurrency=d['workload']['max_concurrency'],stop_event=stop)
                 load_thread=threading.Thread(target=load);load_thread.start();samples=[]
                 while time.time()<q-1:
-                    sample=http(app+'/telemetry');sample['received_at_ns']=time.time_ns()
-                    if abs(sample['sample_time_ns']-sample['received_at_ns'])>d['telemetry']['max_clock_skew_seconds']*10**9:raise ValueError('unacceptable_container_host_clock_skew')
+                    sample=clock.accept(receive_observation(app+'/clock-observation'),telemetry_evidence)
                     samples.append(sample)
                     if time.monotonic()-start_overall>d['smoke']['max_elapsed_seconds']:raise RuntimeError('bounded_smoke_deadline')
                     if len(samples)%6==0:print(json.dumps(dict(stage='collecting_real_bucket',samples=len(samples),seconds_remaining=round(q-time.time(),1))),flush=True)
@@ -224,7 +227,7 @@ def run_smoke(repo):
                     patch_submitted_at_ns=sent,confirmed_at_ns=confirmed_at_ns,latency_seconds=actuation_latency,
                     resource_change_count=1,cpu_churn_millicores=abs(1000-recommendation['cpu_millicores']),memory_churn_mib=abs(512-recommendation['memory_mib']),same_pod_uid=True))
                 while time.time()<b+duration:
-                    sample=http(app+'/telemetry');sample['received_at_ns']=time.time_ns();samples.append(sample);time.sleep(1)
+                    sample=clock.accept(receive_observation(app+'/clock-observation'),telemetry_evidence);samples.append(sample);time.sleep(1)
                 load_thread.join(timeout=d['workload']['timeout_seconds']+10)
                 if load_thread.is_alive() or not answer.get('requests'):raise RuntimeError('generator_did_not_complete')
                 requests=answer['requests']
@@ -245,6 +248,7 @@ def run_smoke(repo):
                     real_completed_buckets=1,real_bucket_seconds=300,real_request_count=len(requests),
                     no_comparative_trials=True,no_claim_eligible_results=True,wall_seconds=time.monotonic()-start_overall))
             finally:
+                clock.finalize();telemetry_evidence.close()
                 stop.set()
                 if load_thread:load_thread.join(timeout=10)
                 for name in ['application','prometheus']:
