@@ -478,3 +478,11 @@ Implementation and bounded neutral clock validation are required before a new
 shared-bootstrap acquisition. See [contract](system_clock_domains.md). V7C.5
 failed on sample401 before any completed bootstrap slot; it remains invalid and
 immutable. No automatic retry,72h anchor or comparative V8 is authorized.
+
+V7C.6 validation completed: **PASS**. The clean-source managed900s clock-only
+probe accepted896observations without causal/admission/host violations; all output
+hashes and tamper rejection passed. See [clock-domain evidence](system_clock_domains.md).
+V7C.5 still has no completed shared-bootstrap artifact. Next permissible execution
+is a separately authorized bootstrap-only retry under the v2 clock/bootstrap
+contracts and refreshed host preflight. No retry,72h anchor or comparative V8 has
+been started or automatically scheduled.

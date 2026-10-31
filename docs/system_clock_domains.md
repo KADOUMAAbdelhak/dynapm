@@ -107,3 +107,44 @@ helper), CLI, provenance/run-store/data-manifest code remain pinned. Changed hos
 checks or limits invalidate the certificate. Hardware/packages, boot/power policy
 and original SUCCESS hashes must still match; generic scientific cache identity
 is never relaxed.
+
+## Completed V7C.6 validation
+
+Disposition: **PASS**, bounded clock-path validation only. Source
+`54c65bd80e79cd2e286b4bd61478e6617072f2f0` was clean throughout managed run
+`2026-10-31T045418.835227Z-7363d15175a3-c3e3f52b`.
+Experiment fingerprint:
+`7363d15175a372fe1b9edfcff54604908003a8cbce38f3c7b669488a857a358e`.
+Config SHA256:
+`193516d1d6fc5ee7b07fb858ec456856b8f0320c12533fb9d75027bf94ff9282`.
+
+896accepted observations span the901.003364334s observation period; zero
+rejections. Source and receiver report the same Linux boot ID and time namespace;
+the node boot ID also matches. Every retained response, source body, admission
+order, context and all14output-file hashes were independently checked. A tampered
+COPY is rejected with `output_hash_mismatch`; a claim-cache request is rejected.
+
+- Cluster receipt minus source:0.204333–2.804959ms.
+- Host receipt minus source:1.211577–8.004997ms, first1.211577ms,
+  last1.856118ms, first-to-last change+0.644541ms. This conflates clock offset
+  and transport delay; it is not an isolated estimate of oscillator drift.
+- 186host continuity checkpoints; maximum absolute wall/monotonic discrepancy
+  0.728125ms; maximum checkpoint gap5.096354250s. No recorded power, lid, boot,
+  assertion or continuity failure. Caffeinate PID60782 for owner56639 was released.
+- Zero workloads, bootstrap slots, profile initializations and comparisons.
+- All82historical failed files and45V7C.5 files matched their stored inventories.
+- Full suite: **676passed,0failed,1skipped**; compile/import/safe-CLI checks passed.
+
+Output-manifest SHA256:
+`fb9f44a6d350ffed28d86c06c655e94141dee25c5deb7273066e6abfa7d61cfb`.
+Outputs remain under ignored `results/clock_probe/runs/<fingerprint>/<run_id>/`.
+Independent validation is `results/clock_probe/v7c6-independent-validation.json`.
+
+One earlier probe generation
+`2026-10-31T044557.145357Z-c9a1a86a3f1f-ce507d39` failed at setup on
+`isolated_harness_cluster_required`, before cluster creation or observations.
+It remains FAILED and untouched. The probe naming/read-only-deployment correction
+was tested and committed before the fresh successful generation. No bootstrap
+retry occurred. A new bootstrap-only attempt may be separately authorized after
+repeating host/resource preflight; this15minute probe does not prove24h uptime
+or approve repeated claim-generating laptop trials.
