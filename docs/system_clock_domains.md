@@ -56,7 +56,7 @@ v1 evidence remains verifiable as historical evidence, not reusable v2 input.
 
 `host-admission-slots-cluster-causal-v2` explicitly uses the macOS timeline for
 300s logical boundaries, workload scheduling, profile windows and read times.
-A sample is assigned by host receipt in `(bucket_start,bucket_end]`, **not** by a
+A sample is assigned by host receipt in `[bucket_start,bucket_end)`, **not** by a
 numerically compared VM timestamp. It must have passed admission before the
 algorithm sees it. A complete bucket is available at the later of its nominal
 end and its samples' host admission times. Samples after an end remain buffered
@@ -148,3 +148,10 @@ was tested and committed before the fresh successful generation. No bootstrap
 retry occurred. A new bootstrap-only attempt may be separately authorized after
 repeating host/resource preflight; this15minute probe does not prove24h uptime
 or approve repeated claim-generating laptop trials.
+
+V7C.8 makes the endpoint orientation explicit: a receipt exactly at a boundary
+belongs to the following bucket; a receipt at or after the terminal horizon is
+excluded. This supersedes the earlier `(start,end]` wording. The collector now
+uses one receipt selector for aggregation and persistence, and closes elapsed
+buckets using the clock after receipt. Admission and source-clock validation are
+unchanged; CPU still uses source-monotonic elapsed time.

@@ -2,8 +2,9 @@
 
 V7C.4 decouples reusable measured initialization from a72h anchor. A genuine
 bootstrap-only acquisition is sufficient; a48h measurement phase is not required.
-No genuine completed24h artifact exists yet. Unit fixtures and failed warm-up
-samples are not production evidence. Synthetic unit parents require an explicit
+The ordinary path requires a completed genuine24h acquisition. V7C.8
+separately supports verified derivation from a boundary-failed acquisition. Unit
+fixtures and failed warm-up samples are not production evidence. Synthetic unit parents require an explicit
 test-only creation path, remain labelled UNIT_TEST_ONLY, and are refused by
 production creation and all pilot/claim block/treatment initialization paths. No collection was run in this phase.
 
@@ -78,4 +79,53 @@ and runtime integration validation. No comparative trial is enabled by this API.
 
 V7C.6 uses [separate cluster/host clocks](system_clock_domains.md): host-receipt
 slot membership, validated cluster source causality and host admission before use.
-Historical failed samples are never promoted or reused.
+Failed parents cannot enter the ordinary SUCCESS-parent artifact path. V7C.8 adds the explicitly labelled, independently validated derivation path below.
+
+
+## V7C.8 receipt-boundary correctness repair
+
+The V7C.7 collector sampled `now` before polling, received and admitted a complete
+response, then appended it to the current pending buffer. When the pre-request
+clock reached the scheduled `next_q`, aggregation filtered that buffer but durable
+`bootstrap_samples.jsonl` stored the entire unfiltered buffer. A just-late receipt
+therefore entered the earlier bucket's persisted evidence and stayed buffered for
+the next bucket too. The defect was buffer persistence, not an invalid source or
+host clock. Final strict validation correctly refused the original evidence.
+
+The corrected selector uses actual accepted `received_at_ns` in `[start,end)` for
+both aggregation and persistence. Receipts before bootstrap start or at/after its
+end are excluded. Boundary receipts enter the following bucket, once. Elapsed
+buckets close after complete-response receipt, independently of poll scheduling.
+Sample source, receipt, admission, indices and raw envelope/source bytes never
+change. The measured evidence hash schema is now `measured-system-bootstrap-v3`.
+Per-bucket >=50 samples and >=270 seconds, paired >=200 and final96 complete,
+resources, age/causal checks and policy-specific initialization windows stay fixed.
+
+`receipt_derivation.create_generation` requires an independently trusted complete
+parent-file hash inventory and the specific final bucket-validation failure from
+a clean pilot bootstrap-only acquisition. It snapshots the failed parent unchanged,
+verifies accepted records against exact source/envelope bytes and clock manifests,
+reconstructs chronological host assertions/power/boot/policy and Pod/resource
+continuity, reconciles requests and zero controller changes, then partitions raw
+accepted telemetry. All288 corrected buckets must pass; no filling, extension,
+replay, tolerance, source-time reassignment or pulling a terminal receipt backward
+is supported. Failed coverage yields a BLOCKED generation and cannot make an artifact.
+The original parent always remains FAILED, including its unfinished controller
+completion flag after cleanup. This path does not synthesize a parent SUCCESS.
+
+The immutable `receipt-rebucket-generation-v1` binds original run/source/config and
+all parent files, corrected implementation commit/file hashes, derivation config
+and exact corrected-file bytes. Independent load reconstructs the generation.
+`create_derived_artifact` then creates a new `shared-measured-bootstrap-derived-v1`
+artifact, labelled `MEASURED_24H_DERIVED_FROM_FAILED_ACQUISITION`, retaining that
+complete lineage. `load_artifact` supports this separate schema with an externally
+trusted expected SHA. Artifact availability is the actual derivation/artifact
+creation time, never backdated to the raw acquisition. Samples retain their
+original availability/admission clocks. Synthetic fixtures require explicit test
+creation and remain UNIT_TEST_ONLY, forbidden in pilot/claim treatments.
+
+This is an explicitly documented correctness fix before comparative outcomes.
+A valid derived scientific prehistory does not qualify the current boot or erase
+the authorized battery-drain deviation: claim disposition remains
+NOT_AUTOMATICALLY_CLAIM_ELIGIBLE pending separate qualification/review. No new
+acquisition, deployment, measurement or comparative experiment is enabled here.

@@ -19,7 +19,7 @@ RUNTIME=('dynapm/system_validation/estimation_design.py','dynapm/system_validati
  'dynapm/system_validation/shared_bootstrap.py','dynapm/system_validation/timing_probes.py',
  'dynapm/scripts/task36_shared_bootstrap.py',
  'harness/system/Calibration.Dockerfile','dynapm/system_validation/clock_probe.py',
- 'dynapm/scripts/task37_clock_domain_probe.py')
+ 'dynapm/scripts/task37_clock_domain_probe.py','dynapm/system_validation/receipt_derivation.py')
 
 
 def specification(repo):
@@ -66,7 +66,7 @@ def specification(repo):
     d['clock_observations']=dict(schema=CLOCK_SCHEMA,source_ahead_tolerance_ns=0,
         maximum_source_receipt_delta_ns=MAX_CLOCK_DELTA_NS,receipt_boundary='complete source body received in cluster; complete envelope received on host before admission',
         causal_domain='source and loopback receiver share Linux boot/time namespace',
-        host_vm_difference='diagnostic only; never absolute causal comparison',logical_slots='macOS host receipt (start,end]',
+        host_vm_difference='diagnostic only; never absolute causal comparison',logical_slots='macOS host receipt [start,end)',
         rejection='fail closed; isolated raw body + context/hash; never scientific telemetry')
     d['host_execution']=dict(schema=POWER_SCHEMA,owned_assertions=['PreventUserIdleSystemSleep','PreventSystemSleep'],
         ac_required=True,lid_open_required=True,check_seconds=CHECK_SECONDS,power_check_seconds=POWER_SECONDS,

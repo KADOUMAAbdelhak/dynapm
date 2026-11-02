@@ -34,7 +34,7 @@ def parameters():
             decision_cadence_seconds=300,one_inflight_resize=True,changed_quantities_only=True,
             signal_inputs='CPU/memory maintained p95 only; no SLO feedback, prediction, adaptive detector, smoothing or tuned hysteresis'),
         telemetry=dict(bucket_seconds=300,poll_seconds=5,min_samples=50,min_span_seconds=270,
-            fence='host receipt inside (bucket_start,bucket_end]; host admission before algorithm use; source causality checked only against cluster receipt; incomplete buckets absent',
+            fence='host receipt inside [bucket_start,bucket_end); host admission before algorithm use; source causality checked only against cluster receipt; incomplete buckets absent',
             cpu='counter difference over source monotonic span for host-receipt-selected samples; no extrapolation',
             memory='mean of actual cgroup working-set bytes in bucket',maximum_same_domain_age_seconds=2,
             no_interpolation=True,no_clipping=True,late_read='record wall receive/commit/read times separately from nominal policy slot; never consume incomplete source'),

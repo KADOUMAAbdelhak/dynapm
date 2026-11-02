@@ -19,8 +19,13 @@ def current_rss_bytes():
     except (OSError,ValueError,subprocess.CalledProcessError):return None
 
 
+def receipt_bucket_samples(samples,start_ns,end_ns):
+    """One exact selection shared by aggregation and durable bucket evidence."""
+    return [s for s in samples if start_ns<=s['received_at_ns']<end_ns]
+
+
 def aggregate_bucket(samples,start_ns,end_ns,design):
-    t=design['telemetry'];inside=sorted([s for s in samples if start_ns<s['received_at_ns']<=end_ns],key=lambda x:x['received_at_ns'])
+    t=design['telemetry'];inside=sorted(receipt_bucket_samples(samples,start_ns,end_ns),key=lambda x:x['received_at_ns'])
     if end_ns-start_ns!=t['bucket_seconds']*10**9 or len(inside)<t['min_samples']:raise ValueError('incomplete_telemetry_bucket')
     times=np.array([s['received_at_ns'] for s in inside],dtype=np.int64)
     source_times=np.array([s['sample_time_ns'] for s in inside],dtype=np.int64)
@@ -60,7 +65,7 @@ class ProfileAdapter:
     def observe(self,payload,*,wall_ns=None):
         now=time.time_ns() if wall_ns is None else wall_ns;t=payload['logical_slot_ns']
         if any(type(payload[k]) is not int for k in ['logical_slot_ns','host_receipt_start_ns','host_receipt_end_ns','available_at_ns']):raise ValueError('integer_source_clocks_required')
-        if payload['available_at_ns']>now or payload['available_at_ns']<t or payload['host_receipt_end_ns']>t or payload['host_receipt_start_ns']<t-300*10**9 or payload['host_receipt_start_ns']>=payload['host_receipt_end_ns']:
+        if payload['available_at_ns']>now or payload['available_at_ns']<t or payload['host_receipt_end_ns']>=t or payload['host_receipt_start_ns']<t-300*10**9 or payload['host_receipt_start_ns']>=payload['host_receipt_end_ns']:
             raise ValueError('incomplete_or_future_measurement_invisible')
         if (t-self.anchor_ns)%(300*10**9) or not np.isfinite([payload['cpu_percent'],payload['memory_percent']]).all() or min(payload['cpu_percent'],payload['memory_percent'])<0:
             raise ValueError('invalid_nominal_observation')

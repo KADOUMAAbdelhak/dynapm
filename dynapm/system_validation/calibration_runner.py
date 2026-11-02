@@ -16,7 +16,7 @@ from dynapm.system_validation.clock_observations import ObservationClock,receive
 from dynapm.system_validation.host_power import ManagedPowerGuard
 from dynapm.system_validation.host_endurance import require_endurance
 from dynapm.system_validation.trial_preparation import measured_bootstrap
-from dynapm.system_validation.adapter import aggregate_bucket
+from dynapm.system_validation.adapter import aggregate_bucket,receipt_bucket_samples
 from dynapm.system_validation.consumer import summarize_requests,resource_metrics
 from dynapm.system_validation.system_estimation import allocation_integrals
 from dynapm.system_validation.smoke import Commands,Kube,http,text_http,free_port,guard_local_endpoint,guard_local_api,environment,resize_preflight,wait_http
@@ -320,13 +320,16 @@ def run_trial(repo,trial,*,plumbing_only=False,host_endurance_run=None,bootstrap
                                     # Evidence/persistence failures abort; never downgrade to missing data.
                                     sample=clock.accept(observation,raw)
                                     samples.append(sample)
-                            if now>=next_q:
+                            # Receipt is captured after the complete response. Close elapsed
+                            # buckets from that clock, never the pre-request poll time.
+                            while time.time_ns()>=int(next_q*1e9) and next_q<=plan['measurement_end_seconds']:
+                                bucket_samples=receipt_bucket_samples(samples,int((next_q-300)*1e9),int(next_q*1e9))
                                 payload=None
                                 try:
-                                    payload=aggregate_bucket(samples,int((next_q-300)*1e9),int(next_q*1e9),d)
+                                    payload=aggregate_bucket(bucket_samples,int((next_q-300)*1e9),int(next_q*1e9),d)
                                 except ValueError as exc:missing+=1;write_line(bd,dict(kind='INVALID_BUCKET',end_ns=int(next_q*1e9),error=str(exc)))
                                 if boot_start<next_q<=measured and payload:
-                                    write_line(boot,dict(role='MEASURED_CGROUP_SAMPLES',end_ns=int(next_q*1e9),samples=samples));accepted+=1
+                                    write_line(boot,dict(role='MEASURED_CGROUP_SAMPLES',end_ns=int(next_q*1e9),samples=bucket_samples));accepted+=1
                                 if next_q==measured and kube.pod()['metadata']['uid']!=plan['bootstrap_source_pod_uid']:
                                     raise ValueError('bootstrap_source_pod_replaced')
                                 if next_q==measured and bootstrap_only:
@@ -346,7 +349,7 @@ def run_trial(repo,trial,*,plumbing_only=False,host_endurance_run=None,bootstrap
                                     started=time.time_ns();snapshot=http(plan['profile_url']+'/snapshot')
                                     write_line(profiles,dict(nominal_time_ns=int(next_q*1e9),snapshot=snapshot))
                                     if next_q<end:write_line(requests,dict(nominal_time_ns=int(next_q*1e9),snapshot_read_started_ns=started,snapshot=snapshot))
-                                samples=[s for s in samples if s['received_at_ns']>int(next_q*1e9)];next_q+=300
+                                samples=[s for s in samples if s['received_at_ns']>=int(next_q*1e9)];next_q+=300
                             if time.monotonic()-last_host>=1800:
                                 _clean(repo)
                                 if SourceProvenance.capture(repo).commit!=source.commit:raise ValueError('source_commit_changed_during_calibration')

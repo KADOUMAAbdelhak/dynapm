@@ -118,12 +118,12 @@ scientific_runtime_sha256:
   dynapm/methods/baselines_v2.py: 8184f97ebe283c6173557082dc7df5d9f9935523bb9124ba6d5bdeba453e577b
   dynapm/methods/factories.py: bc62fe4c5a22cbd9e3e9daae91632e8dfa0934f864134f83d050abc1cdda6331
   dynapm/scripts/task32_system_harness.py: aff9132f987a8067fd1fb3d4dd2a67f21d7429f318b0b49740af98ed2168abcb
-  dynapm/system_validation/adapter.py: ca8cd89e2316e743476da32a7372161b96df2364f5ae41e7975c779ff4a9cbce
+  dynapm/system_validation/adapter.py: 4700067512899a65e76d71d36ff412b0a0af3896b8aab52878334b4c51a01c77
   dynapm/system_validation/application.py: 571da7880ea57442bc5b9497db5b9bf76d19fe922fcee8cc646f8afe38e43834
   dynapm/system_validation/application_instrumented.py: d9c6500c74565558ddd1cea1fc4712a5b0fa65857cc9830f3682732ddf9f30fb
   dynapm/system_validation/clock_observations.py: 04b8fa49e47dd51f731308bf2b513f45e7c942ffb1e189c3fb1898d6f56e247e
   dynapm/system_validation/consumer.py: 9a7ab4613203784862c830c309858dfe218d993aab734a6a9de0568cd977faef
-  dynapm/system_validation/design.py: 3d3e58527a9375d56709f282328e1584a6f9fff366dc7291f21b6b1e2676798e
+  dynapm/system_validation/design.py: ace0cbf15889c99815847cab8dee6cb4352a9769cc4085573c8dff7ce16c7fe6
   dynapm/system_validation/install_tools.py: 8bd894ff2ba0f317f5f1b0f0a0bb0df503ae3712386b3987b482c6feab5dadd7
   dynapm/system_validation/smoke.py: 5fbebe68a2024d925eb785f46302c36ad5104940b30dcc353734e9aea3b4ceeb
   dynapm/system_validation/workloads.py: 52f340edaa6c7bfeffa6fd1c52abb9312c26c4038613ec6e78a1b01de581a926
@@ -159,7 +159,7 @@ system_clock: host-admission-slots-cluster-causal-v2
 telemetry:
   bucket_seconds: 300
   cpu: counter difference over source monotonic span for host-receipt-selected samples; no extrapolation
-  fence: "host receipt inside (bucket_start,bucket_end]; host admission before algorithm use; source causality checked only against cluster receipt; incomplete buckets absent"
+  fence: "host receipt inside [bucket_start,bucket_end); host admission before algorithm use; source causality checked only against cluster receipt; incomplete buckets absent"
   late_read: record wall receive/commit/read times separately from nominal policy slot; never consume incomplete source
   maximum_same_domain_age_seconds: 2
   memory: mean of actual cgroup working-set bytes in bucket

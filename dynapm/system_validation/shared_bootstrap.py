@@ -127,6 +127,9 @@ def create_artifact(acquisition_run,artifact_store,design,*,allow_unit_fixture=F
 
 def load_artifact(path,expected_sha256,design):
     root=Path(path);_no_links(root)
+    if read_json(root/'manifest.json').get('schema_version')=='shared-measured-bootstrap-derived-v1':
+        from dynapm.system_validation.receipt_derivation import load_derived_artifact
+        return load_derived_artifact(root,expected_sha256,design)
     if {p.name for p in root.iterdir()}!=set(FILES)|{'manifest.json','COMPLETE'}:
         raise ValueError('bootstrap_artifact_inventory_mismatch')
     m=read_json(root/'manifest.json');marker=read_json(root/'COMPLETE')
