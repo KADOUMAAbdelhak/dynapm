@@ -57,3 +57,16 @@ Fast kernel actuation alone cannot justify shortening this scientific clock or
 coverage contract. Decision computation, actuation, polling uncertainty, drain,
 unestablished statistical settling and no overlapping/pending carryover all
 constrain any future proposal. No compressed execution is implemented here.
+
+
+## Explicit follow-up after the first production recommendation
+
+The original production-first probe is preserved under its original committed
+source and input hashes, including any pending resize and timeout. If that path
+is blocked by a state-dependent memory decrease, `run-engineering-two` separately
+characterizes the actuation components twice with an explicitly identified
+128–512MiB engineering ladder. This is not a correction to the 64MiB consumer
+floor, not a repaired PW-6h recommendation, and not evidence that a pending
+64MiB shrink converges. Both phases retain the same request workload and actual
+PW-6h initialization/recommendation calculation. No compression duration or
+acceptance rule is chosen by the follow-up. The original failed run remains FAILED.

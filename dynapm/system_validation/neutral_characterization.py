@@ -35,6 +35,8 @@ SCHEMA='bounded-neutral-characterization-v1'
 # This is an engineering stimulus ladder, NOT a recommendation/policy schedule.
 TARGETS=((None,None),(250,128),(1000,512),(250,128),(500,128),(100,128),
          (100,256),(100,64),(1000,512),(100,64),(100,64),(500,128),(1000,512))
+ENGINEERING_TARGETS=((1000,512),(250,128),(1000,512),(250,128),(500,128),(100,128),
+                     (100,256),(100,128),(1000,512),(100,128),(100,128),(500,256),(1000,512))
 SETTLE_RESPONSES=20  # Descriptive window, never a steady-state acceptance threshold.
 MAX_ACTIVE_SECONDS=240
 MAX_RESIZE_SECONDS=60
@@ -198,16 +200,18 @@ def controller_worker(plan,root,config):
         startup=StartupEvidence(startup.treatment_id,uid,app_instance,health['profile_instance_id'],plan['controller_instance_id'],plan['telemetry_instance_id'],0,0,0,False)
         initialize_profile(plan['profile_url']+'/initialize',dict(profile_instance_id=health['profile_instance_id'],startup=vars(startup)))
         while time.time()<plan['load_start_seconds']+3:collect();time.sleep(.2)
-        for decision,(target_cpu,target_mem) in enumerate(TARGETS):
+        for decision,(target_cpu,target_mem) in enumerate(plan['config']['targets']):
             if time.time()>=plan['load_start_seconds']+MAX_ACTIVE_SECONDS-10:raise ValueError('bounded_probe_deadline')
             begin=time.monotonic_ns();sample=collect();profile=http(plan['profile_url']+'/snapshot')
             maintenance=http(plan['profile_url']+'/maintenance-component');recommend_start=time.monotonic_ns();recommended=recommend(profile['profile'],d);recommend_end=time.monotonic_ns()
-            if target_cpu is None:
+            policy_target=target_cpu is None
+            if policy_target:
                 target_cpu=recommended['cpu_millicores'];target_mem=recommended['memory_mib']
             target=dict(cpu_millicores=target_cpu,memory_mib=target_mem)
             pod=kube.pod();before=pod['spec']['containers'][0]['resources']
             event=dict(decision=decision,decision_start_monotonic_ns=begin,method='pw_6h',policy_recommendation=recommended,
-                applied_target=target,target_role='PRODUCTION_PW6_RECOMMENDATION' if decision==0 else 'ENGINEERING_ACTUATION_STIMULUS_NOT_POLICY_OUTCOME',
+                applied_target=target,target_role='PRODUCTION_PW6_RECOMMENDATION' if policy_target else 'ENGINEERING_ACTUATION_STIMULUS_NOT_POLICY_OUTCOME',
+                policy_recommendation_is_noop=resources_match(before,recommended),recommendation_start_monotonic_ns=recommend_start,recommendation_end_monotonic_ns=recommend_end,
                 recommendation_seconds=(recommend_end-recommend_start)/1e9,maintenance_component_seconds=(maintenance['end_monotonic_ns']-maintenance['start_monotonic_ns'])/1e9,
                 maintenance=maintenance,before_resources=before)
             require_idle(pending)
@@ -293,14 +297,14 @@ def prepare_inputs(repo,config):
     return inputs,dataset
 
 
-def run_one(repo,index):
+def run_one(repo,index,*,engineering=False):
     repo=Path(repo).resolve();source=SourceProvenance.capture(repo)
     if source.dirty:raise ValueError('clean_committed_source_required')
     d=frozen_spec(repo);artifact,q=qualification(repo);artifact_inventory=q['artifact_files']
     power_state();endpoint=os.environ.get('DOCKER_HOST') or subprocess.check_output(['docker','context','inspect','--format','{{.Endpoints.docker.Host}}'],text=True).strip();guard_local_endpoint(endpoint)
     if shutil.disk_usage(repo).free<20*2**30:raise ValueError('20GiB_reserve_required')
     config=dict(schema_version=SCHEMA,method='pw_6h',qualification_sha256=QUALIFICATION,artifact_sha256=ARTIFACT,
-        targets=TARGETS,max_active_seconds=MAX_ACTIVE_SECONDS,max_resize_seconds=MAX_RESIZE_SECONDS,settle_responses=SETTLE_RESPONSES,
+        targets=ENGINEERING_TARGETS if engineering else TARGETS,characterization_phase='ENGINEERING_RESIZES_MEMORY_GE128' if engineering else 'PRODUCTION_RECOMMENDATION_FIRST',max_active_seconds=MAX_ACTIVE_SECONDS,max_resize_seconds=MAX_RESIZE_SECONDS,settle_responses=SETTLE_RESPONSES,
         stimulus_role='engineering actuator targets; not a compressed policy schedule',compression_duration_selected=False,comparative=False,index=index,
         implementation_sha256=file_sha256(Path(__file__)),base_source='5460c86dc4385ade3198dc01c9cd4184c0a8e45b')
     inputs,dataset=prepare_inputs(repo,config)
@@ -387,12 +391,12 @@ def run_one(repo,index):
 
 def main():
     p=argparse.ArgumentParser(description=__doc__);p.add_argument('--repo',type=Path,default=Path(__file__).resolve().parents[2]);s=p.add_subparsers(dest='action',required=True)
-    s.add_parser('run-two')
+    s.add_parser('run-two');s.add_parser('run-engineering-two')
     w=s.add_parser('worker');w.add_argument('kind',choices=['profile','generator','controller']);w.add_argument('--plan',type=Path,required=True);w.add_argument('--root',type=Path,required=True);w.add_argument('--port',type=int);w.add_argument('--kubeconfig',type=Path)
     a=p.parse_args()
-    if a.action=='run-two':
+    if a.action in ('run-two','run-engineering-two'):
         paths=[]
-        for index in (1,2):paths.append(str(run_one(a.repo,index)))
+        for index in (1,2):paths.append(str(run_one(a.repo,index,engineering=a.action=='run-engineering-two')))
         print(canonical_json(dict(completed_runs=paths,compression_duration_selected=False)),flush=True)
     else:
         plan=read_json(a.plan)

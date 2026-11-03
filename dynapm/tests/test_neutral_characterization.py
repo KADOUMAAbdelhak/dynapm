@@ -86,3 +86,16 @@ def test_artifact_initialization_has_separate_bounded_timeout(monkeypatch):
   return Response()
  monkeypatch.setattr(module,'urlopen',opener)
  assert module.initialize_profile('http://127.0.0.1:1234/initialize',{'fresh':'unit'})=={'initialized':True}
+
+
+def test_engineering_memory_safe_ladder_is_explicit_and_does_not_change_consumer():
+ from dynapm.system_validation.neutral_characterization import ENGINEERING_TARGETS
+ d=frozen_spec(ROOT)
+ assert d['consumer']['memory_mib_minimum']==64
+ assert min(m for c,m in ENGINEERING_TARGETS)==128
+ assert any(a[0]>b[0] for a,b in zip(ENGINEERING_TARGETS,ENGINEERING_TARGETS[1:]))
+ assert any(a[0]<b[0] for a,b in zip(ENGINEERING_TARGETS,ENGINEERING_TARGETS[1:]))
+ assert any(a[1]>b[1] for a,b in zip(ENGINEERING_TARGETS,ENGINEERING_TARGETS[1:]))
+ assert any(a[1]<b[1] for a,b in zip(ENGINEERING_TARGETS,ENGINEERING_TARGETS[1:]))
+ assert any(a==b for a,b in zip(ENGINEERING_TARGETS,ENGINEERING_TARGETS[1:]))
+ assert TARGETS[0]==(None,None)  # original failing production target is not rewritten
