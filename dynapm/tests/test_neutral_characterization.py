@@ -99,3 +99,18 @@ def test_engineering_memory_safe_ladder_is_explicit_and_does_not_change_consumer
  assert any(a[1]<b[1] for a,b in zip(ENGINEERING_TARGETS,ENGINEERING_TARGETS[1:]))
  assert any(a==b for a,b in zip(ENGINEERING_TARGETS,ENGINEERING_TARGETS[1:]))
  assert TARGETS[0]==(None,None)  # original failing production target is not rewritten
+
+
+def test_complete_output_inventory_includes_the_deployment_resources(tmp_path):
+ from dynapm.system_validation.neutral_characterization import output_specs
+ from dynapm.core.run_store import build_output_manifest
+ specs=output_specs()
+ assert 'outputs/resources.json' in {s.path for s in specs}
+ for spec in specs:
+  p=tmp_path/spec.path;p.parent.mkdir(parents=True,exist_ok=True)
+  if p.suffix=='.json':write_json(p,{'UNIT_TEST_ONLY':True})
+  else:p.write_text('')
+ out=build_output_manifest(tmp_path,specs)
+ assert len(out.files)==len(specs)
+ (tmp_path/'outputs/unregistered.json').write_text('{}')
+ with pytest.raises(ValueError,match='inventory_mismatch'):build_output_manifest(tmp_path,specs)

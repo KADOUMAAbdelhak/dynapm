@@ -40,9 +40,13 @@ ENGINEERING_TARGETS=((1000,512),(250,128),(1000,512),(250,128),(500,128),(100,12
 SETTLE_RESPONSES=20  # Descriptive window, never a steady-state acceptance threshold.
 MAX_ACTIVE_SECONDS=240
 MAX_RESIZE_SECONDS=60
-JSONS=('plan','runtime_environment','preflight','initialization','summary','status','host_before','host_after')
+JSONS=('resources','plan','runtime_environment','preflight','initialization','summary','status','host_before','host_after')
 LINES=('decisions','timing','telemetry','requests','pod_observations')
 LOGS=('kind','application','portforward','profile','generator','controller')
+
+
+def output_specs():
+    return [OutputSpec('outputs/'+n+'.json','neutral-characterization') for n in JSONS]+[OutputSpec('outputs/'+n+'.jsonl','neutral-characterization') for n in LINES]+[OutputSpec('logs/'+n+'.log','bounded-worker-log') for n in LOGS]+[OutputSpec('outputs/'+n,'guard-clock-evidence') for n in ['clock_observations.jsonl','clock_rejections.jsonl','clock_evidence_manifest.json','host_continuity.jsonl','host_continuity_summary.json','host_continuity_failure.json','power_guard.json','controller_final.json','generator_final.json']]
 
 
 def append(path,row):
@@ -313,7 +317,7 @@ def run_one(repo,index,*,engineering=False):
         (PolicyConfig('pw_6h',periodic_interval_hours=6,observation_window_hours=24),),StatisticsConfig(bootstrap_repetitions=0,bootstrap_seed=20251022,test_specification={'enabled':False}),
         preprocessing=config,analysis=dict(comparative=False,claim_generating=False))
     exp,env_record=prepare_experiment(repo,inputs,cfg,dataset,cohort,{'workload':d['workload']['seed']},execution_compatibility_keys=tuple(d['hardware']['compatibility_keys']))
-    specs=[OutputSpec('outputs/'+n+'.json','neutral-characterization') for n in JSONS]+[OutputSpec('outputs/'+n+'.jsonl','neutral-characterization') for n in LINES]+[OutputSpec('logs/'+n+'.log','bounded-worker-log') for n in LOGS]+[OutputSpec('outputs/'+n,'guard-clock-evidence') for n in ['clock_observations.jsonl','clock_rejections.jsonl','clock_evidence_manifest.json','host_continuity.jsonl','host_continuity_summary.json','host_continuity_failure.json','power_guard.json','controller_final.json','generator_final.json']]
+    specs=output_specs()
     with tempfile.TemporaryDirectory(prefix='dynapm-neutral-private-') as temp:
         private=Path(temp);private.chmod(0o700);dc=private/'docker';dc.mkdir();(dc/'config.json').write_text('{"auths":{}}')
         env={**os.environ,'DOCKER_HOST':endpoint,'DOCKER_CONFIG':str(dc),'KUBECONFIG':str(private/'kubeconfig'),'PATH':str(repo/d['kubernetes']['tools_directory'])+os.pathsep+os.environ['PATH']}
