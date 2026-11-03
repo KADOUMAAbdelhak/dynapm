@@ -71,3 +71,18 @@ def test_nonempty_trace_descriptor_roundtrips_through_managed_input_validation(t
  assert prepare_inputs(tmp_path,config)[1].sha256==dataset.sha256
  (root/'stable/input.json').write_text('{}')
  with pytest.raises(ValueError,match='immutable_probe_descriptor'):prepare_inputs(tmp_path,config)
+
+
+def test_artifact_initialization_has_separate_bounded_timeout(monkeypatch):
+ import json
+ from dynapm.system_validation import neutral_characterization as module
+ class Response:
+  def __enter__(self):return self
+  def __exit__(self,*args):pass
+  def read(self):return b'{"initialized":true}'
+ def opener(request,timeout):
+  assert timeout==60 and request.full_url=='http://127.0.0.1:1234/initialize'
+  assert json.loads(request.data)=={'fresh':'unit'}
+  return Response()
+ monkeypatch.setattr(module,'urlopen',opener)
+ assert module.initialize_profile('http://127.0.0.1:1234/initialize',{'fresh':'unit'})=={'initialized':True}

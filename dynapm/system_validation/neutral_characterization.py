@@ -10,7 +10,7 @@ import argparse, concurrent.futures, json, os, shutil, subprocess, sys, tempfile
 import numpy as np
 import pandas as pd
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
-from urllib.request import urlopen
+from urllib.request import urlopen, Request
 
 from dynapm.core.provenance import (SourceProvenance, DataConfig, ModelConfig, PolicyConfig,
  StatisticsConfig, ExperimentConfigProvenance, CohortManifest, CohortEntity, prepare_experiment,
@@ -105,6 +105,12 @@ def component_refresh(adapter):
         live_runtime_refreshes=adapter.policy.accounting_metrics()['n_refresh_events'])
 
 
+def initialize_profile(url,payload):
+    # Artifact validation is intentionally substantial and is not telemetry I/O.
+    request=Request(url,data=canonical_json(payload).encode(),headers={'Content-Type':'application/json'})
+    with urlopen(request,timeout=60) as response:return json.load(response)
+
+
 def profile_worker(plan,root,port):
     repo=Path(plan['repo']);d=plan['design'];artifact=repo/'results/shared_bootstrap/artifacts'/ARTIFACT
     state={};identity=uuid.uuid4().hex
@@ -126,12 +132,13 @@ def profile_worker(plan,root,port):
                 payload=json.loads(self.rfile.read(int(self.headers['Content-Length'])))
                 if self.path!='/initialize' or state:raise ValueError('exactly_one_initialization')
                 if payload['profile_instance_id']!=identity:raise ValueError('fresh_profile_identity_required')
+                initialization_start=time.monotonic_ns()
                 startup=StartupEvidence(**payload['startup']);blocks=freeze_blocks([(artifact,ARTIFACT)],d,common_stable_prehistory=True,purpose='pilot')
                 registry=TreatmentRegistry(blocks);origin=(time.time_ns()//(300*10**9))*(300*10**9)
                 start=time.monotonic_ns();adapter=registry.initialize(0,'pw_6h',artifact,d,origin,startup,read_wall_ns=time.time_ns())
                 state['adapter']=adapter
                 snap=adapter.snapshot();value=dict(profile_instance_id=identity,pid=os.getpid(),startup=vars(startup),
-                    initialization_seconds=(time.monotonic_ns()-start)/1e9,origin_ns=origin,snapshot=snap,
+                    initialization_seconds=(time.monotonic_ns()-initialization_start)/1e9,registry_initialization_seconds=(time.monotonic_ns()-start)/1e9,origin_ns=origin,snapshot=snap,
                     cpu_thresholds=adapter.policy.cpu_thresholds,memory_thresholds=adapter.policy.mem_thresholds,
                     input_history_sha256=fingerprint(adapter.history.to_numpy().tolist()),
                     initial_dynamic_sha256=fingerprint(snap['profile']['dynamic']),method='pw_6h')
@@ -189,7 +196,7 @@ def controller_worker(plan,root,config):
         collect();health=http(plan['profile_url']+'/healthz')
         startup=StartupEvidence(*[uuid.uuid4().hex for _ in range(6)],initial_runtime_refreshes=0,initial_observations=0,initial_resource_changes=0,pending_resize=False)
         startup=StartupEvidence(startup.treatment_id,uid,app_instance,health['profile_instance_id'],plan['controller_instance_id'],plan['telemetry_instance_id'],0,0,0,False)
-        http(plan['profile_url']+'/initialize',dict(profile_instance_id=health['profile_instance_id'],startup=vars(startup)))
+        initialize_profile(plan['profile_url']+'/initialize',dict(profile_instance_id=health['profile_instance_id'],startup=vars(startup)))
         while time.time()<plan['load_start_seconds']+3:collect();time.sleep(.2)
         for decision,(target_cpu,target_mem) in enumerate(TARGETS):
             if time.time()>=plan['load_start_seconds']+MAX_ACTIVE_SECONDS-10:raise ValueError('bounded_probe_deadline')
@@ -326,6 +333,7 @@ def run_one(repo,index):
                     handle=(logs/log).open('a');handles.append(handle);p=subprocess.Popen(args,env=env,cwd=repo,stdout=handle,stderr=subprocess.STDOUT);children.append(p);return p
                 try:
                     print(canonical_json(dict(stage='SETUP',run_id=run.manifest.run_id,fingerprint=exp.fingerprint,index=index)),flush=True)
+                    if cluster in commands.run(['kind','get','clusters']).splitlines():raise ValueError('preexisting_cluster_preserved')
                     created=True;commands.run(['kind','create','cluster','--name',cluster,'--config','harness/system/kind.yaml','--kubeconfig',str(private/'kubeconfig'),'--wait','120s'],log=logs/'kind.log',timeout=300)
                     guard_local_api(kube.call(['config','view','--minify','-o','jsonpath={.clusters[0].cluster.server}']))
                     details['nodes']=json.loads(kube.call(['get','nodes','-o','json']));details['version']=json.loads(kube.call(['version','-o','json']))
