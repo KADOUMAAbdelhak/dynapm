@@ -46,7 +46,11 @@ LOGS=('kind','application','portforward','profile','generator','controller')
 
 
 def output_specs():
-    return [OutputSpec('outputs/'+n+'.json','neutral-characterization') for n in JSONS]+[OutputSpec('outputs/'+n+'.jsonl','neutral-characterization') for n in LINES]+[OutputSpec('logs/'+n+'.log','bounded-worker-log') for n in LOGS]+[OutputSpec('outputs/'+n,'guard-clock-evidence') for n in ['clock_observations.jsonl','clock_rejections.jsonl','clock_evidence_manifest.json','host_continuity.jsonl','host_continuity_summary.json','host_continuity_failure.json','power_guard.json','controller_final.json','generator_final.json']]
+    return [OutputSpec('outputs/'+n+'.json','neutral-characterization') for n in JSONS]+[OutputSpec('outputs/'+n+'.jsonl','neutral-characterization') for n in LINES]+[OutputSpec('logs/'+n+'.log','bounded-worker-log') for n in LOGS]+[OutputSpec('outputs/'+n,'guard-clock-evidence') for n in ['clock_observations.jsonl','clock_rejections.jsonl','clock_evidence_manifest.json','host_continuity.jsonl','host_continuity_summary.json','host_continuity_failure.json','power_guard.json','controller_final.json','generator_final.json','stop_load.signal']]
+
+
+def stop_path(root):
+    return Path(root)/'outputs/stop_load.signal'
 
 
 def append(path,row):
@@ -176,7 +180,7 @@ def generator_worker(plan,root):
     count=0
     with concurrent.futures.ThreadPoolExecutor(max_workers=d['workload']['max_concurrency']) as pool:
         for i in range(int(MAX_ACTIVE_SECONDS*rate)):
-            if (Path(root)/'STOP_LOAD').exists():break
+            if stop_path(root).exists():break
             time.sleep(max(0,origin+i/rate-time.monotonic()))
             if slots.acquire(blocking=False):pool.submit(send,i)
             else:emit(dict(request_id=i,scheduled_at=start+i/rate,sent_at=None,completed_at=time.time(),success=False,dropped=True,error='capacity',latency_seconds=None))
@@ -266,7 +270,7 @@ def controller_worker(plan,root,config):
             append(o/'decisions.jsonl',event);events.append(event)
         write_json(o/'controller_final.json',dict(complete=True,decisions=len(events),pending=pending,pid=os.getpid(),app_instance_id=app_instance,pod_uid=uid))
     finally:
-        clock.finalize();(root/'STOP_LOAD').touch()
+        clock.finalize();stop_path(root).touch()
 
 
 def summary(root):
@@ -376,7 +380,7 @@ def run_one(repo,index,*,engineering=False):
                     validate_clock_evidence(run.path,context);require_isolated_engine(commands,cluster)
                     write_json(o/'summary.json',summary(run.path));write_json(o/'status.json',dict(stage='COMPLETE',comparative=False,claim_generating=False))
                 finally:
-                    (run.path/'STOP_LOAD').touch()
+                    stop_path(run.path).touch()
                     for p in children:
                         if p.poll() is None:p.terminate()
                         try:p.wait(timeout=10)

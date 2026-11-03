@@ -9,6 +9,7 @@ from dynapm.system_validation.timing_probes import ResizeProbe
 from dynapm.system_validation.trial_preparation import measured_bootstrap,MeasuredProfileAdapter
 from dynapm.system_validation.estimation_design import frozen_spec
 from dynapm.tests.test_system_trial_preparation import unit_evidence,START,END
+from dynapm.tests.test_provenance import inputs
 ROOT=Path(__file__).parents[2]
 
 
@@ -114,3 +115,18 @@ def test_complete_output_inventory_includes_the_deployment_resources(tmp_path):
  assert len(out.files)==len(specs)
  (tmp_path/'outputs/unregistered.json').write_text('{}')
  with pytest.raises(ValueError,match='inventory_mismatch'):build_output_manifest(tmp_path,specs)
+
+
+def test_complete_run_cache_accepts_declared_stop_signal(tmp_path,inputs):
+ from dynapm.system_validation.neutral_characterization import output_specs,stop_path
+ from dynapm.core.run_store import RunSession,check_cache
+ repo,raw,exp,env=inputs
+ with RunSession(tmp_path/'managed',exp,env,repo=repo,dataset_root=raw,purpose='pilot',required_outputs=output_specs()) as run:
+  for spec in output_specs():
+   p=run.path/spec.path;p.parent.mkdir(parents=True,exist_ok=True)
+   if p.suffix=='.json':write_json(p,{'UNIT_TEST_ONLY':True})
+   else:p.write_text('')
+  stop_path(run.path).touch()
+  assert not (run.path/'STOP_LOAD').exists()
+  run.complete()
+ assert check_cache(run.path,exp,'pilot').reusable
