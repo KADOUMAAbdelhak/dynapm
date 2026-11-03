@@ -277,6 +277,15 @@ def summary(root):
         application_settling='old-request drain plus descriptive 20-response windows; statistical steady state NOT_ESTABLISHED')
 
 
+def prepare_inputs(repo,config):
+    inputs=Path(repo)/'results/neutral_characterization/inputs'/fingerprint(config)
+    trace=inputs/'stable';trace.mkdir(parents=True,exist_ok=True);target=trace/'input.json'
+    if target.exists() and canonical_json(read_json(target))!=canonical_json(config):raise ValueError('immutable_probe_descriptor_mismatch')
+    if not target.exists():write_json(target,config)
+    dataset=build_dataset_manifest(inputs,dataset_id='bounded-neutral-characterization',source_name='prospective neutral engineering timing stimuli',trace_names=('stable',),schema_identity=SCHEMA)
+    return inputs,dataset
+
+
 def run_one(repo,index):
     repo=Path(repo).resolve();source=SourceProvenance.capture(repo)
     if source.dirty:raise ValueError('clean_committed_source_required')
@@ -287,9 +296,7 @@ def run_one(repo,index):
         targets=TARGETS,max_active_seconds=MAX_ACTIVE_SECONDS,max_resize_seconds=MAX_RESIZE_SECONDS,settle_responses=SETTLE_RESPONSES,
         stimulus_role='engineering actuator targets; not a compressed policy schedule',compression_duration_selected=False,comparative=False,index=index,
         implementation_sha256=file_sha256(Path(__file__)),base_source='5460c86dc4385ade3198dc01c9cd4184c0a8e45b')
-    inputs=repo/'results/neutral_characterization/inputs'/fingerprint(config);inputs.mkdir(parents=True,exist_ok=True)
-    if not (inputs/'input.json').exists():write_json(inputs/'input.json',config)
-    dataset=build_dataset_manifest(inputs,dataset_id='bounded-neutral-characterization',source_name='prospective neutral engineering timing stimuli',trace_names=(),schema_identity=SCHEMA)
+    inputs,dataset=prepare_inputs(repo,config)
     cohort=CohortManifest(dataset.dataset_id,dataset.sha256,'neutral-engineering-v1',{'minimum_observations':200},(CohortEntity('stable','application',True,None,0),),utc_now())
     cfg=ExperimentConfigProvenance(DataConfig(dataset.dataset_id,bootstrap_fraction=1.,minimum_observations=200),ModelConfig(family='unused-observation-only'),
         (PolicyConfig('pw_6h',periodic_interval_hours=6,observation_window_hours=24),),StatisticsConfig(bootstrap_repetitions=0,bootstrap_seed=20251022,test_specification={'enabled':False}),

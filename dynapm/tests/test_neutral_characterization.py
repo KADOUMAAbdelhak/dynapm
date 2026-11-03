@@ -59,3 +59,15 @@ def test_qualification_tampering_fails_before_any_workload(tmp_path):
  p=tmp_path/'results/shared_bootstrap/qualifications/block0001';p.mkdir(parents=True)
  write_json(p/'qualification.json',{'artifact_sha256':'wrong'})
  with pytest.raises(ValueError,match='qualification_hash'):qualification(tmp_path)
+
+
+def test_nonempty_trace_descriptor_roundtrips_through_managed_input_validation(tmp_path):
+ from dynapm.system_validation.neutral_characterization import prepare_inputs
+ from dynapm.data.manifests import check_dataset
+ config={'unit':'offline','targets':((100,64),(500,128))}
+ root,dataset=prepare_inputs(tmp_path,config)
+ assert dataset.trace_names==('stable',) and len(dataset.files)==1
+ check_dataset(root,dataset)
+ assert prepare_inputs(tmp_path,config)[1].sha256==dataset.sha256
+ (root/'stable/input.json').write_text('{}')
+ with pytest.raises(ValueError,match='immutable_probe_descriptor'):prepare_inputs(tmp_path,config)
