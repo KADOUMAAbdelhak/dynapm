@@ -141,6 +141,8 @@ def main():
        verified=body['iterations']==design['workload']['iterations'] and body['memory_mib']==work
        row=dict(request_id=i,sent_monotonic_ns=sent,completed_monotonic_ns=complete,success=status==200 and verified,work_verified=verified,response=body)
       except Exception as ex:row=dict(request_id=i,sent_monotonic_ns=sent,completed_monotonic_ns=time.monotonic_ns(),success=False,work_verified=False,error=repr(ex))
+      row['latency_seconds']=(row['completed_monotonic_ns']-sent)/1e9
+      row['category']='APPLICATION_OUTCOME';row['dropped']=False
       with request_lock:
        records.append(row);append(out/'requests.jsonl',row);inflight.pop(i);append(out/'request_registry.jsonl',dict(event='COMPLETED',request_id=i,monotonic_ns=row['completed_monotonic_ns']))
       sem.release()
@@ -153,13 +155,16 @@ def main():
         while not stop.is_set() and time.monotonic_ns()-load_started_ns<300*10**9:
          if stop.wait(max(0,(load_started_ns+i*10**9/rate-time.monotonic_ns())/1e9)):break
          if sem.acquire(blocking=False):pool.submit(send,i)
-         else:raise ValueError('request_generator_capacity_drop')
+         else:
+          with request_lock:
+           sent_ids.add(i);drop=dict(request_id=i,sent_monotonic_ns=None,completed_monotonic_ns=time.monotonic_ns(),success=False,work_verified=False,dropped=True,error='open_loop_capacity',category='APPLICATION_OUTCOME')
+           records.append(drop);append(out/'requests.jsonl',drop);append(out/'request_registry.jsonl',dict(event='DROPPED',request_id=i,monotonic_ns=drop['completed_monotonic_ns']))
          i+=1
       except Exception as ex:load_errors.append(repr(ex))
      gen=threading.Thread(target=generator,name='fixed-rps-load');gen.start();sampler=threading.Thread(target=sample_loop,name='independent-node-observer');sampler.start();time.sleep(3)
      # All decisions remain explicit actuator stimuli. A single PW6 profile is initialized from block1.
      def execute(case,target,already_active=False):
-      if time.monotonic_ns()-load_started_ns>270*10**9:raise ValueError('bounded_240s_active_limit')
+      if time.monotonic_ns()-load_started_ns>270*10**9:raise ValueError('bounded_300s_active_limit')
       assert not load_errors
       if not already_active:assert ledger.intend(case,target)==target
       begin=ledger.active['issued_ns'];p=kube.pod();before=next(c['resources'] for c in p['spec']['containers'] if c['name']=='workload')
@@ -195,7 +200,7 @@ def main():
        enf=ledger.active['enforced_ns'];timings.extend([dict(kind='patch_ack_seconds',value=(ack_ns-submitted)/1e9),dict(kind='ack_to_enforcement_seconds',value=(enf-ack_ns)/1e9),dict(kind='decision_to_enforcement_seconds',value=(enf-begin)/1e9)])
       enforced=ledger.active['enforced_ns']
       with request_lock:
-       ids=sorted(set(inflight)|{r['request_id'] for r in records if r['sent_monotonic_ns']<enforced<=r['completed_monotonic_ns']});append(out/'request_registry.jsonl',dict(event='ENFORCEMENT_CAPTURE',decision_id=case,enforced_monotonic_ns=enforced,captured_monotonic_ns=time.monotonic_ns(),inflight_ids=ids))
+       ids=sorted(set(inflight)|{r['request_id'] for r in records if type(r['sent_monotonic_ns']) is int and r['sent_monotonic_ns']<enforced<=r['completed_monotonic_ns']});append(out/'request_registry.jsonl',dict(event='ENFORCEMENT_CAPTURE',decision_id=case,enforced_monotonic_ns=enforced,captured_monotonic_ns=time.monotonic_ns(),inflight_ids=ids))
       # Registry includes actual-boundary inflight plus any conservatively captured later requests.
       if case=='cycle_down_1' and MODE=='application_exec':
        for index in range(2):

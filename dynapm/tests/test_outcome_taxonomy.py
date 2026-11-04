@@ -18,3 +18,26 @@ def test_fresh_failed_attempts_complete_observation_without_claiming_health():
 def test_missing_registry_does_not_complete():assert not observation_window([],None,0,7_000_000_000)['observation_complete']
 def test_unknown_event_cannot_be_silently_accepted():
  with pytest.raises(ValueError):classify('unknown')
+
+def node_fixture():
+ from dynapm.tests.test_reservation_protocol import fixture
+ p,_=fixture(Target(100,64));p['spec']['nodeName']='UNIT_NODE';p['status']['containerStatuses'][0]['containerID']='containerd://UNIT_CONTAINER'
+ n=dict(start_monotonic_ns=3,end_monotonic_ns=4,values={'cpu.max':'10000 100000','memory.max':str(1024*2**20)},binding={'node':'UNIT_NODE','container_id':'UNIT_CONTAINER'})
+ return p,n
+
+def test_independent_enforcement_has_no_application_diagnostic_dependency():
+ from dynapm.system_validation.outcome_taxonomy import control_enforcement
+ p,n=node_fixture();v=control_enforcement(p,n,Target(100,64),pod_uid='UNIT_POD',generation=2,ack_ns=2,pod_received_ns=3,now_ns=5)
+ assert v['complete'] and all(v['gates'].values())
+
+@pytest.mark.parametrize('change',['wrong_container','wrong_quota','wrong_limit','stale_read','unallocated','pending'])
+def test_independent_enforcement_fails_closed(change):
+ from dynapm.system_validation.outcome_taxonomy import control_enforcement
+ p,n=node_fixture()
+ if change=='wrong_container':n['binding']['container_id']='OTHER'
+ if change=='wrong_quota':n['values']['cpu.max']='20000 100000'
+ if change=='wrong_limit':n['values']['memory.max']=str(64*2**20)
+ if change=='stale_read':n['start_monotonic_ns']=1
+ if change=='unallocated':p['status']['containerStatuses'][0]['allocatedResources']={}
+ if change=='pending':p['status']['conditions'].append({'type':'PodResizeInProgress','status':'True'})
+ assert not control_enforcement(p,n,Target(100,64),pod_uid='UNIT_POD',generation=2,ack_ns=2,pod_received_ns=3,now_ns=5)['complete']

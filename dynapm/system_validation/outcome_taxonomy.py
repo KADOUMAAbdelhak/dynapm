@@ -42,7 +42,9 @@ def control_enforcement(pod,node,target,*,pod_uid,generation,ack_ns,pod_received
     except (KeyError,ValueError,TypeError):reservation=False
     quota,period=map(int,node['values']['cpu.max'].split())
     conditions=[c for c in pod['status'].get('conditions',[]) if c['type'] in ('PodResizePending','PodResizeInProgress') and c['status']=='True']
-    gates=dict(specification=resources_match(spec,target),status=resources_match(cs.get('resources'),target),reservation_accounted=reservation,
+    binding=node.get('binding',{})
+    owner=binding.get('container_id')==cs.get('containerID','').split('://')[-1] and bool(binding.get('container_id')) and binding.get('node')==pod['spec'].get('nodeName')
+    gates=dict(container_identity=owner,specification=resources_match(spec,target),status=resources_match(cs.get('resources'),target),reservation_accounted=reservation,
         qos_burstable=pod['status'].get('qosClass')=='Burstable',observed_generation=pod['status'].get('observedGeneration',-1)>=max(generation,pod['metadata']['generation']),
         fresh_observation=ack_ns<=pod_received_ns<=now_ns and ack_ns<=node['start_monotonic_ns']<=node['end_monotonic_ns']<=now_ns,
         cpu_enforced=abs(quota/period*1000-target.cpu_millicores)<1e-6,fixed_memory_cap_enforced=int(node['values']['memory.max'])==1024*2**20,
