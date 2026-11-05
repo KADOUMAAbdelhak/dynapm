@@ -1,0 +1,203 @@
+{
+  "automatic_retries": 0,
+  "bootstrap_sha256": "51aad0e364d6f4774f8c51ab2cb7544eac87d7ebdb36e492eba648c014dffd2b",
+  "bucket_seconds": 300,
+  "cells": [
+    {
+      "method": "static",
+      "repetition": 1,
+      "scenario": "periodic",
+      "seed": 2026110501,
+      "sequence": 1
+    },
+    {
+      "method": "pw_12h",
+      "repetition": 1,
+      "scenario": "periodic",
+      "seed": 2026110501,
+      "sequence": 2
+    },
+    {
+      "method": "pw_3h",
+      "repetition": 1,
+      "scenario": "periodic",
+      "seed": 2026110501,
+      "sequence": 3
+    },
+    {
+      "method": "static",
+      "repetition": 1,
+      "scenario": "abrupt_regime_shift",
+      "seed": 2026110501,
+      "sequence": 4
+    },
+    {
+      "method": "pw_3h",
+      "repetition": 1,
+      "scenario": "abrupt_regime_shift",
+      "seed": 2026110501,
+      "sequence": 5
+    },
+    {
+      "method": "pw_12h",
+      "repetition": 1,
+      "scenario": "abrupt_regime_shift",
+      "seed": 2026110501,
+      "sequence": 6
+    },
+    {
+      "method": "pw_3h",
+      "repetition": 2,
+      "scenario": "abrupt_regime_shift",
+      "seed": 2026110502,
+      "sequence": 7
+    },
+    {
+      "method": "pw_12h",
+      "repetition": 2,
+      "scenario": "abrupt_regime_shift",
+      "seed": 2026110502,
+      "sequence": 8
+    },
+    {
+      "method": "static",
+      "repetition": 2,
+      "scenario": "abrupt_regime_shift",
+      "seed": 2026110502,
+      "sequence": 9
+    },
+    {
+      "method": "pw_12h",
+      "repetition": 2,
+      "scenario": "periodic",
+      "seed": 2026110502,
+      "sequence": 10
+    },
+    {
+      "method": "pw_3h",
+      "repetition": 2,
+      "scenario": "periodic",
+      "seed": 2026110502,
+      "sequence": 11
+    },
+    {
+      "method": "static",
+      "repetition": 2,
+      "scenario": "periodic",
+      "seed": 2026110502,
+      "sequence": 12
+    },
+    {
+      "method": "pw_3h",
+      "repetition": 3,
+      "scenario": "periodic",
+      "seed": 2026110503,
+      "sequence": 13
+    },
+    {
+      "method": "static",
+      "repetition": 3,
+      "scenario": "periodic",
+      "seed": 2026110503,
+      "sequence": 14
+    },
+    {
+      "method": "pw_12h",
+      "repetition": 3,
+      "scenario": "periodic",
+      "seed": 2026110503,
+      "sequence": 15
+    },
+    {
+      "method": "pw_12h",
+      "repetition": 3,
+      "scenario": "abrupt_regime_shift",
+      "seed": 2026110503,
+      "sequence": 16
+    },
+    {
+      "method": "static",
+      "repetition": 3,
+      "scenario": "abrupt_regime_shift",
+      "seed": 2026110503,
+      "sequence": 17
+    },
+    {
+      "method": "pw_3h",
+      "repetition": 3,
+      "scenario": "abrupt_regime_shift",
+      "seed": 2026110503,
+      "sequence": 18
+    }
+  ],
+  "checkpoints_seconds": {
+    "abrupt_regime_shift": 97200,
+    "periodic": 24300
+  },
+  "cooldown_seconds": 900,
+  "donor_buckets": 6,
+  "donor_phases": {
+    "high12": [
+      12,
+      96
+    ],
+    "low2": [
+      2,
+      32
+    ],
+    "low4": [
+      4,
+      32
+    ]
+  },
+  "donor_seed": 20251022,
+  "failure_taxonomy": "reservation-outcome-observability-v1",
+  "fixed_program_seconds": 109800,
+  "integration_refresh_seconds": 10800,
+  "integration_seconds": 12600,
+  "integration_seed": 20251022,
+  "integration_shift_seconds": 1800,
+  "iterations": 30000,
+  "max_concurrency": 32,
+  "maximum_replacements": 2,
+  "measurement_seconds": 1800,
+  "minimum_receipt_span_seconds": 270,
+  "minimum_samples": 50,
+  "practical_superiority": "NOT_DEFINED",
+  "qualification_sha256": "b0e4e3c1dcaf87de424cb6bb070341da4fc69ad96b63558bf910255807775a93",
+  "reference_replay": "tile six vectors in recorded order, reset at segment boundary",
+  "reference_resources": {
+    "limits": {
+      "cpu": "1000m",
+      "memory": "1024Mi"
+    },
+    "requests": {
+      "cpu": "1000m",
+      "memory": "512Mi"
+    }
+  },
+  "resource_semantics": "scheduler-reservation-actuation-v2",
+  "runtime_sha256": {
+    "dynapm/core/accounting.py": "fabe82c06b435d2c520caa4557346a0a526b28ca898f377439e6f25b550b10eb",
+    "dynapm/core/temporal.py": "4bfca252c6376d533d45f89379c5d5599df50148911651fa43c0255b81e3b787",
+    "dynapm/experiments/confirmatory_execution.py": "76f26b7936fbae747fff550eddc5ca05485a2ea6184b03af1bf7f69ece2491d0",
+    "dynapm/methods/baselines_v2.py": "8184f97ebe283c6173557082dc7df5d9f9935523bb9124ba6d5bdeba453e577b",
+    "dynapm/scripts/task41_bounded_v8.py": "4eae793aceda86627eb498a86ce3dde70aca8a036d2cff56920f932f2c6a3c6e",
+    "dynapm/system_validation/bounded_v8.py": "5c69aafd8d2602281b7eb8de10b4120f92ef300534dca884ab24d91740536a0d",
+    "dynapm/system_validation/bounded_v8_metrics.py": "205e447d0ce34a6779bb5f8d497a7ae56023e0515c71dc0a76a2c6741a5df70f",
+    "dynapm/system_validation/bounded_v8_runtime.py": "f4badafd23fe0d64785d027ffe611622e0abcb7993ddfe41899fc9e628607e39",
+    "dynapm/system_validation/clock_observations.py": "04b8fa49e47dd51f731308bf2b513f45e7c942ffb1e189c3fb1898d6f56e247e",
+    "dynapm/system_validation/consumer.py": "9a7ab4613203784862c830c309858dfe218d993aab734a6a9de0568cd977faef",
+    "dynapm/system_validation/outcome_taxonomy.py": "0a1ebad090d20e2ae9ab299c791232f643bdaddd649292eb72673c8f330a432d",
+    "dynapm/system_validation/reservation_protocol.py": "693baca4c2b6a65b04d19c65e299b87234455131067638fd6349acacf01826c1",
+    "dynapm/system_validation/v8_analysis.py": "0dd8a5bd2fe359bd5db0f2387cba1f5daf74084d59d6c73309688cbb34c0cb5d",
+    "dynapm/system_validation/v8_campaign.py": "3c982eadd673ba319a7690ef293f92f2bb3db23a8edf42a1f3e2303706b7c423",
+    "harness/system/kind.yaml": "f44fa544c814716c56577f7ec0fdba037d21bd495c188afc5a72ed8b7a7e0eee"
+  },
+  "schema": "v8-bounded-operational-v1",
+  "scope": "checkpoint operational contrasts and one native live integration",
+  "slo_seconds": 0.25,
+  "timeout_seconds": 5,
+  "transition_slice_seconds": 300,
+  "warmup_seconds": 1800
+}
