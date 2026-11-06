@@ -1,5 +1,6 @@
 """Local phases for a sealed Google acquisition, reusing the cell-e algorithms."""
 from collections import Counter
+from contextlib import ExitStack
 
 import pandas as pd
 import pyarrow as pa
@@ -8,7 +9,7 @@ import pyarrow.parquet as pq
 from dynapm.core.provenance import file_sha256, fingerprint, read_json
 from dynapm.experiments.google2019_availability_validation import SCHEMA as AUDIT_SCHEMA, audit_partition
 from dynapm.experiments.google2019_local_canonical import (NORMALIZATION, PARTITIONS, SCHEMA, disk_guard,
-    partition_usage, process_partition, require_corrected_generation, validate_local)
+    USAGE_COLUMNS, process_partition, require_corrected_generation, validate_local)
 from dynapm.experiments.google2019_protocol_validation import select_cohort
 from dynapm.experiments.google2019_requests import KEYS, PAIR, REQUEST_RULE, prepare_request_history
 from dynapm.system_validation.v8_campaign import publish_record
@@ -31,37 +32,107 @@ def inventory(root):
     return artifacts
 
 
+def partition_raw(paths, columns, out, progress, *, batch_rows=500_000):
+    """Coalesce small Storage Read pages before partitioning by the frozen entity key."""
+    out.mkdir()
+    writers = {}
+    pending = []
+    buffered = seen = 0
+
+    def flush(stack):
+        if not pending:
+            return
+        frame = pa.concat_tables(pending).to_pandas()
+        slots = (frame.collection_id.to_numpy()*1000003+frame.instance_index.to_numpy())%PARTITIONS
+        for pid, group in frame.groupby(slots,sort=False,dropna=False):
+            # Invalid identities are still audited by the frozen row rules.
+            pid = int(pid) if pd.notna(pid) else 0
+            table = pa.Table.from_pandas(group,preserve_index=False)
+            disk_guard(out,max(256*2**20,table.nbytes))
+            if pid not in writers:
+                writers[pid] = stack.enter_context(pq.ParquetWriter(out/f'raw_{pid:03d}.parquet',
+                                                                     table.schema,compression='zstd'))
+            writers[pid].write_table(table,row_group_size=100_000)
+        pending.clear()
+
+    with ExitStack() as stack:
+        for path in paths:
+            for batch in pq.ParquetFile(path).iter_batches(batch_size=batch_rows,columns=columns):
+                pending.append(pa.Table.from_batches([batch]))
+                seen += batch.num_rows
+                buffered += batch.num_rows
+                if buffered >= batch_rows:
+                    flush(stack)
+                    buffered = 0
+                    progress.update(stage=f'partition_{out.name}',rows_processed=seen)
+        flush(stack)
+    return seen
+
+
 def canonicalize(out, cell, raw, files, source_commit):
-    events = pa.concat_tables([pq.read_table(p,columns=KEYS+PAIR) for p in files['events']]).to_pandas()
-    if len(events)!=raw['events']['rows']:
-        raise ValueError('request_event_rows_do_not_reconcile')
-    clean,bad,latest,request_counts = prepare_request_history(events)
-    del events
-    for name,table in [('request_history',clean),('ambiguous_requests',bad),('positive_event_times',latest)]:
-        table.to_parquet(out/f'{name}.parquet',compression='zstd',index=False)
-    (out/'partition_diagnostics').mkdir()
     progress = Progress()
-    n = partition_usage(files['usage'],out/'work',PARTITIONS,progress)
+    work = out/'work'
+    work.mkdir()
+    event_work,usage_work = work/'events',work/'usage'
+    if partition_raw(files['events'],KEYS+PAIR,event_work,progress)!=raw['events']['rows']:
+        raise ValueError('request_event_rows_do_not_reconcile')
+    n = partition_raw(files['usage'],USAGE_COLUMNS,usage_work,progress)
     if n!=raw['usage']['rows']:
         raise ValueError('usage_partition_rows_do_not_reconcile')
+    (out/'partition_diagnostics').mkdir()
+    for name in ('request_history','ambiguous_requests','positive_event_times'):
+        (out/name).mkdir()
     total = Counter()
     reasons = Counter()
-    for p in sorted((out/'work').glob('raw_*.parquet')):
-        counts = process_partition((p,out/'request_history.parquet',out/'positive_event_times.parquet',
-                                    out,int(p.stem.split('_')[1])),cell=cell)
+    request_total = Counter()
+    validation_total = Counter()
+    validation_flags = None
+    shards = sorted({p.name for folder in (event_work,usage_work) for p in folder.glob('raw_*.parquet')})
+    for filename in shards:
+        pid = int(filename[4:7])
+        part = f'part_{pid:03d}.parquet'
+        event_path,usage_path = event_work/filename,usage_work/filename
+        if any(p.is_file() and pq.ParquetFile(p).metadata.num_rows>8_000_000 for p in (event_path,usage_path)):
+            raise ValueError('canonical_partition_memory_ceiling')
+        events = (pq.read_table(event_path).to_pandas() if event_path.exists()
+                  else pd.DataFrame({k:pd.Series(dtype='int64' if k in KEYS else 'float64') for k in KEYS+PAIR}))
+        clean,bad,latest,request_counts = prepare_request_history(events)
+        del events
+        request_counts.pop('rule')
+        request_total.update(request_counts)
+        for name,table in [('request_history',clean),('ambiguous_requests',bad),('positive_event_times',latest)]:
+            disk_guard(out,max(256*2**20,int(table.memory_usage(index=False,deep=True).sum())))
+            table.to_parquet(out/name/part,compression='zstd',index=False)
+        event_path.unlink(missing_ok=True)
+        if not usage_path.exists():
+            continue
+        counts = process_partition((usage_path,out/'request_history'/part,out/'positive_event_times'/part,out,pid),
+                                    cell=cell)
         reasons.update(counts.pop('exclusion_reasons'))
         counts.pop('partition')
         total.update(counts)
-    (out/'work').rmdir()
-    if n!=total['canonical_rows']+total['rejected_rows'] or sum(reasons.values())!=total['rejected_rows']:
-        raise ValueError('canonical_and_rejected_rows_do_not_reconcile')
+        checked = validate_local(out,clean,bad,latest,progress,cell=cell,partition=part)
+        validation_total.update({k:v for k,v in checked.items() if type(v) is int})
+        flags = {k:v for k,v in checked.items() if type(v) is not int}
+        if validation_flags is not None and flags!=validation_flags:
+            raise ValueError('canonical_partition_validation_flags_changed')
+        validation_flags = flags
+        progress.update(stage='verify_canonical_partition',partition=pid,rows_processed=total['canonical_rows'])
+    event_work.rmdir()
+    usage_work.rmdir()
+    work.rmdir()
+    if (request_total['raw_event_rows']!=raw['events']['rows']
+            or n!=total['canonical_rows']+total['rejected_rows']
+            or sum(reasons.values())!=total['rejected_rows']):
+        raise ValueError('raw_events_or_usage_do_not_reconcile')
     entities = pd.concat([pq.read_table(p).to_pandas() for p in sorted((out/'entities').glob('*.parquet'))],
                          ignore_index=True)
     if entities.empty or entities.duplicated(['cell','collection_id','instance_index']).any():
         raise ValueError('canonical_entities_empty_or_partition_split')
     entities = entities.sort_values(['cell','collection_id','instance_index']).reset_index(drop=True)
     entities.to_parquet(out/'entity_manifest.parquet',compression='zstd',index=False)
-    validation = validate_local(out,clean,bad,latest,progress,cell=cell)
+    validation = dict(**validation_flags,**validation_total)
+    validation['ambiguous_groups_excluded']=request_total['ambiguous_groups']
     if validation['canonical_rows_verified']!=total['canonical_rows']:
         raise ValueError('canonical_validation_row_mismatch')
     artifacts = inventory(out)
@@ -74,7 +145,7 @@ def canonicalize(out, cell, raw, files, source_commit):
         output_row_count=total['canonical_rows'],entity_count=len(entities),
         acquisition_eligible_entities=int(entities.eligible.sum()),canonical_dataset_sha256=fingerprint(parts),
         entity_manifest_sha256=file_sha256(out/'entity_manifest.parquet'),artifacts=artifacts,validation=validation,
-        diagnostics=dict(total,exclusion_reasons=dict(reasons),request_history=request_counts))
+        diagnostics=dict(total,exclusion_reasons=dict(reasons),request_history=dict(request_total,rule=REQUEST_RULE)))
     publish_record(out/'manifest.json',manifest)
     publish_record(out/'SUCCESS',dict(manifest_sha256=file_sha256(out/'manifest.json')))
     return manifest

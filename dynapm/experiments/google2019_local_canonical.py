@@ -211,7 +211,7 @@ def require_corrected_generation(path):
     return m
 
 
-def validate_local(out, history, ambiguous, latest, status, *, cell='e'):
+def validate_local(out, history, ambiguous, latest, status, *, cell='e', partition=None):
     """Independent NumPy ASOF + full ratios/cadence/eligibility audit."""
     bad_index=pd.MultiIndex.from_frame(ambiguous[KEYS])
     assert not pd.MultiIndex.from_frame(history[KEYS]).isin(bad_index).any()
@@ -220,9 +220,14 @@ def validate_local(out, history, ambiguous, latest, status, *, cell='e'):
             for key,g in history.groupby(['collection_id','instance_index'],sort=False)}
     previous={key:(g.time.to_numpy(),g.latest_ambiguous.to_numpy())
               for key,g in latest.groupby(['collection_id','instance_index'],sort=False)}
-    manifest_entities=pq.read_table(out/'entity_manifest.parquet').to_pandas().set_index(['collection_id','instance_index'])
+    entity_path=out/'entity_manifest.parquet' if partition is None else out/'entities'/partition
+    manifest_entities=pq.read_table(entity_path).to_pandas()
+    if manifest_entities.empty and partition is not None:
+        manifest_entities=pd.DataFrame(columns=['collection_id','instance_index'])
+    manifest_entities=manifest_entities.set_index(['collection_id','instance_index'])
     checked=ambiguous_hits=sampled=0;maxerr=0.;cpu_above=mem_above=fallbacks=0;entities_checked=set()
-    for file in sorted((out/'canonical_usage').glob('*.parquet')):
+    files=sorted((out/'canonical_usage').glob('*.parquet')) if partition is None else [out/'canonical_usage'/partition]
+    for file in files:
         f=pq.read_table(file).to_pandas();keys=['collection_id','instance_index','timestamp_us']
         if f.empty:continue
         usage_table,event_table=source_tables(cell)

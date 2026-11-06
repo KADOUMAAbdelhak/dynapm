@@ -284,7 +284,29 @@ def idle_v8(repo):
         yield
 
 
-def run(repo, month, ledger_path, execute, project=None):
+def bind_existing_run(root, previous, header, resume_from, parent_commit):
+    """Authorize a single source-only continuation without changing job IDs."""
+    original = {k:v for k,v in previous.items() if k not in ('preflight','run_id')}
+    run_id = fingerprint(original)
+    if previous['run_id']!=run_id:
+        raise ValueError('acquisition_run_header_hash_changed')
+    migration = root/'resume-source.json'
+    if original==header and resume_from is None and not migration.exists():
+        return run_id
+    if (resume_from is None or original['source_commit']!=resume_from
+            or parent_commit!=resume_from or dict(header,source_commit=resume_from)!=original
+            or header['source_commit']==resume_from):
+        raise ValueError('incompatible_acquisition_resume')
+    record = dict(run_id=run_id,initial_source=resume_from,continuation_source=header['source_commit'],
+                  run_manifest_sha256=file_sha256(root/'run.json'))
+    if not migration.exists():
+        publish_record(migration,record)
+    if read_json(migration)!=record:
+        raise ValueError('source_continuation_binding_changed')
+    return run_id
+
+
+def run(repo, month, ledger_path, execute, project=None, resume_from=None):
     if repo!=Path(__file__).resolve().parents[2]:
         raise ValueError('repo_must_match_running_acquisition_source')
     source = subprocess.check_output(['git','rev-parse','HEAD'],cwd=repo,text=True).strip()
@@ -329,10 +351,10 @@ def run(repo, month, ledger_path, execute, project=None):
         run_id = fingerprint(header)
         if state.exists():
             previous = read_json(state)
-            if {k:v for k,v in previous.items() if k!='preflight'}!=dict(run_id=run_id,**header):
-                raise ValueError('incompatible_acquisition_resume')
+            parent = subprocess.check_output(['git','rev-parse','HEAD^'],cwd=repo,text=True).strip() if resume_from else None
+            run_id = bind_existing_run(root,previous,header,resume_from,parent)
         else:
-            if previous or any(x.name!='.lock' for x in root.iterdir()) or (repo/G_BINDING).exists():
+            if resume_from or previous or any(x.name!='.lock' for x in root.iterdir()) or (repo/G_BINDING).exists():
                 raise ValueError('unmanaged_prior_cell_g_state')
             if (repo/'data/google2019/raw/g').exists() or (repo/'data/google2019/checkpoints/g.json').exists():
                 raise ValueError('legacy_cell_g_state_requires_reconciliation')
@@ -376,10 +398,11 @@ def main():
     p.add_argument('--ledger',required=True,type=Path)
     p.add_argument('--billing-project')
     p.add_argument('--execute',action='store_true')
+    p.add_argument('--resume-from-source',help='explicit direct-parent source for a reviewed continuation')
     args = p.parse_args()
     repo = args.repo.resolve()
     ledger = args.ledger if args.ledger.is_absolute() else repo/args.ledger
-    print(canonical_json(run(repo,args.month,ledger,args.execute,args.billing_project)))
+    print(canonical_json(run(repo,args.month,ledger,args.execute,args.billing_project,args.resume_from_source)))
 
 
 if __name__=='__main__':

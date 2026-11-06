@@ -27,3 +27,18 @@ The clock audit uses the shared cell-e code for completed closing labels and adm
 ## Offline regression
 
 One complete sealed e shard was reconstructed from its canonical winners and rejected raw rows. The shared implementation reproduced all 1,922,553 canonical rows, 174,765 rejection counts and diagnostics, and the entity metadata for 610 entities. The shared clock audit reproduced that shard's sealed availability metadata exactly. All 1,032 sealed canonical e artifacts and the frozen e cohort were verified independently. This is shard-level replay and full-manifest integrity verification.
+
+## Large request histories and source continuation
+
+Raw request events and usage are coalesced in bounded batches, then partitioned by
+the same entity key before local processing. All requests for an entity are
+processed together. Each shard is audited independently against its unambiguous
+request history. An oversized shard fails closed rather than loading the whole
+cell. Raw download receipts and chunks remain the source of truth.
+
+If a reviewed correction is committed directly on top of the source used to
+journal an existing run, its operator can explicitly pass
+`--resume-from-source ORIGINAL_COMMIT`. The launcher records the continuation
+source and checks that the original header differs only by source commit. The
+original run fingerprint, query IDs and Storage Read session remain bound.
+The same continuation flag is required on another resume.

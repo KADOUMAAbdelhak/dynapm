@@ -203,3 +203,33 @@ def test_live_preflight_respects_existing_v8_lock(tmp_path,monkeypatch):
     with runner.idle_v8(tmp_path):
         pass
     assert file_sha256(lock)==before
+
+
+def test_source_only_continuation_keeps_original_job_binding(tmp_path):
+    from dynapm.core.provenance import fingerprint
+    old = dict(source_commit='original',month=runner.MONTH,queries=runner.frozen_queries(),project='p')
+    initial = dict(old,run_id=fingerprint(old),preflight={'safe':True})
+    write_json(tmp_path/'run.json',initial)
+    new = dict(old,source_commit='direct-child')
+    assert runner.bind_existing_run(tmp_path,initial,old,None,None)==initial['run_id']
+    with pytest.raises(ValueError,match='incompatible'):
+        runner.bind_existing_run(tmp_path,initial,new,None,None)
+    with pytest.raises(ValueError,match='incompatible'):
+        runner.bind_existing_run(tmp_path,initial,dict(new,project='other'),'original','original')
+    assert runner.bind_existing_run(tmp_path,initial,new,'original','original')==initial['run_id']
+    assert runner.bind_existing_run(tmp_path,initial,new,'original','original')==initial['run_id']
+    assert read_json(tmp_path/'run.json')==initial
+
+
+def test_partitioned_request_history_reconciles_event_only_and_usage_only_entities(tmp_path):
+    e = tmp_path/'events.parquet'
+    u = tmp_path/'usage.parquet'
+    pd.concat([events(),events().assign(collection_id=9000)]).to_parquet(e,index=False)
+    pd.concat([usage(),usage().assign(collection_id=8000)]).to_parquet(u,index=False)
+    out = tmp_path/'generation'
+    out.mkdir()
+    m = canonicalize(out,'g',dict(events={'rows':12},usage={'rows':8}),dict(events=[e],usage=[u]),'fixture')
+    assert m['diagnostics']['request_history']['raw_event_rows']==12
+    assert m['diagnostics']['request_history']['ambiguous_groups']==2
+    assert m['validation']['ambiguous_groups_excluded']==2
+    assert m['diagnostics']['exclusion_reasons']['missing_unambiguous_positive_request']==4
