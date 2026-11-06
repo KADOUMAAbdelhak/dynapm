@@ -155,7 +155,7 @@ def partition_usage(usage, work, count, status):
     return seen
 
 
-def process_partition(task, *, cell='e'):
+def process_partition(task, *, cell='e', consume_input=True):
     raw_path,history_path,latest_path,out,pid=task;out=Path(out);disk_guard(out,256*2**20)
     raw=pq.read_table(raw_path).to_pandas()
     hist=pq.read_table(history_path).to_pandas();latest=pq.read_table(latest_path).to_pandas()
@@ -170,7 +170,8 @@ def process_partition(task, *, cell='e'):
         frame.to_parquet(folder/f'part_{pid:03d}.parquet',compression='zstd',row_group_size=100000,index=False)
     counts['partition']=pid
     write_json(out/'partition_diagnostics'/f'{pid:03d}.json',counts)
-    Path(raw_path).unlink()  # only scratch created by this generation
+    if consume_input:
+        Path(raw_path).unlink()  # only scratch created by this generation
     return counts
 
 

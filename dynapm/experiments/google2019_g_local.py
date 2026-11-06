@@ -125,14 +125,18 @@ def canonicalize(out, cell, raw, files, source_commit):
             or n!=total['canonical_rows']+total['rejected_rows']
             or sum(reasons.values())!=total['rejected_rows']):
         raise ValueError('raw_events_or_usage_do_not_reconcile')
+    validation = dict(**validation_flags,**validation_total)
+    validation['ambiguous_groups_excluded']=request_total['ambiguous_groups']
+    return seal_canonical(out,cell,raw,source_commit,total,reasons,request_total,validation)
+
+
+def seal_canonical(out, cell, raw, source_commit, total, reasons, request_total, validation):
     entities = pd.concat([pq.read_table(p).to_pandas() for p in sorted((out/'entities').glob('*.parquet'))],
                          ignore_index=True)
     if entities.empty or entities.duplicated(['cell','collection_id','instance_index']).any():
         raise ValueError('canonical_entities_empty_or_partition_split')
     entities = entities.sort_values(['cell','collection_id','instance_index']).reset_index(drop=True)
     entities.to_parquet(out/'entity_manifest.parquet',compression='zstd',index=False)
-    validation = dict(**validation_flags,**validation_total)
-    validation['ambiguous_groups_excluded']=request_total['ambiguous_groups']
     if validation['canonical_rows_verified']!=total['canonical_rows']:
         raise ValueError('canonical_validation_row_mismatch')
     artifacts = inventory(out)
@@ -169,6 +173,7 @@ def availability(out, cell, generation, protocol):
             or table.availability_contract_blocked.any() or table.bootstrap_rows_ending_after_cut.any()
             or table.bootstrap_rows_ending_after_stream_anchor.any()):
         raise ValueError('availability_contract_blocked')
+    disk_guard(out,max(256*2**20,int(table.memory_usage(index=False,deep=True).sum())))
     table.to_parquet(out/'entity_eligibility.parquet',compression='zstd',index=False)
     summary = dict(disposition='AVAILABILITY_CONTRACT_READY',timing=dict(timing,maximum_interval_gap_us=max_gap),
         canonical_entities=len(table),eligible_entities=int(table.nominal_protocol_eligible.sum()),
@@ -192,5 +197,6 @@ def freeze_cohort(out, cell, canonical_sha, eligibility, protocol, rule):
         canonical_sha256=canonical_sha,protocol_fingerprint=protocol['protocol_fingerprint'],
         clock_contract_sha256=protocol['clock_contract_sha256'],cohort_rule_sha256=fingerprint(rule),
         entities=selected)
+    disk_guard(out,256*2**20)
     publish_record(out/'g_cohort.json',result)
     return dict(cohort_size=len(selected),member_records_sha256=fingerprint(selected))

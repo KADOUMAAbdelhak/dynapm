@@ -50,3 +50,21 @@ requires the immutable pre-submit traceback and an exact job lookup returning
 dispatch receipt, and submits only the original job ID. A second unresolved
 dispatch fails closed. Each reviewed source continuation preserves the original
 run ID and records the immediately preceding source.
+
+## Offline continuation from the disk stop
+
+The continuation launcher is bound to the original 1,444-file partial inventory,
+the two sealed downloads and the exact November ledger. Run the command below
+for a read-only preflight.
+
+```sh
+.venv/bin/python -m dynapm.scripts.task43_google2019_continue_g
+```
+
+Add `--execute-local` after verifying at least 40 GiB free. There are no cloud
+operations on either path. Shards 0–185 remain in the original partial tree.
+Each later shard is written to an isolated attempt, audited and sealed before
+its directory is published atomically. The next invocation verifies contiguous
+seals and promotes any complete attempt interrupted just before publication.
+The command keeps interrupted attempts and uses hard links to assemble the
+final generation on the same volume without copying canonical shards.

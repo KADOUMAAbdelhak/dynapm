@@ -228,6 +228,8 @@ def phase(root, name, inputs, produce):
                 raise ValueError('linked_phase_scratch')
             # A previously sealed stage can be promoted after interruption.
             if not (stage/'PHASE.json').is_file():
+                if name=='canonical' and any((stage/'partition_diagnostics').glob('*.json')):
+                    raise ValueError('canonical_shards_present_use_offline_continuation')
                 shutil.rmtree(stage)
         if not stage.exists():
             stage.mkdir()
