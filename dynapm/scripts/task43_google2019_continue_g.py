@@ -14,6 +14,7 @@ from dynapm.experiments.google2019_availability_validation import validate_proto
 from dynapm.experiments.google2019_durable_read import sync_directory
 from dynapm.experiments.google2019_g_local import Progress, inventory, seal_canonical
 from dynapm.experiments.google2019_local_canonical import PARTITIONS, disk_guard, process_partition, validate_local
+from dynapm.experiments.google2019_rejection_audit import rejection_record, validate_record
 from dynapm.experiments.google2019_requests import KEYS, PAIR, REQUEST_RULE, prepare_request_history
 from dynapm.experiments.google_replication import load_stage_inputs
 from dynapm.experiments.google_staged_design import E_BINDING, G_BINDING, frozen_design
@@ -38,7 +39,7 @@ def contiguous(indices, start=0):
     return start+len(numbers)
 
 
-def verified_partial(repo, root):
+def verified_partial(repo, root, *, removed=None, compact=None):
     evidence = repo/EVIDENCE
     record = read_json(evidence/'RECORD.json')
     if file_sha256(evidence/'RECORD.json')!=EVIDENCE_SHA:
@@ -48,17 +49,17 @@ def verified_partial(repo, root):
             raise ValueError('original_blocked_evidence_changed')
     old = root/'.canonical.partial'
     original = read_json(evidence/'partial-canonical-inventory.json')['artifacts']
-    if len(original)!=1444 or inventory(old)!=original:
+    if len(original)!=1444 or inventory(old)!=[item for item in original if item['path'] not in (removed or ())]:
         raise ValueError('blocked_partial_inventory_changed')
     ids = (int(p.stem) for p in (old/'partition_diagnostics').glob('*.json'))
     if contiguous(ids)!=ORIGINAL_END:
         raise ValueError('historical_shard_count_changed')
     for pid in range(ORIGINAL_END):
-        reconcile_shard(old,pid)
+        reconcile_shard(old,pid,compact/f'{pid:03d}.json' if compact is not None else None)
     return old,record
 
 
-def reconcile_shard(root, pid):
+def reconcile_shard(root, pid, audit_path=None):
     part = f'part_{pid:03d}.parquet'
     counts = read_json(root/'partition_diagnostics'/f'{pid:03d}.json')
     if (counts['partition']!=pid or counts['canonical_rows']+counts['rejected_rows']!=counts['raw_usage_rows']
@@ -66,7 +67,11 @@ def reconcile_shard(root, pid):
         raise ValueError('shard_counts_do_not_reconcile')
     for key in ('canonical_rows','rejected_rows'):
         folder = 'canonical_usage' if key=='canonical_rows' else 'rejected_rows'
-        if pq.ParquetFile(root/folder/part).metadata.num_rows!=counts[key]:
+        path = root/folder/part
+        if key=='rejected_rows' and not path.is_file():
+            audit = audit_path if audit_path is not None else root/'rejection_audit'/f'{pid:03d}.json'
+            validate_record(audit,root/'canonical_usage'/part,counts,pid)
+        elif pq.ParquetFile(path).metadata.num_rows!=counts[key]:
             raise ValueError('shard_footer_does_not_reconcile')
     return counts
 
@@ -129,7 +134,7 @@ def histories(path, pid):
     return tuple(pq.read_table(path/n/part).to_pandas() for n in HISTORY)
 
 
-def create_shard(out, old, pid):
+def create_shard(out, old, pid, *, compact_binding=None):
     event = old/'work/events'/f'raw_{pid:03d}.parquet'
     usage = old/'work/usage'/f'raw_{pid:03d}.parquet'
     if pq.ParquetFile(usage).metadata.num_rows>8_000_000:
@@ -149,8 +154,16 @@ def create_shard(out, old, pid):
         clean,bad,latest = histories(old,pid)
         for name in HISTORY:
             os.link(old/name/part,out/name/part)
+    writer = None
+    if compact_binding is not None:
+        (out/'rejection_audit').mkdir()
+        def writer(rejected,counts,entities):
+            value = rejection_record(out/'canonical_usage'/part,rejected,partition=pid,counts=counts,
+                conflicts=len(bad),entities=entities,binding=compact_binding)
+            disk_guard(out,256*2**20)
+            publish_record(out/'rejection_audit'/f'{pid:03d}.json',value)
     process_partition((usage,out/'request_history'/part,out/'positive_event_times'/part,out,pid),
-                      cell='g',consume_input=False)
+                      cell='g',consume_input=False,rejection_writer=writer)
     return validate_local(out,clean,bad,latest,Progress(),cell='g',partition=part)
 
 
@@ -169,7 +182,7 @@ def event_totals(paths, expected):
     return rows,positive
 
 
-def assemble(root, old, work, raw, files, source, binding):
+def assemble(root, old, work, raw, files, source, binding, *, compact=None):
     canonical = root/'canonical'
     if canonical.exists():
         return
@@ -177,7 +190,8 @@ def assemble(root, old, work, raw, files, source, binding):
     attempt = 1+len(list(work.glob('assembly-*')))
     stage = work/f'assembly-{attempt:03d}'
     stage.mkdir()
-    for name in PRODUCTS:
+    products = PRODUCTS if compact is None else tuple(n for n in PRODUCTS if n!='rejected_rows')+('rejection_audit',)
+    for name in products:
         (stage/name).mkdir()
     totals,reasons,validation = Counter(),Counter(),Counter()
     clean_rows = ambiguous_groups = ambiguous_tuples = 0
@@ -185,7 +199,8 @@ def assemble(root, old, work, raw, files, source, binding):
     for pid in range(PARTITIONS):
         part = f'part_{pid:03d}.parquet'
         location = old if pid<ORIGINAL_END else work/f'{pid:03d}'
-        counts = reconcile_shard(location,pid)
+        compact_path = compact/f'{pid:03d}.json' if compact is not None and pid<ORIGINAL_END else None
+        counts = reconcile_shard(location,pid,compact_path)
         reasons.update(counts.pop('exclusion_reasons'))
         counts.pop('partition')
         totals.update(counts)
@@ -204,9 +219,10 @@ def assemble(root, old, work, raw, files, source, binding):
         if flags is not None and current!=flags:
             raise ValueError('canonical_validation_flags_changed')
         flags = current
-        for name in PRODUCTS:
-            filename = f'{pid:03d}.json' if name=='partition_diagnostics' else part
-            os.link(location/name/filename,stage/name/filename)
+        for name in products:
+            filename = f'{pid:03d}.json' if name in ('partition_diagnostics','rejection_audit') else part
+            origin = compact_path if name=='rejection_audit' and compact_path is not None else location/name/filename
+            os.link(origin,stage/name/filename)
     rows,positive = event_totals(files['events'],raw['events']['rows'])
     distinct = clean_rows+ambiguous_tuples
     if distinct>positive or totals['raw_usage_rows']!=raw['usage']['rows']:

@@ -155,7 +155,18 @@ def partition_usage(usage, work, count, status):
     return seen
 
 
-def process_partition(task, *, cell='e', consume_input=True):
+def write_bounded_parquet(frame, path):
+    """Keep the same row order and limit disk admission to one Parquet row group."""
+    table=pa.Table.from_pandas(frame,preserve_index=False)
+    disk_guard(path.parent,256*2**20)
+    with pq.ParquetWriter(path,table.schema,compression='zstd') as writer:
+        for batch in table.to_batches(max_chunksize=100_000):
+            disk_guard(path.parent,max(256*2**20,batch.nbytes))
+            writer.write_batch(batch)
+
+
+
+def process_partition(task, *, cell='e', consume_input=True, rejection_writer=None):
     raw_path,history_path,latest_path,out,pid=task;out=Path(out);disk_guard(out,256*2**20)
     raw=pq.read_table(raw_path).to_pandas()
     hist=pq.read_table(history_path).to_pandas();latest=pq.read_table(latest_path).to_pandas()
@@ -164,11 +175,20 @@ def process_partition(task, *, cell='e', consume_input=True):
     mask=((latest.collection_id.to_numpy()*1000003+latest.instance_index.to_numpy())%PARTITIONS)==pid
     recent=latest.loc[mask].copy()
     canonical,entities,rejected,counts=canonical_partition(raw,history,recent,cell=cell)
-    for kind,frame in [('canonical_usage',canonical),('entities',entities),('rejected_rows',rejected)]:
+    outputs=[('canonical_usage',canonical),('entities',entities)]
+    if rejection_writer is None:
+        outputs.append(('rejected_rows',rejected))
+    for kind,frame in outputs:
         folder=out/kind;folder.mkdir(exist_ok=True)
-        disk_guard(out,max(256*2**20,int(frame.memory_usage(index=False,deep=True).sum())))
-        frame.to_parquet(folder/f'part_{pid:03d}.parquet',compression='zstd',row_group_size=100000,index=False)
+        path=folder/f'part_{pid:03d}.parquet'
+        if rejection_writer is not None:
+            write_bounded_parquet(frame,path)
+        else:
+            disk_guard(out,max(256*2**20,int(frame.memory_usage(index=False,deep=True).sum())))
+            frame.to_parquet(path,compression='zstd',row_group_size=100000,index=False)
     counts['partition']=pid
+    if rejection_writer is not None:
+        rejection_writer(rejected,counts,len(entities))
     write_json(out/'partition_diagnostics'/f'{pid:03d}.json',counts)
     if consume_input:
         Path(raw_path).unlink()  # only scratch created by this generation

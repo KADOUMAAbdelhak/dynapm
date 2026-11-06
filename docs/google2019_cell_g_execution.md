@@ -68,3 +68,41 @@ its directory is published atomically. The next invocation verifies contiguous
 seals and promotes any complete attempt interrupted just before publication.
 The command keeps interrupted attempts and uses hard links to assemble the
 final generation on the same volume without copying canonical shards.
+
+## Compact rejection evidence
+
+Stage B requires the accepted canonical shards, eligibility metadata and cohort.
+The availability audit uses three duplicate-interval counters computed from
+rejected rows. It can read those exact counters from the g compact audit. The
+full rejected payload is audit-only and regenerable. Request history, conflict
+groups and positive-event timing are needed for the independent canonical
+validation and are retained. Partition scratch is needed until its shard seals.
+
+The offline compactor checks two complete raw replays before any retirement.
+It records the typed, ordered Arrow logical-row hash, full reason counts,
+duplicate-interval counters, conflict and entity counts and the accepted-file
+hash for every historical shard. The deletion ledger preserves the original
+path, byte size, hash and the exact replacement or shard seal. The historical
+inventory stays intact and every missing file must reconcile to the ledger.
+
+To regenerate rejected rows for a shard, iterate sealed chunks in receipt
+order, project `KEYS + PAIR` for events and `USAGE_COLUMNS` for usage, and keep
+rows with `(collection_id * 1000003 + instance_index) % 256` equal to the shard.
+Run `prepare_request_history` followed by `canonical_partition(cell='g')`.
+Verify the resulting logical hash, reason counts and interval counters against
+the compact record. The record pins the raw receipts, producer source,
+derivation files, runtime and protocol. This reproduces logical content.
+
+Use the offline plan command to assess capacity.
+
+```sh
+.venv/bin/python -m dynapm.scripts.task44_google2019_compact_g
+```
+
+To execute, add `--execute-local --proof-log PATH` with the completed raw replay
+log for shards 0 and 185. Subsequent invocations use the sealed proof. After the
+186 compact audits are independently verified, the launcher checks capacity and
+continues at the first unsealed shard. Each remaining scratch shard is retired
+only after its canonical and compact rejection outputs seal. All writes keep
+the 20 GiB reserve. The canonical files for shards 0–185 are reused by link and
+checked against their original hashes.

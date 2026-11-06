@@ -112,8 +112,15 @@ def audit_partition(cell, generation, p, entities):
         raise ValueError('unsupported_google_cell')
     f=pq.read_table(p,columns=['collection_id','instance_index','timestamp_us','source_start_time_us','source_end_time_us','cpu_utilization','memory_utilization']).to_pandas()
     stats,dist=timing_counts(f)
-    rejected=pq.read_table(generation/'rejected_rows'/p.name,columns=['collection_id','instance_index','start_time','end_time','exclusion_reason']).to_pandas()
-    stats.update(duplicate_interval_counts(f,rejected))
+    compact=generation/'rejection_audit'/f"{p.stem.removeprefix('part_')}.json"
+    if cell=='g' and compact.is_file():
+        pid=int(p.stem.removeprefix('part_'))
+        from dynapm.experiments.google2019_rejection_audit import validate_record
+        diagnostics=read_json(generation/'partition_diagnostics'/f'{pid:03d}.json')
+        stats.update(validate_record(compact,p,diagnostics,pid)['interval_counts'])
+    else:
+        rejected=pq.read_table(generation/'rejected_rows'/p.name,columns=['collection_id','instance_index','start_time','end_time','exclusion_reason']).to_pandas()
+        stats.update(duplicate_interval_counts(f,rejected))
     rows=[]
     for (cid,idx),g in f.groupby(['collection_id','instance_index'],sort=False):
         e=entities.loc[(cid,idx)]
