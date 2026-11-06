@@ -233,3 +233,45 @@ def test_partitioned_request_history_reconciles_event_only_and_usage_only_entiti
     assert m['diagnostics']['request_history']['ambiguous_groups']==2
     assert m['validation']['ambiguous_groups_excluded']==2
     assert m['diagnostics']['exclusion_reasons']['missing_unambiguous_positive_request']==4
+
+
+def test_recovery_is_single_dispatch_with_original_usage_id(tmp_path):
+    from google.api_core.exceptions import NotFound
+    from dynapm.core.provenance import utc_now
+    run_id = 'fa'*32
+    spec = runner.frozen_queries()['usage']
+    job_id = f'dynapm_v4c2_g_usage_{run_id[:24]}'
+    job = SimpleNamespace(job_id=job_id,project='p',location='US',
+        query=runner.render_plan_query(runner.TEMPLATES['usage'],'g'),use_query_cache=False,
+        maximum_bytes_billed=spec['maximum_bytes_billed'])
+    client = Mock()
+    client.query.return_value = job
+    client.get_job.side_effect = NotFound('no usage job')
+    billing = Mock()
+    dry = Mock(return_value=spec['expected_bytes'])
+    log = tmp_path/'usage-pre-submit-failure.log'
+    log.write_text('in open_query\n    billing(project)\nAcquisitionBlocked: billing_info_unavailable\n')
+    intent = tmp_path/'usage-query.json'
+    binding = dict(kind='usage',job_id=job_id,project='p',location='US',spec=spec,month=runner.MONTH)
+    write_json(intent,dict(binding=binding,dry_run_bytes=spec['expected_bytes'],created_at=utc_now()))
+    proof = tmp_path/'usage-pre-submit-recovery.json'
+    write_json(proof,dict(run_id=run_id,job_id=job_id,intent_sha256=file_sha256(intent),
+        failure='BILLING_CHECK_FAILED_BEFORE_SUBMIT',server_lookup='NOT_FOUND',execution_log_sha256=file_sha256(log)))
+    assert runner.open_query(tmp_path,client,'p','usage',spec,run_id,0,billing,dry,recovery=proof)[0] is job
+    assert client.query.call_args.kwargs['job_id']==job_id
+    with pytest.raises(ValueError,match='uncertain_no_rescan'):
+        runner.open_query(tmp_path,client,'p','usage',spec,run_id,0,billing,dry,recovery=proof)
+    client.get_job.side_effect = None
+    client.get_job.return_value = job
+    assert runner.open_query(tmp_path,client,'p','usage',spec,run_id,0,billing,dry)[0] is job
+    assert client.query.call_count==dry.call_count==1
+
+
+def test_failed_final_billing_check_leaves_no_fresh_intent(tmp_path):
+    spec = runner.frozen_queries()['usage']
+    client = Mock()
+    billing = Mock(side_effect=[None,ValueError('billing unavailable')])
+    with pytest.raises(ValueError,match='billing unavailable'):
+        runner.open_query(tmp_path,client,'p','usage',spec,'c'*64,0,billing,Mock(return_value=spec['expected_bytes']))
+    assert not (tmp_path/'usage-query.json').exists()
+    client.query.assert_not_called()

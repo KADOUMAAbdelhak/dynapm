@@ -42,3 +42,11 @@ journal an existing run, its operator can explicitly pass
 source and checks that the original header differs only by source commit. The
 original run fingerprint, query IDs and Storage Read session remain bound.
 The same continuation flag is required on another resume.
+
+A failed billing check now occurs before the job intent is written. For the
+already journaled usage intent in this run, the recovery path additionally
+requires the immutable pre-submit traceback and an exact job lookup returning
+`NOT_FOUND`. It runs a new dry-run and billing check, writes a one-use recovery
+dispatch receipt, and submits only the original job ID. A second unresolved
+dispatch fails closed. Each reviewed source continuation preserves the original
+run ID and records the immediately preceding source.

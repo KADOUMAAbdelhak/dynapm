@@ -107,15 +107,15 @@ def dry_run(client, project, kind, spec, billing):
     return got
 
 
-def open_query(root, client, project, kind, spec, run_id, ledger_bytes, billing, dry=dry_run):
+def open_query(root, client, project, kind, spec, run_id, ledger_bytes, billing, dry=dry_run, recovery=None):
     """Journal the stable job ID before submit. Uncertain prior submissions never retry."""
     from google.api_core.exceptions import NotFound
-    from google.cloud import bigquery
     path = root/f'{kind}-query.json'
     job_id = f'dynapm_v4c2_g_{kind}_{run_id[:24]}'
     binding = dict(kind=kind,job_id=job_id,project=project,location='US',spec=spec,month=MONTH)
     sql = render_plan_query(TEMPLATES[kind],'g')
     billing(project)
+    dispatch = root/f'{kind}-recovery-dispatch.json'
     if path.exists():
         journal = read_json(path)
         if journal['binding']!=binding:
@@ -123,22 +123,50 @@ def open_query(root, client, project, kind, spec, run_id, ledger_bytes, billing,
         try:
             job = client.get_job(job_id,location='US',timeout=30)
         except NotFound as exc:
-            raise ValueError('prior_submission_uncertain_no_rescan') from exc
+            proof = read_json(recovery) if recovery is not None and kind=='usage' else {}
+            expected = dict(run_id=run_id,job_id=job_id,intent_sha256=file_sha256(path),
+                            failure='BILLING_CHECK_FAILED_BEFORE_SUBMIT',server_lookup='NOT_FOUND')
+            if dispatch.exists() or not all(proof.get(k)==v for k,v in expected.items()):
+                raise ValueError('prior_submission_uncertain_no_rescan') from exc
+            log = recovery.with_name('usage-pre-submit-failure.log')
+            if (file_sha256(log)!=proof.get('execution_log_sha256')
+                    or 'in open_query\n    billing(project)' not in log.read_text()
+                    or not log.read_text().rstrip().endswith('AcquisitionBlocked: billing_info_unavailable')):
+                raise ValueError('unsubmitted_usage_failure_evidence_mismatch') from exc
+            got = dry(client,project,kind,spec,billing)
+            if ledger_bytes+spec['maximum_bytes_billed']>CAP:
+                raise ValueError('monthly_cap_reservation_exceeded')
+            billing(project)
+            publish_record(dispatch,dict(binding=binding,dry_run_bytes=got,proof_sha256=file_sha256(recovery)))
+            job = submit(client,sql,job_id,spec)
+        if dispatch.exists():
+            resumed = read_json(dispatch)
+            if resumed['binding']!=binding:
+                raise ValueError('recovery_dispatch_binding_changed')
+            journal = dict(journal,dry_run_bytes=resumed['dry_run_bytes'])
     else:
+        if recovery is not None and kind=='usage':
+            raise ValueError('recovery_requires_existing_usage_intent')
         dry_bytes = dry(client,project,kind,spec,billing)
         if ledger_bytes+spec['maximum_bytes_billed']>CAP:
             raise ValueError('monthly_cap_reservation_exceeded')
+        billing(project)
         journal = dict(binding=binding,dry_run_bytes=dry_bytes,created_at=utc_now())
         publish_record(path,journal)
-        billing(project)
-        job = client.query(sql,job_id=job_id,location='US',timeout=30,retry=None,job_retry=None,
-            job_config=bigquery.QueryJobConfig(dry_run=False,use_query_cache=False,
-                                             maximum_bytes_billed=spec['maximum_bytes_billed']))
+        job = submit(client,sql,job_id,spec)
     if (job.job_id!=job_id or job.project!=project or job.location!='US'
             or job.query!=sql or job.maximum_bytes_billed!=spec['maximum_bytes_billed']
             or job.use_query_cache is not False):
         raise ValueError('server_job_configuration_changed')
     return job,journal
+
+
+def submit(client, sql, job_id, spec):
+    from google.cloud import bigquery
+
+    return client.query(sql,job_id=job_id,location='US',timeout=30,retry=None,job_retry=None,
+        job_config=bigquery.QueryJobConfig(dry_run=False,use_query_cache=False,
+                                         maximum_bytes_billed=spec['maximum_bytes_billed']))
 
 
 def raw_paths(folder, manifest):
@@ -148,7 +176,7 @@ def raw_paths(folder, manifest):
     return [folder/c['path'] for c in manifest['chunks']]
 
 
-def acquire(repo, root, project, client, run_id, spec, kind, credentials):
+def acquire(repo, root, project, client, run_id, spec, kind, credentials, recovery=None):
     receipt = root/f'{kind}-download.json'
     ledger_path = repo/LEDGER
     ledger = read_ledger(repo,MONTH,ledger_path,run_id)
@@ -157,7 +185,7 @@ def acquire(repo, root, project, client, run_id, spec, kind, credentials):
         if datetime.now(timezone.utc).strftime('%Y-%m')!=MONTH:
             raise ValueError('execution_month_mismatch')
         job,journal = open_query(root,client,project,kind,spec,run_id,ledger['cumulative_executed_bytes'],
-                                 require_zero_cost_project)
+                                 require_zero_cost_project,recovery=recovery)
         while job.state!='DONE':
             time.sleep(3)
             job.reload(timeout=30)
@@ -290,15 +318,27 @@ def bind_existing_run(root, previous, header, resume_from, parent_commit):
     run_id = fingerprint(original)
     if previous['run_id']!=run_id:
         raise ValueError('acquisition_run_header_hash_changed')
-    migration = root/'resume-source.json'
-    if original==header and resume_from is None and not migration.exists():
+    first = root/'resume-source.json'
+    if original==header and resume_from is None and not first.exists():
         return run_id
-    if (resume_from is None or original['source_commit']!=resume_from
-            or parent_commit!=resume_from or dict(header,source_commit=resume_from)!=original
-            or header['source_commit']==resume_from):
+    initial = original['source_commit']
+    manifest_sha = file_sha256(root/'run.json')
+    if (resume_from is None or parent_commit!=resume_from or dict(header,source_commit=initial)!=original
+            or header['source_commit'] in (initial,resume_from)):
         raise ValueError('incompatible_acquisition_resume')
-    record = dict(run_id=run_id,initial_source=resume_from,continuation_source=header['source_commit'],
-                  run_manifest_sha256=file_sha256(root/'run.json'))
+    if resume_from==initial:
+        migration = first
+    else:
+        prior = root/f'resume-source-{resume_from}.json'
+        previous_migration = read_json(prior if prior.exists() else first)
+        if (previous_migration['continuation_source']!=resume_from or previous_migration['run_id']!=run_id
+                or previous_migration['initial_source']!=initial or previous_migration['run_manifest_sha256']!=manifest_sha):
+            raise ValueError('incompatible_prior_source_continuation')
+        migration = root/f"resume-source-{header['source_commit']}.json"
+    record = dict(run_id=run_id,initial_source=initial,continuation_source=header['source_commit'],
+                  run_manifest_sha256=manifest_sha)
+    if resume_from!=initial:
+        record['previous_source']=resume_from
     if not migration.exists():
         publish_record(migration,record)
     if read_json(migration)!=record:
@@ -306,7 +346,7 @@ def bind_existing_run(root, previous, header, resume_from, parent_commit):
     return run_id
 
 
-def run(repo, month, ledger_path, execute, project=None, resume_from=None):
+def run(repo, month, ledger_path, execute, project=None, resume_from=None, recovery=None):
     if repo!=Path(__file__).resolve().parents[2]:
         raise ValueError('repo_must_match_running_acquisition_source')
     source = subprocess.check_output(['git','rev-parse','HEAD'],cwd=repo,text=True).strip()
@@ -328,6 +368,8 @@ def run(repo, month, ledger_path, execute, project=None, resume_from=None):
     storage = disk_safe_for_g_after_e()
     if not previous and not storage['safe']:
         raise ValueError('frozen_g_storage_guard_failed')
+    if recovery is not None and (not execute or not resume_from or recovery!=root/'usage-pre-submit-recovery.json'):
+        raise ValueError('exact_managed_recovery_record_required')
     if not execute:
         return dict(mode='OFFLINE_NO_CLOUD',source=source,month=month,ledger_bytes=ledger['cumulative_executed_bytes'],
                     disk=storage,queries=queries)
@@ -375,7 +417,8 @@ def run(repo, month, ledger_path, execute, project=None, resume_from=None):
             raise ValueError('preflight_binding_changed')
         raw,files = {},{}
         for kind,spec in queries.items():
-            raw[kind],files[kind] = acquire(repo,root,billing.project_id,client,run_id,spec,kind,credentials)
+            raw[kind],files[kind] = acquire(repo,root,billing.project_id,client,run_id,spec,kind,credentials,
+                                            recovery if kind=='usage' else None)
         binding,dest = finish(repo,root,source,raw,files,protocol,design)
         if subprocess.check_output(['git','rev-parse','HEAD'],cwd=repo,text=True).strip()!=source:
             raise ValueError('acquisition_source_changed')
@@ -399,10 +442,12 @@ def main():
     p.add_argument('--billing-project')
     p.add_argument('--execute',action='store_true')
     p.add_argument('--resume-from-source',help='explicit direct-parent source for a reviewed continuation')
+    p.add_argument('--recover-unsubmitted-usage',type=Path)
     args = p.parse_args()
     repo = args.repo.resolve()
     ledger = args.ledger if args.ledger.is_absolute() else repo/args.ledger
-    print(canonical_json(run(repo,args.month,ledger,args.execute,args.billing_project,args.resume_from_source)))
+    proof = repo/args.recover_unsubmitted_usage if args.recover_unsubmitted_usage else None
+    print(canonical_json(run(repo,args.month,ledger,args.execute,args.billing_project,args.resume_from_source,proof)))
 
 
 if __name__=='__main__':
