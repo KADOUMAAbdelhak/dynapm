@@ -107,6 +107,21 @@ def validate_clock_audit(path):
     return m
 
 
+def audit_partition(cell, generation, p, entities):
+    if cell not in ('e','g'):
+        raise ValueError('unsupported_google_cell')
+    f=pq.read_table(p,columns=['collection_id','instance_index','timestamp_us','source_start_time_us','source_end_time_us','cpu_utilization','memory_utilization']).to_pandas()
+    stats,dist=timing_counts(f)
+    rejected=pq.read_table(generation/'rejected_rows'/p.name,columns=['collection_id','instance_index','start_time','end_time','exclusion_reason']).to_pandas()
+    stats.update(duplicate_interval_counts(f,rejected))
+    rows=[]
+    for (cid,idx),g in f.groupby(['collection_id','instance_index'],sort=False):
+        e=entities.loc[(cid,idx)]
+        rows.append(metadata_for_entity(cell,cid,idx,g.timestamp_us+STEP,g.cpu_utilization,g.memory_utilization,
+            g.source_end_time_us,e.eligible,e.exclusion_reason if isinstance(e.exclusion_reason,str) else None))
+    return rows,stats,dist
+
+
 def run(repo):
     repo=Path(repo).resolve();source=SourceProvenance.capture(repo)
     if source.dirty:raise ValueError('clean_committed_clock_audit_required')
@@ -136,16 +151,9 @@ def run(repo):
     max_gap=0
     try:
         for number,p in enumerate(files,1):
-            f=pq.read_table(p,columns=['collection_id','instance_index','timestamp_us','source_start_time_us','source_end_time_us','cpu_utilization','memory_utilization']).to_pandas()
-            stats,dist=timing_counts(f);max_gap=max(max_gap,stats.pop('maximum_interval_gap_us'));total.update(stats)
+            rows,stats,dist=audit_partition('e',generation,p,entities)
+            max_gap=max(max_gap,stats.pop('maximum_interval_gap_us'));total.update(stats)
             for key,values in dist.items():hist[key].update(values)
-            rejected=pq.read_table(generation/'rejected_rows'/p.name,columns=['collection_id','instance_index','start_time','end_time','exclusion_reason']).to_pandas()
-            total.update(duplicate_interval_counts(f,rejected))
-            rows=[]
-            for (cid,idx),g in f.groupby(['collection_id','instance_index'],sort=False):
-                e=entities.loc[(cid,idx)]
-                rows.append(metadata_for_entity('e',cid,idx,g.timestamp_us+STEP,g.cpu_utilization,g.memory_utilization,
-                    g.source_end_time_us,e.eligible,e.exclusion_reason if isinstance(e.exclusion_reason,str) else None))
             pd.DataFrame(rows).to_parquet(out/'partitions'/p.name,index=False,compression='zstd');all_rows.extend(rows)
             elapsed=time.monotonic()-start
             status=dict(stage='intervals_and_availability_metadata',parts_completed=number,total_parts=len(files),

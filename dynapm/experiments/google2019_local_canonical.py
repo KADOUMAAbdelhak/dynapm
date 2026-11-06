@@ -39,19 +39,25 @@ def disk_guard(path, upcoming=0):
     return free
 
 
-def source_hashes(frame):
+def source_tables(cell):
+    if cell not in ('e','g'):
+        raise ValueError('unsupported_google_cell')
+    prefix=f'google.com:google-cluster-data.clusterdata_2019_{cell}'
+    return f'{prefix}.instance_usage', f'{prefix}.instance_events'
+
+
+def source_hashes(frame, *, cell='e'):
     """Exact canonical-json/fingerprint bytes, optimized for frozen finite schema.
 
     Fixed JSON keys are lexically sorted. repr(float) matches the stdlib JSON
     encoder for finite numbers; IDs/times retain integer spelling. Tests compare
     every digest with the original generic fingerprint implementation.
     """
-    source=json.dumps('google.com:google-cluster-data.clusterdata_2019_e.instance_usage')
-    request=json.dumps('google.com:google-cluster-data.clusterdata_2019_e.instance_events')
+    source,request=map(json.dumps,source_tables(cell))
     cols=['average_cpu','average_memory','collection_id','collection_type','end_time','instance_index','request_cpu','request_event_time','request_memory','start_time']
     def digest(r):
         cpu,mem,cid,ct,end,idx,rc,rt,rm,start=r
-        data=(f'{{"average_cpu":{float(cpu)!r},"average_memory":{float(mem)!r},"cell":"e",'
+        data=(f'{{"average_cpu":{float(cpu)!r},"average_memory":{float(mem)!r},"cell":"{cell}",'
             f'"collection_id":{int(cid)},"collection_type":{int(ct)},"end_time":{int(end)},'
             f'"instance_index":{int(idx)},"request_cpu":{float(rc)!r},"request_event_time":{int(rt)},'
             f'"request_memory":{float(rm)!r},"request_source_table":{request},'
@@ -72,7 +78,7 @@ def join_partition(raw, history, latest):
     return joined
 
 
-def canonical_partition(raw, history, latest):
+def canonical_partition(raw, history, latest, *, cell='e'):
     f=join_partition(raw,history,latest)
     reasons=pd.Series('',index=f.index,dtype=object)
     numeric=['collection_id','instance_index','collection_type','start_time','end_time','average_cpu','average_memory']
@@ -87,15 +93,15 @@ def canonical_partition(raw, history, latest):
     rejected=f.loc[reasons.ne('')].copy();rejected['exclusion_reason']=reasons[reasons.ne('')]
     valid=f.loc[reasons.eq('')].copy();valid['request_event_time']=valid.request_event_time.astype('int64')
     valid['timestamp_us']=(valid.start_time//CADENCE_US)*CADENCE_US
-    valid['source_row_sha256']=source_hashes(valid)
+    valid['source_row_sha256']=source_hashes(valid,cell=cell)
     keys=['collection_id','instance_index','timestamp_us']
     valid=valid.sort_values(keys+['end_time','source_row_sha256'],ascending=[True,True,True,False,True],kind='mergesort')
     duplicate=valid.duplicated(keys,keep='first');dups=valid.loc[duplicate].copy();dups['exclusion_reason']='duplicate_nominal_bucket'
     rejected=pd.concat([rejected,dups],ignore_index=True);valid=valid.loc[~duplicate].copy()
     valid['cpu_utilization']=valid.average_cpu/valid.request_cpu;valid['memory_utilization']=valid.average_memory/valid.request_memory
     if not np.isfinite(valid[['cpu_utilization','memory_utilization']].to_numpy(float)).all():raise ValueError('nonfinite normalized data')
-    valid['cell']='e';valid['usage_source_table']='google.com:google-cluster-data.clusterdata_2019_e.instance_usage'
-    valid['request_source_table']='google.com:google-cluster-data.clusterdata_2019_e.instance_events'
+    valid['cell']=cell
+    valid['usage_source_table'],valid['request_source_table']=source_tables(cell)
     valid=valid.rename(columns={'average_cpu':'average_cpu_ncu','average_memory':'average_memory_normalized_ram',
         'request_cpu':'request_cpu_ncu','request_memory':'request_memory_normalized_ram','request_event_time':'request_event_time_us',
         'start_time':'source_start_time_us','end_time':'source_end_time_us'})
@@ -109,7 +115,7 @@ def canonical_partition(raw, history, latest):
         ts=g.timestamp_us.to_numpy();n=len(ts);span=int(ts[-1]-ts[0]);expected=1+span//CADENCE_US
         reason='insufficient_bootstrap_history' if n<MIN_VALID_SLOTS else ('insufficient_continuous_span_for_24h_windows' if span<MIN_SPAN_US else None)
         states=len(g[['request_cpu_ncu','request_memory_normalized_ram']].drop_duplicates())
-        entities.append(dict(cell='e',collection_id=int(cid),instance_index=int(idx),first_timestamp_us=int(ts[0]),
+        entities.append(dict(cell=cell,collection_id=int(cid),instance_index=int(idx),first_timestamp_us=int(ts[0]),
             last_timestamp_us=int(ts[-1]),observed_slots=n,expected_slots=expected,missing_slots=expected-n,
             maximum_gap_us=int(np.diff(ts).max()) if n>1 else 0,request_states=states,has_request_change=states>1,
             eligible=reason is None,exclusion_reason=reason))
@@ -124,8 +130,11 @@ def canonical_partition(raw, history, latest):
 
 def partition_usage(usage, work, count, status):
     work.mkdir();writers={};buffers={};sizes={};seen=0
+    paths=[usage] if isinstance(usage,(str,Path)) else usage
+    expected=sum(pq.ParquetFile(path).metadata.num_rows for path in paths)
     try:
-        for batch in pq.ParquetFile(usage).iter_batches(batch_size=1000000,columns=USAGE_COLUMNS):
+        batches=(batch for path in paths for batch in pq.ParquetFile(path).iter_batches(batch_size=1000000,columns=USAGE_COLUMNS))
+        for batch in batches:
             frame=batch.to_pandas();ids=(frame.collection_id.to_numpy()*1000003+frame.instance_index.to_numpy())%count
             for pid,group in frame.groupby(ids,sort=False):
                 pid=int(pid);table=pa.Table.from_pandas(group,preserve_index=False)
@@ -134,10 +143,11 @@ def partition_usage(usage, work, count, status):
                     disk_guard(work,256*2**20)
                     if pid not in writers:writers[pid]=pq.ParquetWriter(work/f'raw_{pid:03d}.parquet',table.schema,compression='zstd')
                     writers[pid].write_table(pa.concat_tables(buffers[pid]),row_group_size=100000);buffers[pid]=[];sizes[pid]=0
-            seen+=len(frame);status.update(stage='partition_raw_usage',rows_processed=seen,expected_rows=pq.ParquetFile(usage).metadata.num_rows)
+            seen+=len(frame);status.update(stage='partition_raw_usage',rows_processed=seen,expected_rows=expected)
         for pid,tables in buffers.items():
             if not tables:continue
             t=pa.concat_tables(tables)
+            disk_guard(work,max(256*2**20,t.nbytes))
             if pid not in writers:writers[pid]=pq.ParquetWriter(work/f'raw_{pid:03d}.parquet',t.schema,compression='zstd')
             writers[pid].write_table(t,row_group_size=100000)
     finally:
@@ -145,7 +155,7 @@ def partition_usage(usage, work, count, status):
     return seen
 
 
-def process_partition(task):
+def process_partition(task, *, cell='e'):
     raw_path,history_path,latest_path,out,pid=task;out=Path(out);disk_guard(out,256*2**20)
     raw=pq.read_table(raw_path).to_pandas()
     hist=pq.read_table(history_path).to_pandas();latest=pq.read_table(latest_path).to_pandas()
@@ -153,9 +163,10 @@ def process_partition(task):
     history=hist.loc[mask].copy()
     mask=((latest.collection_id.to_numpy()*1000003+latest.instance_index.to_numpy())%PARTITIONS)==pid
     recent=latest.loc[mask].copy()
-    canonical,entities,rejected,counts=canonical_partition(raw,history,recent)
+    canonical,entities,rejected,counts=canonical_partition(raw,history,recent,cell=cell)
     for kind,frame in [('canonical_usage',canonical),('entities',entities),('rejected_rows',rejected)]:
         folder=out/kind;folder.mkdir(exist_ok=True)
+        disk_guard(out,max(256*2**20,int(frame.memory_usage(index=False,deep=True).sum())))
         frame.to_parquet(folder/f'part_{pid:03d}.parquet',compression='zstd',row_group_size=100000,index=False)
     counts['partition']=pid
     write_json(out/'partition_diagnostics'/f'{pid:03d}.json',counts)
@@ -200,7 +211,7 @@ def require_corrected_generation(path):
     return m
 
 
-def validate_local(out, history, ambiguous, latest, status):
+def validate_local(out, history, ambiguous, latest, status, *, cell='e'):
     """Independent NumPy ASOF + full ratios/cadence/eligibility audit."""
     bad_index=pd.MultiIndex.from_frame(ambiguous[KEYS])
     assert not pd.MultiIndex.from_frame(history[KEYS]).isin(bad_index).any()
@@ -214,6 +225,8 @@ def validate_local(out, history, ambiguous, latest, status):
     for file in sorted((out/'canonical_usage').glob('*.parquet')):
         f=pq.read_table(file).to_pandas();keys=['collection_id','instance_index','timestamp_us']
         if f.empty:continue
+        usage_table,event_table=source_tables(cell)
+        assert f.cell.eq(cell).all() and f.usage_source_table.eq(usage_table).all() and f.request_source_table.eq(event_table).all()
         assert not f.duplicated(keys).any()
         assert f[keys].equals(f.sort_values(keys,kind='mergesort')[keys])
         assert (f.timestamp_us%CADENCE_US).eq(0).all()
@@ -246,7 +259,7 @@ def validate_local(out, history, ambiguous, latest, status):
         # Independently encode edge/normalization source hashes via generic JSON.
         samples=pd.concat([f.head(10),f.tail(10),f[f.used_earlier_request].head(10),f[f.cpu_utilization.gt(1)|f.memory_utilization.gt(1)].head(10)]).drop_duplicates(keys)
         for row in samples.to_dict('records'):
-            value=dict(cell='e',collection_id=int(row['collection_id']),instance_index=int(row['instance_index']),collection_type=1,
+            value=dict(cell=cell,collection_id=int(row['collection_id']),instance_index=int(row['instance_index']),collection_type=1,
                 start_time=int(row['source_start_time_us']),end_time=int(row['source_end_time_us']),
                 average_cpu=float(row['average_cpu_ncu']),average_memory=float(row['average_memory_normalized_ram']),
                 request_cpu=float(row['request_cpu_ncu']),request_memory=float(row['request_memory_normalized_ram']),
