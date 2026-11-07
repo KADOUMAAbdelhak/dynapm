@@ -164,10 +164,10 @@ def test_e_g_selection_independent_no_backfill_and_outcomes_ignored(design):
     assert e_outcomes and canonical_json(gr.google_config('g',design))==before
 
 
-def test_real_g_unavailable_refused_before_any_execution(design):
-    assert not (REPO/G_BINDING).exists()
-    with pytest.raises(ValueError,match='g_validated_cohort_unavailable'):
-        gr.load_stage_inputs(REPO,'g',REPO/'not-an-input.json')
+def test_missing_g_binding_refused_before_any_execution(tmp_path, design, monkeypatch):
+    monkeypatch.setattr(gr, 'frozen_design', lambda repo: design)
+    with pytest.raises(ValueError, match='g_validated_cohort_unavailable'):
+        gr.load_stage_inputs(tmp_path, 'g', tmp_path/'not-an-input.json')
 
 
 @pytest.fixture
