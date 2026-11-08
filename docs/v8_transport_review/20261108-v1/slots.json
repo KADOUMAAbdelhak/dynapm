@@ -1,0 +1,2239 @@
+[
+  {
+    "actual_primary_request_records": 12600,
+    "actuations": [
+      {
+        "ack_monotonic_ns": 228265386918791,
+        "actuation_latency_seconds": 0.546488,
+        "cpu_millicores": 70,
+        "enforced_monotonic_ns": 228265814868625,
+        "memory_request_mib": 64,
+        "status": "ENFORCED",
+        "trigger": "T0"
+      }
+    ],
+    "cell": {
+      "method": "static",
+      "repetition": 1,
+      "scenario": "periodic",
+      "seed": 2026110501,
+      "sequence": 1
+    },
+    "cgroup_samples": 723,
+    "duplicate_primary_ids": 0,
+    "exact_error_counts_limitation": "original recorder omitted exception reason/errno/connection tuple; transport failures cannot be counted retrospectively per request",
+    "executor_status": "COMPLETE",
+    "expected_primary_requests": 12600,
+    "first_warning_offsets": {
+      "broken_pipe": 7.303404092788696,
+      "connection_reset": 32.733283042907715,
+      "data_stream_creation": 44.896570920944214,
+      "error_stream_creation": 45.890259981155396
+    },
+    "generator_retries_basis": "exact source has one submission per scheduled ID, no retry path; IDs independently reconciled",
+    "host_failure": null,
+    "host_max_drift_ns": 59689625,
+    "host_max_gap_ns": 5143522792,
+    "http_statuses": {
+      "200": 20,
+      "None": 12580
+    },
+    "last_receipt_offset": 1800.229166375,
+    "last_success_completion_offset": 11.814526958,
+    "last_warning_offsets": {
+      "broken_pipe": 29.403475999832153,
+      "connection_reset": 32.733283042907715,
+      "data_stream_creation": 59.177181005477905,
+      "error_stream_creation": 1804.4492530822754
+    },
+    "manifest_sha256": "f52862cb7e9dc0213cd6d7db29998aa9ea0a2dc9233796c5d0d190b96ef9c985",
+    "max_telemetry_gap_seconds": 5.042344125,
+    "missing_primary_ids": 0,
+    "not_recorded": [
+      "continuous Service/endpoints history",
+      "Kubernetes event stream",
+      "node/kubelet logs",
+      "application stdout/stderr",
+      "post-failure Pod status",
+      "post-failure node/API probe",
+      "port-forward process returncode and exit timestamp"
+    ],
+    "offer_schedule_matches": true,
+    "oom_values": [
+      0
+    ],
+    "outcomes": {
+      "overload_drop": 5112,
+      "request_timeout": 7468,
+      "success": 20
+    },
+    "pod_observations": [
+      {
+        "container_id": "containerd://61ef09a9393289b86a81634f215dbe7a4da6e76cfbb977d781b486e57e8d174f",
+        "last_state": {},
+        "offset": -1809.921442459,
+        "phase": "Running",
+        "pod_ready": "True",
+        "ready": true,
+        "restart_count": 0,
+        "state": {
+          "running": {
+            "startedAt": "2026-11-07T19:58:03Z"
+          }
+        },
+        "uid": "1fbdbb5f-a885-4a15-b4f4-1d0e16ee48a9"
+      },
+      {
+        "container_id": "containerd://61ef09a9393289b86a81634f215dbe7a4da6e76cfbb977d781b486e57e8d174f",
+        "last_state": {},
+        "offset": 0.123195916,
+        "phase": "Running",
+        "pod_ready": "True",
+        "ready": true,
+        "restart_count": 0,
+        "state": {
+          "running": {
+            "startedAt": "2026-11-07T19:58:03Z"
+          }
+        },
+        "uid": "1fbdbb5f-a885-4a15-b4f4-1d0e16ee48a9"
+      },
+      {
+        "container_id": "containerd://61ef09a9393289b86a81634f215dbe7a4da6e76cfbb977d781b486e57e8d174f",
+        "last_state": {},
+        "offset": 0.164197041,
+        "phase": "Running",
+        "pod_ready": "True",
+        "ready": true,
+        "restart_count": 0,
+        "state": {
+          "running": {
+            "startedAt": "2026-11-07T19:58:03Z"
+          }
+        },
+        "uid": "1fbdbb5f-a885-4a15-b4f4-1d0e16ee48a9"
+      },
+      {
+        "container_id": "containerd://61ef09a9393289b86a81634f215dbe7a4da6e76cfbb977d781b486e57e8d174f",
+        "last_state": {},
+        "offset": 0.485555416,
+        "phase": "Running",
+        "pod_ready": "True",
+        "ready": true,
+        "restart_count": 0,
+        "state": {
+          "running": {
+            "startedAt": "2026-11-07T19:58:03Z"
+          }
+        },
+        "uid": "1fbdbb5f-a885-4a15-b4f4-1d0e16ee48a9"
+      },
+      {
+        "container_id": "containerd://61ef09a9393289b86a81634f215dbe7a4da6e76cfbb977d781b486e57e8d174f",
+        "last_state": {},
+        "offset": 300.324548875,
+        "phase": "Running",
+        "pod_ready": "True",
+        "ready": true,
+        "restart_count": 0,
+        "state": {
+          "running": {
+            "startedAt": "2026-11-07T19:58:03Z"
+          }
+        },
+        "uid": "1fbdbb5f-a885-4a15-b4f4-1d0e16ee48a9"
+      },
+      {
+        "container_id": "containerd://61ef09a9393289b86a81634f215dbe7a4da6e76cfbb977d781b486e57e8d174f",
+        "last_state": {},
+        "offset": 600.327477666,
+        "phase": "Running",
+        "pod_ready": "True",
+        "ready": true,
+        "restart_count": 0,
+        "state": {
+          "running": {
+            "startedAt": "2026-11-07T19:58:03Z"
+          }
+        },
+        "uid": "1fbdbb5f-a885-4a15-b4f4-1d0e16ee48a9"
+      },
+      {
+        "container_id": "containerd://61ef09a9393289b86a81634f215dbe7a4da6e76cfbb977d781b486e57e8d174f",
+        "last_state": {},
+        "offset": 900.316013375,
+        "phase": "Running",
+        "pod_ready": "True",
+        "ready": true,
+        "restart_count": 0,
+        "state": {
+          "running": {
+            "startedAt": "2026-11-07T19:58:03Z"
+          }
+        },
+        "uid": "1fbdbb5f-a885-4a15-b4f4-1d0e16ee48a9"
+      },
+      {
+        "container_id": "containerd://61ef09a9393289b86a81634f215dbe7a4da6e76cfbb977d781b486e57e8d174f",
+        "last_state": {},
+        "offset": 1200.304080666,
+        "phase": "Running",
+        "pod_ready": "True",
+        "ready": true,
+        "restart_count": 0,
+        "state": {
+          "running": {
+            "startedAt": "2026-11-07T19:58:03Z"
+          }
+        },
+        "uid": "1fbdbb5f-a885-4a15-b4f4-1d0e16ee48a9"
+      },
+      {
+        "container_id": "containerd://61ef09a9393289b86a81634f215dbe7a4da6e76cfbb977d781b486e57e8d174f",
+        "last_state": {},
+        "offset": 1500.315522416,
+        "phase": "Running",
+        "pod_ready": "True",
+        "ready": true,
+        "restart_count": 0,
+        "state": {
+          "running": {
+            "startedAt": "2026-11-07T19:58:03Z"
+          }
+        },
+        "uid": "1fbdbb5f-a885-4a15-b4f4-1d0e16ee48a9"
+      },
+      {
+        "container_id": "containerd://61ef09a9393289b86a81634f215dbe7a4da6e76cfbb977d781b486e57e8d174f",
+        "last_state": {},
+        "offset": 1800.328630958,
+        "phase": "Running",
+        "pod_ready": "True",
+        "ready": true,
+        "restart_count": 0,
+        "state": {
+          "running": {
+            "startedAt": "2026-11-07T19:58:03Z"
+          }
+        },
+        "uid": "1fbdbb5f-a885-4a15-b4f4-1d0e16ee48a9"
+      }
+    ],
+    "process_exit_code": null,
+    "process_exit_signal": null,
+    "process_restart_count": 0,
+    "process_restarts_basis": "exact frozen code has one Popen and no restart path; original process lifecycle exit code was not persisted",
+    "reason": "persistent failure to create request forwarding/error streams, no successful response after stream collapse; client outcomes cannot represent application-only primary endpoints",
+    "request_generator_retries": 0,
+    "request_transport_error_count": null,
+    "run_id": "004-2026-11-07T194230-886669+0000-78bd0a0eb86e",
+    "slot": 1,
+    "t0_utc": "2026-11-07T20:28:15.663054+00:00",
+    "terminal_sha256": "1947c43b16ad1dea8bfc5cb468aeda5fb8e7151ce2d829e8d3f0daddda38d87d",
+    "timeline_path": "timeline-01.jsonl.gz",
+    "transport_validity": "HARNESS_FAILED",
+    "unattributed_application_error_records": 0,
+    "unattributed_timeouts": 7468,
+    "warning_counts": {
+      "broken_pipe": 11,
+      "connection_reset": 1,
+      "data_stream_creation": 29,
+      "error_stream_creation": 7255
+    }
+  },
+  {
+    "actual_primary_request_records": 12600,
+    "actuations": [
+      {
+        "ack_monotonic_ns": 232825961954916,
+        "actuation_latency_seconds": 0.5129505,
+        "cpu_millicores": 70,
+        "enforced_monotonic_ns": 232826360134000,
+        "memory_request_mib": 64,
+        "status": "ENFORCED",
+        "trigger": "T0"
+      }
+    ],
+    "cell": {
+      "method": "pw_12h",
+      "repetition": 1,
+      "scenario": "periodic",
+      "seed": 2026110501,
+      "sequence": 2
+    },
+    "cgroup_samples": 723,
+    "duplicate_primary_ids": 0,
+    "exact_error_counts_limitation": "original recorder omitted exception reason/errno/connection tuple; transport failures cannot be counted retrospectively per request",
+    "executor_status": "COMPLETE",
+    "expected_primary_requests": 12600,
+    "first_warning_offsets": {
+      "broken_pipe": 9.164551258087158,
+      "connection_reset": 69.34378719329834,
+      "data_stream_creation": 43.112343072891235,
+      "error_stream_creation": 43.349024057388306
+    },
+    "generator_retries_basis": "exact source has one submission per scheduled ID, no retry path; IDs independently reconciled",
+    "host_failure": null,
+    "host_max_drift_ns": 96384792,
+    "host_max_gap_ns": 5146857125,
+    "http_statuses": {
+      "200": 21,
+      "None": 12579
+    },
+    "last_receipt_offset": 1800.232328167,
+    "last_success_completion_offset": 7.575005792,
+    "last_warning_offsets": {
+      "broken_pipe": 63.35193920135498,
+      "connection_reset": 69.34386110305786,
+      "data_stream_creation": 114.73446822166443,
+      "error_stream_creation": 1804.5827901363373
+    },
+    "manifest_sha256": "0a52c542a5a67de4a15a491f4467ed1fc87af96d47f2bdf35b6b433f2591f9cd",
+    "max_telemetry_gap_seconds": 5.062524125,
+    "missing_primary_ids": 0,
+    "not_recorded": [
+      "continuous Service/endpoints history",
+      "Kubernetes event stream",
+      "node/kubelet logs",
+      "application stdout/stderr",
+      "post-failure Pod status",
+      "post-failure node/API probe",
+      "port-forward process returncode and exit timestamp"
+    ],
+    "offer_schedule_matches": true,
+    "oom_values": [
+      0
+    ],
+    "outcomes": {
+      "overload_drop": 5114,
+      "request_timeout": 7465,
+      "success": 21
+    },
+    "pod_observations": [
+      {
+        "container_id": "containerd://e97c91db451e5a26b689832ef8a52c785020f10484e37e0b3e64237e2c40b088",
+        "last_state": {},
+        "offset": -1809.923272583,
+        "phase": "Running",
+        "pod_ready": "True",
+        "ready": true,
+        "restart_count": 0,
+        "state": {
+          "running": {
+            "startedAt": "2026-11-07T21:14:03Z"
+          }
+        },
+        "uid": "f77c8cb1-d4b1-452c-9cc6-ec7d32f0d34f"
+      },
+      {
+        "container_id": "containerd://e97c91db451e5a26b689832ef8a52c785020f10484e37e0b3e64237e2c40b088",
+        "last_state": {},
+        "offset": 0.116520208,
+        "phase": "Running",
+        "pod_ready": "True",
+        "ready": true,
+        "restart_count": 0,
+        "state": {
+          "running": {
+            "startedAt": "2026-11-07T21:14:03Z"
+          }
+        },
+        "uid": "f77c8cb1-d4b1-452c-9cc6-ec7d32f0d34f"
+      },
+      {
+        "container_id": "containerd://e97c91db451e5a26b689832ef8a52c785020f10484e37e0b3e64237e2c40b088",
+        "last_state": {},
+        "offset": 0.155973792,
+        "phase": "Running",
+        "pod_ready": "True",
+        "ready": true,
+        "restart_count": 0,
+        "state": {
+          "running": {
+            "startedAt": "2026-11-07T21:14:03Z"
+          }
+        },
+        "uid": "f77c8cb1-d4b1-452c-9cc6-ec7d32f0d34f"
+      },
+      {
+        "container_id": "containerd://e97c91db451e5a26b689832ef8a52c785020f10484e37e0b3e64237e2c40b088",
+        "last_state": {},
+        "offset": 0.45408025,
+        "phase": "Running",
+        "pod_ready": "True",
+        "ready": true,
+        "restart_count": 0,
+        "state": {
+          "running": {
+            "startedAt": "2026-11-07T21:14:03Z"
+          }
+        },
+        "uid": "f77c8cb1-d4b1-452c-9cc6-ec7d32f0d34f"
+      },
+      {
+        "container_id": "containerd://e97c91db451e5a26b689832ef8a52c785020f10484e37e0b3e64237e2c40b088",
+        "last_state": {},
+        "offset": 300.330268167,
+        "phase": "Running",
+        "pod_ready": "True",
+        "ready": true,
+        "restart_count": 0,
+        "state": {
+          "running": {
+            "startedAt": "2026-11-07T21:14:03Z"
+          }
+        },
+        "uid": "f77c8cb1-d4b1-452c-9cc6-ec7d32f0d34f"
+      },
+      {
+        "container_id": "containerd://e97c91db451e5a26b689832ef8a52c785020f10484e37e0b3e64237e2c40b088",
+        "last_state": {},
+        "offset": 600.322351583,
+        "phase": "Running",
+        "pod_ready": "True",
+        "ready": true,
+        "restart_count": 0,
+        "state": {
+          "running": {
+            "startedAt": "2026-11-07T21:14:03Z"
+          }
+        },
+        "uid": "f77c8cb1-d4b1-452c-9cc6-ec7d32f0d34f"
+      },
+      {
+        "container_id": "containerd://e97c91db451e5a26b689832ef8a52c785020f10484e37e0b3e64237e2c40b088",
+        "last_state": {},
+        "offset": 900.340202792,
+        "phase": "Running",
+        "pod_ready": "True",
+        "ready": true,
+        "restart_count": 0,
+        "state": {
+          "running": {
+            "startedAt": "2026-11-07T21:14:03Z"
+          }
+        },
+        "uid": "f77c8cb1-d4b1-452c-9cc6-ec7d32f0d34f"
+      },
+      {
+        "container_id": "containerd://e97c91db451e5a26b689832ef8a52c785020f10484e37e0b3e64237e2c40b088",
+        "last_state": {},
+        "offset": 1200.319455083,
+        "phase": "Running",
+        "pod_ready": "True",
+        "ready": true,
+        "restart_count": 0,
+        "state": {
+          "running": {
+            "startedAt": "2026-11-07T21:14:03Z"
+          }
+        },
+        "uid": "f77c8cb1-d4b1-452c-9cc6-ec7d32f0d34f"
+      },
+      {
+        "container_id": "containerd://e97c91db451e5a26b689832ef8a52c785020f10484e37e0b3e64237e2c40b088",
+        "last_state": {},
+        "offset": 1500.315143917,
+        "phase": "Running",
+        "pod_ready": "True",
+        "ready": true,
+        "restart_count": 0,
+        "state": {
+          "running": {
+            "startedAt": "2026-11-07T21:14:03Z"
+          }
+        },
+        "uid": "f77c8cb1-d4b1-452c-9cc6-ec7d32f0d34f"
+      },
+      {
+        "container_id": "containerd://e97c91db451e5a26b689832ef8a52c785020f10484e37e0b3e64237e2c40b088",
+        "last_state": {},
+        "offset": 1800.324532375,
+        "phase": "Running",
+        "pod_ready": "True",
+        "ready": true,
+        "restart_count": 0,
+        "state": {
+          "running": {
+            "startedAt": "2026-11-07T21:14:03Z"
+          }
+        },
+        "uid": "f77c8cb1-d4b1-452c-9cc6-ec7d32f0d34f"
+      }
+    ],
+    "process_exit_code": null,
+    "process_exit_signal": null,
+    "process_restart_count": 0,
+    "process_restarts_basis": "exact frozen code has one Popen and no restart path; original process lifecycle exit code was not persisted",
+    "reason": "persistent failure to create request forwarding/error streams, no successful response after stream collapse; client outcomes cannot represent application-only primary endpoints",
+    "request_generator_retries": 0,
+    "request_transport_error_count": null,
+    "run_id": "005-2026-11-07T205831-983391+0000-a92601fb9136",
+    "slot": 2,
+    "t0_utc": "2026-11-07T21:44:16.167921+00:00",
+    "terminal_sha256": "c71a7286dc0a21dfb40d33089fc1e502eafcb2713fe70a9c33ae23a43cdbc112",
+    "timeline_path": "timeline-02.jsonl.gz",
+    "transport_validity": "HARNESS_FAILED",
+    "unattributed_application_error_records": 0,
+    "unattributed_timeouts": 7465,
+    "warning_counts": {
+      "broken_pipe": 14,
+      "connection_reset": 5,
+      "data_stream_creation": 73,
+      "error_stream_creation": 7101
+    }
+  },
+  {
+    "actual_primary_request_records": 12600,
+    "actuations": [
+      {
+        "ack_monotonic_ns": 237387039914500,
+        "actuation_latency_seconds": 0.848230958,
+        "cpu_millicores": 190,
+        "enforced_monotonic_ns": 237387768379583,
+        "memory_request_mib": 136,
+        "status": "ENFORCED",
+        "trigger": "T0"
+      }
+    ],
+    "cell": {
+      "method": "pw_3h",
+      "repetition": 1,
+      "scenario": "periodic",
+      "seed": 2026110501,
+      "sequence": 3
+    },
+    "cgroup_samples": 723,
+    "duplicate_primary_ids": 0,
+    "exact_error_counts_limitation": "original recorder omitted exception reason/errno/connection tuple; transport failures cannot be counted retrospectively per request",
+    "executor_status": "COMPLETE",
+    "expected_primary_requests": 12600,
+    "first_warning_offsets": {},
+    "generator_retries_basis": "exact source has one submission per scheduled ID, no retry path; IDs independently reconciled",
+    "host_failure": null,
+    "host_max_drift_ns": 52588750,
+    "host_max_gap_ns": 5154040000,
+    "http_statuses": {
+      "200": 12600
+    },
+    "last_receipt_offset": 1800.243525584,
+    "last_success_completion_offset": 1799.537671375,
+    "last_warning_offsets": {},
+    "manifest_sha256": "d57defa94d11789482873e8557b008f9bee2e53a43c6ef5738a4b515c09509af",
+    "max_telemetry_gap_seconds": 5.0525090410000075,
+    "missing_primary_ids": 0,
+    "not_recorded": [
+      "continuous Service/endpoints history",
+      "Kubernetes event stream",
+      "node/kubelet logs",
+      "application stdout/stderr",
+      "post-failure Pod status",
+      "post-failure node/API probe",
+      "port-forward process returncode and exit timestamp"
+    ],
+    "offer_schedule_matches": true,
+    "oom_values": [
+      0
+    ],
+    "outcomes": {
+      "success": 12600
+    },
+    "pod_observations": [
+      {
+        "container_id": "containerd://87f10e385e0973862fef06a616d476318c95fbd59b9de5ac098bea3f7e82adda",
+        "last_state": {},
+        "offset": -1809.918685083,
+        "phase": "Running",
+        "pod_ready": "True",
+        "ready": true,
+        "restart_count": 0,
+        "state": {
+          "running": {
+            "startedAt": "2026-11-07T22:30:04Z"
+          }
+        },
+        "uid": "2da920b8-bffc-46ee-8fba-94ffecf5af66"
+      },
+      {
+        "container_id": "containerd://87f10e385e0973862fef06a616d476318c95fbd59b9de5ac098bea3f7e82adda",
+        "last_state": {},
+        "offset": 0.125096709,
+        "phase": "Running",
+        "pod_ready": "True",
+        "ready": true,
+        "restart_count": 0,
+        "state": {
+          "running": {
+            "startedAt": "2026-11-07T22:30:04Z"
+          }
+        },
+        "uid": "2da920b8-bffc-46ee-8fba-94ffecf5af66"
+      },
+      {
+        "container_id": "containerd://87f10e385e0973862fef06a616d476318c95fbd59b9de5ac098bea3f7e82adda",
+        "last_state": {},
+        "offset": 0.165222542,
+        "phase": "Running",
+        "pod_ready": "True",
+        "ready": true,
+        "restart_count": 0,
+        "state": {
+          "running": {
+            "startedAt": "2026-11-07T22:30:04Z"
+          }
+        },
+        "uid": "2da920b8-bffc-46ee-8fba-94ffecf5af66"
+      },
+      {
+        "container_id": "containerd://87f10e385e0973862fef06a616d476318c95fbd59b9de5ac098bea3f7e82adda",
+        "last_state": {},
+        "offset": 0.464709084,
+        "phase": "Running",
+        "pod_ready": "True",
+        "ready": true,
+        "restart_count": 0,
+        "state": {
+          "running": {
+            "startedAt": "2026-11-07T22:30:04Z"
+          }
+        },
+        "uid": "2da920b8-bffc-46ee-8fba-94ffecf5af66"
+      },
+      {
+        "container_id": "containerd://87f10e385e0973862fef06a616d476318c95fbd59b9de5ac098bea3f7e82adda",
+        "last_state": {},
+        "offset": 0.797104417,
+        "phase": "Running",
+        "pod_ready": "True",
+        "ready": true,
+        "restart_count": 0,
+        "state": {
+          "running": {
+            "startedAt": "2026-11-07T22:30:04Z"
+          }
+        },
+        "uid": "2da920b8-bffc-46ee-8fba-94ffecf5af66"
+      },
+      {
+        "container_id": "containerd://87f10e385e0973862fef06a616d476318c95fbd59b9de5ac098bea3f7e82adda",
+        "last_state": {},
+        "offset": 300.32376575,
+        "phase": "Running",
+        "pod_ready": "True",
+        "ready": true,
+        "restart_count": 0,
+        "state": {
+          "running": {
+            "startedAt": "2026-11-07T22:30:04Z"
+          }
+        },
+        "uid": "2da920b8-bffc-46ee-8fba-94ffecf5af66"
+      },
+      {
+        "container_id": "containerd://87f10e385e0973862fef06a616d476318c95fbd59b9de5ac098bea3f7e82adda",
+        "last_state": {},
+        "offset": 600.332155875,
+        "phase": "Running",
+        "pod_ready": "True",
+        "ready": true,
+        "restart_count": 0,
+        "state": {
+          "running": {
+            "startedAt": "2026-11-07T22:30:04Z"
+          }
+        },
+        "uid": "2da920b8-bffc-46ee-8fba-94ffecf5af66"
+      },
+      {
+        "container_id": "containerd://87f10e385e0973862fef06a616d476318c95fbd59b9de5ac098bea3f7e82adda",
+        "last_state": {},
+        "offset": 900.318174459,
+        "phase": "Running",
+        "pod_ready": "True",
+        "ready": true,
+        "restart_count": 0,
+        "state": {
+          "running": {
+            "startedAt": "2026-11-07T22:30:04Z"
+          }
+        },
+        "uid": "2da920b8-bffc-46ee-8fba-94ffecf5af66"
+      },
+      {
+        "container_id": "containerd://87f10e385e0973862fef06a616d476318c95fbd59b9de5ac098bea3f7e82adda",
+        "last_state": {},
+        "offset": 1200.340234167,
+        "phase": "Running",
+        "pod_ready": "True",
+        "ready": true,
+        "restart_count": 0,
+        "state": {
+          "running": {
+            "startedAt": "2026-11-07T22:30:04Z"
+          }
+        },
+        "uid": "2da920b8-bffc-46ee-8fba-94ffecf5af66"
+      },
+      {
+        "container_id": "containerd://87f10e385e0973862fef06a616d476318c95fbd59b9de5ac098bea3f7e82adda",
+        "last_state": {},
+        "offset": 1500.330539417,
+        "phase": "Running",
+        "pod_ready": "True",
+        "ready": true,
+        "restart_count": 0,
+        "state": {
+          "running": {
+            "startedAt": "2026-11-07T22:30:04Z"
+          }
+        },
+        "uid": "2da920b8-bffc-46ee-8fba-94ffecf5af66"
+      },
+      {
+        "container_id": "containerd://87f10e385e0973862fef06a616d476318c95fbd59b9de5ac098bea3f7e82adda",
+        "last_state": {},
+        "offset": 1800.335321,
+        "phase": "Running",
+        "pod_ready": "True",
+        "ready": true,
+        "restart_count": 0,
+        "state": {
+          "running": {
+            "startedAt": "2026-11-07T22:30:04Z"
+          }
+        },
+        "uid": "2da920b8-bffc-46ee-8fba-94ffecf5af66"
+      }
+    ],
+    "process_exit_code": null,
+    "process_exit_signal": null,
+    "process_restart_count": 0,
+    "process_restarts_basis": "exact frozen code has one Popen and no restart path; original process lifecycle exit code was not persisted",
+    "reason": "complete expected request IDs, all HTTP 200 successes, no recorded transport warnings or observability gaps",
+    "request_generator_retries": 0,
+    "request_transport_error_count": null,
+    "run_id": "006-2026-11-07T221432-097994+0000-982768f454f8",
+    "slot": 3,
+    "t0_utc": "2026-11-07T23:00:17.314217+00:00",
+    "terminal_sha256": "31f50be30f031b7791373e85e177a89f6a223e3238a83c0fe7fcaeccba80a86b",
+    "timeline_path": "timeline-03.jsonl.gz",
+    "transport_validity": "VALID",
+    "unattributed_application_error_records": 0,
+    "unattributed_timeouts": 0,
+    "warning_counts": {}
+  },
+  {
+    "actual_primary_request_records": 21600,
+    "actuations": [
+      {
+        "ack_monotonic_ns": 241943449971000,
+        "actuation_latency_seconds": 0.843155167,
+        "cpu_millicores": 70,
+        "enforced_monotonic_ns": 241944183606208,
+        "memory_request_mib": 64,
+        "status": "ENFORCED",
+        "trigger": "T0"
+      }
+    ],
+    "cell": {
+      "method": "static",
+      "repetition": 1,
+      "scenario": "abrupt_regime_shift",
+      "seed": 2026110501,
+      "sequence": 4
+    },
+    "cgroup_samples": 723,
+    "duplicate_primary_ids": 0,
+    "exact_error_counts_limitation": "original recorder omitted exception reason/errno/connection tuple; transport failures cannot be counted retrospectively per request",
+    "executor_status": "COMPLETE",
+    "expected_primary_requests": 21600,
+    "first_warning_offsets": {
+      "broken_pipe": 8.754612922668457,
+      "connection_reset": 71.87091898918152,
+      "data_stream_creation": 37.32346796989441,
+      "error_stream_creation": 37.910861015319824
+    },
+    "generator_retries_basis": "exact source has one submission per scheduled ID, no retry path; IDs independently reconciled",
+    "host_failure": null,
+    "host_max_drift_ns": 61005750,
+    "host_max_gap_ns": 5156192500,
+    "http_statuses": {
+      "200": 23,
+      "None": 21577
+    },
+    "last_receipt_offset": 1800.24899925,
+    "last_success_completion_offset": 13.174377666,
+    "last_warning_offsets": {
+      "broken_pipe": 27.955538034439087,
+      "connection_reset": 71.87091898918152,
+      "data_stream_creation": 84.4883120059967,
+      "error_stream_creation": 1804.8901951313019
+    },
+    "manifest_sha256": "80ca59bd746421a803fb90347e58872af34470cff8589827ba1e7e4e00198767",
+    "max_telemetry_gap_seconds": 5.045463500000096,
+    "missing_primary_ids": 0,
+    "not_recorded": [
+      "continuous Service/endpoints history",
+      "Kubernetes event stream",
+      "node/kubelet logs",
+      "application stdout/stderr",
+      "post-failure Pod status",
+      "post-failure node/API probe",
+      "port-forward process returncode and exit timestamp"
+    ],
+    "offer_schedule_matches": true,
+    "oom_values": [
+      0
+    ],
+    "outcomes": {
+      "overload_drop": 10241,
+      "request_timeout": 11336,
+      "success": 23
+    },
+    "pod_observations": [
+      {
+        "container_id": "containerd://b08dec0885a0e3f736a99653ec7e735213f9c9e5e5c228a27f90d200e8c85672",
+        "last_state": {},
+        "offset": -1809.920804584,
+        "phase": "Running",
+        "pod_ready": "True",
+        "ready": true,
+        "restart_count": 0,
+        "state": {
+          "running": {
+            "startedAt": "2026-11-07T23:46:01Z"
+          }
+        },
+        "uid": "d7cc4b99-8a0e-47c9-bdd9-d18f11d321c2"
+      },
+      {
+        "container_id": "containerd://b08dec0885a0e3f736a99653ec7e735213f9c9e5e5c228a27f90d200e8c85672",
+        "last_state": {},
+        "offset": 0.114864625,
+        "phase": "Running",
+        "pod_ready": "True",
+        "ready": true,
+        "restart_count": 0,
+        "state": {
+          "running": {
+            "startedAt": "2026-11-07T23:46:01Z"
+          }
+        },
+        "uid": "d7cc4b99-8a0e-47c9-bdd9-d18f11d321c2"
+      },
+      {
+        "container_id": "containerd://b08dec0885a0e3f736a99653ec7e735213f9c9e5e5c228a27f90d200e8c85672",
+        "last_state": {},
+        "offset": 0.153387916,
+        "phase": "Running",
+        "pod_ready": "True",
+        "ready": true,
+        "restart_count": 0,
+        "state": {
+          "running": {
+            "startedAt": "2026-11-07T23:46:01Z"
+          }
+        },
+        "uid": "d7cc4b99-8a0e-47c9-bdd9-d18f11d321c2"
+      },
+      {
+        "container_id": "containerd://b08dec0885a0e3f736a99653ec7e735213f9c9e5e5c228a27f90d200e8c85672",
+        "last_state": {},
+        "offset": 0.453166083,
+        "phase": "Running",
+        "pod_ready": "True",
+        "ready": true,
+        "restart_count": 0,
+        "state": {
+          "running": {
+            "startedAt": "2026-11-07T23:46:01Z"
+          }
+        },
+        "uid": "d7cc4b99-8a0e-47c9-bdd9-d18f11d321c2"
+      },
+      {
+        "container_id": "containerd://b08dec0885a0e3f736a99653ec7e735213f9c9e5e5c228a27f90d200e8c85672",
+        "last_state": {},
+        "offset": 0.789509666,
+        "phase": "Running",
+        "pod_ready": "True",
+        "ready": true,
+        "restart_count": 0,
+        "state": {
+          "running": {
+            "startedAt": "2026-11-07T23:46:01Z"
+          }
+        },
+        "uid": "d7cc4b99-8a0e-47c9-bdd9-d18f11d321c2"
+      },
+      {
+        "container_id": "containerd://b08dec0885a0e3f736a99653ec7e735213f9c9e5e5c228a27f90d200e8c85672",
+        "last_state": {},
+        "offset": 300.3449675,
+        "phase": "Running",
+        "pod_ready": "True",
+        "ready": true,
+        "restart_count": 0,
+        "state": {
+          "running": {
+            "startedAt": "2026-11-07T23:46:01Z"
+          }
+        },
+        "uid": "d7cc4b99-8a0e-47c9-bdd9-d18f11d321c2"
+      },
+      {
+        "container_id": "containerd://b08dec0885a0e3f736a99653ec7e735213f9c9e5e5c228a27f90d200e8c85672",
+        "last_state": {},
+        "offset": 600.3444405,
+        "phase": "Running",
+        "pod_ready": "True",
+        "ready": true,
+        "restart_count": 0,
+        "state": {
+          "running": {
+            "startedAt": "2026-11-07T23:46:01Z"
+          }
+        },
+        "uid": "d7cc4b99-8a0e-47c9-bdd9-d18f11d321c2"
+      },
+      {
+        "container_id": "containerd://b08dec0885a0e3f736a99653ec7e735213f9c9e5e5c228a27f90d200e8c85672",
+        "last_state": {},
+        "offset": 900.336202291,
+        "phase": "Running",
+        "pod_ready": "True",
+        "ready": true,
+        "restart_count": 0,
+        "state": {
+          "running": {
+            "startedAt": "2026-11-07T23:46:01Z"
+          }
+        },
+        "uid": "d7cc4b99-8a0e-47c9-bdd9-d18f11d321c2"
+      },
+      {
+        "container_id": "containerd://b08dec0885a0e3f736a99653ec7e735213f9c9e5e5c228a27f90d200e8c85672",
+        "last_state": {},
+        "offset": 1200.339847458,
+        "phase": "Running",
+        "pod_ready": "True",
+        "ready": true,
+        "restart_count": 0,
+        "state": {
+          "running": {
+            "startedAt": "2026-11-07T23:46:01Z"
+          }
+        },
+        "uid": "d7cc4b99-8a0e-47c9-bdd9-d18f11d321c2"
+      },
+      {
+        "container_id": "containerd://b08dec0885a0e3f736a99653ec7e735213f9c9e5e5c228a27f90d200e8c85672",
+        "last_state": {},
+        "offset": 1500.342268166,
+        "phase": "Running",
+        "pod_ready": "True",
+        "ready": true,
+        "restart_count": 0,
+        "state": {
+          "running": {
+            "startedAt": "2026-11-07T23:46:01Z"
+          }
+        },
+        "uid": "d7cc4b99-8a0e-47c9-bdd9-d18f11d321c2"
+      },
+      {
+        "container_id": "containerd://b08dec0885a0e3f736a99653ec7e735213f9c9e5e5c228a27f90d200e8c85672",
+        "last_state": {},
+        "offset": 1800.340125708,
+        "phase": "Running",
+        "pod_ready": "True",
+        "ready": true,
+        "restart_count": 0,
+        "state": {
+          "running": {
+            "startedAt": "2026-11-07T23:46:01Z"
+          }
+        },
+        "uid": "d7cc4b99-8a0e-47c9-bdd9-d18f11d321c2"
+      }
+    ],
+    "process_exit_code": null,
+    "process_exit_signal": null,
+    "process_restart_count": 0,
+    "process_restarts_basis": "exact frozen code has one Popen and no restart path; original process lifecycle exit code was not persisted",
+    "reason": "persistent failure to create request forwarding/error streams, no successful response after stream collapse; client outcomes cannot represent application-only primary endpoints",
+    "request_generator_retries": 0,
+    "request_transport_error_count": null,
+    "run_id": "007-2026-11-07T233029-503103+0000-412ed716bccd",
+    "slot": 4,
+    "t0_utc": "2026-11-08T00:16:13.728673+00:00",
+    "terminal_sha256": "791b7ee21b84f9a3da713acba6022251a26ed802a120ee7d3db130f6b804e214",
+    "timeline_path": "timeline-04.jsonl.gz",
+    "transport_validity": "HARNESS_FAILED",
+    "unattributed_application_error_records": 0,
+    "unattributed_timeouts": 11336,
+    "warning_counts": {
+      "broken_pipe": 3,
+      "connection_reset": 1,
+      "data_stream_creation": 54,
+      "error_stream_creation": 10847
+    }
+  },
+  {
+    "actual_primary_request_records": 21600,
+    "actuations": [
+      {
+        "ack_monotonic_ns": 246504058585875,
+        "actuation_latency_seconds": 1.158529584,
+        "cpu_millicores": 190,
+        "enforced_monotonic_ns": 246505104753125,
+        "memory_request_mib": 136,
+        "status": "ENFORCED",
+        "trigger": "T0"
+      }
+    ],
+    "cell": {
+      "method": "pw_3h",
+      "repetition": 1,
+      "scenario": "abrupt_regime_shift",
+      "seed": 2026110501,
+      "sequence": 5
+    },
+    "cgroup_samples": 723,
+    "duplicate_primary_ids": 0,
+    "exact_error_counts_limitation": "original recorder omitted exception reason/errno/connection tuple; transport failures cannot be counted retrospectively per request",
+    "executor_status": "COMPLETE",
+    "expected_primary_requests": 21600,
+    "first_warning_offsets": {
+      "broken_pipe": 156.42124605178833,
+      "connection_reset": 682.6282429695129
+    },
+    "generator_retries_basis": "exact source has one submission per scheduled ID, no retry path; IDs independently reconciled",
+    "host_failure": null,
+    "host_max_drift_ns": 37363750,
+    "host_max_gap_ns": 5157371083,
+    "http_statuses": {
+      "200": 15187,
+      "None": 6413
+    },
+    "last_receipt_offset": 1800.238444292,
+    "last_success_completion_offset": 1802.883751333,
+    "last_warning_offsets": {
+      "broken_pipe": 1786.9624021053314,
+      "connection_reset": 682.6282429695129
+    },
+    "manifest_sha256": "792302e289529c12c34be9c424457cbc557850f3850f84493a42d170e16e88d4",
+    "max_telemetry_gap_seconds": 5.054377999999986,
+    "missing_primary_ids": 0,
+    "not_recorded": [
+      "continuous Service/endpoints history",
+      "Kubernetes event stream",
+      "node/kubelet logs",
+      "application stdout/stderr",
+      "post-failure Pod status",
+      "post-failure node/API probe",
+      "port-forward process returncode and exit timestamp"
+    ],
+    "offer_schedule_matches": true,
+    "oom_values": [
+      0
+    ],
+    "outcomes": {
+      "overload_drop": 4950,
+      "request_timeout": 1463,
+      "success": 15187
+    },
+    "pod_observations": [
+      {
+        "container_id": "containerd://14eb343b3782b27a14b00c7a21ffd7914cc11914c1860ca80d1014b6c380dfea",
+        "last_state": {},
+        "offset": -1809.91539175,
+        "phase": "Running",
+        "pod_ready": "True",
+        "ready": true,
+        "restart_count": 0,
+        "state": {
+          "running": {
+            "startedAt": "2026-11-08T01:02:01Z"
+          }
+        },
+        "uid": "407f0540-63ec-4967-902b-3198ae9c8858"
+      },
+      {
+        "container_id": "containerd://14eb343b3782b27a14b00c7a21ffd7914cc11914c1860ca80d1014b6c380dfea",
+        "last_state": {},
+        "offset": 0.118458292,
+        "phase": "Running",
+        "pod_ready": "True",
+        "ready": true,
+        "restart_count": 0,
+        "state": {
+          "running": {
+            "startedAt": "2026-11-08T01:02:01Z"
+          }
+        },
+        "uid": "407f0540-63ec-4967-902b-3198ae9c8858"
+      },
+      {
+        "container_id": "containerd://14eb343b3782b27a14b00c7a21ffd7914cc11914c1860ca80d1014b6c380dfea",
+        "last_state": {},
+        "offset": 0.157135,
+        "phase": "Running",
+        "pod_ready": "True",
+        "ready": true,
+        "restart_count": 0,
+        "state": {
+          "running": {
+            "startedAt": "2026-11-08T01:02:01Z"
+          }
+        },
+        "uid": "407f0540-63ec-4967-902b-3198ae9c8858"
+      },
+      {
+        "container_id": "containerd://14eb343b3782b27a14b00c7a21ffd7914cc11914c1860ca80d1014b6c380dfea",
+        "last_state": {},
+        "offset": 0.458232,
+        "phase": "Running",
+        "pod_ready": "True",
+        "ready": true,
+        "restart_count": 0,
+        "state": {
+          "running": {
+            "startedAt": "2026-11-08T01:02:01Z"
+          }
+        },
+        "uid": "407f0540-63ec-4967-902b-3198ae9c8858"
+      },
+      {
+        "container_id": "containerd://14eb343b3782b27a14b00c7a21ffd7914cc11914c1860ca80d1014b6c380dfea",
+        "last_state": {},
+        "offset": 0.781071083,
+        "phase": "Running",
+        "pod_ready": "True",
+        "ready": true,
+        "restart_count": 0,
+        "state": {
+          "running": {
+            "startedAt": "2026-11-08T01:02:01Z"
+          }
+        },
+        "uid": "407f0540-63ec-4967-902b-3198ae9c8858"
+      },
+      {
+        "container_id": "containerd://14eb343b3782b27a14b00c7a21ffd7914cc11914c1860ca80d1014b6c380dfea",
+        "last_state": {},
+        "offset": 1.108288,
+        "phase": "Running",
+        "pod_ready": "True",
+        "ready": true,
+        "restart_count": 0,
+        "state": {
+          "running": {
+            "startedAt": "2026-11-08T01:02:01Z"
+          }
+        },
+        "uid": "407f0540-63ec-4967-902b-3198ae9c8858"
+      },
+      {
+        "container_id": "containerd://14eb343b3782b27a14b00c7a21ffd7914cc11914c1860ca80d1014b6c380dfea",
+        "last_state": {},
+        "offset": 300.339621125,
+        "phase": "Running",
+        "pod_ready": "True",
+        "ready": true,
+        "restart_count": 0,
+        "state": {
+          "running": {
+            "startedAt": "2026-11-08T01:02:01Z"
+          }
+        },
+        "uid": "407f0540-63ec-4967-902b-3198ae9c8858"
+      },
+      {
+        "container_id": "containerd://14eb343b3782b27a14b00c7a21ffd7914cc11914c1860ca80d1014b6c380dfea",
+        "last_state": {},
+        "offset": 600.337916917,
+        "phase": "Running",
+        "pod_ready": "True",
+        "ready": true,
+        "restart_count": 0,
+        "state": {
+          "running": {
+            "startedAt": "2026-11-08T01:02:01Z"
+          }
+        },
+        "uid": "407f0540-63ec-4967-902b-3198ae9c8858"
+      },
+      {
+        "container_id": "containerd://14eb343b3782b27a14b00c7a21ffd7914cc11914c1860ca80d1014b6c380dfea",
+        "last_state": {},
+        "offset": 900.342619542,
+        "phase": "Running",
+        "pod_ready": "True",
+        "ready": true,
+        "restart_count": 0,
+        "state": {
+          "running": {
+            "startedAt": "2026-11-08T01:02:01Z"
+          }
+        },
+        "uid": "407f0540-63ec-4967-902b-3198ae9c8858"
+      },
+      {
+        "container_id": "containerd://14eb343b3782b27a14b00c7a21ffd7914cc11914c1860ca80d1014b6c380dfea",
+        "last_state": {},
+        "offset": 1200.3227545,
+        "phase": "Running",
+        "pod_ready": "True",
+        "ready": true,
+        "restart_count": 0,
+        "state": {
+          "running": {
+            "startedAt": "2026-11-08T01:02:01Z"
+          }
+        },
+        "uid": "407f0540-63ec-4967-902b-3198ae9c8858"
+      },
+      {
+        "container_id": "containerd://14eb343b3782b27a14b00c7a21ffd7914cc11914c1860ca80d1014b6c380dfea",
+        "last_state": {},
+        "offset": 1500.330845583,
+        "phase": "Running",
+        "pod_ready": "True",
+        "ready": true,
+        "restart_count": 0,
+        "state": {
+          "running": {
+            "startedAt": "2026-11-08T01:02:01Z"
+          }
+        },
+        "uid": "407f0540-63ec-4967-902b-3198ae9c8858"
+      },
+      {
+        "container_id": "containerd://14eb343b3782b27a14b00c7a21ffd7914cc11914c1860ca80d1014b6c380dfea",
+        "last_state": {},
+        "offset": 1800.329101458,
+        "phase": "Running",
+        "pod_ready": "True",
+        "ready": true,
+        "restart_count": 0,
+        "state": {
+          "running": {
+            "startedAt": "2026-11-08T01:02:01Z"
+          }
+        },
+        "uid": "407f0540-63ec-4967-902b-3198ae9c8858"
+      }
+    ],
+    "process_exit_code": null,
+    "process_exit_signal": null,
+    "process_restart_count": 0,
+    "process_restarts_basis": "exact frozen code has one Popen and no restart path; original process lifecycle exit code was not persisted",
+    "reason": "responses continue, but a connection reset and unattributed timeouts lack request-level transport provenance; full-window attribution cannot be proven",
+    "request_generator_retries": 0,
+    "request_transport_error_count": null,
+    "run_id": "008-2026-11-08T004630-430637+0000-a87cd08e93a0",
+    "slot": 5,
+    "t0_utc": "2026-11-08T01:32:14.296470+00:00",
+    "terminal_sha256": "5cc3288cadd1f475f5461c5ac559cd9b43dae422e56f4a61cda6134a8481d7a7",
+    "timeline_path": "timeline-05.jsonl.gz",
+    "transport_validity": "INDETERMINATE",
+    "unattributed_application_error_records": 0,
+    "unattributed_timeouts": 1463,
+    "warning_counts": {
+      "broken_pipe": 180,
+      "connection_reset": 1
+    }
+  },
+  {
+    "actual_primary_request_records": 21600,
+    "actuations": [
+      {
+        "ack_monotonic_ns": 251064206804125,
+        "actuation_latency_seconds": 0.884126958,
+        "cpu_millicores": 70,
+        "enforced_monotonic_ns": 251064966920041,
+        "memory_request_mib": 64,
+        "status": "ENFORCED",
+        "trigger": "T0"
+      }
+    ],
+    "cell": {
+      "method": "pw_12h",
+      "repetition": 1,
+      "scenario": "abrupt_regime_shift",
+      "seed": 2026110501,
+      "sequence": 6
+    },
+    "cgroup_samples": 723,
+    "duplicate_primary_ids": 0,
+    "exact_error_counts_limitation": "original recorder omitted exception reason/errno/connection tuple; transport failures cannot be counted retrospectively per request",
+    "executor_status": "COMPLETE",
+    "expected_primary_requests": 21600,
+    "first_warning_offsets": {
+      "broken_pipe": 10.49287223815918,
+      "connection_reset": 41.8121280670166,
+      "data_stream_creation": 52.37933921813965,
+      "error_stream_creation": 36.11198115348816
+    },
+    "generator_retries_basis": "exact source has one submission per scheduled ID, no retry path; IDs independently reconciled",
+    "host_failure": null,
+    "host_max_drift_ns": 57535750,
+    "host_max_gap_ns": 5150497458,
+    "http_statuses": {
+      "200": 52,
+      "None": 21548
+    },
+    "last_receipt_offset": 1800.245565416,
+    "last_success_completion_offset": 24.282110791,
+    "last_warning_offsets": {
+      "broken_pipe": 18.29746723175049,
+      "connection_reset": 41.8121280670166,
+      "data_stream_creation": 71.85190105438232,
+      "error_stream_creation": 1805.0439970493317
+    },
+    "manifest_sha256": "e685970cb7ece6e62452995fe1f3b59fabe5ac98e7f9f6e333e1ee0319d3df72",
+    "max_telemetry_gap_seconds": 5.053526292000015,
+    "missing_primary_ids": 0,
+    "not_recorded": [
+      "continuous Service/endpoints history",
+      "Kubernetes event stream",
+      "node/kubelet logs",
+      "application stdout/stderr",
+      "post-failure Pod status",
+      "post-failure node/API probe",
+      "port-forward process returncode and exit timestamp"
+    ],
+    "offer_schedule_matches": true,
+    "oom_values": [
+      0
+    ],
+    "outcomes": {
+      "overload_drop": 10231,
+      "request_timeout": 11317,
+      "success": 52
+    },
+    "pod_observations": [
+      {
+        "container_id": "containerd://d672f178de26b2580548950077c341d523773ff95212fd952fe3ee30fafeb2e2",
+        "last_state": {},
+        "offset": -1809.918011875,
+        "phase": "Running",
+        "pod_ready": "True",
+        "ready": true,
+        "restart_count": 0,
+        "state": {
+          "running": {
+            "startedAt": "2026-11-08T02:18:02Z"
+          }
+        },
+        "uid": "19109f1e-b482-4a4f-91fc-70fcd699e418"
+      },
+      {
+        "container_id": "containerd://d672f178de26b2580548950077c341d523773ff95212fd952fe3ee30fafeb2e2",
+        "last_state": {},
+        "offset": 0.130466125,
+        "phase": "Running",
+        "pod_ready": "True",
+        "ready": true,
+        "restart_count": 0,
+        "state": {
+          "running": {
+            "startedAt": "2026-11-08T02:18:02Z"
+          }
+        },
+        "uid": "19109f1e-b482-4a4f-91fc-70fcd699e418"
+      },
+      {
+        "container_id": "containerd://d672f178de26b2580548950077c341d523773ff95212fd952fe3ee30fafeb2e2",
+        "last_state": {},
+        "offset": 0.174514916,
+        "phase": "Running",
+        "pod_ready": "True",
+        "ready": true,
+        "restart_count": 0,
+        "state": {
+          "running": {
+            "startedAt": "2026-11-08T02:18:02Z"
+          }
+        },
+        "uid": "19109f1e-b482-4a4f-91fc-70fcd699e418"
+      },
+      {
+        "container_id": "containerd://d672f178de26b2580548950077c341d523773ff95212fd952fe3ee30fafeb2e2",
+        "last_state": {},
+        "offset": 0.479755791,
+        "phase": "Running",
+        "pod_ready": "True",
+        "ready": true,
+        "restart_count": 0,
+        "state": {
+          "running": {
+            "startedAt": "2026-11-08T02:18:02Z"
+          }
+        },
+        "uid": "19109f1e-b482-4a4f-91fc-70fcd699e418"
+      },
+      {
+        "container_id": "containerd://d672f178de26b2580548950077c341d523773ff95212fd952fe3ee30fafeb2e2",
+        "last_state": {},
+        "offset": 0.822636958,
+        "phase": "Running",
+        "pod_ready": "True",
+        "ready": true,
+        "restart_count": 0,
+        "state": {
+          "running": {
+            "startedAt": "2026-11-08T02:18:02Z"
+          }
+        },
+        "uid": "19109f1e-b482-4a4f-91fc-70fcd699e418"
+      },
+      {
+        "container_id": "containerd://d672f178de26b2580548950077c341d523773ff95212fd952fe3ee30fafeb2e2",
+        "last_state": {},
+        "offset": 300.325281,
+        "phase": "Running",
+        "pod_ready": "True",
+        "ready": true,
+        "restart_count": 0,
+        "state": {
+          "running": {
+            "startedAt": "2026-11-08T02:18:02Z"
+          }
+        },
+        "uid": "19109f1e-b482-4a4f-91fc-70fcd699e418"
+      },
+      {
+        "container_id": "containerd://d672f178de26b2580548950077c341d523773ff95212fd952fe3ee30fafeb2e2",
+        "last_state": {},
+        "offset": 600.328736916,
+        "phase": "Running",
+        "pod_ready": "True",
+        "ready": true,
+        "restart_count": 0,
+        "state": {
+          "running": {
+            "startedAt": "2026-11-08T02:18:02Z"
+          }
+        },
+        "uid": "19109f1e-b482-4a4f-91fc-70fcd699e418"
+      },
+      {
+        "container_id": "containerd://d672f178de26b2580548950077c341d523773ff95212fd952fe3ee30fafeb2e2",
+        "last_state": {},
+        "offset": 900.34569625,
+        "phase": "Running",
+        "pod_ready": "True",
+        "ready": true,
+        "restart_count": 0,
+        "state": {
+          "running": {
+            "startedAt": "2026-11-08T02:18:02Z"
+          }
+        },
+        "uid": "19109f1e-b482-4a4f-91fc-70fcd699e418"
+      },
+      {
+        "container_id": "containerd://d672f178de26b2580548950077c341d523773ff95212fd952fe3ee30fafeb2e2",
+        "last_state": {},
+        "offset": 1200.334660208,
+        "phase": "Running",
+        "pod_ready": "True",
+        "ready": true,
+        "restart_count": 0,
+        "state": {
+          "running": {
+            "startedAt": "2026-11-08T02:18:02Z"
+          }
+        },
+        "uid": "19109f1e-b482-4a4f-91fc-70fcd699e418"
+      },
+      {
+        "container_id": "containerd://d672f178de26b2580548950077c341d523773ff95212fd952fe3ee30fafeb2e2",
+        "last_state": {},
+        "offset": 1500.337180333,
+        "phase": "Running",
+        "pod_ready": "True",
+        "ready": true,
+        "restart_count": 0,
+        "state": {
+          "running": {
+            "startedAt": "2026-11-08T02:18:02Z"
+          }
+        },
+        "uid": "19109f1e-b482-4a4f-91fc-70fcd699e418"
+      },
+      {
+        "container_id": "containerd://d672f178de26b2580548950077c341d523773ff95212fd952fe3ee30fafeb2e2",
+        "last_state": {},
+        "offset": 1800.337942666,
+        "phase": "Running",
+        "pod_ready": "True",
+        "ready": true,
+        "restart_count": 0,
+        "state": {
+          "running": {
+            "startedAt": "2026-11-08T02:18:02Z"
+          }
+        },
+        "uid": "19109f1e-b482-4a4f-91fc-70fcd699e418"
+      }
+    ],
+    "process_exit_code": null,
+    "process_exit_signal": null,
+    "process_restart_count": 0,
+    "process_restarts_basis": "exact frozen code has one Popen and no restart path; original process lifecycle exit code was not persisted",
+    "reason": "persistent failure to create request forwarding/error streams, no successful response after stream collapse; client outcomes cannot represent application-only primary endpoints",
+    "request_generator_retries": 0,
+    "request_transport_error_count": null,
+    "run_id": "009-2026-11-08T020229-416462+0000-d6762ca96e8a",
+    "slot": 6,
+    "t0_utc": "2026-11-08T02:48:14.434559+00:00",
+    "terminal_sha256": "23a064f82d314a8895604d2b1fb0eeaa6e0a04fd3419ff6198cd33debc990454",
+    "timeline_path": "timeline-06.jsonl.gz",
+    "transport_validity": "HARNESS_FAILED",
+    "unattributed_application_error_records": 0,
+    "unattributed_timeouts": 11317,
+    "warning_counts": {
+      "broken_pipe": 2,
+      "connection_reset": 3,
+      "data_stream_creation": 53,
+      "error_stream_creation": 11040
+    }
+  },
+  {
+    "actual_primary_request_records": 21600,
+    "actuations": [
+      {
+        "ack_monotonic_ns": 255625918972750,
+        "actuation_latency_seconds": 1.472887,
+        "cpu_millicores": 190,
+        "enforced_monotonic_ns": 255627282841625,
+        "memory_request_mib": 136,
+        "status": "ENFORCED",
+        "trigger": "T0"
+      }
+    ],
+    "cell": {
+      "method": "pw_3h",
+      "repetition": 2,
+      "scenario": "abrupt_regime_shift",
+      "seed": 2026110502,
+      "sequence": 7
+    },
+    "cgroup_samples": 723,
+    "duplicate_primary_ids": 0,
+    "exact_error_counts_limitation": "original recorder omitted exception reason/errno/connection tuple; transport failures cannot be counted retrospectively per request",
+    "executor_status": "COMPLETE",
+    "expected_primary_requests": 21600,
+    "first_warning_offsets": {
+      "broken_pipe": 819.493408203125
+    },
+    "generator_retries_basis": "exact source has one submission per scheduled ID, no retry path; IDs independently reconciled",
+    "host_failure": null,
+    "host_max_drift_ns": 70946833,
+    "host_max_gap_ns": 5148635250,
+    "http_statuses": {
+      "200": 17539,
+      "None": 4061
+    },
+    "last_receipt_offset": 1800.246748958,
+    "last_success_completion_offset": 1803.007338667,
+    "last_warning_offsets": {
+      "broken_pipe": 1802.4456253051758
+    },
+    "manifest_sha256": "dc1442a7d8b6a351ade9945b1912ba56735ae9e3039670accf2bc4e32573d793",
+    "max_telemetry_gap_seconds": 5.059580792000133,
+    "missing_primary_ids": 0,
+    "not_recorded": [
+      "continuous Service/endpoints history",
+      "Kubernetes event stream",
+      "node/kubelet logs",
+      "application stdout/stderr",
+      "post-failure Pod status",
+      "post-failure node/API probe",
+      "port-forward process returncode and exit timestamp"
+    ],
+    "offer_schedule_matches": true,
+    "oom_values": [
+      0
+    ],
+    "outcomes": {
+      "overload_drop": 3123,
+      "request_timeout": 938,
+      "success": 17539
+    },
+    "pod_observations": [
+      {
+        "container_id": "containerd://e5c6dc79ee9d2948c87b45905c1219e2eb24adeaf1d6d9a8daee94248f31b721",
+        "last_state": {},
+        "offset": -1809.915219708,
+        "phase": "Running",
+        "pod_ready": "True",
+        "ready": true,
+        "restart_count": 0,
+        "state": {
+          "running": {
+            "startedAt": "2026-11-08T03:34:03Z"
+          }
+        },
+        "uid": "cf0010da-2389-4197-90f1-a3931fab283e"
+      },
+      {
+        "container_id": "containerd://e5c6dc79ee9d2948c87b45905c1219e2eb24adeaf1d6d9a8daee94248f31b721",
+        "last_state": {},
+        "offset": 0.116945667,
+        "phase": "Running",
+        "pod_ready": "True",
+        "ready": true,
+        "restart_count": 0,
+        "state": {
+          "running": {
+            "startedAt": "2026-11-08T03:34:03Z"
+          }
+        },
+        "uid": "cf0010da-2389-4197-90f1-a3931fab283e"
+      },
+      {
+        "container_id": "containerd://e5c6dc79ee9d2948c87b45905c1219e2eb24adeaf1d6d9a8daee94248f31b721",
+        "last_state": {},
+        "offset": 0.157426708,
+        "phase": "Running",
+        "pod_ready": "True",
+        "ready": true,
+        "restart_count": 0,
+        "state": {
+          "running": {
+            "startedAt": "2026-11-08T03:34:03Z"
+          }
+        },
+        "uid": "cf0010da-2389-4197-90f1-a3931fab283e"
+      },
+      {
+        "container_id": "containerd://e5c6dc79ee9d2948c87b45905c1219e2eb24adeaf1d6d9a8daee94248f31b721",
+        "last_state": {},
+        "offset": 0.467302375,
+        "phase": "Running",
+        "pod_ready": "True",
+        "ready": true,
+        "restart_count": 0,
+        "state": {
+          "running": {
+            "startedAt": "2026-11-08T03:34:03Z"
+          }
+        },
+        "uid": "cf0010da-2389-4197-90f1-a3931fab283e"
+      },
+      {
+        "container_id": "containerd://e5c6dc79ee9d2948c87b45905c1219e2eb24adeaf1d6d9a8daee94248f31b721",
+        "last_state": {},
+        "offset": 0.789596958,
+        "phase": "Running",
+        "pod_ready": "True",
+        "ready": true,
+        "restart_count": 0,
+        "state": {
+          "running": {
+            "startedAt": "2026-11-08T03:34:03Z"
+          }
+        },
+        "uid": "cf0010da-2389-4197-90f1-a3931fab283e"
+      },
+      {
+        "container_id": "containerd://e5c6dc79ee9d2948c87b45905c1219e2eb24adeaf1d6d9a8daee94248f31b721",
+        "last_state": {},
+        "offset": 1.123391792,
+        "phase": "Running",
+        "pod_ready": "True",
+        "ready": true,
+        "restart_count": 0,
+        "state": {
+          "running": {
+            "startedAt": "2026-11-08T03:34:03Z"
+          }
+        },
+        "uid": "cf0010da-2389-4197-90f1-a3931fab283e"
+      },
+      {
+        "container_id": "containerd://e5c6dc79ee9d2948c87b45905c1219e2eb24adeaf1d6d9a8daee94248f31b721",
+        "last_state": {},
+        "offset": 1.421373708,
+        "phase": "Running",
+        "pod_ready": "True",
+        "ready": true,
+        "restart_count": 0,
+        "state": {
+          "running": {
+            "startedAt": "2026-11-08T03:34:03Z"
+          }
+        },
+        "uid": "cf0010da-2389-4197-90f1-a3931fab283e"
+      },
+      {
+        "container_id": "containerd://e5c6dc79ee9d2948c87b45905c1219e2eb24adeaf1d6d9a8daee94248f31b721",
+        "last_state": {},
+        "offset": 300.330106375,
+        "phase": "Running",
+        "pod_ready": "True",
+        "ready": true,
+        "restart_count": 0,
+        "state": {
+          "running": {
+            "startedAt": "2026-11-08T03:34:03Z"
+          }
+        },
+        "uid": "cf0010da-2389-4197-90f1-a3931fab283e"
+      },
+      {
+        "container_id": "containerd://e5c6dc79ee9d2948c87b45905c1219e2eb24adeaf1d6d9a8daee94248f31b721",
+        "last_state": {},
+        "offset": 600.340803458,
+        "phase": "Running",
+        "pod_ready": "True",
+        "ready": true,
+        "restart_count": 0,
+        "state": {
+          "running": {
+            "startedAt": "2026-11-08T03:34:03Z"
+          }
+        },
+        "uid": "cf0010da-2389-4197-90f1-a3931fab283e"
+      },
+      {
+        "container_id": "containerd://e5c6dc79ee9d2948c87b45905c1219e2eb24adeaf1d6d9a8daee94248f31b721",
+        "last_state": {},
+        "offset": 900.338814625,
+        "phase": "Running",
+        "pod_ready": "True",
+        "ready": true,
+        "restart_count": 0,
+        "state": {
+          "running": {
+            "startedAt": "2026-11-08T03:34:03Z"
+          }
+        },
+        "uid": "cf0010da-2389-4197-90f1-a3931fab283e"
+      },
+      {
+        "container_id": "containerd://e5c6dc79ee9d2948c87b45905c1219e2eb24adeaf1d6d9a8daee94248f31b721",
+        "last_state": {},
+        "offset": 1200.342880833,
+        "phase": "Running",
+        "pod_ready": "True",
+        "ready": true,
+        "restart_count": 0,
+        "state": {
+          "running": {
+            "startedAt": "2026-11-08T03:34:03Z"
+          }
+        },
+        "uid": "cf0010da-2389-4197-90f1-a3931fab283e"
+      },
+      {
+        "container_id": "containerd://e5c6dc79ee9d2948c87b45905c1219e2eb24adeaf1d6d9a8daee94248f31b721",
+        "last_state": {},
+        "offset": 1500.331538167,
+        "phase": "Running",
+        "pod_ready": "True",
+        "ready": true,
+        "restart_count": 0,
+        "state": {
+          "running": {
+            "startedAt": "2026-11-08T03:34:03Z"
+          }
+        },
+        "uid": "cf0010da-2389-4197-90f1-a3931fab283e"
+      },
+      {
+        "container_id": "containerd://e5c6dc79ee9d2948c87b45905c1219e2eb24adeaf1d6d9a8daee94248f31b721",
+        "last_state": {},
+        "offset": 1800.34258425,
+        "phase": "Running",
+        "pod_ready": "True",
+        "ready": true,
+        "restart_count": 0,
+        "state": {
+          "running": {
+            "startedAt": "2026-11-08T03:34:03Z"
+          }
+        },
+        "uid": "cf0010da-2389-4197-90f1-a3931fab283e"
+      }
+    ],
+    "process_exit_code": null,
+    "process_exit_signal": null,
+    "process_restart_count": 0,
+    "process_restarts_basis": "exact frozen code has one Popen and no restart path; original process lifecycle exit code was not persisted",
+    "reason": "only late-response broken pipes; successful responses continue through window; no recorded stream creation/control-channel failures; client-observed deadlines retained without claiming server-side timeout cause",
+    "request_generator_retries": 0,
+    "request_transport_error_count": null,
+    "run_id": "010-2026-11-08T031831-596684+0000-506219e373bf",
+    "slot": 7,
+    "t0_utc": "2026-11-08T04:04:16.132112+00:00",
+    "terminal_sha256": "42e89867da66bdc8bf081085b8fb5c8f6d637230cc5073a5174bfd0a7b5c2d21",
+    "timeline_path": "timeline-07.jsonl.gz",
+    "transport_validity": "VALID_WITH_TRANSPORT_WARNINGS",
+    "unattributed_application_error_records": 0,
+    "unattributed_timeouts": 938,
+    "warning_counts": {
+      "broken_pipe": 122
+    }
+  },
+  {
+    "actual_primary_request_records": 21600,
+    "actuations": [
+      {
+        "ack_monotonic_ns": 260185266759000,
+        "actuation_latency_seconds": 1.51073875,
+        "cpu_millicores": 70,
+        "enforced_monotonic_ns": 260186671198083,
+        "memory_request_mib": 64,
+        "status": "ENFORCED",
+        "trigger": "T0"
+      }
+    ],
+    "cell": {
+      "method": "pw_12h",
+      "repetition": 2,
+      "scenario": "abrupt_regime_shift",
+      "seed": 2026110502,
+      "sequence": 8
+    },
+    "cgroup_samples": 723,
+    "duplicate_primary_ids": 0,
+    "exact_error_counts_limitation": "original recorder omitted exception reason/errno/connection tuple; transport failures cannot be counted retrospectively per request",
+    "executor_status": "COMPLETE",
+    "expected_primary_requests": 21600,
+    "first_warning_offsets": {
+      "broken_pipe": 8.89547610282898,
+      "connection_reset": 58.786543130874634,
+      "data_stream_creation": 33.27260112762451,
+      "error_stream_creation": 34.93194222450256
+    },
+    "generator_retries_basis": "exact source has one submission per scheduled ID, no retry path; IDs independently reconciled",
+    "host_failure": null,
+    "host_max_drift_ns": 26191291,
+    "host_max_gap_ns": 5144903584,
+    "http_statuses": {
+      "200": 26,
+      "None": 21574
+    },
+    "last_receipt_offset": 1800.228627833,
+    "last_success_completion_offset": 22.788048667,
+    "last_warning_offsets": {
+      "broken_pipe": 19.505853176116943,
+      "connection_reset": 58.786925077438354,
+      "data_stream_creation": 90.34709906578064,
+      "error_stream_creation": 1804.994558095932
+    },
+    "manifest_sha256": "be0ce3707b727ce50548276253282f027160f8ad7be7f6bf10daa2adf654e91f",
+    "max_telemetry_gap_seconds": 5.0552286660000005,
+    "missing_primary_ids": 0,
+    "not_recorded": [
+      "continuous Service/endpoints history",
+      "Kubernetes event stream",
+      "node/kubelet logs",
+      "application stdout/stderr",
+      "post-failure Pod status",
+      "post-failure node/API probe",
+      "port-forward process returncode and exit timestamp"
+    ],
+    "offer_schedule_matches": true,
+    "oom_values": [
+      0
+    ],
+    "outcomes": {
+      "overload_drop": 10235,
+      "request_timeout": 11339,
+      "success": 26
+    },
+    "pod_observations": [
+      {
+        "container_id": "containerd://71139412c185ed1e2744520ce2cf426829db26b3255a0588e419f3c051dfbaff",
+        "last_state": {},
+        "offset": -1809.92172425,
+        "phase": "Running",
+        "pod_ready": "True",
+        "ready": true,
+        "restart_count": 0,
+        "state": {
+          "running": {
+            "startedAt": "2026-11-08T04:50:03Z"
+          }
+        },
+        "uid": "62e7ef1f-f121-498f-b3d3-2e8093004889"
+      },
+      {
+        "container_id": "containerd://71139412c185ed1e2744520ce2cf426829db26b3255a0588e419f3c051dfbaff",
+        "last_state": {},
+        "offset": 0.113502667,
+        "phase": "Running",
+        "pod_ready": "True",
+        "ready": true,
+        "restart_count": 0,
+        "state": {
+          "running": {
+            "startedAt": "2026-11-08T04:50:03Z"
+          }
+        },
+        "uid": "62e7ef1f-f121-498f-b3d3-2e8093004889"
+      },
+      {
+        "container_id": "containerd://71139412c185ed1e2744520ce2cf426829db26b3255a0588e419f3c051dfbaff",
+        "last_state": {},
+        "offset": 0.15069025,
+        "phase": "Running",
+        "pod_ready": "True",
+        "ready": true,
+        "restart_count": 0,
+        "state": {
+          "running": {
+            "startedAt": "2026-11-08T04:50:03Z"
+          }
+        },
+        "uid": "62e7ef1f-f121-498f-b3d3-2e8093004889"
+      },
+      {
+        "container_id": "containerd://71139412c185ed1e2744520ce2cf426829db26b3255a0588e419f3c051dfbaff",
+        "last_state": {},
+        "offset": 0.447440792,
+        "phase": "Running",
+        "pod_ready": "True",
+        "ready": true,
+        "restart_count": 0,
+        "state": {
+          "running": {
+            "startedAt": "2026-11-08T04:50:03Z"
+          }
+        },
+        "uid": "62e7ef1f-f121-498f-b3d3-2e8093004889"
+      },
+      {
+        "container_id": "containerd://71139412c185ed1e2744520ce2cf426829db26b3255a0588e419f3c051dfbaff",
+        "last_state": {},
+        "offset": 0.773274417,
+        "phase": "Running",
+        "pod_ready": "True",
+        "ready": true,
+        "restart_count": 0,
+        "state": {
+          "running": {
+            "startedAt": "2026-11-08T04:50:03Z"
+          }
+        },
+        "uid": "62e7ef1f-f121-498f-b3d3-2e8093004889"
+      },
+      {
+        "container_id": "containerd://71139412c185ed1e2744520ce2cf426829db26b3255a0588e419f3c051dfbaff",
+        "last_state": {},
+        "offset": 1.114917042,
+        "phase": "Running",
+        "pod_ready": "True",
+        "ready": true,
+        "restart_count": 0,
+        "state": {
+          "running": {
+            "startedAt": "2026-11-08T04:50:03Z"
+          }
+        },
+        "uid": "62e7ef1f-f121-498f-b3d3-2e8093004889"
+      },
+      {
+        "container_id": "containerd://71139412c185ed1e2744520ce2cf426829db26b3255a0588e419f3c051dfbaff",
+        "last_state": {},
+        "offset": 1.4573645,
+        "phase": "Running",
+        "pod_ready": "True",
+        "ready": true,
+        "restart_count": 0,
+        "state": {
+          "running": {
+            "startedAt": "2026-11-08T04:50:03Z"
+          }
+        },
+        "uid": "62e7ef1f-f121-498f-b3d3-2e8093004889"
+      },
+      {
+        "container_id": "containerd://71139412c185ed1e2744520ce2cf426829db26b3255a0588e419f3c051dfbaff",
+        "last_state": {},
+        "offset": 300.323827417,
+        "phase": "Running",
+        "pod_ready": "True",
+        "ready": true,
+        "restart_count": 0,
+        "state": {
+          "running": {
+            "startedAt": "2026-11-08T04:50:03Z"
+          }
+        },
+        "uid": "62e7ef1f-f121-498f-b3d3-2e8093004889"
+      },
+      {
+        "container_id": "containerd://71139412c185ed1e2744520ce2cf426829db26b3255a0588e419f3c051dfbaff",
+        "last_state": {},
+        "offset": 600.33192375,
+        "phase": "Running",
+        "pod_ready": "True",
+        "ready": true,
+        "restart_count": 0,
+        "state": {
+          "running": {
+            "startedAt": "2026-11-08T04:50:03Z"
+          }
+        },
+        "uid": "62e7ef1f-f121-498f-b3d3-2e8093004889"
+      },
+      {
+        "container_id": "containerd://71139412c185ed1e2744520ce2cf426829db26b3255a0588e419f3c051dfbaff",
+        "last_state": {},
+        "offset": 900.334489458,
+        "phase": "Running",
+        "pod_ready": "True",
+        "ready": true,
+        "restart_count": 0,
+        "state": {
+          "running": {
+            "startedAt": "2026-11-08T04:50:03Z"
+          }
+        },
+        "uid": "62e7ef1f-f121-498f-b3d3-2e8093004889"
+      },
+      {
+        "container_id": "containerd://71139412c185ed1e2744520ce2cf426829db26b3255a0588e419f3c051dfbaff",
+        "last_state": {},
+        "offset": 1200.330765333,
+        "phase": "Running",
+        "pod_ready": "True",
+        "ready": true,
+        "restart_count": 0,
+        "state": {
+          "running": {
+            "startedAt": "2026-11-08T04:50:03Z"
+          }
+        },
+        "uid": "62e7ef1f-f121-498f-b3d3-2e8093004889"
+      },
+      {
+        "container_id": "containerd://71139412c185ed1e2744520ce2cf426829db26b3255a0588e419f3c051dfbaff",
+        "last_state": {},
+        "offset": 1500.343409333,
+        "phase": "Running",
+        "pod_ready": "True",
+        "ready": true,
+        "restart_count": 0,
+        "state": {
+          "running": {
+            "startedAt": "2026-11-08T04:50:03Z"
+          }
+        },
+        "uid": "62e7ef1f-f121-498f-b3d3-2e8093004889"
+      },
+      {
+        "container_id": "containerd://71139412c185ed1e2744520ce2cf426829db26b3255a0588e419f3c051dfbaff",
+        "last_state": {},
+        "offset": 1800.307017042,
+        "phase": "Running",
+        "pod_ready": "True",
+        "ready": true,
+        "restart_count": 0,
+        "state": {
+          "running": {
+            "startedAt": "2026-11-08T04:50:03Z"
+          }
+        },
+        "uid": "62e7ef1f-f121-498f-b3d3-2e8093004889"
+      }
+    ],
+    "process_exit_code": null,
+    "process_exit_signal": null,
+    "process_restart_count": 0,
+    "process_restarts_basis": "exact frozen code has one Popen and no restart path; original process lifecycle exit code was not persisted",
+    "reason": "persistent failure to create request forwarding/error streams, no successful response after stream collapse; client outcomes cannot represent application-only primary endpoints",
+    "request_generator_retries": 0,
+    "request_transport_error_count": null,
+    "run_id": "011-2026-11-08T043431-608661+0000-d5865ba0f5ad",
+    "slot": 8,
+    "t0_utc": "2026-11-08T05:20:15.467121+00:00",
+    "terminal_sha256": "4381fbcd98edc7538df6ae3894cfdcbd8315f32710672cfe37623c64ff2728e4",
+    "timeline_path": "timeline-08.jsonl.gz",
+    "transport_validity": "HARNESS_FAILED",
+    "unattributed_application_error_records": 0,
+    "unattributed_timeouts": 11339,
+    "warning_counts": {
+      "broken_pipe": 13,
+      "connection_reset": 11,
+      "data_stream_creation": 42,
+      "error_stream_creation": 10913
+    }
+  },
+  {
+    "actual_primary_request_records": 3601,
+    "actuations": [
+      {
+        "ack_monotonic_ns": 264745758404416,
+        "actuation_latency_seconds": 0.864224375,
+        "cpu_millicores": 70,
+        "enforced_monotonic_ns": 264746510573750,
+        "memory_request_mib": 64,
+        "status": "ENFORCED",
+        "trigger": "T0"
+      }
+    ],
+    "cell": {
+      "method": "static",
+      "repetition": 2,
+      "scenario": "abrupt_regime_shift",
+      "seed": 2026110502,
+      "sequence": 9
+    },
+    "cgroup_samples": 383,
+    "duplicate_primary_ids": 0,
+    "exact_error_counts_limitation": "original recorder omitted exception reason/errno/connection tuple; transport failures cannot be counted retrospectively per request",
+    "executor_status": "HARNESS_FAILED",
+    "expected_primary_requests": 21600,
+    "first_warning_offsets": {
+      "broken_pipe": 8.61365294456482,
+      "connection_reset": 61.92239594459534,
+      "data_stream_creation": 63.28012800216675,
+      "error_stream_creation": 63.30615305900574
+    },
+    "generator_retries_basis": "exact source has one submission per scheduled ID, no retry path; IDs independently reconciled",
+    "host_failure": null,
+    "host_max_drift_ns": 66239500,
+    "host_max_gap_ns": 5149023375,
+    "http_statuses": {
+      "200": 20,
+      "None": 3581
+    },
+    "last_receipt_offset": 100.250381958,
+    "last_success_completion_offset": 5.953304166,
+    "last_warning_offsets": {
+      "broken_pipe": 31.91422700881958,
+      "connection_reset": 61.92239594459534,
+      "data_stream_creation": 99.12129187583923,
+      "error_stream_creation": 100.55466508865356
+    },
+    "manifest_sha256": "32e1f20ecbf55e68f5267ff8bfcec5af55bc0ceaf890ad964e21c0c59e5eb73d",
+    "max_telemetry_gap_seconds": 5.052740333,
+    "missing_primary_ids": 17999,
+    "not_recorded": [
+      "continuous Service/endpoints history",
+      "Kubernetes event stream",
+      "node/kubelet logs",
+      "application stdout/stderr",
+      "post-failure Pod status",
+      "post-failure node/API probe",
+      "port-forward process returncode and exit timestamp"
+    ],
+    "offer_schedule_matches": true,
+    "oom_values": [
+      0
+    ],
+    "outcomes": {
+      "application_error": 2416,
+      "overload_drop": 561,
+      "request_timeout": 604,
+      "success": 20
+    },
+    "pod_observations": [
+      {
+        "container_id": "containerd://14e93fa181c346dc898b4bddfa2d5272628f265762e5e27d1b6ef6baf33ad797",
+        "last_state": {},
+        "offset": -1809.920841125,
+        "phase": "Running",
+        "pod_ready": "True",
+        "ready": true,
+        "restart_count": 0,
+        "state": {
+          "running": {
+            "startedAt": "2026-11-08T06:06:03Z"
+          }
+        },
+        "uid": "783066e5-1cfd-4f85-91b6-54f806658a83"
+      },
+      {
+        "container_id": "containerd://14e93fa181c346dc898b4bddfa2d5272628f265762e5e27d1b6ef6baf33ad797",
+        "last_state": {},
+        "offset": 0.114143541,
+        "phase": "Running",
+        "pod_ready": "True",
+        "ready": true,
+        "restart_count": 0,
+        "state": {
+          "running": {
+            "startedAt": "2026-11-08T06:06:03Z"
+          }
+        },
+        "uid": "783066e5-1cfd-4f85-91b6-54f806658a83"
+      },
+      {
+        "container_id": "containerd://14e93fa181c346dc898b4bddfa2d5272628f265762e5e27d1b6ef6baf33ad797",
+        "last_state": {},
+        "offset": 0.152687125,
+        "phase": "Running",
+        "pod_ready": "True",
+        "ready": true,
+        "restart_count": 0,
+        "state": {
+          "running": {
+            "startedAt": "2026-11-08T06:06:03Z"
+          }
+        },
+        "uid": "783066e5-1cfd-4f85-91b6-54f806658a83"
+      },
+      {
+        "container_id": "containerd://14e93fa181c346dc898b4bddfa2d5272628f265762e5e27d1b6ef6baf33ad797",
+        "last_state": {},
+        "offset": 0.450451083,
+        "phase": "Running",
+        "pod_ready": "True",
+        "ready": true,
+        "restart_count": 0,
+        "state": {
+          "running": {
+            "startedAt": "2026-11-08T06:06:03Z"
+          }
+        },
+        "uid": "783066e5-1cfd-4f85-91b6-54f806658a83"
+      },
+      {
+        "container_id": "containerd://14e93fa181c346dc898b4bddfa2d5272628f265762e5e27d1b6ef6baf33ad797",
+        "last_state": {},
+        "offset": 0.795048333,
+        "phase": "Running",
+        "pod_ready": "True",
+        "ready": true,
+        "restart_count": 0,
+        "state": {
+          "running": {
+            "startedAt": "2026-11-08T06:06:03Z"
+          }
+        },
+        "uid": "783066e5-1cfd-4f85-91b6-54f806658a83"
+      }
+    ],
+    "process_exit_code": null,
+    "process_exit_signal": null,
+    "process_restart_count": 0,
+    "process_restarts_basis": "exact frozen code has one Popen and no restart path; original process lifecycle exit code was not persisted",
+    "reason": "port-forward exited; telemetry stops at +100 s and full exposure is absent",
+    "request_generator_retries": 0,
+    "request_transport_error_count": null,
+    "run_id": "012-2026-11-08T055032-093248+0000-749cdb7d0689",
+    "slot": 9,
+    "t0_utc": "2026-11-08T06:36:15.993875+00:00",
+    "terminal_sha256": "738278e500ffb0175d34ac6d21787ba21a3077bb009d025296beac789253807e",
+    "timeline_path": "timeline-09.jsonl.gz",
+    "transport_validity": "HARNESS_FAILED",
+    "unattributed_application_error_records": 2416,
+    "unattributed_timeouts": 604,
+    "warning_counts": {
+      "broken_pipe": 10,
+      "connection_reset": 1,
+      "data_stream_creation": 91,
+      "error_stream_creation": 187,
+      "lost_connection_to_pod": 1
+    }
+  }
+]

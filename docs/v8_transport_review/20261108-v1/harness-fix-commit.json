@@ -1,0 +1,13 @@
+{
+  "active_execution_harness_unchanged": true,
+  "branch": "v8c4-transport-harness-fix",
+  "campaign_wiring_changed": false,
+  "files": {
+    "docs/v8_transport_amendment.md": "3d2947c7f84685f36f35a41fe97d17422f973039",
+    "dynapm/system_validation/transport_observability.py": "ff58c8bbe8d9bec2576ab5ab71366a34ae310fc5",
+    "dynapm/tests/test_transport_observability.py": "be807a48686ec31f7e3a2c5ae4a2235d3102a9ac"
+  },
+  "fix_commit": "0a68749c9dcef4fc7394a7c20539b62289a8e315",
+  "previous_harness": "d0ffc346e13d22f7b3d072fc59378831a668b3f2",
+  "scientific_source": "fe3b870149a156e7fecb88741d51cfb5c1ed86d7"
+}

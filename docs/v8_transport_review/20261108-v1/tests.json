@@ -1,0 +1,13 @@
+{
+  "fix_commit": "0a68749c9dcef4fc7394a7c20539b62289a8e315",
+  "focused": {
+    "log_sha256": "33c930eade6286ef5ddd39f98dab7b7067892f96d99a96cffb302925675837f3",
+    "passed": 14
+  },
+  "full": {
+    "log_sha256": "0e03a6f9999abda242941c46b07649459a640e14451a479f5ad8c7b71ca23c6e",
+    "passed": 842,
+    "skipped": 3
+  },
+  "original_source_files_changed": 0
+}

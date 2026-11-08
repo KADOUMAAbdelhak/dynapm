@@ -1,0 +1,81 @@
+{
+  "campaign_may_continue": false,
+  "campaign_status": "V8_CAMPAIGN_BLOCKED",
+  "diagnostic_conditions_completed": 2,
+  "diagnostic_preflight_failures_preserved": 2,
+  "diagnostics": [
+    {
+      "condition": "neutral",
+      "manifest_sha256": "6064e48dbbb2e1a9d6541f21f38f66cf32d2283ccdc03dc49c73af6ac94b9f21",
+      "run_id": "dynapm-v7b-calibration-v8c4-3b7448735e"
+    },
+    {
+      "condition": "low",
+      "manifest_sha256": "5bb27f17138335f1cedd7eacbef2748a874775f1f07d4710c68f73ae127b336c",
+      "run_id": "dynapm-v7b-calibration-v8c4-0af1cfb071"
+    }
+  ],
+  "disposition": "TRANSPORT_HARNESS_DEFECT",
+  "fix_commit": "0a68749c9dcef4fc7394a7c20539b62289a8e315",
+  "free_bytes": 30668972032,
+  "inputs_reverified": 244,
+  "isolated_replacement_review_justified": false,
+  "original_slot9_exit_trigger": "UNRESOLVED_MISSING_CONTEMPORANEOUS_EVIDENCE",
+  "previous_harness": "d0ffc346e13d22f7b3d072fc59378831a668b3f2",
+  "replacement_authorized": false,
+  "review_completed_at": "2026-11-08T18:33:06.602378+00:00",
+  "review_status": "PASS",
+  "scientific_source": "fe3b870149a156e7fecb88741d51cfb5c1ed86d7",
+  "slots": [
+    {
+      "classification": "HARNESS_FAILED",
+      "executor_status": "COMPLETE",
+      "slot": 1
+    },
+    {
+      "classification": "HARNESS_FAILED",
+      "executor_status": "COMPLETE",
+      "slot": 2
+    },
+    {
+      "classification": "VALID",
+      "executor_status": "COMPLETE",
+      "slot": 3
+    },
+    {
+      "classification": "HARNESS_FAILED",
+      "executor_status": "COMPLETE",
+      "slot": 4
+    },
+    {
+      "classification": "INDETERMINATE",
+      "executor_status": "COMPLETE",
+      "slot": 5
+    },
+    {
+      "classification": "HARNESS_FAILED",
+      "executor_status": "COMPLETE",
+      "slot": 6
+    },
+    {
+      "classification": "VALID_WITH_TRANSPORT_WARNINGS",
+      "executor_status": "COMPLETE",
+      "slot": 7
+    },
+    {
+      "classification": "HARNESS_FAILED",
+      "executor_status": "COMPLETE",
+      "slot": 8
+    },
+    {
+      "classification": "HARNESS_FAILED",
+      "executor_status": "HARNESS_FAILED",
+      "slot": 9
+    }
+  ],
+  "tests": {
+    "focused_passed": 14,
+    "full_passed": 842,
+    "full_skipped": 3
+  }
+}
