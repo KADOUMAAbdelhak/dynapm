@@ -1,0 +1,13 @@
+{
+  "focused": {
+    "log_sha256": "3638485e58194b50ab6bcbd2a120e5e835f0bf818b213bf609e8e4c2ae835db9",
+    "passed": 89
+  },
+  "full": {
+    "log_sha256": "924127755c24656d34a9c478b375e33a57385fe4c4e6d54da78ff3bc2d2cfdcc",
+    "passed": 828,
+    "skipped": 3
+  },
+  "live_runs_during_tests": 0,
+  "source_changes": 0
+}
