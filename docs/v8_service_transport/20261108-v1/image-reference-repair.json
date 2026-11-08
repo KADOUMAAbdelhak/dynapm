@@ -1,0 +1,24 @@
+{
+  "dynapm-system-prometheus:v7a": {
+    "after_repo_tags": [
+      "dynapm-system-prometheus:v7a"
+    ],
+    "before_repo_tags": [
+      "dynapm-system-prometheus:v7a"
+    ],
+    "content_unchanged": true,
+    "expected_id": "sha256:6fb20bca6c8bd6fdb816c6e25a70136ee763e8231cf8c76184e00faf2ecd16a6",
+    "lookup_before_returncode": 0
+  },
+  "dynapm-system-workload:v7b-instrumented": {
+    "after_repo_tags": [
+      "dynapm-system-workload:v7b-instrumented"
+    ],
+    "before_repo_tags": [
+      "dynapm-system-workload:v7b-instrumented"
+    ],
+    "content_unchanged": true,
+    "expected_id": "sha256:e57712d960a8d5565303cec52a8f409fc01cefdcffad23e7e8a2a622b68622d1",
+    "lookup_before_returncode": 1
+  }
+}

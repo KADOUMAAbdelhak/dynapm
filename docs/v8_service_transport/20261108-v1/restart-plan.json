@@ -1,0 +1,139 @@
+{
+  "amendment_sha256": "286c6bb99d5e293c5ce6085ce7d80c9c258518063ec66d0a57bcc112e6ed65f8",
+  "automatic_retries": 0,
+  "campaign_generation": "v8-direct-service-v1",
+  "cells": [
+    {
+      "method": "static",
+      "repetition": 1,
+      "scenario": "periodic",
+      "seed": 2026110501,
+      "sequence": 1
+    },
+    {
+      "method": "pw_12h",
+      "repetition": 1,
+      "scenario": "periodic",
+      "seed": 2026110501,
+      "sequence": 2
+    },
+    {
+      "method": "pw_3h",
+      "repetition": 1,
+      "scenario": "periodic",
+      "seed": 2026110501,
+      "sequence": 3
+    },
+    {
+      "method": "static",
+      "repetition": 1,
+      "scenario": "abrupt_regime_shift",
+      "seed": 2026110501,
+      "sequence": 4
+    },
+    {
+      "method": "pw_3h",
+      "repetition": 1,
+      "scenario": "abrupt_regime_shift",
+      "seed": 2026110501,
+      "sequence": 5
+    },
+    {
+      "method": "pw_12h",
+      "repetition": 1,
+      "scenario": "abrupt_regime_shift",
+      "seed": 2026110501,
+      "sequence": 6
+    },
+    {
+      "method": "pw_3h",
+      "repetition": 2,
+      "scenario": "abrupt_regime_shift",
+      "seed": 2026110502,
+      "sequence": 7
+    },
+    {
+      "method": "pw_12h",
+      "repetition": 2,
+      "scenario": "abrupt_regime_shift",
+      "seed": 2026110502,
+      "sequence": 8
+    },
+    {
+      "method": "static",
+      "repetition": 2,
+      "scenario": "abrupt_regime_shift",
+      "seed": 2026110502,
+      "sequence": 9
+    },
+    {
+      "method": "pw_12h",
+      "repetition": 2,
+      "scenario": "periodic",
+      "seed": 2026110502,
+      "sequence": 10
+    },
+    {
+      "method": "pw_3h",
+      "repetition": 2,
+      "scenario": "periodic",
+      "seed": 2026110502,
+      "sequence": 11
+    },
+    {
+      "method": "static",
+      "repetition": 2,
+      "scenario": "periodic",
+      "seed": 2026110502,
+      "sequence": 12
+    },
+    {
+      "method": "pw_3h",
+      "repetition": 3,
+      "scenario": "periodic",
+      "seed": 2026110503,
+      "sequence": 13
+    },
+    {
+      "method": "static",
+      "repetition": 3,
+      "scenario": "periodic",
+      "seed": 2026110503,
+      "sequence": 14
+    },
+    {
+      "method": "pw_12h",
+      "repetition": 3,
+      "scenario": "periodic",
+      "seed": 2026110503,
+      "sequence": 15
+    },
+    {
+      "method": "pw_12h",
+      "repetition": 3,
+      "scenario": "abrupt_regime_shift",
+      "seed": 2026110503,
+      "sequence": 16
+    },
+    {
+      "method": "static",
+      "repetition": 3,
+      "scenario": "abrupt_regime_shift",
+      "seed": 2026110503,
+      "sequence": 17
+    },
+    {
+      "method": "pw_3h",
+      "repetition": 3,
+      "scenario": "abrupt_regime_shift",
+      "seed": 2026110503,
+      "sequence": 18
+    }
+  ],
+  "implementation_commit": "b3fd0d1fa095dbaa13c2b035624d6336b24d60ca",
+  "maximum_separately_authorized_infrastructure_replacements": 2,
+  "old_application_runs_eligible": [],
+  "root": "results/bounded_v8/service-campaign-v1",
+  "start_sequence": 1,
+  "status": "NOT_LAUNCHED"
+}

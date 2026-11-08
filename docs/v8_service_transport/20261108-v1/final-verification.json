@@ -1,0 +1,11 @@
+{
+  "bootstrap_expected_sha256": "51aad0e364d6f4774f8c51ab2cb7544eac87d7ebdb36e492eba648c014dffd2b",
+  "bootstrap_full_load_and_hash_validation": "PASS",
+  "docker_containers_after": [],
+  "frozen_scientific_files_unchanged": true,
+  "integration_runs": 0,
+  "new_claim_runs": 0,
+  "prior_dynapm_ref": "d0ffc346e13d22f7b3d072fc59378831a668b3f2",
+  "recorded_at": "2026-11-08T19:58:15.938413+00:00",
+  "v8b_ref": "39082cf6ffdfe1884194f4160131fa82c58676f1"
+}

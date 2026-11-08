@@ -1,0 +1,13 @@
+{
+  "cluster": "dynapm-v7b-calibration-v8c5-bdd6f28151",
+  "expected_rows": 7200,
+  "node_copies_deleted_only_after_byte_equality": true,
+  "reason": "intentional stop for endpoint timestamp correctness repair; not accepted qualification",
+  "retained_host_hashes": {
+    "DONE.json": "d30ec1edbdbc66039799c7efceb5f5a92cf7cbc3bfe8af6b25272fc54df8822b",
+    "START.json": "fc0a8d46775b01e3dbcfcca50ac8d5673291e218ecddf9bce9213d1ff1555722",
+    "requests.jsonl": "6262fcd91071bff1321419d24373b4f295f59b991f775fd28163a30a8fa70d7b"
+  },
+  "rows": 2141,
+  "scope": "DIAGNOSTIC_NON_CLAIM"
+}

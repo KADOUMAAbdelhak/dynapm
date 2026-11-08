@@ -1,0 +1,302 @@
+{
+  "amendment_sha256": "286c6bb99d5e293c5ce6085ce7d80c9c258518063ec66d0a57bcc112e6ed65f8",
+  "disposition": "RESTART_FULL_18_WITH_AMENDED_TRANSPORT",
+  "free_bytes": 29541531648,
+  "implementation_commit": "b3fd0d1fa095dbaa13c2b035624d6336b24d60ca",
+  "new_claim_runs": 0,
+  "old_claim_slots_excluded": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9
+  ],
+  "old_new_mixing": false,
+  "original_attempt_and_snapshot_files_verified": 244,
+  "original_control_files_verified": 43,
+  "previous_harness": "d0ffc346e13d22f7b3d072fc59378831a668b3f2",
+  "qualification": [
+    {
+      "api_observation_errors": 0,
+      "assertion_released": true,
+      "clock_rejections": 0,
+      "condition": "neutral",
+      "duplicates": 0,
+      "duration_seconds": 600.011756111,
+      "endpoint_uids": [
+        "7d5f9bdb-3c4a-4140-9237-7a36ca0deadf"
+      ],
+      "exception_stages": {},
+      "expected_records": 7200,
+      "failure_layers": {
+        "None": 7200
+      },
+      "generator_requests_sha256": "1722dac97e443e49a224026ce0dfc65d6fbf73fa6b580dbd2838621a821c2a1c",
+      "host_max_drift_ns": 5183709,
+      "host_max_gap_ns": 5129882292,
+      "host_pause": [
+        {
+          "event": "HOST_RESULT_OBSERVER_PAUSE_BEGIN",
+          "host_monotonic_ns": 287801065393958,
+          "recorded_at": "2026-11-08T19:07:30.124577+00:00",
+          "seconds": 15
+        },
+        {
+          "event": "HOST_RESULT_OBSERVER_PAUSE_END",
+          "host_monotonic_ns": 287816071512000,
+          "recorded_at": "2026-11-08T19:07:45.130764+00:00"
+        }
+      ],
+      "lifecycle": {
+        "application": {
+          "last_states": [],
+          "phases": [
+            "Running"
+          ],
+          "restart_counts": [
+            0
+          ],
+          "terminations": [],
+          "uids": [
+            "7d5f9bdb-3c4a-4140-9237-7a36ca0deadf"
+          ]
+        },
+        "request-generator": {
+          "last_states": [],
+          "phases": [
+            "Pending",
+            "Running",
+            "Succeeded"
+          ],
+          "restart_counts": [
+            0
+          ],
+          "terminations": [
+            {
+              "containerID": "containerd://eb58f2179dfed305ce5dc9f8c68a1001c5b50382eaa919ee1ddda7b503bb4542",
+              "exitCode": 0,
+              "finishedAt": "2026-11-08T19:15:35Z",
+              "reason": "Completed",
+              "startedAt": "2026-11-08T19:05:25Z"
+            }
+          ],
+          "uids": [
+            "27eca7b0-b5b3-4aff-ac7c-5de66976c05d"
+          ]
+        }
+      },
+      "manifest_sha256": "16e1e43aacb526ffff25adca2f192373a8497844fcf751f52c1baa58319a6a41",
+      "missing": 0,
+      "offered_window_seconds": 600,
+      "outcomes": {
+        "success": 7200
+      },
+      "phase_counts": {
+        "high12": 7200
+      },
+      "records": 7200,
+      "resource_samples": 121,
+      "run_id": "b6feef5df92e4e67a5ca8b1b8c9e10b4",
+      "scope": "DIAGNOSTIC_NON_CLAIM",
+      "seal_after_seconds": 600.011756111,
+      "sent_attempts": 7200,
+      "service_cluster_ip": "10.96.106.172",
+      "status": "PASS",
+      "unsent_concurrency_drops": 0
+    },
+    {
+      "api_observation_errors": 0,
+      "assertion_released": true,
+      "clock_rejections": 0,
+      "condition": "low",
+      "duplicates": 0,
+      "duration_seconds": 907.618817629,
+      "endpoint_uids": [
+        "d8831771-625a-4fe5-9bc2-95475d309c7b"
+      ],
+      "exception_stages": {
+        "connect": 3366,
+        "response_headers": 1645
+      },
+      "expected_records": 10800,
+      "failure_layers": {
+        "CONNECTION_DEADLINE": 2556,
+        "GENERATOR_CONCURRENCY_CAP": 5154,
+        "None": 635,
+        "RESPONSE_DEADLINE_CAUSE_UNRESOLVED": 1645,
+        "SERVICE_TRANSPORT": 810
+      },
+      "generator_requests_sha256": "b6abfe730be662ac745665aa8fd5007e101faf23922859cf9e7f7b84e7e01ce6",
+      "host_max_drift_ns": 37821375,
+      "host_max_gap_ns": 5121802750,
+      "host_pause": [],
+      "lifecycle": {
+        "application": {
+          "last_states": [],
+          "phases": [
+            "Running"
+          ],
+          "restart_counts": [
+            0
+          ],
+          "terminations": [],
+          "uids": [
+            "d8831771-625a-4fe5-9bc2-95475d309c7b"
+          ]
+        },
+        "request-generator": {
+          "last_states": [],
+          "phases": [
+            "Pending",
+            "Running",
+            "Succeeded"
+          ],
+          "restart_counts": [
+            0
+          ],
+          "terminations": [
+            {
+              "containerID": "containerd://73e28a884d4629031e6d4a1da2e6aa33a9d75bfccf0b81be1cad0e31b87a896e",
+              "exitCode": 0,
+              "finishedAt": "2026-11-08T19:31:36Z",
+              "reason": "Completed",
+              "startedAt": "2026-11-08T19:16:18Z"
+            }
+          ],
+          "uids": [
+            "6bd2aaff-04d0-40c5-89f4-a120483557d4"
+          ]
+        }
+      },
+      "manifest_sha256": "b5672ba3253f7c6ad576ac999dd02e58b3ffccfdd797a7706d9b8bc2c3119ea3",
+      "missing": 0,
+      "offered_window_seconds": 900,
+      "outcomes": {
+        "overload_drop": 5154,
+        "request_timeout": 4201,
+        "success": 635,
+        "transport_error": 810
+      },
+      "phase_counts": {
+        "high12": 10800
+      },
+      "records": 10800,
+      "resource_samples": 181,
+      "run_id": "8e9f70467fa848889339a0dd4c234201",
+      "scope": "DIAGNOSTIC_NON_CLAIM",
+      "seal_after_seconds": 907.618817629,
+      "sent_attempts": 5646,
+      "service_cluster_ip": "10.96.82.89",
+      "status": "PASS",
+      "unsent_concurrency_drops": 5154
+    },
+    {
+      "api_observation_errors": 0,
+      "assertion_released": true,
+      "clock_rejections": 0,
+      "condition": "periodic_transition",
+      "duplicates": 0,
+      "duration_seconds": 900.012426246,
+      "endpoint_uids": [
+        "a6cd9671-cc9e-49ac-bf80-199ec15597e9"
+      ],
+      "exception_stages": {
+        "connect": 1745,
+        "response_headers": 827
+      },
+      "expected_records": 6300,
+      "failure_layers": {
+        "CONNECTION_DEADLINE": 1321,
+        "GENERATOR_CONCURRENCY_CAP": 2563,
+        "None": 1165,
+        "RESPONSE_DEADLINE_CAUSE_UNRESOLVED": 827,
+        "SERVICE_TRANSPORT": 424
+      },
+      "generator_requests_sha256": "fa1d8c9f4a6a326e5b66fadd31d092c642456bbe4fed75bad7bb579679e0a1b0",
+      "host_max_drift_ns": 6228125,
+      "host_max_gap_ns": 5121737125,
+      "host_pause": [],
+      "lifecycle": {
+        "application": {
+          "last_states": [],
+          "phases": [
+            "Running"
+          ],
+          "restart_counts": [
+            0
+          ],
+          "terminations": [],
+          "uids": [
+            "a6cd9671-cc9e-49ac-bf80-199ec15597e9"
+          ]
+        },
+        "request-generator": {
+          "last_states": [],
+          "phases": [
+            "Pending",
+            "Running",
+            "Succeeded"
+          ],
+          "restart_counts": [
+            0
+          ],
+          "terminations": [
+            {
+              "containerID": "containerd://bcabe3bf761ed6fae8566709fd59fb2e29e6780beefa18f2893e8c1b0e6d7563",
+              "exitCode": 0,
+              "finishedAt": "2026-11-08T19:47:28Z",
+              "reason": "Completed",
+              "startedAt": "2026-11-08T19:32:18Z"
+            },
+            {
+              "containerID": "containerd://bcabe3bf761ed6fae8566709fd59fb2e29e6780beefa18f2893e8c1b0e6d7563",
+              "exitCode": 0,
+              "finishedAt": "2026-11-08T19:47:28Z",
+              "reason": "Completed",
+              "startedAt": "2026-11-08T19:32:18Z"
+            }
+          ],
+          "uids": [
+            "66200ff9-819e-445d-bd3a-cda960bffd03"
+          ]
+        }
+      },
+      "manifest_sha256": "b9298ca006edca66af6cbd4ea7953e24d57f2277ba40c9eba6e68be9090293b9",
+      "missing": 0,
+      "offered_window_seconds": 900,
+      "outcomes": {
+        "overload_drop": 2563,
+        "request_timeout": 2148,
+        "success": 1165,
+        "transport_error": 424
+      },
+      "phase_counts": {
+        "high12": 5400,
+        "low2": 900
+      },
+      "records": 6300,
+      "resource_samples": 180,
+      "run_id": "500cd796cbb942adb7d59928458f38ec",
+      "scope": "DIAGNOSTIC_NON_CLAIM",
+      "seal_after_seconds": 900.012426246,
+      "sent_attempts": 3737,
+      "service_cluster_ip": "10.96.228.222",
+      "status": "PASS",
+      "unsent_concurrency_drops": 2563
+    }
+  ],
+  "request_records": 24300,
+  "schema": "v8-service-transport-qualification-v1",
+  "scientific_source": "fe3b870149a156e7fecb88741d51cfb5c1ed86d7",
+  "status": "PASS",
+  "tests": {
+    "focused_passed": 19,
+    "full_passed": 861,
+    "full_skipped": 3
+  },
+  "transport_review_commit": "85da10df01db917e496b72a1311c3ae622ce0442"
+}
