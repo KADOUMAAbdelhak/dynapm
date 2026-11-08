@@ -34,27 +34,29 @@ def request(url,event,phase,origin,*,connection_factory=http.client.HTTPConnecti
     parsed=urlsplit(url)
     if parsed.scheme!='http' or not (parsed.hostname or '').endswith('.svc.cluster.local') or parsed.username or parsed.query or parsed.path not in ('','/'):
         raise ValueError('plain_internal_service_endpoint_required')
-    sent=time.monotonic_ns();sent_wall=time.time_ns();stage='connect';status=None;error=None;layer=None;result='success';body=None
+    sent=time.monotonic_ns();sent_wall=time.time_ns();stage='connect';status=None;error=None;layer=None;result='success';body=None;completed=None;wall=None
     conn=connection_factory(parsed.hostname,parsed.port or 80,timeout=5)
     try:
         conn.connect();stage='send_request'
         query=f"/work?iterations={event['iterations']}&memory_mib={event['memory_mib']}&seed={event['seed']}"
         conn.request('GET',query,headers={'Connection':'close'});stage='response_headers'
         response=conn.getresponse();status=response.status
-        if status>=400:result='http_error';layer='APPLICATION_HTTP_RESPONSE'
-        elif 300<=status<400:result='transport_error';layer='UNEXPECTED_REDIRECT_NO_RETRY'
+        if status>=400:completed=time.monotonic_ns();wall=time.time_ns();result='http_error';layer='APPLICATION_HTTP_RESPONSE'
+        elif 300<=status<400:completed=time.monotonic_ns();wall=time.time_ns();result='transport_error';layer='UNEXPECTED_REDIRECT_NO_RETRY'
         else:
-            stage='response_body';body=response.read();stage='decode_body';decoded=json.loads(body)
+            stage='response_body';body=response.read();completed=time.monotonic_ns();wall=time.time_ns();stage='decode_body';decoded=json.loads(body)
             if status!=200 or not isinstance(decoded,dict) or decoded.get('ok') is not True or decoded.get('iterations')!=event['iterations'] or decoded.get('memory_mib')!=event['memory_mib']:
                 result='application_error';layer='APPLICATION_RESPONSE'
     except TimeoutError as exc:
+        completed=time.monotonic_ns();wall=time.time_ns()
         result='request_timeout';layer='CONNECTION_DEADLINE' if stage=='connect' else 'RESPONSE_DEADLINE_CAUSE_UNRESOLVED';error=exception_details(exc)
     except (OSError,http.client.HTTPException,ValueError) as exc:
+        completed=time.monotonic_ns();wall=time.time_ns()
         error=exception_details(exc)
         result='application_error' if stage=='decode_body' else 'transport_error'
         layer='APPLICATION_RESPONSE' if stage=='decode_body' else 'SERVICE_TRANSPORT'
     finally:conn.close()
-    completed=time.monotonic_ns();wall=time.time_ns()
+    if completed is None:completed=time.monotonic_ns();wall=time.time_ns()
     return dict(schema=SCHEMA,request_id=event['request_id'],offer=event,intended_phase=phase,
         sent_offset_ns=sent-origin,completed_offset_ns=completed-origin,
         sent_monotonic_ns=sent,sent_wall_ns=sent_wall,completed_monotonic_ns=completed,completed_wall_ns=wall,

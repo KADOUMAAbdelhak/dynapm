@@ -142,3 +142,18 @@ def test_duplicate_rows_refused_even_with_consistent_file_hash(tmp_path):
  cfg=fixture(tmp_path);rows=(tmp_path/'requests.jsonl').read_text().splitlines();(tmp_path/'requests.jsonl').write_text(rows[0]+'\n'+rows[0]+'\n')
  d=json.loads((tmp_path/'DONE.json').read_text());d['requests_sha256']=g.sha(tmp_path/'requests.jsonl');(tmp_path/'DONE.json').write_text(canonical_json(d))
  with pytest.raises(ValueError,match='offer'):validate_download(tmp_path,cfg)
+
+def test_latency_ends_before_validation_and_socket_cleanup(monkeypatch):
+ ticks=[100]
+ def now():return ticks[0]
+ class R(Reply):
+  def read(self):ticks[0]=200;return super().read()
+ class C(Conn):
+  def getresponse(self):return R()
+  def close(self):ticks[0]=999
+ original=g.json.loads
+ def parse(raw):ticks[0]=700;return original(raw)
+ monkeypatch.setattr(g.time,'monotonic_ns',now);monkeypatch.setattr(g.json,'loads',parse)
+ r=g.request(URL,E,'high12',0,connection_factory=C)
+ assert r['completed_monotonic_ns']==200 and r['latency_ns']==200
+ assert ticks[0]==999
