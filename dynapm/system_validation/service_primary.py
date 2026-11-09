@@ -394,12 +394,15 @@ def treatment(repo,root,planned,snapshot,design,environment,identity):
                     if gen['status'].get('phase') in ('Succeeded','Failed'):break
                     if time.monotonic()>deadline:raise ValueError('generator_watchdog_right_censored')
                     time.sleep(1)
+                atomic_record(out/'generator-terminal.json',gen)
                 export_records(commands,generator_node,node_path,out/'generator')
                 records,start,done=validate_download(out/'generator',cfg)
                 state=gen['status']['containerStatuses'][0]
                 if state['restartCount'] or state['state'].get('terminated',{}).get('exitCode')!=0:raise ValueError('generator_lifecycle_invalid')
                 if start['snapshot_sha256']!=fingerprint(snapshot) or start['boot_id']!=domain['boot_id'] or start['time_namespace']!=domain['time_namespace']:raise ValueError('generator_start_binding_invalid')
                 service=json.loads(kube.call(['get','service','application','-o','json']))
+                atomic_record(out/'service-terminal.json',service)
+                atomic_record(out/'application-terminal.json',kube.pod())
                 if service['spec']['clusterIP'] not in start['resolved_addresses']:raise ValueError('service_dns_identity_invalid')
                 # DONE binds the authoritative node bytes; independent second read verifies export identity.
                 remote=commands.run(['docker','exec',generator_node,'sha256sum',node_path+'/requests.jsonl']).split()[0]
