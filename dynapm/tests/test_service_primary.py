@@ -203,3 +203,45 @@ def test_nonqualifying_session_cannot_admit_strict_slot(tmp_path):
     strict_root=tmp_path/'strict';strict_root.mkdir()
     strict=Checkpoint(strict_root,dict(scope='DIAGNOSTIC_NON_CLAIM',executor_commit='fixture'))
     with pytest.raises(ValueError,match='preflight'):strict.begin(cells()[0],'strict',session)
+
+
+@pytest.mark.parametrize('limit',[dict(max_slots=18),dict(stop_after_slot=18)])
+def test_final_analysis_runs_even_at_explicit_last_stop(tmp_path,monkeypatch,limit):
+    import dynapm.system_validation.service_primary as mod
+    import dynapm.system_validation.bounded_v8_metrics as stats
+    spec=dict(executor_commit='SYNTHETIC_FIXTURE',t0_policy='FROZEN_T0_INCLUDES_ENFORCEMENT_TRANSITION')
+    monkeypatch.setattr(mod,'source_binding',lambda *_:dict(executor_commit='SYNTHETIC_FIXTURE'))
+    snapshots=dict(snapshots=[dict(scenario=c['scenario'],method=c['method']) for c in cells()])
+    monkeypatch.setattr(mod,'preflight',lambda *_:(dict(status='PASS',preflight_sha256='SYNTHETIC'),{},snapshots,{}))
+    def treatment(repo,run,planned,*_):
+        run.mkdir(parents=True)
+        paths={}
+        for name in ('requests','endpoint','continuity'):
+            path=run/(name+'.json');path.write_text(canonical_json(dict(fixture=True)))
+            paths[name+'_path']=str(path)
+        return dict(status='SEALED_VALID',fixture=True,metrics=dict(primary={}),**paths)
+    monkeypatch.setattr(mod,'treatment',treatment)
+    snapshot_dir=tmp_path/'results/bounded_v8/campaign-v1/snapshots';snapshot_dir.mkdir(parents=True)
+    for name in ('library.json','snapshots.json','maintenance.json'):
+        (snapshot_dir/name).write_text(canonical_json(dict(fixture=True)))
+    (snapshot_dir/'FROZEN').write_text(canonical_json({n:file_sha256(snapshot_dir/n) for n in ('library.json','snapshots.json','maintenance.json')}))
+    monkeypatch.setattr(mod,'SNAPSHOTS',file_sha256(snapshot_dir/'FROZEN'))
+    calls=[]
+    def analysis(terminals,bundle):
+        calls.append(terminals)
+        assert [t['sequence'] for t in terminals]==list(range(1,19))
+        return dict(fixture=True,physical_outcomes=False,count=len(terminals))
+    monkeypatch.setattr(stats,'paired_analysis',analysis)
+    qualification=dict(status='PASS',schema='v8-primary-service-qualification-v1',scope='DIAGNOSTIC_NON_CLAIM',
+        qualification_mode='STRICT_AC_PRIMARY_LIFECYCLE',claim_qualification_eligible=True,full_lifecycle_verified=True,
+        executor_commit='SYNTHETIC_FIXTURE',storage_certified=True)
+    root=tmp_path/'campaign'
+    state=campaign(tmp_path,root,spec,'AMENDED_V8_PRIMARY',qualification=qualification,**limit)
+    assert len(calls)==1 and all(s['status']=='SEALED_VALID' for s in state['slots'])
+    path=root/'paired-analysis.json';before=path.read_bytes()
+    mod.finish_claim_analysis(tmp_path,root,state)
+    assert path.read_bytes()==before
+    path.write_text('{}')
+    with pytest.raises(ValueError,match='analysis_tampered'):mod.finish_claim_analysis(tmp_path,root,state)
+    state=copy.deepcopy(state);state['identity']['scope']='DIAGNOSTIC_NON_CLAIM_NON_QUALIFYING'
+    with pytest.raises(ValueError,match='nonclaim_analysis'):mod.finish_claim_analysis(tmp_path,root,state)

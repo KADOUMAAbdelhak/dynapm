@@ -154,3 +154,34 @@ admit a strict slot. The claim launcher requires a separately hashed strict-AC
 primary-lifecycle qualification with explicit eligible/schema/mode fields and
 cannot consume battery evidence. Later AC qualification must be a new full run
 under the unchanged strict gate; no mid-run or retrospective promotion exists.
+
+## Readiness classification correction found by the non-qualifying test
+
+The a41c986 battery test stopped at the 600-second exposure check. All independent
+resource gates passed (70m CPU, 64MiB allocated reservation, 1024MiB cgroup cap,
+correct spec/status/generation/container, no pending resize); only Pod Ready was
+false. Kubernetes separately recorded a timed-out HTTP readiness probe. The
+frozen verifier had incorrectly combined this application outcome with physical
+resource enforcement. The failed attempt remains SEALED_INVALID and is not
+retroactively promoted; it lost the remaining controller measurement window.
+
+`primary_actuation.py` is an additive, versioned harness correction. It retains
+all physical patch, serialization, censoring and watchdog logic, and every
+independent resource gate. It records readiness separately as an application
+observation. It does not disable or alter readiness probes, Service routing,
+resources, workloads, snapshots, windows or endpoint denominators. Readiness
+failures and their request consequences remain outcomes. No low-resource point
+is excluded. The original frozen verifier/runtime files remain unchanged.
+
+Regression tests use a copy of the actual non-qualifying failed frame and prove
+that readiness alone cannot invalidate resource enforcement, while wrong CPU,
+cap, spec/status, allocation, generation, container identity, pending resize,
+stale evidence and restarts still fail closed. The fixed harness requires a new
+complete physical qualification; neither the failed battery attempt nor its
+separately recovered request stream qualifies the amended executor.
+
+Completed analysis is finalized even when --max-slots or --stop-after-slot ends
+exactly at slot 18. It first revalidates every new claim slot and the frozen
+snapshot seal, then calls the unchanged frozen paired-analysis implementation.
+Repeated finalization is idempotent; a changed prior analysis fails closed.
+Diagnostic and battery scopes cannot create primary paired results.

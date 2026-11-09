@@ -15,7 +15,8 @@ from dynapm.core.provenance import canonical_json, file_sha256, fingerprint, rea
 from dynapm.scripts.task41_bounded_v8 import completed_attempts, read_bundle
 from dynapm.system_validation.bounded_v8 import (ARTIFACT, NS, REFERENCE, accepted_samples, cells,
     load_contract, plan, qualified_bootstrap, inventory)
-from dynapm.system_validation.bounded_v8_runtime import (OperationalStop, actuate, confirm, _wait_until, pinned_images)
+from dynapm.system_validation.bounded_v8_runtime import (OperationalStop, _wait_until, pinned_images)
+from dynapm.system_validation.primary_actuation import actuate, confirm
 from dynapm.system_validation.bounded_v8_metrics import resource_endpoints
 from dynapm.system_validation.adapter import aggregate_bucket
 from dynapm.system_validation.clock_observations import ObservationClock, MAX_CLOCK_DELTA_NS
@@ -24,7 +25,7 @@ from dynapm.system_validation.reservation_protocol import reservation_recommenda
 from dynapm.system_validation.service_transport import (campaign_generator_config, generator_resources,
     start_stack, export_records, validate_download, endpoint_metrics)
 from dynapm.system_validation.service_checkpoint import (Checkpoint, atomic_record, campaign_lock,
-    next_slot, stop_after_seal)
+    next_slot, stop_after_seal, verify_checkpoint)
 from dynapm.system_validation.smoke import Commands
 from dynapm.system_validation.v8_host_identity import (SCIENTIFIC_SOURCE, UUIDPowerGuard,
     read_boot, same_boot, qualification_inputs)
@@ -462,6 +463,32 @@ def treatment(repo,root,planned,snapshot,design,environment,identity):
         return dict(result,scope=identity['scope'],claim_qualification_eligible=identity['scope']!=BATTERY_SCOPE,requests_path=str(request),endpoint_path=str(out/'endpoint.json'),continuity_path=str(continuity))
 
 
+def finish_claim_analysis(repo,root,state):
+    """Only a complete verified new claim campaign can produce paired results."""
+    if state['identity']['scope']!='AMENDED_V8_PRIMARY':
+        raise ValueError('nonclaim_analysis_forbidden')
+    verify_checkpoint(root,state,state['identity'])
+    if any(slot['status']!='SEALED_VALID' for slot in state['slots']):
+        raise ValueError('complete_valid_18_required_for_analysis')
+    directory=repo/'results/bounded_v8/campaign-v1/snapshots'
+    if file_sha256(directory/'FROZEN')!=SNAPSHOTS:
+        raise ValueError('analysis_snapshot_seal_changed')
+    seals=read_json(directory/'FROZEN')
+    if set(seals)!={'library.json','snapshots.json','maintenance.json'} or any(file_sha256(directory/name)!=digest for name,digest in seals.items()):
+        raise ValueError('analysis_snapshot_bundle_changed')
+    from dynapm.system_validation.bounded_v8_metrics import paired_analysis
+    terminals=[]
+    for slot in state['slots']:
+        terminal=read_json(root/slot['manifest'])
+        terminals.append(dict(sequence=slot['cell']['sequence'],status='COMPLETE',metrics=terminal['metrics']))
+    result=paired_analysis(terminals,read_json(directory/'snapshots.json'))
+    path=root/'paired-analysis.json'
+    if path.exists():
+        if read_json(path)!=result:raise ValueError('completed_analysis_tampered')
+    else:atomic_record(path,result)
+    return result
+
+
 def campaign(repo,root,spec,scope,*,resume=False,max_slots=None,stop_after_slot=None,qualification=None):
     if scope not in ('DIAGNOSTIC_NON_CLAIM','AMENDED_V8_PRIMARY',BATTERY_SCOPE):raise ValueError('explicit_scope_required')
     required_power_mode='BATTERY_DIAGNOSTIC_ONLY' if scope==BATTERY_SCOPE else 'STRICT_AC'
@@ -487,14 +514,7 @@ def campaign(repo,root,spec,scope,*,resume=False,max_slots=None,stop_after_slot=
         while True:
             cell=next_slot(root,checkpoint.state,identity)
             if cell is None:
-                if scope=='AMENDED_V8_PRIMARY':
-                    from dynapm.system_validation.bounded_v8_metrics import paired_analysis
-                    terminals=[]
-                    for slot in checkpoint.state['slots']:
-                        terminal=read_json(root/slot['manifest'])
-                        terminals.append(dict(sequence=slot['cell']['sequence'],status='COMPLETE',metrics=terminal['metrics']))
-                    bundle=read_json(repo/'results/bounded_v8/campaign-v1/snapshots/snapshots.json')
-                    atomic_record(root/'paired-analysis.json',paired_analysis(terminals,bundle))
+                if scope=='AMENDED_V8_PRIMARY':finish_claim_analysis(repo,root,checkpoint.state)
                 return checkpoint.state
             if stop_after_slot is not None and cell['sequence']>stop_after_slot:return checkpoint.state
             sessionroot=root/'sessions'/uuid.uuid4().hex;sessionroot.parent.mkdir(exist_ok=True)
@@ -529,4 +549,5 @@ def campaign(repo,root,spec,scope,*,resume=False,max_slots=None,stop_after_slot=
                 if checkpoint.state['slots'][cell['sequence']-1]['status']=='RUNNING':checkpoint.interrupt()
                 raise
             completed+=1
+            if cell['sequence']==18 and scope=='AMENDED_V8_PRIMARY':finish_claim_analysis(repo,root,checkpoint.state)
             if stop_after_seal(completed,cell['sequence'],max_slots=max_slots,stop_after_slot=stop_after_slot):return checkpoint.state
