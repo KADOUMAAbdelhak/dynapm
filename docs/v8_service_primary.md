@@ -133,3 +133,24 @@ kind digest and request/actuation semantics remain unchanged. No rebuild/pull
 or scientific input substitution is performed. The failed PENDING-only campaign
 and its original prospective seal are preserved; a corrected commit/specification
 requires a fresh qualification root.
+
+## Explicitly non-qualifying battery mechanics mode
+
+The user separately authorized a full battery-powered mechanics test, labelled
+DIAGNOSTIC_NON_CLAIM_NON_QUALIFYING. This is not AC qualification. The strict
+preflight and UUIDPowerGuard branches remain intact and still reject battery.
+A separate BatteryDiagnosticGuard observes discharge, source transitions, exact
+boot, open lid, unchanged power policy and the unchanged 2 s/30 s continuity
+bounds. It owns an idle-sleep assertion only; it does not claim the AC-only
+PreventSystemSleep qualification on battery.
+
+This mode requires power_mode=BATTERY_DIAGNOSTIC_ONLY in its prospectively sealed
+specification and --authorize-battery-nonqualifying. It runs the identical
+primary treatment body and frozen schedules, but all intents/checkpoints,
+generator records and power evidence are labelled non-qualifying. SEALED_VALID
+inside this scope means complete executor mechanics only. Claim qualification
+and outcome eligibility are false. A distinct diagnostic admission status cannot
+admit a strict slot. The claim launcher requires a separately hashed strict-AC
+primary-lifecycle qualification with explicit eligible/schema/mode fields and
+cannot consume battery evidence. Later AC qualification must be a new full run
+under the unchanged strict gate; no mid-run or retrospective promotion exists.

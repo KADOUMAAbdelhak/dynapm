@@ -58,7 +58,7 @@ def campaign_lock(root):
 
 
 def new_checkpoint(identity):
-    if identity.get('scope') not in ('AMENDED_V8_PRIMARY', 'DIAGNOSTIC_NON_CLAIM'):
+    if identity.get('scope') not in ('AMENDED_V8_PRIMARY', 'DIAGNOSTIC_NON_CLAIM', 'DIAGNOSTIC_NON_CLAIM_NON_QUALIFYING'):
         raise ValueError('explicit_campaign_scope_required')
     return dict(schema=SCHEMA, identity=deepcopy(identity), identity_sha256=fingerprint(identity),
                 revision=0, updated_at=utc_now(), slots=[dict(cell=c, status='PENDING',
@@ -100,6 +100,11 @@ def verify_checkpoint(root, state, identity):
             verify_slot(root, slot, identity)
             if status == 'SEALED_INVALID':
                 blocked = status
+    attempts = Path(root) / 'attempts'
+    if attempts.exists():
+        for attempt in attempts.iterdir():
+            if attempt.is_symlink() or not attempt.is_dir() or attempt.name not in treatment_ids:
+                raise ValueError('unreferenced_attempt_requires_review')
     return state
 
 
@@ -119,6 +124,8 @@ def _evidence_path(root, relative):
 
 
 def verify_slot(root, slot, identity):
+    if slot.get('manifest') != 'attempts/'+slot['treatment_id']+'/manifest.json':
+        raise ValueError('slot_manifest_location_mismatch')
     manifest_path = _evidence_path(root, slot['manifest'])
     if file_sha256(manifest_path) != slot['manifest_sha256']:
         raise ValueError('slot_manifest_hash_mismatch')
@@ -182,7 +189,10 @@ class Checkpoint:
     def begin(self, cell, treatment_id, session):
         if cell != next_slot(self.root, self.state, self.identity):
             raise ValueError('next_frozen_slot_required')
-        if not session.get('preflight_sha256') or session.get('status') != 'PASS':
+        diagnostic_only = (self.identity['scope'] == 'DIAGNOSTIC_NON_CLAIM_NON_QUALIFYING'
+                           and session.get('status') == 'NON_QUALIFYING_DIAGNOSTIC_ADMISSION'
+                           and session.get('claim_qualification_eligible') is False)
+        if not session.get('preflight_sha256') or not (session.get('status') == 'PASS' or diagnostic_only):
             raise ValueError('fresh_host_session_preflight_required')
         state = deepcopy(self.state)
         state['slots'][cell['sequence']-1].update(status='RUNNING', treatment_id=treatment_id,

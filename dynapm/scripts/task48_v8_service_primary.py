@@ -12,8 +12,9 @@ def main():
     p.add_argument('--spec',type=Path,required=True)
     p.add_argument('--spec-sha256',required=True)
     p.add_argument('--root',type=Path,required=True)
-    p.add_argument('--scope',choices=('DIAGNOSTIC_NON_CLAIM','AMENDED_V8_PRIMARY'),required=True)
+    p.add_argument('--scope',choices=('DIAGNOSTIC_NON_CLAIM','AMENDED_V8_PRIMARY','DIAGNOSTIC_NON_CLAIM_NON_QUALIFYING'),required=True)
     p.add_argument('--authorize-diagnostic',action='store_true')
+    p.add_argument('--authorize-battery-nonqualifying',action='store_true')
     p.add_argument('--authorize-claim',action='store_true')
     p.add_argument('--qualification',type=Path)
     p.add_argument('--qualification-sha256')
@@ -23,6 +24,8 @@ def main():
     a=p.parse_args()
     if file_sha256(a.spec)!=a.spec_sha256:raise ValueError('executor_spec_hash_mismatch')
     if a.scope=='DIAGNOSTIC_NON_CLAIM' and not a.authorize_diagnostic:raise ValueError('explicit_diagnostic_authorization_required')
+    if a.scope=='DIAGNOSTIC_NON_CLAIM_NON_QUALIFYING' and not a.authorize_battery_nonqualifying:
+        raise ValueError('explicit_nonqualifying_battery_authorization_required')
     qualification=None
     if a.scope=='AMENDED_V8_PRIMARY':
         if not a.authorize_claim or not a.qualification or not a.qualification_sha256:

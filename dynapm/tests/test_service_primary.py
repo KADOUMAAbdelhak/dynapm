@@ -170,3 +170,36 @@ def test_image_alias_resolution_preserves_frozen_objects_and_exact_ids():
     assert runtime['kubernetes']['node_image']==design['kubernetes']['node_image']
     environment['image_ids']['docker.io/library/app:frozen']='sha256:wrong'
     with pytest.raises(ValueError,match='conflict'):resolve_runtime_images(design,environment)
+
+
+def test_battery_mechanics_record_can_never_authorize_claims(tmp_path):
+    from dynapm.system_validation.service_primary import BATTERY_SCOPE
+    fake=dict(status='PASS',executor_commit='fixture',storage_certified=True,full_lifecycle_verified=True,
+              claim_qualification_eligible=False,scope=BATTERY_SCOPE,schema='v8-primary-service-qualification-v1',
+              qualification_mode='BATTERY_NON_QUALIFYING')
+    with pytest.raises(ValueError,match='qualification'):
+        campaign(tmp_path,tmp_path/'claim',dict(executor_commit='fixture'),'AMENDED_V8_PRIMARY',qualification=fake)
+    with pytest.raises(ValueError,match='power_scope'):
+        campaign(tmp_path,tmp_path/'claim',dict(power_mode='BATTERY_DIAGNOSTIC_ONLY'),'AMENDED_V8_PRIMARY',qualification=fake)
+
+
+def test_strict_and_battery_power_guard_factories_are_separate(tmp_path):
+    from dynapm.system_validation.service_primary import power_guard_for_scope,BATTERY_SCOPE
+    from dynapm.system_validation.v8_host_identity import UUIDPowerGuard
+    from dynapm.system_validation.battery_diagnostic_guard import BatteryDiagnosticGuard
+    assert isinstance(power_guard_for_scope(tmp_path,{},'AMENDED_V8_PRIMARY'),UUIDPowerGuard)
+    assert isinstance(power_guard_for_scope(tmp_path,{},'DIAGNOSTIC_NON_CLAIM'),UUIDPowerGuard)
+    assert isinstance(power_guard_for_scope(tmp_path,{},BATTERY_SCOPE),BatteryDiagnosticGuard)
+    with pytest.raises(ValueError):power_guard_for_scope(tmp_path,{},'implicit')
+
+
+def test_nonqualifying_session_cannot_admit_strict_slot(tmp_path):
+    from dynapm.system_validation.service_primary import BATTERY_SCOPE
+    identity=dict(scope=BATTERY_SCOPE,executor_commit='fixture')
+    root=tmp_path/'battery';root.mkdir()
+    cp=Checkpoint(root,identity)
+    session=dict(status='NON_QUALIFYING_DIAGNOSTIC_ADMISSION',preflight_sha256='nq',claim_qualification_eligible=False)
+    cp.begin(cells()[0],'nq-only',session)
+    strict_root=tmp_path/'strict';strict_root.mkdir()
+    strict=Checkpoint(strict_root,dict(scope='DIAGNOSTIC_NON_CLAIM',executor_commit='fixture'))
+    with pytest.raises(ValueError,match='preflight'):strict.begin(cells()[0],'strict',session)

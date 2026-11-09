@@ -29,7 +29,7 @@ def run(config, root):
     domain = config['expected_clock_domain']
     if boot != domain['boot_id'] or namespace != domain['time_namespace']:
         raise ValueError('generator_clock_domain_or_warmup_start_mismatch')
-    start = dict(schema=g.SCHEMA, run_id=config['run_id'], config_sha256=g.hashlib.sha256(g.canonical(config).encode()).hexdigest(),
+    start = dict(scope=config['scope'],claim_qualification_eligible=config['scope']=='DIAGNOSTIC_NON_CLAIM',schema=g.SCHEMA, run_id=config['run_id'], config_sha256=g.hashlib.sha256(g.canonical(config).encode()).hexdigest(),
                  origin_monotonic_ns=origin, origin_wall_ns=wall+origin-now,
                  clock_pair_monotonic_ns=now, clock_pair_wall_ns=wall,
                  boot_id=boot, time_namespace=namespace, pod_uid=os.environ.get('POD_UID'),
@@ -41,6 +41,8 @@ def run(config, root):
     with (root/'requests.jsonl').open('x') as sink:
         def emit(row):
             nonlocal count, size
+            row=dict(row,scope=config['scope'],claim_outcome_eligible=config['scope']=='AMENDED_V8_PRIMARY',
+                     claim_qualification_eligible=config['scope']=='DIAGNOSTIC_NON_CLAIM')
             raw = g.canonical(row)+'\n'
             with lock:
                 if size+len(raw.encode()) > config['maximum_record_bytes']:
@@ -75,7 +77,7 @@ def run(config, root):
             stop.set(); error = g.exception_details(exc)
     if not stop.is_set(): stop.wait(max(0,(origin+config['plan']['measurement_seconds']*g.NS-time.monotonic_ns())/g.NS))
     expected = sum(1 for _ in g.offers(config))
-    result = dict(schema=g.SCHEMA,run_id=config['run_id'],status='COMPLETE' if not stop.is_set() and count==expected else 'INTERRUPTED',
+    result = dict(scope=config['scope'],claim_qualification_eligible=config['scope']=='DIAGNOSTIC_NON_CLAIM',schema=g.SCHEMA,run_id=config['run_id'],status='COMPLETE' if not stop.is_set() and count==expected else 'INTERRUPTED',
                   records=count,expected_records=expected,requests_sha256=g.sha(root/'requests.jsonl'),start_sha256=g.sha(root/'START.json'),
                   config_sha256=start['config_sha256'],completed_monotonic_ns=time.monotonic_ns(),completed_wall_ns=time.time_ns(),error=error)
     g.atomic(root/'DONE.json',result)

@@ -179,3 +179,19 @@ def test_missing_bound_continuity_and_external_paths_refused(tmp_path):
     path.unlink()
     with pytest.raises(ValueError, match='missing'):
         Checkpoint(tmp_path, IDENTITY, resume=True)
+
+
+def test_rolled_back_checkpoint_cannot_hide_completed_attempt(tmp_path):
+    cp = Checkpoint(tmp_path, IDENTITY)
+    original = cp.path.read_bytes()
+    seal_fixture(tmp_path, cp, 1)
+    cp.path.write_bytes(original)
+    with pytest.raises(ValueError, match='unreferenced_attempt'):
+        Checkpoint(tmp_path, IDENTITY, resume=True)
+
+
+def test_unreferenced_partial_attempt_requires_review(tmp_path):
+    Checkpoint(tmp_path, IDENTITY)
+    (tmp_path/'attempts'/'orphan').mkdir(parents=True)
+    with pytest.raises(ValueError, match='unreferenced_attempt'):
+        Checkpoint(tmp_path, IDENTITY, resume=True)

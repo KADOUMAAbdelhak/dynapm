@@ -40,6 +40,7 @@ OBSERVER_BUDGET = 64*2**20
 SLOT_BUDGET = 144*2**20
 DOCKER_GROWTH = 3*2**30
 RESERVE = 20*2**30
+BATTERY_SCOPE = 'DIAGNOSTIC_NON_CLAIM_NON_QUALIFYING'
 
 
 def stable_spec_hash(spec):
@@ -228,6 +229,42 @@ def preflight(repo, root, spec, remaining):
     return dict(record,preflight_sha256=file_sha256(root/'preflight.json')),design,bundle,environment
 
 
+def battery_preflight(repo, root, spec, remaining):
+    from dynapm.system_validation.battery_diagnostic_guard import BatteryDiagnosticGuard
+    provenance=source_binding(repo,spec)
+    processes=subprocess.check_output(['ps','-axo','pid=,ppid=,args='],text=True)
+    if experiment_processes(processes,os.getpid()):raise ValueError('another_experiment_process_active')
+    design=frozen_spec(repo)
+    old=repo/'results/bounded_v8/campaign-v1'
+    bundle=read_bundle(old,SNAPSHOTS,design,CONTRACT,completed_attempts(old))
+    qualified_bootstrap(repo,design)
+    boot=host_qualification(repo,spec)
+    environment=read_json(repo/'results/shared_bootstrap/artifacts'/ARTIFACT/'generation/parent/manifest.json')['experiment']['config']['preprocessing']['execution_environment']
+    env=dict(os.environ,PATH=str(repo/design['kubernetes']['tools_directory'])+os.pathsep+os.environ['PATH'])
+    commands=Commands(env,repo)
+    for name,h in environment['cli_binary_sha256'].items():
+        path=shutil.which(name,path=env['PATH'])
+        if not path or file_sha256(path)!=h:raise ValueError('qualified_cli_changed')
+    runtime_design,runtime_environment,aliases=resolve_runtime_images(design,environment)
+    images=pinned_images(commands,[runtime_design['kubernetes'][key] for key in ('application_image','prometheus_local_image','node_image')],runtime_environment['image_ids'])
+    if commands.run(['docker','ps','-aq']).strip() or commands.run(['kind','get','clusters']).strip():
+        raise ValueError('engine_not_isolated')
+    if 'lowpowermode         0' not in command(['/usr/bin/pmset','-g','custom']):
+        raise ValueError('low_power_not_disabled')
+    if shutil.disk_usage(repo).free < storage_requirement(remaining):
+        raise ValueError('complete_campaign_storage_headroom')
+    root.mkdir(parents=True,exist_ok=False)
+    context=dict(run_id=root.name,source_commit=provenance['executor_commit'],experiment_fingerprint=fingerprint(spec))
+    with BatteryDiagnosticGuard(root,context) as guard:
+        time.sleep(6);guard.checkpoint(force_power=True)
+    record=dict(status='NON_QUALIFYING_DIAGNOSTIC_ADMISSION',claim_qualification_eligible=False,strict_ac_gate_passed=False,scope=BATTERY_SCOPE,**provenance,host_amendment_path=spec['host_amendment_path'],host_amendment_sha256=spec['host_amendment_sha256'],boot=boot,images=images,image_aliases=aliases,free_bytes=shutil.disk_usage(repo).free,
+                required_free_bytes=storage_requirement(remaining),remaining_slots=remaining,
+                contract_sha256=CONTRACT,snapshot_sha256=SNAPSHOTS,
+                guard_sha256=file_sha256(root/'outputs/power_guard.json'))
+    atomic_record(root/'preflight.json',record)
+    return dict(record,preflight_sha256=file_sha256(root/'preflight.json')),design,bundle,environment
+
+
 class BudgetWriter:
     def __init__(self,path,budget):
         self.handle=Path(path).open('x');self.budget=budget
@@ -244,11 +281,20 @@ class BudgetWriter:
     def __exit__(self,*_):self.close()
 
 
+def power_guard_for_scope(root,context,scope):
+    if scope==BATTERY_SCOPE:
+        from dynapm.system_validation.battery_diagnostic_guard import BatteryDiagnosticGuard
+        return BatteryDiagnosticGuard(root,context)
+    if scope not in ('DIAGNOSTIC_NON_CLAIM','AMENDED_V8_PRIMARY'):
+        raise ValueError('explicit_power_scope_required')
+    return UUIDPowerGuard(root,context)
+
+
 def treatment(repo,root,planned,snapshot,design,environment,identity):
     """Same implementation for claim and non-claim; only identity scope differs."""
     out=root/'outputs';out.mkdir(parents=True)
     ident=root.name;cluster=design['kubernetes']['cluster']+'-v8r2-'+uuid.uuid4().hex[:10]
-    context=dict(run_id=ident,source_commit=identity['executor_commit'],experiment_fingerprint=fingerprint(identity),frozen_scientific_source=SCIENTIFIC_SOURCE)
+    context=dict(run_id=ident,source_commit=identity['executor_commit'],experiment_fingerprint=fingerprint(identity),frozen_scientific_source=SCIENTIFIC_SOURCE,scope=identity['scope'],claim_qualification_eligible=identity['scope']!=BATTERY_SCOPE)
     budget=dict(root=root,lock=threading.Lock(),written=0)
     stop=threading.Event();errors=[];samples=[];health=[];threads=[]
     commands=kube=node=None;copied=False;result=None;failure=None
@@ -284,7 +330,7 @@ def treatment(repo,root,planned,snapshot,design,environment,identity):
                     stop.wait(5)
         except BaseException as exc:errors.append(repr(exc))
     try:
-        with UUIDPowerGuard(root,context) as guard:
+        with power_guard_for_scope(root,context,identity['scope']) as guard:
             emit(dict(event='COOLDOWN_BEGIN'));_wait_until(time.monotonic_ns()+900*NS,guard);emit(dict(event='COOLDOWN_END'))
             runtime_design,runtime_environment,aliases=resolve_runtime_images(design,environment)
             atomic_record(out/'image-aliases.json',aliases)
@@ -300,6 +346,8 @@ def treatment(repo,root,planned,snapshot,design,environment,identity):
                 cfg=primary_config(planned,ident,'http://application.'+design['kubernetes']['namespace']+'.svc.cluster.local:8080',snapshot,domain)
                 cfg['scope']=identity['scope']
                 resources,generator_node,node_path=generator_resources(runtime_design,cluster,cfg,repo/'dynapm/system_validation/primary_service_generator.py')
+                if identity['scope']==BATTERY_SCOPE:
+                    resources['items'][1]['metadata']['labels']['scope']='battery-diagnostic-nonqualifying'
                 resources['items'][0]['data']['transport_generator.py']=(repo/'dynapm/system_validation/service_generator.py').read_text()
                 commands.run(['docker','exec',generator_node,'mkdir','-p',node_path]);commands.run(['docker','exec',generator_node,'chmod','0777',node_path])
                 atomic_record(root/'recovery.json',dict(cluster=cluster,generator_node=generator_node,node_path=node_path,config=cfg,kubeconfig=str(kube.config)))
@@ -375,7 +423,7 @@ def treatment(repo,root,planned,snapshot,design,environment,identity):
                     metrics[name].update(resource_endpoints(sealed,host_origin,acts,lo,hi))
                 metrics['primary'].update(cpu_churn_cores=abs(target.cpu_millicores-REFERENCE.cpu_millicores)/1000,
                     memory_churn_bytes=abs(target.memory_request_mib-REFERENCE.memory_request_mib)*2**20,controller_cpu_seconds=controller_cpu)
-                result=dict(status='SEALED_VALID',runtime=runtime,metrics=metrics,actuations=acts,
+                result=dict(status='SEALED_VALID',scope=identity['scope'],claim_qualification_eligible=identity['scope']!=BATTERY_SCOPE,runtime=runtime,metrics=metrics,actuations=acts,
                     maintenance=dict(scope='FROZEN_OFFLINE_SNAPSHOT_COMPILATION_COST_NOT_LIVE_MAINTENANCE',
                         record=next(row for row in read_json(repo/'results/bounded_v8/campaign-v1/snapshots/maintenance.json')
                             if row['method']==planned['cell']['method'] and row['scenario']==planned['cell']['scenario']),
@@ -399,6 +447,7 @@ def treatment(repo,root,planned,snapshot,design,environment,identity):
             except Exception as exc:
                 result=dict(status='SEALED_INVALID',failure=dict(error='cleanup_failed:'+repr(exc)),metrics=None)
         atomic_record(out/'cleanup.json',cleanup)
+        result.update(scope=identity['scope'],claim_qualification_eligible=identity['scope']!=BATTERY_SCOPE)
         atomic_record(out/'endpoint.json',result)
         if not (out/'generator/requests.jsonl').exists():
             # This is an explicitly partial/undefined endpoint, never an empty valid request stream.
@@ -407,15 +456,24 @@ def treatment(repo,root,planned,snapshot,design,environment,identity):
         if not continuity.exists():atomic_record(out/'CONTINUITY_UNAVAILABLE.json',dict(status='UNDEFINED'))
         request=out/'generator/requests.jsonl' if (out/'generator/requests.jsonl').exists() else out/'REQUESTS_UNAVAILABLE.json'
         continuity=continuity if continuity.exists() else out/'CONTINUITY_UNAVAILABLE.json'
-        return dict(result,requests_path=str(request),endpoint_path=str(out/'endpoint.json'),continuity_path=str(continuity))
+        return dict(result,scope=identity['scope'],claim_qualification_eligible=identity['scope']!=BATTERY_SCOPE,requests_path=str(request),endpoint_path=str(out/'endpoint.json'),continuity_path=str(continuity))
 
 
 def campaign(repo,root,spec,scope,*,resume=False,max_slots=None,stop_after_slot=None,qualification=None):
-    if scope not in ('DIAGNOSTIC_NON_CLAIM','AMENDED_V8_PRIMARY'):raise ValueError('explicit_scope_required')
+    if scope not in ('DIAGNOSTIC_NON_CLAIM','AMENDED_V8_PRIMARY',BATTERY_SCOPE):raise ValueError('explicit_scope_required')
+    required_power_mode='BATTERY_DIAGNOSTIC_ONLY' if scope==BATTERY_SCOPE else 'STRICT_AC'
+    if spec.get('power_mode','STRICT_AC')!=required_power_mode:raise ValueError('power_scope_spec_mismatch')
     # Validate limits before ownership or any live action.
     stop_after_seal(0,0,max_slots=max_slots,stop_after_slot=stop_after_slot)
     if scope=='AMENDED_V8_PRIMARY':
-        if qualification is None or qualification.get('status')!='PASS' or qualification.get('executor_commit')!=spec['executor_commit'] or not qualification.get('storage_certified'):
+        if (qualification is None or qualification.get('status')!='PASS'
+                or qualification.get('schema')!='v8-primary-service-qualification-v1'
+                or qualification.get('scope')!='DIAGNOSTIC_NON_CLAIM'
+                or qualification.get('qualification_mode')!='STRICT_AC_PRIMARY_LIFECYCLE'
+                or qualification.get('claim_qualification_eligible') is not True
+                or qualification.get('full_lifecycle_verified') is not True
+                or qualification.get('executor_commit')!=spec['executor_commit']
+                or not qualification.get('storage_certified')):
             raise ValueError('prospective_primary_qualification_required')
     provenance=source_binding(repo,spec)
     identity=dict(provenance,scope=scope,contract_sha256=CONTRACT,snapshot_sha256=SNAPSHOTS,
@@ -437,7 +495,8 @@ def campaign(repo,root,spec,scope,*,resume=False,max_slots=None,stop_after_slot=
                 return checkpoint.state
             if stop_after_slot is not None and cell['sequence']>stop_after_slot:return checkpoint.state
             sessionroot=root/'sessions'/uuid.uuid4().hex;sessionroot.parent.mkdir(exist_ok=True)
-            session,design,bundle,environment=preflight(repo,sessionroot,spec,19-cell['sequence'])
+            admit=battery_preflight if scope==BATTERY_SCOPE else preflight
+            session,design,bundle,environment=admit(repo,sessionroot,spec,19-cell['sequence'])
             snapshot=next(s for s in bundle['snapshots'] if s['scenario']==cell['scenario'] and s['method']==cell['method'])
             ident=f"slot-{cell['sequence']:02d}-"+uuid.uuid4().hex
             run=root/'attempts'/ident

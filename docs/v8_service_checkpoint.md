@@ -56,3 +56,8 @@ qualification proof.
 The versioned live CLI and qualification requirements are documented in
 `v8_service_primary.md`. Persistence fixtures remain synthetic and do not replace
 the required full physical qualification.
+
+On resume, every existing attempt directory must have a corresponding slot
+identity. A rolled-back checkpoint cannot hide an already sealed or partial
+attempt and silently permit a repeated cell. Orphaned directories require
+review; they are never deleted automatically.
