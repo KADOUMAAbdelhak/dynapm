@@ -119,3 +119,17 @@ Unit tests use synthetic clocks and orchestration fixtures and are labelled as
 such. A passing physical 900/1800/1800-second non-claim execution, independent
 raw reconstruction, reserve verification and cleanup proof are required in a
 separate qualification record. Incomplete or blocked qualification is not READY.
+
+## Docker reference resolution correction
+
+The first qualification preflight at ee7950d stopped before cooldown, cluster
+creation or generator launch: shorthand image lookup failed despite the exact
+pinned image IDs being present. Explicit docker.io/library aliases resolved
+to those same IDs. The corrected primary adapter canonicalizes only these two
+local references in runtime copies, checks their exact frozen IDs, and records
+frozen-reference → canonical-reference → ID. It passes the same canonical
+names to kind loading and Pod manifests. Frozen config files, image content,
+kind digest and request/actuation semantics remain unchanged. No rebuild/pull
+or scientific input substitution is performed. The failed PENDING-only campaign
+and its original prospective seal are preserved; a corrected commit/specification
+requires a fresh qualification root.

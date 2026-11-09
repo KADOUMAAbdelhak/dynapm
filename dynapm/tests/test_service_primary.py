@@ -155,3 +155,18 @@ def test_other_experiments_rejected_without_persisting_unrelated_arguments():
     from dynapm.system_validation.service_primary import experiment_processes
     rows="1 0 init\n10 1 shell dynapm.scripts.task48_v8_service_primary\n11 10 python -m dynapm.scripts.task48_v8_service_primary\n12 11 ps\n20 1 python -m dynapm.scripts.task42_google2019_cell_g\n21 1 editor personal-file\n"
     assert experiment_processes(rows,11)==[20]
+
+
+def test_image_alias_resolution_preserves_frozen_objects_and_exact_ids():
+    from dynapm.system_validation.service_primary import resolve_runtime_images
+    design=dict(kubernetes=dict(application_image='app:frozen',prometheus_local_image='prom:frozen',node_image='kindest/node@sha256:node'))
+    environment=dict(image_ids={'app:frozen':'sha256:app','prom:frozen':'sha256:prom'})
+    original=copy.deepcopy((design,environment))
+    runtime,resolved,aliases=resolve_runtime_images(design,environment)
+    assert (design,environment)==original
+    assert runtime['kubernetes']['application_image']=='docker.io/library/app:frozen'
+    assert resolved['image_ids']['docker.io/library/app:frozen']=='sha256:app'
+    assert aliases['app:frozen']['expected_image_id']=='sha256:app'
+    assert runtime['kubernetes']['node_image']==design['kubernetes']['node_image']
+    environment['image_ids']['docker.io/library/app:frozen']='sha256:wrong'
+    with pytest.raises(ValueError,match='conflict'):resolve_runtime_images(design,environment)

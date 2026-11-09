@@ -1,5 +1,6 @@
 """Versioned direct-Service primary lifecycle. No old/new application data mixing."""
 from collections import Counter
+from copy import deepcopy
 from contextlib import contextmanager
 import json
 import os
@@ -43,6 +44,23 @@ RESERVE = 20*2**30
 
 def stable_spec_hash(spec):
     return fingerprint({k:v for k,v in spec.items() if k not in ('host_amendment_path','host_amendment_sha256')})
+
+
+def resolve_runtime_images(design, environment):
+    """Canonical aliases only; frozen config and the exact image IDs are immutable."""
+    runtime=deepcopy(design);resolved=deepcopy(environment);aliases={}
+    for key in ('application_image','prometheus_local_image'):
+        frozen=design['kubernetes'][key]
+        if frozen not in environment['image_ids']:
+            raise ValueError('frozen_image_identity_missing')
+        canonical='docker.io/library/'+frozen if '/' not in frozen else frozen
+        expected=environment['image_ids'][frozen]
+        if canonical in resolved['image_ids'] and resolved['image_ids'][canonical]!=expected:
+            raise ValueError('canonical_image_identity_conflict')
+        runtime['kubernetes'][key]=canonical
+        resolved['image_ids'][canonical]=expected
+        aliases[frozen]=dict(resolved_reference=canonical,expected_image_id=expected)
+    return runtime,resolved,aliases
 
 
 def storage_requirement(remaining):
@@ -190,7 +208,8 @@ def preflight(repo, root, spec, remaining):
     for name,h in environment['cli_binary_sha256'].items():
         path=shutil.which(name,path=env['PATH'])
         if not path or file_sha256(path)!=h:raise ValueError('qualified_cli_changed')
-    images=pinned_images(commands,[design['kubernetes'][key] for key in ('application_image','prometheus_local_image','node_image')],environment['image_ids'])
+    runtime_design,runtime_environment,aliases=resolve_runtime_images(design,environment)
+    images=pinned_images(commands,[runtime_design['kubernetes'][key] for key in ('application_image','prometheus_local_image','node_image')],runtime_environment['image_ids'])
     if commands.run(['docker','ps','-aq']).strip() or commands.run(['kind','get','clusters']).strip():
         raise ValueError('engine_not_isolated')
     if 'lowpowermode         0' not in command(['/usr/bin/pmset','-g','custom']):
@@ -201,7 +220,7 @@ def preflight(repo, root, spec, remaining):
     context=dict(run_id=root.name,source_commit=provenance['executor_commit'],experiment_fingerprint=fingerprint(spec))
     with UUIDPowerGuard(root,context) as guard:
         time.sleep(6);guard.checkpoint(force_power=True)
-    record=dict(status='PASS',**provenance,host_amendment_path=spec['host_amendment_path'],host_amendment_sha256=spec['host_amendment_sha256'],boot=boot,images=images,free_bytes=shutil.disk_usage(repo).free,
+    record=dict(status='PASS',**provenance,host_amendment_path=spec['host_amendment_path'],host_amendment_sha256=spec['host_amendment_sha256'],boot=boot,images=images,image_aliases=aliases,free_bytes=shutil.disk_usage(repo).free,
                 required_free_bytes=storage_requirement(remaining),remaining_slots=remaining,
                 contract_sha256=CONTRACT,snapshot_sha256=SNAPSHOTS,
                 guard_sha256=file_sha256(root/'outputs/power_guard.json'))
@@ -267,7 +286,9 @@ def treatment(repo,root,planned,snapshot,design,environment,identity):
     try:
         with UUIDPowerGuard(root,context) as guard:
             emit(dict(event='COOLDOWN_BEGIN'));_wait_until(time.monotonic_ns()+900*NS,guard);emit(dict(event='COOLDOWN_END'))
-            commands,kube,node=start_stack(repo,design,root,cluster,environment)
+            runtime_design,runtime_environment,aliases=resolve_runtime_images(design,environment)
+            atomic_record(out/'image-aliases.json',aliases)
+            commands,kube,node=start_stack(repo,runtime_design,root,cluster,runtime_environment)
             pod=kube.pod();uid=pod['metadata']['uid']
             runtime=dict(cluster=cluster,pod_uid=uid,container=node.container,controller=uuid.uuid4().hex,telemetry=uuid.uuid4().hex)
             atomic_record(out/'runtime.json',runtime)
@@ -278,7 +299,7 @@ def treatment(repo,root,planned,snapshot,design,environment,identity):
                 domain=clock_domain(kube)
                 cfg=primary_config(planned,ident,'http://application.'+design['kubernetes']['namespace']+'.svc.cluster.local:8080',snapshot,domain)
                 cfg['scope']=identity['scope']
-                resources,generator_node,node_path=generator_resources(design,cluster,cfg,repo/'dynapm/system_validation/primary_service_generator.py')
+                resources,generator_node,node_path=generator_resources(runtime_design,cluster,cfg,repo/'dynapm/system_validation/primary_service_generator.py')
                 resources['items'][0]['data']['transport_generator.py']=(repo/'dynapm/system_validation/service_generator.py').read_text()
                 commands.run(['docker','exec',generator_node,'mkdir','-p',node_path]);commands.run(['docker','exec',generator_node,'chmod','0777',node_path])
                 atomic_record(root/'recovery.json',dict(cluster=cluster,generator_node=generator_node,node_path=node_path,config=cfg,kubeconfig=str(kube.config)))
