@@ -3,23 +3,16 @@
 Frozen scientific source: `fe3b870149a156e7fecb88741d51cfb5c1ed86d7`.
 Qualified transport ancestor: `b3fd0d1fa095dbaa13c2b035624d6336b24d60ca`.
 No frozen scientific file or existing transport implementation is changed by this component.
-No claim-launch command is provided or enabled.
+Claim execution additionally requires a separately sealed passing primary-executor qualification.
 
-## Blocking timing decision
+## Timing decision
 
-The original `bounded_v8_runtime.episode` waits for T0, dispatches the snapshot
-recommendation and calls `actuate` while `stream_requests` independently offers
-requests from T0. The resize latency is therefore inside the primary and
-first-five-minute transition windows. Resources during that transition are
-integrated using observed patch-ack and enforcement timestamps.
-
-The V8C-R.2 instruction also says measured exposure cannot start before target
-enforcement is verified. That would require one of: applying the target before
-T0 (changing the reference-resource warm-up), delaying the offer schedule after
-T0, or redefining T0 after enforcement. Each changes frozen primary timing.
-These alternatives must not be selected implicitly. The timing choice was sent
-as a required clarification before any live qualification. Until resolved, no
-full-lifecycle executor or 75-minute qualification is represented as complete.
+The user explicitly chose to preserve frozen T0: target dispatch and measured
+offers begin at T0; enforcement latency remains in the transition. A causal
+source marker and host receipt link the two domains. No enforcement gate delays
+the measured offer schedule. See `v8_service_primary.md` for the executor and
+clock limitations. The earlier checkpoint-only commit did not qualify a live
+executor.
 
 ## Persistence implemented
 
@@ -60,17 +53,6 @@ ownership, atomic reserve failure, stop limits and all 18 frozen offer schedules
 Fixtures are synthetic and are not physical cluster recreation or host
 qualification proof.
 
-No start/resume/stop *live* CLI exists yet. Claim execution remains disabled.
-A future CLI must call the same primary implementation for diagnostic and claim
-scopes, require explicit resume, and apply --max-slots/--stop-after-slot only
-after a slot is sealed and independently verified.
-
-## Still required
-
-Resolve T0/enforcement ordering; implement and version primary Service
-orchestration; bind generator/Linux T0 and host controller observations without
-subtracting unrelated monotonic domains; integrate full amended preflight;
-verify target/snapshot and all telemetry; seal/recover node and host results;
-certify complete peak storage including Docker growth; run the real 75-minute
-non-claim qualification; freeze its evidence separately. No claim execution is
-authorized merely by the persistence tests.
+The versioned live CLI and qualification requirements are documented in
+`v8_service_primary.md`. Persistence fixtures remain synthetic and do not replace
+the required full physical qualification.
