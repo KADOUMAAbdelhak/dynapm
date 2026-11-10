@@ -1,0 +1,35 @@
+{
+  "all_18_pending": true,
+  "attempts": [],
+  "checkpoint_resume_verified_unchanged": true,
+  "checkpoint_sha256": "16c07107b4063037c922ea766398c72e526a4d68f4e931f184a5c0264ad07ce6",
+  "claim_authorized": false,
+  "current_boot": {
+    "boot_epoch_seconds": 1794292789,
+    "boot_timeval_ns": 1794292789051833000,
+    "boot_uuid": "033EF93F-4581-47BB-87C4-D1BABA7F8155",
+    "timeval_raw": "{ sec = 1794292789, usec = 51833 } Tue Nov 10 08:39:49 2026\n",
+    "uuid_raw": "033EF93F-4581-47BB-87C4-D1BABA7F8155\n"
+  },
+  "docker_observation": {
+    "returncode": 1,
+    "stderr": "Cannot connect to the Docker daemon at unix:///Users/fgtek002/.docker/run/docker.sock. Is the docker daemon running?\n",
+    "stdout": ""
+  },
+  "executor_commit": "67bfd37ee72e0096e4dfec974fd145f7a347e6e0",
+  "expected_boot_uuid": "59359FFE-05A4-4FBA-A5C2-457CFE8DF778",
+  "free_bytes": 35711614976,
+  "integration_started": false,
+  "lifecycle_started": false,
+  "next_slot": {
+    "method": "static",
+    "repetition": 1,
+    "scenario": "periodic",
+    "seed": 2026110501,
+    "sequence": 1
+  },
+  "observed_at": "2026-11-10T07:00:14.731894+00:00",
+  "power_raw": "Now drawing from 'AC Power'\n -InternalBattery-0 (id=7143523)\t72%; charging; 1:15 remaining present: true\n",
+  "qualification_pass": false,
+  "status": "BLOCKED_PREFLIGHT_BOOT_UUID_MISMATCH"
+}

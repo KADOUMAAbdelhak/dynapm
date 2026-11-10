@@ -1,0 +1,20 @@
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/Users/fgtek002/dynapm-v8c-frozen/dynapm/scripts/task48_v8_service_primary.py", line 49, in <module>
+    if __name__=='__main__':main()
+                            ~~~~^^
+  File "/Users/fgtek002/dynapm-v8c-frozen/dynapm/scripts/task48_v8_service_primary.py", line 44, in main
+    state=campaign(Path.cwd(),a.root.resolve(),read_json(a.spec),a.scope,resume=a.resume,
+        max_slots=a.max_slots,stop_after_slot=a.stop_after_slot,qualification=qualification)
+  File "/Users/fgtek002/dynapm-v8c-frozen/dynapm/system_validation/service_primary.py", line 522, in campaign
+    session,design,bundle,environment=admit(repo,sessionroot,spec,19-cell['sequence'])
+                                      ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/fgtek002/dynapm-v8c-frozen/dynapm/system_validation/service_primary.py", line 206, in preflight
+    boot=host_qualification(repo,spec)
+  File "/Users/fgtek002/dynapm-v8c-frozen/dynapm/system_validation/service_primary.py", line 177, in host_qualification
+    current=read_boot();same_boot(amendment['boot_uuid'],current,legacy_epoch=inputs['legacy_epoch'])
+                        ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/fgtek002/dynapm-v8c-frozen/dynapm/system_validation/v8_host_identity.py", line 76, in same_boot
+    raise ValueError('host_boot_uuid_mismatch')
+ValueError: host_boot_uuid_mismatch
