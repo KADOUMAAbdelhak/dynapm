@@ -1,0 +1,759 @@
+......................................F..............................EE. [  7%]
+...EEEE.................F.............................................s. [ 15%]
+........................................................................ [ 22%]
+........................................................................ [ 30%]
+..............................................................ss.F...F.. [ 38%]
+.F...................................................................... [ 45%]
+........................................................................ [ 53%]
+.................................................FE......F........F..... [ 61%]
+........................................................................ [ 68%]
+.............................EEEEEEEEEEE...............................F [ 76%]
+F............F..FF...F.................................................. [ 83%]
+........................................................................ [ 91%]
+........................................................................ [ 99%]
+.......                                                                  [100%]
+==================================== ERRORS ====================================
+_ ERROR at setup of test_replay_causal_tile_reset_and_deterministic_compilation _
+
+    @pytest.fixture(scope='module')
+    def inputs():
+>       design = frozen_spec(ROOT)
+                 ^^^^^^^^^^^^^^^^^
+
+dynapm/tests/test_bounded_v8.py:27: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+repo = PosixPath('/Users/fgtek002/dynapm-v8c-frozen')
+
+    def frozen_spec(repo):
+        d=read_json(Path(repo)/SPEC)
+>       if d!=specification(repo):raise ValueError('system_estimation_config_or_source_mismatch')
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       ValueError: system_estimation_config_or_source_mismatch
+
+dynapm/system_validation/estimation_design.py:82: ValueError
+_______ ERROR at setup of test_native_live_refresh_and_noop_disposition ________
+
+    @pytest.fixture(scope='module')
+    def inputs():
+>       design = frozen_spec(ROOT)
+                 ^^^^^^^^^^^^^^^^^
+
+dynapm/tests/test_bounded_v8.py:27: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+repo = PosixPath('/Users/fgtek002/dynapm-v8c-frozen')
+
+    def frozen_spec(repo):
+        d=read_json(Path(repo)/SPEC)
+>       if d!=specification(repo):raise ValueError('system_estimation_config_or_source_mismatch')
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       ValueError: system_estimation_config_or_source_mismatch
+
+dynapm/system_validation/estimation_design.py:82: ValueError
+______ ERROR at setup of test_analysis_uses_three_pairs_and_marks_missing ______
+
+    @pytest.fixture(scope='module')
+    def inputs():
+>       design = frozen_spec(ROOT)
+                 ^^^^^^^^^^^^^^^^^
+
+dynapm/tests/test_bounded_v8.py:27: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+repo = PosixPath('/Users/fgtek002/dynapm-v8c-frozen')
+
+    def frozen_spec(repo):
+        d=read_json(Path(repo)/SPEC)
+>       if d!=specification(repo):raise ValueError('system_estimation_config_or_source_mismatch')
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       ValueError: system_estimation_config_or_source_mismatch
+
+dynapm/system_validation/estimation_design.py:82: ValueError
+________ ERROR at setup of test_reference_loader_rejects_fixture_scope _________
+
+    @pytest.fixture(scope='module')
+    def inputs():
+>       design = frozen_spec(ROOT)
+                 ^^^^^^^^^^^^^^^^^
+
+dynapm/tests/test_bounded_v8.py:27: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+repo = PosixPath('/Users/fgtek002/dynapm-v8c-frozen')
+
+    def frozen_spec(repo):
+        d=read_json(Path(repo)/SPEC)
+>       if d!=specification(repo):raise ValueError('system_estimation_config_or_source_mismatch')
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       ValueError: system_estimation_config_or_source_mismatch
+
+dynapm/system_validation/estimation_design.py:82: ValueError
+__________ ERROR at setup of test_complete_offline_manifest_sequence ___________
+
+    @pytest.fixture(scope='module')
+    def inputs():
+>       design = frozen_spec(ROOT)
+                 ^^^^^^^^^^^^^^^^^
+
+dynapm/tests/test_bounded_v8.py:27: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+repo = PosixPath('/Users/fgtek002/dynapm-v8c-frozen')
+
+    def frozen_spec(repo):
+        d=read_json(Path(repo)/SPEC)
+>       if d!=specification(repo):raise ValueError('system_estimation_config_or_source_mismatch')
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       ValueError: system_estimation_config_or_source_mismatch
+
+dynapm/system_validation/estimation_design.py:82: ValueError
+_ ERROR at setup of test_snapshot_digest_and_file_tamper_fail_before_donor_read _
+
+    @pytest.fixture(scope='module')
+    def inputs():
+>       design = frozen_spec(ROOT)
+                 ^^^^^^^^^^^^^^^^^
+
+dynapm/tests/test_bounded_v8.py:27: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+repo = PosixPath('/Users/fgtek002/dynapm-v8c-frozen')
+
+    def frozen_spec(repo):
+        d=read_json(Path(repo)/SPEC)
+>       if d!=specification(repo):raise ValueError('system_estimation_config_or_source_mismatch')
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       ValueError: system_estimation_config_or_source_mismatch
+
+dynapm/system_validation/estimation_design.py:82: ValueError
+_ ERROR at setup of test_derived_generation_parent_immutability_independent_load_and_tamper _
+
+tmp_path = PosixPath('/private/var/folders/gj/4h0zvkw165n5t_9rl_nxh0l00000gp/T/pytest-of-fgtek002/pytest-2/test_derived_generation_parent0')
+inputs = (PosixPath('/private/var/folders/gj/4h0zvkw165n5t_9rl_nxh0l00000gp/T/pytest-of-fgtek002/pytest-2/test_derived_generati... '3.6.0', 'typing-extensions': '4.16.0', 'urllib3': '2.7.0', 'wheel': '0.47.0', 'wrapt': '2.2.2', 'xgboost': '3.3.0'}))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x11bd13230>
+
+    @pytest.fixture
+    def acquisition(tmp_path,inputs,monkeypatch):
+        """A managed metadata fixture with explicitly simulated 24h wall clocks."""
+>       repo,raw,base,env=inputs;d=frozen_spec(ROOT)
+                                   ^^^^^^^^^^^^^^^^^
+
+dynapm/tests/test_shared_bootstrap.py:30: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+repo = PosixPath('/Users/fgtek002/dynapm-v8c-frozen')
+
+    def frozen_spec(repo):
+        d=read_json(Path(repo)/SPEC)
+>       if d!=specification(repo):raise ValueError('system_estimation_config_or_source_mismatch')
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       ValueError: system_estimation_config_or_source_mismatch
+
+dynapm/system_validation/estimation_design.py:82: ValueError
+_ ERROR at setup of test_bootstrap_only_parent_materializes_deterministically_and_relocates _
+
+tmp_path = PosixPath('/private/var/folders/gj/4h0zvkw165n5t_9rl_nxh0l00000gp/T/pytest-of-fgtek002/pytest-2/test_bootstrap_only_parent_mat0')
+inputs = (PosixPath('/private/var/folders/gj/4h0zvkw165n5t_9rl_nxh0l00000gp/T/pytest-of-fgtek002/pytest-2/test_bootstrap_only_p... '3.6.0', 'typing-extensions': '4.16.0', 'urllib3': '2.7.0', 'wheel': '0.47.0', 'wrapt': '2.2.2', 'xgboost': '3.3.0'}))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x119dc54e0>
+
+    @pytest.fixture
+    def acquisition(tmp_path,inputs,monkeypatch):
+        """A managed metadata fixture with explicitly simulated 24h wall clocks."""
+>       repo,raw,base,env=inputs;d=frozen_spec(ROOT)
+                                   ^^^^^^^^^^^^^^^^^
+
+dynapm/tests/test_shared_bootstrap.py:30: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+repo = PosixPath('/Users/fgtek002/dynapm-v8c-frozen')
+
+    def frozen_spec(repo):
+        d=read_json(Path(repo)/SPEC)
+>       if d!=specification(repo):raise ValueError('system_estimation_config_or_source_mismatch')
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       ValueError: system_estimation_config_or_source_mismatch
+
+dynapm/system_validation/estimation_design.py:82: ValueError
+____ ERROR at setup of test_artifact_tampering_rejected[raw_samples.jsonl] _____
+
+tmp_path = PosixPath('/private/var/folders/gj/4h0zvkw165n5t_9rl_nxh0l00000gp/T/pytest-of-fgtek002/pytest-2/test_artifact_tampering_reject0')
+inputs = (PosixPath('/private/var/folders/gj/4h0zvkw165n5t_9rl_nxh0l00000gp/T/pytest-of-fgtek002/pytest-2/test_artifact_tamperi... '3.6.0', 'typing-extensions': '4.16.0', 'urllib3': '2.7.0', 'wheel': '0.47.0', 'wrapt': '2.2.2', 'xgboost': '3.3.0'}))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x119e22cf0>
+
+    @pytest.fixture
+    def acquisition(tmp_path,inputs,monkeypatch):
+        """A managed metadata fixture with explicitly simulated 24h wall clocks."""
+>       repo,raw,base,env=inputs;d=frozen_spec(ROOT)
+                                   ^^^^^^^^^^^^^^^^^
+
+dynapm/tests/test_shared_bootstrap.py:30: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+repo = PosixPath('/Users/fgtek002/dynapm-v8c-frozen')
+
+    def frozen_spec(repo):
+        d=read_json(Path(repo)/SPEC)
+>       if d!=specification(repo):raise ValueError('system_estimation_config_or_source_mismatch')
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       ValueError: system_estimation_config_or_source_mismatch
+
+dynapm/system_validation/estimation_design.py:82: ValueError
+___ ERROR at setup of test_artifact_tampering_rejected[parent_manifest.json] ___
+
+tmp_path = PosixPath('/private/var/folders/gj/4h0zvkw165n5t_9rl_nxh0l00000gp/T/pytest-of-fgtek002/pytest-2/test_artifact_tampering_reject1')
+inputs = (PosixPath('/private/var/folders/gj/4h0zvkw165n5t_9rl_nxh0l00000gp/T/pytest-of-fgtek002/pytest-2/test_artifact_tamperi... '3.6.0', 'typing-extensions': '4.16.0', 'urllib3': '2.7.0', 'wheel': '0.47.0', 'wrapt': '2.2.2', 'xgboost': '3.3.0'}))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x119d4fee0>
+
+    @pytest.fixture
+    def acquisition(tmp_path,inputs,monkeypatch):
+        """A managed metadata fixture with explicitly simulated 24h wall clocks."""
+>       repo,raw,base,env=inputs;d=frozen_spec(ROOT)
+                                   ^^^^^^^^^^^^^^^^^
+
+dynapm/tests/test_shared_bootstrap.py:30: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+repo = PosixPath('/Users/fgtek002/dynapm-v8c-frozen')
+
+    def frozen_spec(repo):
+        d=read_json(Path(repo)/SPEC)
+>       if d!=specification(repo):raise ValueError('system_estimation_config_or_source_mismatch')
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       ValueError: system_estimation_config_or_source_mismatch
+
+dynapm/system_validation/estimation_design.py:82: ValueError
+_________ ERROR at setup of test_artifact_tampering_rejected[COMPLETE] _________
+
+tmp_path = PosixPath('/private/var/folders/gj/4h0zvkw165n5t_9rl_nxh0l00000gp/T/pytest-of-fgtek002/pytest-2/test_artifact_tampering_reject2')
+inputs = (PosixPath('/private/var/folders/gj/4h0zvkw165n5t_9rl_nxh0l00000gp/T/pytest-of-fgtek002/pytest-2/test_artifact_tamperi... '3.6.0', 'typing-extensions': '4.16.0', 'urllib3': '2.7.0', 'wheel': '0.47.0', 'wrapt': '2.2.2', 'xgboost': '3.3.0'}))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x12014f9a0>
+
+    @pytest.fixture
+    def acquisition(tmp_path,inputs,monkeypatch):
+        """A managed metadata fixture with explicitly simulated 24h wall clocks."""
+>       repo,raw,base,env=inputs;d=frozen_spec(ROOT)
+                                   ^^^^^^^^^^^^^^^^^
+
+dynapm/tests/test_shared_bootstrap.py:30: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+repo = PosixPath('/Users/fgtek002/dynapm-v8c-frozen')
+
+    def frozen_spec(repo):
+        d=read_json(Path(repo)/SPEC)
+>       if d!=specification(repo):raise ValueError('system_estimation_config_or_source_mismatch')
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       ValueError: system_estimation_config_or_source_mismatch
+
+dynapm/system_validation/estimation_design.py:82: ValueError
+_____ ERROR at setup of test_parent_tampering_not_upgraded_to_new_artifact _____
+
+tmp_path = PosixPath('/private/var/folders/gj/4h0zvkw165n5t_9rl_nxh0l00000gp/T/pytest-of-fgtek002/pytest-2/test_parent_tampering_not_upgr0')
+inputs = (PosixPath('/private/var/folders/gj/4h0zvkw165n5t_9rl_nxh0l00000gp/T/pytest-of-fgtek002/pytest-2/test_parent_tampering... '3.6.0', 'typing-extensions': '4.16.0', 'urllib3': '2.7.0', 'wheel': '0.47.0', 'wrapt': '2.2.2', 'xgboost': '3.3.0'}))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x11ae26580>
+
+    @pytest.fixture
+    def acquisition(tmp_path,inputs,monkeypatch):
+        """A managed metadata fixture with explicitly simulated 24h wall clocks."""
+>       repo,raw,base,env=inputs;d=frozen_spec(ROOT)
+                                   ^^^^^^^^^^^^^^^^^
+
+dynapm/tests/test_shared_bootstrap.py:30: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+repo = PosixPath('/Users/fgtek002/dynapm-v8c-frozen')
+
+    def frozen_spec(repo):
+        d=read_json(Path(repo)/SPEC)
+>       if d!=specification(repo):raise ValueError('system_estimation_config_or_source_mismatch')
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       ValueError: system_estimation_config_or_source_mismatch
+
+dynapm/system_validation/estimation_design.py:82: ValueError
+_ ERROR at setup of test_synthetic_incomplete_short_and_unavailable_provenance_rejected _
+
+tmp_path = PosixPath('/private/var/folders/gj/4h0zvkw165n5t_9rl_nxh0l00000gp/T/pytest-of-fgtek002/pytest-2/test_synthetic_incomplete_shor0')
+inputs = (PosixPath('/private/var/folders/gj/4h0zvkw165n5t_9rl_nxh0l00000gp/T/pytest-of-fgtek002/pytest-2/test_synthetic_incomp... '3.6.0', 'typing-extensions': '4.16.0', 'urllib3': '2.7.0', 'wheel': '0.47.0', 'wrapt': '2.2.2', 'xgboost': '3.3.0'}))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x119cdfee0>
+
+    @pytest.fixture
+    def acquisition(tmp_path,inputs,monkeypatch):
+        """A managed metadata fixture with explicitly simulated 24h wall clocks."""
+>       repo,raw,base,env=inputs;d=frozen_spec(ROOT)
+                                   ^^^^^^^^^^^^^^^^^
+
+dynapm/tests/test_shared_bootstrap.py:30: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+repo = PosixPath('/Users/fgtek002/dynapm-v8c-frozen')
+
+    def frozen_spec(repo):
+        d=read_json(Path(repo)/SPEC)
+>       if d!=specification(repo):raise ValueError('system_estimation_config_or_source_mismatch')
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       ValueError: system_estimation_config_or_source_mismatch
+
+dynapm/system_validation/estimation_design.py:82: ValueError
+_ ERROR at setup of test_all_five_share_history_but_keep_factory_semantics_and_isolation _
+
+tmp_path = PosixPath('/private/var/folders/gj/4h0zvkw165n5t_9rl_nxh0l00000gp/T/pytest-of-fgtek002/pytest-2/test_all_five_share_history_bu0')
+inputs = (PosixPath('/private/var/folders/gj/4h0zvkw165n5t_9rl_nxh0l00000gp/T/pytest-of-fgtek002/pytest-2/test_all_five_share_h... '3.6.0', 'typing-extensions': '4.16.0', 'urllib3': '2.7.0', 'wheel': '0.47.0', 'wrapt': '2.2.2', 'xgboost': '3.3.0'}))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x11e4edef0>
+
+    @pytest.fixture
+    def acquisition(tmp_path,inputs,monkeypatch):
+        """A managed metadata fixture with explicitly simulated 24h wall clocks."""
+>       repo,raw,base,env=inputs;d=frozen_spec(ROOT)
+                                   ^^^^^^^^^^^^^^^^^
+
+dynapm/tests/test_shared_bootstrap.py:30: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+repo = PosixPath('/Users/fgtek002/dynapm-v8c-frozen')
+
+    def frozen_spec(repo):
+        d=read_json(Path(repo)/SPEC)
+>       if d!=specification(repo):raise ValueError('system_estimation_config_or_source_mismatch')
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       ValueError: system_estimation_config_or_source_mismatch
+
+dynapm/system_validation/estimation_design.py:82: ValueError
+____ ERROR at setup of test_fresh_startup_and_no_future_artifact_injection _____
+
+tmp_path = PosixPath('/private/var/folders/gj/4h0zvkw165n5t_9rl_nxh0l00000gp/T/pytest-of-fgtek002/pytest-2/test_fresh_startup_and_no_futu0')
+inputs = (PosixPath('/private/var/folders/gj/4h0zvkw165n5t_9rl_nxh0l00000gp/T/pytest-of-fgtek002/pytest-2/test_fresh_startup_an... '3.6.0', 'typing-extensions': '4.16.0', 'urllib3': '2.7.0', 'wheel': '0.47.0', 'wrapt': '2.2.2', 'xgboost': '3.3.0'}))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x11bd12c10>
+
+    @pytest.fixture
+    def acquisition(tmp_path,inputs,monkeypatch):
+        """A managed metadata fixture with explicitly simulated 24h wall clocks."""
+>       repo,raw,base,env=inputs;d=frozen_spec(ROOT)
+                                   ^^^^^^^^^^^^^^^^^
+
+dynapm/tests/test_shared_bootstrap.py:30: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+repo = PosixPath('/Users/fgtek002/dynapm-v8c-frozen')
+
+    def frozen_spec(repo):
+        d=read_json(Path(repo)/SPEC)
+>       if d!=specification(repo):raise ValueError('system_estimation_config_or_source_mismatch')
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       ValueError: system_estimation_config_or_source_mismatch
+
+dynapm/system_validation/estimation_design.py:82: ValueError
+______ ERROR at setup of test_independent_blocks_cannot_reuse_acquisition ______
+
+tmp_path = PosixPath('/private/var/folders/gj/4h0zvkw165n5t_9rl_nxh0l00000gp/T/pytest-of-fgtek002/pytest-2/test_independent_blocks_cannot0')
+inputs = (PosixPath('/private/var/folders/gj/4h0zvkw165n5t_9rl_nxh0l00000gp/T/pytest-of-fgtek002/pytest-2/test_independent_bloc... '3.6.0', 'typing-extensions': '4.16.0', 'urllib3': '2.7.0', 'wheel': '0.47.0', 'wrapt': '2.2.2', 'xgboost': '3.3.0'}))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x11e456d60>
+
+    @pytest.fixture
+    def acquisition(tmp_path,inputs,monkeypatch):
+        """A managed metadata fixture with explicitly simulated 24h wall clocks."""
+>       repo,raw,base,env=inputs;d=frozen_spec(ROOT)
+                                   ^^^^^^^^^^^^^^^^^
+
+dynapm/tests/test_shared_bootstrap.py:30: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+repo = PosixPath('/Users/fgtek002/dynapm-v8c-frozen')
+
+    def frozen_spec(repo):
+        d=read_json(Path(repo)/SPEC)
+>       if d!=specification(repo):raise ValueError('system_estimation_config_or_source_mismatch')
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       ValueError: system_estimation_config_or_source_mismatch
+
+dynapm/system_validation/estimation_design.py:82: ValueError
+_______ ERROR at setup of test_incomplete_or_symlinked_artifact_rejected _______
+
+tmp_path = PosixPath('/private/var/folders/gj/4h0zvkw165n5t_9rl_nxh0l00000gp/T/pytest-of-fgtek002/pytest-2/test_incomplete_or_symlinked_a0')
+inputs = (PosixPath('/private/var/folders/gj/4h0zvkw165n5t_9rl_nxh0l00000gp/T/pytest-of-fgtek002/pytest-2/test_incomplete_or_sy... '3.6.0', 'typing-extensions': '4.16.0', 'urllib3': '2.7.0', 'wheel': '0.47.0', 'wrapt': '2.2.2', 'xgboost': '3.3.0'}))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x11e456510>
+
+    @pytest.fixture
+    def acquisition(tmp_path,inputs,monkeypatch):
+        """A managed metadata fixture with explicitly simulated 24h wall clocks."""
+>       repo,raw,base,env=inputs;d=frozen_spec(ROOT)
+                                   ^^^^^^^^^^^^^^^^^
+
+dynapm/tests/test_shared_bootstrap.py:30: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+repo = PosixPath('/Users/fgtek002/dynapm-v8c-frozen')
+
+    def frozen_spec(repo):
+        d=read_json(Path(repo)/SPEC)
+>       if d!=specification(repo):raise ValueError('system_estimation_config_or_source_mismatch')
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       ValueError: system_estimation_config_or_source_mismatch
+
+dynapm/system_validation/estimation_design.py:82: ValueError
+_ ERROR at setup of test_unit_artifacts_cannot_be_promoted_to_scientific_inputs _
+
+tmp_path = PosixPath('/private/var/folders/gj/4h0zvkw165n5t_9rl_nxh0l00000gp/T/pytest-of-fgtek002/pytest-2/test_unit_artifacts_cannot_be_0')
+inputs = (PosixPath('/private/var/folders/gj/4h0zvkw165n5t_9rl_nxh0l00000gp/T/pytest-of-fgtek002/pytest-2/test_unit_artifacts_c... '3.6.0', 'typing-extensions': '4.16.0', 'urllib3': '2.7.0', 'wheel': '0.47.0', 'wrapt': '2.2.2', 'xgboost': '3.3.0'}))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x119d4d010>
+
+    @pytest.fixture
+    def acquisition(tmp_path,inputs,monkeypatch):
+        """A managed metadata fixture with explicitly simulated 24h wall clocks."""
+>       repo,raw,base,env=inputs;d=frozen_spec(ROOT)
+                                   ^^^^^^^^^^^^^^^^^
+
+dynapm/tests/test_shared_bootstrap.py:30: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+repo = PosixPath('/Users/fgtek002/dynapm-v8c-frozen')
+
+    def frozen_spec(repo):
+        d=read_json(Path(repo)/SPEC)
+>       if d!=specification(repo):raise ValueError('system_estimation_config_or_source_mismatch')
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       ValueError: system_estimation_config_or_source_mismatch
+
+dynapm/system_validation/estimation_design.py:82: ValueError
+=================================== FAILURES ===================================
+_________ test_frozen_shared_and_timing_contracts_match_implementation _________
+
+    def test_frozen_shared_and_timing_contracts_match_implementation():
+>       d=frozen_spec(ROOT)
+          ^^^^^^^^^^^^^^^^^
+
+dynapm/tests/test_bootstrap_cli_contract.py:14: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+repo = PosixPath('/Users/fgtek002/dynapm-v8c-frozen')
+
+    def frozen_spec(repo):
+        d=read_json(Path(repo)/SPEC)
+>       if d!=specification(repo):raise ValueError('system_estimation_config_or_source_mismatch')
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       ValueError: system_estimation_config_or_source_mismatch
+
+dynapm/system_validation/estimation_design.py:82: ValueError
+_________ test_probe_uses_managed_local_cluster_prefix_and_no_workload _________
+
+    def test_probe_uses_managed_local_cluster_prefix_and_no_workload():
+>       d=frozen_spec(Path(__file__).parents[2])
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+dynapm/tests/test_clock_probe.py:10: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+repo = PosixPath('/Users/fgtek002/dynapm-v8c-frozen')
+
+    def frozen_spec(repo):
+        d=read_json(Path(repo)/SPEC)
+>       if d!=specification(repo):raise ValueError('system_estimation_config_or_source_mismatch')
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       ValueError: system_estimation_config_or_source_mismatch
+
+dynapm/system_validation/estimation_design.py:82: ValueError
+___ test_component_benchmark_does_not_refresh_live_policy_or_modify_history ____
+
+    def test_component_benchmark_does_not_refresh_live_policy_or_modify_history():
+>    d=frozen_spec(ROOT);b=measured_bootstrap(unit_evidence(),START,END,END,d)
+       ^^^^^^^^^^^^^^^^^
+
+dynapm/tests/test_neutral_characterization.py:17: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+repo = PosixPath('/Users/fgtek002/dynapm-v8c-frozen')
+
+    def frozen_spec(repo):
+        d=read_json(Path(repo)/SPEC)
+>       if d!=specification(repo):raise ValueError('system_estimation_config_or_source_mismatch')
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       ValueError: system_estimation_config_or_source_mismatch
+
+dynapm/system_validation/estimation_design.py:82: ValueError
+___ test_bounded_stimuli_cover_all_directions_and_do_not_choose_compression ____
+
+    def test_bounded_stimuli_cover_all_directions_and_do_not_choose_compression():
+>    d=frozen_spec(ROOT);fixed=[t for t in TARGETS if t[0] is not None]
+       ^^^^^^^^^^^^^^^^^
+
+dynapm/tests/test_neutral_characterization.py:49: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+repo = PosixPath('/Users/fgtek002/dynapm-v8c-frozen')
+
+    def frozen_spec(repo):
+        d=read_json(Path(repo)/SPEC)
+>       if d!=specification(repo):raise ValueError('system_estimation_config_or_source_mismatch')
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       ValueError: system_estimation_config_or_source_mismatch
+
+dynapm/system_validation/estimation_design.py:82: ValueError
+_ test_engineering_memory_safe_ladder_is_explicit_and_does_not_change_consumer _
+
+    def test_engineering_memory_safe_ladder_is_explicit_and_does_not_change_consumer():
+     from dynapm.system_validation.neutral_characterization import ENGINEERING_TARGETS
+>    d=frozen_spec(ROOT)
+       ^^^^^^^^^^^^^^^^^
+
+dynapm/tests/test_neutral_characterization.py:94: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+repo = PosixPath('/Users/fgtek002/dynapm-v8c-frozen')
+
+    def frozen_spec(repo):
+        d=read_json(Path(repo)/SPEC)
+>       if d!=specification(repo):raise ValueError('system_estimation_config_or_source_mismatch')
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       ValueError: system_estimation_config_or_source_mismatch
+
+dynapm/system_validation/estimation_design.py:82: ValueError
+____ test_half_open_still_requires_original_causal_and_admission_semantics _____
+
+    def test_half_open_still_requires_original_causal_and_admission_semantics():
+        from dynapm.system_validation.estimation_design import frozen_spec
+>       d=frozen_spec(Path(__file__).parents[2]);ss=unit_evidence()[0]['samples']
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+dynapm/tests/test_receipt_derivation.py:48: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+repo = PosixPath('/Users/fgtek002/dynapm-v8c-frozen')
+
+    def frozen_spec(repo):
+        d=read_json(Path(repo)/SPEC)
+>       if d!=specification(repo):raise ValueError('system_estimation_config_or_source_mismatch')
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       ValueError: system_estimation_config_or_source_mismatch
+
+dynapm/system_validation/estimation_design.py:82: ValueError
+_____ test_frozen_contract_is_separate_and_keeps_legacy_physical_semantics _____
+
+    def test_frozen_contract_is_separate_and_keeps_legacy_physical_semantics():
+>    d=frozen_spec(ROOT);v=read_protocol(ROOT)
+       ^^^^^^^^^^^^^^^^^
+
+dynapm/tests/test_reservation_protocol.py:39: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+repo = PosixPath('/Users/fgtek002/dynapm-v8c-frozen')
+
+    def frozen_spec(repo):
+        d=read_json(Path(repo)/SPEC)
+>       if d!=specification(repo):raise ValueError('system_estimation_config_or_source_mismatch')
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       ValueError: system_estimation_config_or_source_mismatch
+
+dynapm/system_validation/estimation_design.py:82: ValueError
+_____ test_reservation_target_and_templates_do_not_change_legacy_hard_cap ______
+
+    def test_reservation_target_and_templates_do_not_change_legacy_hard_cap():
+>    d=frozen_spec(ROOT);before=deepcopy(d);resources=reservation_resources(d)
+       ^^^^^^^^^^^^^^^^^
+
+dynapm/tests/test_reservation_protocol.py:53: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+repo = PosixPath('/Users/fgtek002/dynapm-v8c-frozen')
+
+    def frozen_spec(repo):
+        d=read_json(Path(repo)/SPEC)
+>       if d!=specification(repo):raise ValueError('system_estimation_config_or_source_mismatch')
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       ValueError: system_estimation_config_or_source_mismatch
+
+dynapm/system_validation/estimation_design.py:82: ValueError
+___________ test_no_practical_margins_blocker_and_no_claims_enabled ____________
+
+    def test_no_practical_margins_blocker_and_no_claims_enabled():
+>       d=frozen_spec(ROOT)
+          ^^^^^^^^^^^^^^^^^
+
+dynapm/tests/test_system_estimation_calibration.py:19: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+repo = PosixPath('/Users/fgtek002/dynapm-v8c-frozen')
+
+    def frozen_spec(repo):
+        d=read_json(Path(repo)/SPEC)
+>       if d!=specification(repo):raise ValueError('system_estimation_config_or_source_mismatch')
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       ValueError: system_estimation_config_or_source_mismatch
+
+dynapm/system_validation/estimation_design.py:82: ValueError
+_________ test_six_predeclared_neutral_only_trials_and_fresh_bootstrap _________
+
+    def test_six_predeclared_neutral_only_trials_and_fresh_bootstrap():
+>       p=calibration_plan(ROOT)
+          ^^^^^^^^^^^^^^^^^^^^^^
+
+dynapm/tests/test_system_estimation_calibration.py:31: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+dynapm/system_validation/estimation_design.py:89: in calibration_plan
+    d=frozen_spec(repo)
+      ^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+repo = PosixPath('/Users/fgtek002/dynapm-v8c-frozen')
+
+    def frozen_spec(repo):
+        d=read_json(Path(repo)/SPEC)
+>       if d!=specification(repo):raise ValueError('system_estimation_config_or_source_mismatch')
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       ValueError: system_estimation_config_or_source_mismatch
+
+dynapm/system_validation/estimation_design.py:82: ValueError
+_______ test_event_stream_uses_stable_bootstrap_and_frozen_dynamic_phase _______
+
+    def test_event_stream_uses_stable_bootstrap_and_frozen_dynamic_phase():
+        from itertools import islice
+>       d=frozen_spec(ROOT);p=dict(design=d,load_start_seconds=0,measurement_start_seconds=1,measurement_end_seconds=2,scenario='periodic')
+          ^^^^^^^^^^^^^^^^^
+
+dynapm/tests/test_system_estimation_calibration.py:105: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+repo = PosixPath('/Users/fgtek002/dynapm-v8c-frozen')
+
+    def frozen_spec(repo):
+        d=read_json(Path(repo)/SPEC)
+>       if d!=specification(repo):raise ValueError('system_estimation_config_or_source_mismatch')
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       ValueError: system_estimation_config_or_source_mismatch
+
+dynapm/system_validation/estimation_design.py:82: ValueError
+___________ test_measured_worker_http_initialize_and_periodic_commit ___________
+
+tmp_path = PosixPath('/private/var/folders/gj/4h0zvkw165n5t_9rl_nxh0l00000gp/T/pytest-of-fgtek002/pytest-2/test_measured_worker_http_init0')
+
+    def test_measured_worker_http_initialize_and_periodic_commit(tmp_path):
+        """UNIT fixture, not an elapsed real bootstrap or system comparison."""
+        from dynapm.tests.test_system_trial_preparation import unit_evidence,START,END,STEP
+        from dynapm.system_validation.smoke import free_port,http,wait_http
+        from dynapm.core.run_store import write_json
+        root=tmp_path/'run';(root/'outputs').mkdir(parents=True)
+        with (root/'outputs/bootstrap_samples.jsonl').open('w') as file:
+            for entry in unit_evidence():file.write(canonical_json(entry)+'\n')
+>       plan=tmp_path/'plan.json';write_json(plan,dict(design=frozen_spec(ROOT),bootstrap_start_seconds=START//10**9,
+                                                              ^^^^^^^^^^^^^^^^^
+            measurement_start_seconds=END//10**9))
+
+dynapm/tests/test_system_estimation_calibration.py:143: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+repo = PosixPath('/Users/fgtek002/dynapm-v8c-frozen')
+
+    def frozen_spec(repo):
+        d=read_json(Path(repo)/SPEC)
+>       if d!=specification(repo):raise ValueError('system_estimation_config_or_source_mismatch')
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       ValueError: system_estimation_config_or_source_mismatch
+
+dynapm/system_validation/estimation_design.py:82: ValueError
+________ test_controller_worker_preserves_actual_enforcement_and_costs _________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x11bd134d0>
+tmp_path = PosixPath('/private/var/folders/gj/4h0zvkw165n5t_9rl_nxh0l00000gp/T/pytest-of-fgtek002/pytest-2/test_controller_worker_preserv0')
+
+    def test_controller_worker_preserves_actual_enforcement_and_costs(monkeypatch,tmp_path):
+        from dynapm.system_validation import calibration_workers as w
+        root=tmp_path;out=root/'outputs';out.mkdir()
+>       d=frozen_spec(ROOT);commands=out/'controller_commands.jsonl'
+          ^^^^^^^^^^^^^^^^^
+
+dynapm/tests/test_system_estimation_calibration.py:167: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+repo = PosixPath('/Users/fgtek002/dynapm-v8c-frozen')
+
+    def frozen_spec(repo):
+        d=read_json(Path(repo)/SPEC)
+>       if d!=specification(repo):raise ValueError('system_estimation_config_or_source_mismatch')
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       ValueError: system_estimation_config_or_source_mismatch
+
+dynapm/system_validation/estimation_design.py:82: ValueError
+____ test_complete_trial_summary_with_operational_harm_and_cost_attribution ____
+
+tmp_path = PosixPath('/private/var/folders/gj/4h0zvkw165n5t_9rl_nxh0l00000gp/T/pytest-of-fgtek002/pytest-2/test_complete_trial_summary_wi0')
+
+    def test_complete_trial_summary_with_operational_harm_and_cost_attribution(tmp_path):
+        """Complete synthetic result schema catches errors before a multi-day trial."""
+        from dynapm.system_validation.calibration_runner import summarize
+        from dynapm.core.run_store import write_json
+        root=tmp_path;out=root/'outputs';out.mkdir()
+        def lines(name,rows):
+            (out/(name+'.jsonl')).write_text(''.join(canonical_json(r)+'\n' for r in rows))
+        initial={'requests':{'cpu':'1','memory':'100Mi'},'limits':{'cpu':'1','memory':'100Mi'}}
+        lines('requests',[dict(scheduled_at=t,completed_at=t+.1,latency_seconds=.1,success=True,dropped=False) for t in (-.05,1.,5.)])
+        lines('telemetry',[dict(sample_time_ns=i*5*10**9,received_at_ns=i*5*10**9,instance_id='UNIT',cpu_seconds=i*.2,
+            memory_working_set_bytes=40*2**20,cpu_limit_cores=1.,memory_limit_bytes=100*2**20,
+            cpu_throttled_periods=0,cpu_periods=i,oom_kills=0,
+            work_handler_cpu_seconds_total=i*.15,telemetry_handler_cpu_seconds_total=i*.025,
+            health_handler_cpu_seconds_total=i*.025) for i in range(3)])
+        events=[dict(kind='RECOMMENDATION',disposition='SUBMITTED',acknowledged_ns=2*10**9,
+            recommendation=dict(cpu_millicores=500,memory_mib=50),compute_wall_seconds=.001),
+            dict(kind='ENFORCED',confirmed_ns=4*10**9,actual_resources={'requests':{'cpu':'500m','memory':'50Mi'}},actuation_latency_seconds=2.),
+            dict(kind='POD_OBSERVATION',wall_ns=0,status={'containerStatuses':[dict(restartCount=0,lastState={})]}),
+            dict(kind='POD_OBSERVATION',wall_ns=5*10**9,status={'containerStatuses':[dict(restartCount=1,
+                lastState={'terminated':{'reason':'OOMKilled','finishedAt':'unit-clock'}})]})]
+        lines('decisions',events)
+        baseline=dict(phase='measurement_start_before_initialization',profile={'cpu_seconds':1.},
+            controller={'cpu_seconds':2.},generator={'cpu_seconds':3.},prometheus={'process_cpu_seconds_total':4.})
+        measure=dict(phase='MEASUREMENT',profile={'rss_bytes':100},controller={'rss_bytes':200},
+            generator={'rss_bytes':300},prometheus={'process_cpu_seconds_total':5.,'process_resident_memory_bytes':400})
+        lines('overhead',[baseline,measure])
+        write_json(out/'resize_preflight.json',{'unchanged_actual_resources':initial})
+        write_json(out/'controller_status.json',dict(process={'cpu_seconds':3.},counters={'resource_changes':1}))
+        write_json(out/'profile_initial.json',dict(profile={'dynamic':{'predicted_cpu_p95_next_24h':1.,'predicted_mem_p95_next_24h':10.}},
+            bootstrap_thresholds={'cpu':{'p95':1.},'memory':{'p95':10.}}))
+        write_json(out/'profile_final.json',dict(accounting={'n_refresh_events':0},maintenance_step_wall_seconds=[.002]))
+        write_json(out/'attribution.json',dict(process={'cpu_seconds':2.},thread_step_cpu_seconds=[.001]))
+>       r=summarize(root,dict(measurement_start_seconds=0.,measurement_end_seconds=10.,scenario='stable',block=0,design=frozen_spec(ROOT)))
+                                                                                                                        ^^^^^^^^^^^^^^^^^
+
+dynapm/tests/test_system_estimation_calibration.py:257: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+repo = PosixPath('/Users/fgtek002/dynapm-v8c-frozen')
+
+    def frozen_spec(repo):
+        d=read_json(Path(repo)/SPEC)
+>       if d!=specification(repo):raise ValueError('system_estimation_config_or_source_mismatch')
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       ValueError: system_estimation_config_or_source_mismatch
+
+dynapm/system_validation/estimation_design.py:82: ValueError
+=========================== short test summary info ============================
+FAILED dynapm/tests/test_bootstrap_cli_contract.py::test_frozen_shared_and_timing_contracts_match_implementation
+FAILED dynapm/tests/test_clock_probe.py::test_probe_uses_managed_local_cluster_prefix_and_no_workload
+FAILED dynapm/tests/test_neutral_characterization.py::test_component_benchmark_does_not_refresh_live_policy_or_modify_history
+FAILED dynapm/tests/test_neutral_characterization.py::test_bounded_stimuli_cover_all_directions_and_do_not_choose_compression
+FAILED dynapm/tests/test_neutral_characterization.py::test_engineering_memory_safe_ladder_is_explicit_and_does_not_change_consumer
+FAILED dynapm/tests/test_receipt_derivation.py::test_half_open_still_requires_original_causal_and_admission_semantics
+FAILED dynapm/tests/test_reservation_protocol.py::test_frozen_contract_is_separate_and_keeps_legacy_physical_semantics
+FAILED dynapm/tests/test_reservation_protocol.py::test_reservation_target_and_templates_do_not_change_legacy_hard_cap
+FAILED dynapm/tests/test_system_estimation_calibration.py::test_no_practical_margins_blocker_and_no_claims_enabled
+FAILED dynapm/tests/test_system_estimation_calibration.py::test_six_predeclared_neutral_only_trials_and_fresh_bootstrap
+FAILED dynapm/tests/test_system_estimation_calibration.py::test_event_stream_uses_stable_bootstrap_and_frozen_dynamic_phase
+FAILED dynapm/tests/test_system_estimation_calibration.py::test_measured_worker_http_initialize_and_periodic_commit
+FAILED dynapm/tests/test_system_estimation_calibration.py::test_controller_worker_preserves_actual_enforcement_and_costs
+FAILED dynapm/tests/test_system_estimation_calibration.py::test_complete_trial_summary_with_operational_harm_and_cost_attribution
+ERROR dynapm/tests/test_bounded_v8.py::test_replay_causal_tile_reset_and_deterministic_compilation
+ERROR dynapm/tests/test_bounded_v8.py::test_native_live_refresh_and_noop_disposition
+ERROR dynapm/tests/test_bounded_v8.py::test_analysis_uses_three_pairs_and_marks_missing
+ERROR dynapm/tests/test_bounded_v8.py::test_reference_loader_rejects_fixture_scope
+ERROR dynapm/tests/test_bounded_v8.py::test_complete_offline_manifest_sequence
+ERROR dynapm/tests/test_bounded_v8.py::test_snapshot_digest_and_file_tamper_fail_before_donor_read
+ERROR dynapm/tests/test_receipt_derivation.py::test_derived_generation_parent_immutability_independent_load_and_tamper
+ERROR dynapm/tests/test_shared_bootstrap.py::test_bootstrap_only_parent_materializes_deterministically_and_relocates
+ERROR dynapm/tests/test_shared_bootstrap.py::test_artifact_tampering_rejected[raw_samples.jsonl]
+ERROR dynapm/tests/test_shared_bootstrap.py::test_artifact_tampering_rejected[parent_manifest.json]
+ERROR dynapm/tests/test_shared_bootstrap.py::test_artifact_tampering_rejected[COMPLETE]
+ERROR dynapm/tests/test_shared_bootstrap.py::test_parent_tampering_not_upgraded_to_new_artifact
+ERROR dynapm/tests/test_shared_bootstrap.py::test_synthetic_incomplete_short_and_unavailable_provenance_rejected
+ERROR dynapm/tests/test_shared_bootstrap.py::test_all_five_share_history_but_keep_factory_semantics_and_isolation
+ERROR dynapm/tests/test_shared_bootstrap.py::test_fresh_startup_and_no_future_artifact_injection
+ERROR dynapm/tests/test_shared_bootstrap.py::test_independent_blocks_cannot_reuse_acquisition
+ERROR dynapm/tests/test_shared_bootstrap.py::test_incomplete_or_symlinked_artifact_rejected
+ERROR dynapm/tests/test_shared_bootstrap.py::test_unit_artifacts_cannot_be_promoted_to_scientific_inputs
+14 failed, 908 passed, 3 skipped, 18 errors in 114.83s (0:01:54)
