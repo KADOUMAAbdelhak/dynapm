@@ -1,0 +1,26 @@
+{
+  "after_boundary": {
+    "boot_epoch_seconds": 1794336849,
+    "boot_timeval_ns": 1794336849060321000,
+    "boot_uuid": "6C470F9C-9B15-4093-87C3-DDE6D713D7E6",
+    "timeval_raw": "{ sec = 1794336849, usec = 60321 } Tue Nov 10 20:54:09 2026\n",
+    "uuid_raw": "6C470F9C-9B15-4093-87C3-DDE6D713D7E6\n"
+  },
+  "before_boundary": {
+    "boot_epoch_seconds": 1794336848,
+    "boot_timeval_ns": 1794336848986377000,
+    "boot_uuid": "6C470F9C-9B15-4093-87C3-DDE6D713D7E6",
+    "timeval_raw": "{ sec = 1794336848, usec = 986377 } Tue Nov 10 20:54:08 2026\n",
+    "uuid_raw": "6C470F9C-9B15-4093-87C3-DDE6D713D7E6\n"
+  },
+  "initial": {
+    "boot_epoch_seconds": 1794336848,
+    "boot_timeval_ns": 1794336848485198000,
+    "boot_uuid": "6C470F9C-9B15-4093-87C3-DDE6D713D7E6",
+    "timeval_raw": "{ sec = 1794336848, usec = 485198 } Tue Nov 10 20:54:08 2026\n",
+    "uuid_raw": "6C470F9C-9B15-4093-87C3-DDE6D713D7E6\n"
+  },
+  "scope": "OFFLINE_REGRESSION_FIXTURE_NOT_QUALIFICATION",
+  "source_evidence_commit": "890882e996ff71510ecf00186964e8640b9032c1",
+  "source_manifest_sha256": "95bec9b596a85f932a035606591040bda55946e6edd20089332cf6452f2e0052"
+}

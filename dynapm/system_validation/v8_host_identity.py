@@ -1,6 +1,8 @@
-"""V8 host identity amendment. Frozen acquisition and scientific files stay intact."""
+"""Versioned host UUID guards and evidence; no scientific treatment changes."""
 from pathlib import Path
 import re
+import subprocess
+import threading
 import uuid
 
 from dynapm.core.provenance import (canonical_json, experiment_from_dict, file_sha256,
@@ -10,8 +12,10 @@ from dynapm.system_validation.clock_observations import MAX_CLOCK_DELTA_NS
 from dynapm.system_validation.host_certificate import require_same_host_runtime
 from dynapm.system_validation.host_power import (
     ManagedPowerGuard, PowerGuardError, command, power_state, own_assertions,
-    ENDURANCE_SECONDS, SCHEMA,
+    ENDURANCE_SECONDS, SCHEMA, MAX_HEARTBEAT_GAP_NS,
 )
+
+UUID_ENDURANCE_SCHEMA = 'host-endurance-v2-uuid'
 
 SCIENTIFIC_SOURCE = 'fe3b870149a156e7fecb88741d51cfb5c1ed86d7'
 ADDITIONS = (
@@ -95,19 +99,25 @@ def same_boot(expected_uuid, current, *, legacy_epoch=None, anchor_ns=None):
 
 class UUIDPowerGuard(ManagedPowerGuard):
     """Keep all original clock, gap, AC, lid, policy and owned-assertion checks."""
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.lock = threading.RLock()
+
     def _snapshot(self):
         if self.process is None or self.process.poll() is not None:
             raise PowerGuardError('power_assertion_process_exited')
         state = power_state(self.read, allow_external_power_deficit=self.allow_external_power_deficit)
         try:
             identity = read_boot(self.read)
-            if state['boot_epoch_seconds'] != identity['boot_epoch_seconds']:
-                raise ValueError('inconsistent_boot_snapshot')
+            # The calendar may cross an integer-second boundary between OS reads.
+            # Corroborate its resolution bin with the existing 2 s bound.
+            same_boot(identity['boot_uuid'], identity, legacy_epoch=state['boot_epoch_seconds'])
             if self.cached:
                 same_boot(self.cached['boot_uuid'], identity,
                           anchor_ns=self.state['boot_timeval_anchor_ns'])
             else:
                 self.state['boot_timeval_anchor_ns'] = identity['boot_timeval_ns']
+                self.state['boot_uuid_anchor'] = identity['boot_uuid']
         except ValueError as exc:
             raise PowerGuardError(str(exc)) from exc
         settings = self.read(['/usr/bin/pmset', '-g', 'custom'])
@@ -117,7 +127,72 @@ class UUIDPowerGuard(ManagedPowerGuard):
         state['power_settings_sha256'] = fingerprint(settings)
         state['own_assertion_lines'] = own_assertions(
             self.read(['/usr/bin/pmset', '-g', 'assertions']), self.process.pid)
-        return dict(state, **{k:v for k,v in identity.items() if k != 'boot_epoch_seconds'})
+        return dict(state, boot_identity_checkpoint=identity,
+                    **{k:v for k,v in identity.items() if k != 'boot_epoch_seconds'})
+
+
+    def checkpoint(self, *, wall_ns=None, mono_ns=None, force_power=False):
+        with self.lock:
+            # UUID/timeval are checked at EVERY existing 5 s checkpoint, even while
+            # expensive AC/lid/policy/assertion diagnostics retain their 30 s cadence.
+            self.raise_if_failed()
+            try:
+                identity = read_boot(self.read)
+                same_boot(self.cached['boot_uuid'], identity,
+                          anchor_ns=self.state['boot_timeval_anchor_ns'])
+            except (ValueError, OSError, subprocess.SubprocessError, KeyError) as exc:
+                self._fail(str(exc), dict(boot_identity=locals().get('identity')))
+            self.cached['boot_identity_checkpoint'] = identity
+            return super().checkpoint(wall_ns=wall_ns, mono_ns=mono_ns, force_power=force_power)
+
+
+def endurance_boot_metadata(summary, guard, points):
+    """Validate v2 raw UUID history; v1 stays identifiable as historical evidence."""
+    if not points:
+        raise ValueError('missing_qualification_checkpoints')
+    if summary['schema_version'] == 'host-endurance-v1':
+        epochs = {p['power']['boot_epoch_seconds'] for p in points}
+        if len(epochs) != 1 or type(next(iter(epochs))) is not int:
+            raise ValueError('inconsistent_qualification_boot_metadata')
+        return dict(legacy_epoch=next(iter(epochs)), original_uuid_recorded=False)
+    if summary['schema_version'] != UUID_ENDURANCE_SCHEMA:
+        raise ValueError('unknown_host_endurance_schema')
+    anchor = guard.get('boot_timeval_anchor_ns')
+    uuid_value = guard.get('boot_uuid_anchor')
+    if summary.get('boot_uuid') != uuid_value or summary.get('boot_timeval_anchor_ns') != anchor:
+        raise ValueError('qualification_boot_anchor_mismatch')
+    if type(anchor) is not int or anchor < 0 or not uuid_value:
+        raise ValueError('missing_qualification_boot_anchor')
+    try:
+        first = points[0]
+        previous = None
+        for point in points:
+            if point['kind'] != 'CHECKPOINT':
+                raise ValueError('noncheckpoint_qualification_record')
+            power = point['power']
+            identity = power['boot_identity_checkpoint']
+            parsed = parse_boot(identity['uuid_raw'], identity['timeval_raw'])
+            if parsed != identity or power['boot_uuid'] != parsed['boot_uuid']:
+                raise ValueError('qualification_raw_boot_identity_mismatch')
+            same_boot(uuid_value, parsed, anchor_ns=anchor)
+            if (not power['ac_power'] or not power['lid_open']
+                    or power.get('external_power_deficit_observed')
+                    or power.get('authorized_external_power_deficit')):
+                raise ValueError('qualification_power_invalid')
+            wall, mono = point['wall_ns'], point['monotonic_ns']
+            drift = (wall-first['wall_ns'])-(mono-first['monotonic_ns'])
+            if abs(drift) > MAX_CLOCK_DELTA_NS:
+                raise ValueError('qualification_clock_discontinuity')
+            if previous is not None and not 0 <= mono-previous <= MAX_HEARTBEAT_GAP_NS:
+                raise ValueError('qualification_checkpoint_gap')
+            previous = mono
+        if points[-1]['monotonic_ns']-first['monotonic_ns'] < ENDURANCE_SECONDS*10**9:
+            raise ValueError('qualification_history_incomplete')
+    except (KeyError, TypeError) as exc:
+        raise ValueError('malformed_qualification_history') from exc
+    return dict(legacy_epoch=points[0]['power']['boot_epoch_seconds'],
+                original_uuid_recorded=True, boot_uuid=uuid_value,
+                boot_timeval_anchor_ns=anchor)
 
 
 def qualification_inputs(repo, run_path):
@@ -128,13 +203,18 @@ def qualification_inputs(repo, run_path):
         raise ValueError('managed_host_endurance_path_required')
     manifest = read_json(root/'manifest.json')
     exp = experiment_from_dict(manifest['experiment'])
-    require_same_host_runtime(repo, exp.source.commit)
+    schema = read_json(root/'outputs/endurance_summary.json').get('schema_version')
+    if schema == UUID_ENDURANCE_SCHEMA:
+        from dynapm.system_validation.uuid_host_observer import require_same_uuid_runtime
+        require_same_uuid_runtime(repo, exp.source.commit)
+    else:
+        require_same_host_runtime(repo, exp.source.commit)
     decision = check_cache(root, exp, 'smoke')
     if not decision.reusable:
         raise ValueError('host_endurance_invalid:'+','.join(decision.reasons))
     summary = read_json(root/'outputs/endurance_summary.json')
     guard = read_json(root/'outputs/power_guard.json')
-    if (summary.get('schema_version') != 'host-endurance-v1'
+    if (summary.get('schema_version') not in ('host-endurance-v1', UUID_ENDURANCE_SCHEMA)
             or summary.get('elapsed_seconds', 0) < ENDURANCE_SECONDS
             or summary.get('requested_seconds', 0) < ENDURANCE_SECONDS
             or summary.get('comparisons') != 0 or summary.get('profile_initializations') != 0
@@ -143,16 +223,12 @@ def qualification_inputs(repo, run_path):
         raise ValueError('host_endurance_incomplete')
     import json
     points = [json.loads(line) for line in (root/'outputs/host_continuity.jsonl').read_text().splitlines()]
-    if not points:
-        raise ValueError('missing_qualification_checkpoints')
-    epochs = {p['power']['boot_epoch_seconds'] for p in points}
-    if len(epochs) != 1 or type(next(iter(epochs))) is not int:
-        raise ValueError('inconsistent_qualification_boot_metadata')
+    boot_metadata = endurance_boot_metadata(summary, guard, points)
     names = ('manifest.json', 'output_manifest.json', 'SUCCESS', 'outputs/power_guard.json',
              'outputs/endurance_summary.json', 'outputs/host_continuity.jsonl')
     return dict(path=root.relative_to(repo).as_posix(),
                 hashes={n:file_sha256(root/n) for n in names},
-                legacy_epoch=next(iter(epochs)), original_uuid_recorded=False), guard
+                **boot_metadata), guard
 
 
 def qualification_amendment(repo, run_path, witness_paths):
