@@ -129,18 +129,27 @@ def receive_t0(commands,kube,node,path,config,guard):
 
 
 def source_binding(repo, spec):
+    from dynapm.system_validation import primary_observer_binding as observer_binding
     head=subprocess.check_output(['git','rev-parse','HEAD'],cwd=repo,text=True).strip()
-    if head!=spec['executor_commit'] or subprocess.check_output(['git','status','--porcelain'],cwd=repo).strip() or subprocess.check_output(['git','branch','--show-current'],cwd=repo,text=True).strip()!=spec['executor_branch']:
-        raise ValueError('clean_exact_executor_commit_required')
-    subprocess.run(['git','merge-base','--is-ancestor',TRANSPORT,head],cwd=repo,check=True,capture_output=True)
-    changes=subprocess.check_output(['git','diff','--name-status',TRANSPORT,head],cwd=repo,text=True).splitlines()
-    additions={}
-    for line in changes:
-        status,path=line.split('\t')
-        if status!='A':raise ValueError('approved_transport_or_scientific_file_modified')
-        additions[path]=file_sha256(repo/path)
-    if additions!=spec['executor_files'] or load_contract(repo)!=CONTRACT:
-        raise ValueError('executor_source_or_contract_mismatch')
+    binding={}
+    if spec.get('schema')==observer_binding.SPEC_SCHEMA:
+        # Binding-only amendment: primary executor, task49 observer, observer
+        # amendment and current-boot qualification are each verified separately.
+        binding=observer_binding.source_binding(repo,spec)
+        if load_contract(repo)!=CONTRACT:
+            raise ValueError('executor_source_or_contract_mismatch')
+    else:
+        if head!=spec['executor_commit'] or subprocess.check_output(['git','status','--porcelain'],cwd=repo).strip() or subprocess.check_output(['git','branch','--show-current'],cwd=repo,text=True).strip()!=spec['executor_branch']:
+            raise ValueError('clean_exact_executor_commit_required')
+        subprocess.run(['git','merge-base','--is-ancestor',TRANSPORT,head],cwd=repo,check=True,capture_output=True)
+        changes=subprocess.check_output(['git','diff','--name-status',TRANSPORT,head],cwd=repo,text=True).splitlines()
+        additions={}
+        for line in changes:
+            status,path=line.split('\t')
+            if status!='A':raise ValueError('approved_transport_or_scientific_file_modified')
+            additions[path]=file_sha256(repo/path)
+        if additions!=spec['executor_files'] or load_contract(repo)!=CONTRACT:
+            raise ValueError('executor_source_or_contract_mismatch')
     base=repo/'results/v8c5_service/20261108-v1'
     if file_sha256(base/'amendment-v2.json')!=AMENDMENT or file_sha256(base/'qualification-summary.json')!=QUALIFICATION:
         raise ValueError('transport_qualification_changed')
@@ -157,10 +166,14 @@ def source_binding(repo, spec):
     if spec.get('t0_policy')!='FROZEN_T0_INCLUDES_ENFORCEMENT_TRANSITION':
         raise ValueError('prospective_t0_policy_required')
     return dict(scientific_source=SCIENTIFIC_SOURCE,transport_commit=TRANSPORT,executor_commit=head,
-                amendment_sha256=AMENDMENT,transport_qualification_sha256=QUALIFICATION)
+                amendment_sha256=AMENDMENT,transport_qualification_sha256=QUALIFICATION,**binding)
 
 
 def host_qualification(repo,spec):
+    from dynapm.system_validation import primary_observer_binding as observer_binding
+    if spec.get('schema')==observer_binding.SPEC_SCHEMA:
+        # Sealed task49 certificate verified in place; exact current boot UUID required.
+        return observer_binding.host_qualification(repo,spec)
     path=repo/spec['host_amendment_path']
     if file_sha256(path)!=spec['host_amendment_sha256']:
         raise ValueError('approved_host_amendment_changed')
