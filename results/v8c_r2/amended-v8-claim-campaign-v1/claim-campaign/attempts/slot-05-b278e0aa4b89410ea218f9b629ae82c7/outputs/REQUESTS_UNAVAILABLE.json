@@ -1,0 +1,1 @@
+{"failure":{"category":"HARNESS_MEASUREMENT_FAILURE","error":"ValueError('telemetry_failed:[\"ValueError(\\'observer_storage_buffer_or_budget\\')\", \"ValueError(\\'slot_storage_buffer_or_budget_exhausted\\')\"]')","type":"ValueError"},"node_preserved":true,"status":"UNDEFINED"}

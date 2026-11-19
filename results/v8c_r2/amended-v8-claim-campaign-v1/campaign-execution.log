@@ -1,0 +1,13 @@
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/Users/fgtek002/dynapm-v8c-frozen/dynapm/scripts/task48_v8_service_primary.py", line 49, in <module>
+    if __name__=='__main__':main()
+                            ~~~~^^
+  File "/Users/fgtek002/dynapm-v8c-frozen/dynapm/scripts/task48_v8_service_primary.py", line 44, in main
+    state=campaign(Path.cwd(),a.root.resolve(),read_json(a.spec),a.scope,resume=a.resume,
+        max_slots=a.max_slots,stop_after_slot=a.stop_after_slot,qualification=qualification)
+  File "/Users/fgtek002/dynapm-v8c-frozen/dynapm/system_validation/service_primary.py", line 560, in campaign
+    if result['status']!='SEALED_VALID':raise ValueError('invalid_treatment_requires_review')
+                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ValueError: invalid_treatment_requires_review
