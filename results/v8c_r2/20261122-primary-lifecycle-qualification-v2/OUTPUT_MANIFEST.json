@@ -1,0 +1,246 @@
+{
+ "files": {
+  "results/v8c_r2/20261122-primary-lifecycle-qualification-v2/build_qualification.py": {
+   "bytes": 5124,
+   "sha256": "2b6a6d51dd2909b5cef8ef6fd6f6f5ac13f0bcbe7a45fa262c863699a43aebb2"
+  },
+  "results/v8c_r2/20261122-primary-lifecycle-qualification-v2/independent-validation.json": {
+   "bytes": 672,
+   "sha256": "b92c3de809a39c16ec240e5f8efa3aea2656ec7047a77060f8aae493fbf57207"
+  },
+  "results/v8c_r2/20261122-primary-lifecycle-qualification-v2/independent_validation.py": {
+   "bytes": 2914,
+   "sha256": "02c15a3b7d644c423697633d24ea68ee23eee08a636a3ee7e11d8ee24a208be4"
+  },
+  "results/v8c_r2/20261122-primary-lifecycle-qualification-v2/intent.json": {
+   "bytes": 1485,
+   "sha256": "e22e5f1c499e3dc710b57b0c134a4323336f4a38b33ec092fa98e6a2a0cb3d20"
+  },
+  "results/v8c_r2/20261122-primary-lifecycle-qualification-v2/launch_b.sh": {
+   "bytes": 523,
+   "sha256": "9008bff8638a59e7eceaf80b1451ddb21b68cfb8a7313b0723a8d07f82cc525e"
+  },
+  "results/v8c_r2/20261122-primary-lifecycle-qualification-v2/launcher-terminal.json": {
+   "bytes": 170,
+   "sha256": "132913da06d25846a499511babff076d99843cd5097d1be27c811ee24b13d971"
+  },
+  "results/v8c_r2/20261122-primary-lifecycle-qualification-v2/lifecycle-execution.log": {
+   "bytes": 310,
+   "sha256": "29146899f3cbca11d1cd5d24376753fdc11b8ad8153dc5b156b550c351fd556a"
+  },
+  "results/v8c_r2/20261122-primary-lifecycle-qualification-v2/prepared-step-c-command.json": {
+   "bytes": 2017,
+   "sha256": "6d7daf3ecd58e830e55be79e7706ec2a0556646db4a84590a828de82afa1cc58"
+  },
+  "results/v8c_r2/20261122-primary-lifecycle-qualification-v2/primary-qualification.json": {
+   "bytes": 11263,
+   "sha256": "8a87c578b4c44883da39d9ead7d9ac8ef7f9ada71b9f20addfafdd2a53b5e18b"
+  },
+  "results/v8c_r2/20261122-primary-lifecycle-qualification-v2/qualification-campaign/attempts/slot-01-05964dbafbbe4a888aee7a6eb5ce8b30/control/docker/config.json": {
+   "bytes": 12,
+   "sha256": "ec21c035eccb78eb5ca20ec95628eb351633621e09a130ac8d7e663714d40c7a"
+  },
+  "results/v8c_r2/20261122-primary-lifecycle-qualification-v2/qualification-campaign/attempts/slot-01-05964dbafbbe4a888aee7a6eb5ce8b30/control/kubeconfig": {
+   "bytes": 28,
+   "sha256": "5d060abdde881925da9ff44be7c4d582b24352af5bae028ac8717373e12b4fba"
+  },
+  "results/v8c_r2/20261122-primary-lifecycle-qualification-v2/qualification-campaign/attempts/slot-01-05964dbafbbe4a888aee7a6eb5ce8b30/intent.json": {
+   "bytes": 1992,
+   "sha256": "ecf378605020a12cf1f2f1e44df0bcc11b158772c373e9e28a446c029c2db6b7"
+  },
+  "results/v8c_r2/20261122-primary-lifecycle-qualification-v2/qualification-campaign/attempts/slot-01-05964dbafbbe4a888aee7a6eb5ce8b30/manifest.json": {
+   "bytes": 20285,
+   "sha256": "ab39463a420393488497dfa54aa6920600e027e42e63f45dac384a8342408d92"
+  },
+  "results/v8c_r2/20261122-primary-lifecycle-qualification-v2/qualification-campaign/attempts/slot-01-05964dbafbbe4a888aee7a6eb5ce8b30/outputs/0cc6886bb3fb4e409259744b1f0067d0.event.json": {
+   "bytes": 306,
+   "sha256": "d98b06c6c065d712ad44376631627fc983b0cd72a7c66e317036f2b3c491cde4"
+  },
+  "results/v8c_r2/20261122-primary-lifecycle-qualification-v2/qualification-campaign/attempts/slot-01-05964dbafbbe4a888aee7a6eb5ce8b30/outputs/12ebed22344b44d28208435b059f91bc.event.json": {
+   "bytes": 560,
+   "sha256": "9fa9fecc4266fd2e559ca339debe917ef270862de6c3adaf6035844b33805334"
+  },
+  "results/v8c_r2/20261122-primary-lifecycle-qualification-v2/qualification-campaign/attempts/slot-01-05964dbafbbe4a888aee7a6eb5ce8b30/outputs/1b0edf560a344186a3e12795b0203653.event.json": {
+   "bytes": 210,
+   "sha256": "a48b2a32458f23d8d6ecedb38c89c26464230695172b204d70476b14cb9fcca4"
+  },
+  "results/v8c_r2/20261122-primary-lifecycle-qualification-v2/qualification-campaign/attempts/slot-01-05964dbafbbe4a888aee7a6eb5ce8b30/outputs/3f3718739611496986768fc39e2f7fb0.event.json": {
+   "bytes": 559,
+   "sha256": "e9576123a8de5384243651b7de816f6232c962e92935d84a894b83b67b26e447"
+  },
+  "results/v8c_r2/20261122-primary-lifecycle-qualification-v2/qualification-campaign/attempts/slot-01-05964dbafbbe4a888aee7a6eb5ce8b30/outputs/40f04d4644bd4becbe2b9d706d3a7a8a.event.json": {
+   "bytes": 109,
+   "sha256": "d0d54f780547008626d73fb7695122086c28ecfd86392e3d7dce189f893ce7c7"
+  },
+  "results/v8c_r2/20261122-primary-lifecycle-qualification-v2/qualification-campaign/attempts/slot-01-05964dbafbbe4a888aee7a6eb5ce8b30/outputs/67b84fb5ae3e4fbb8488d553c6a42d6b.event.json": {
+   "bytes": 559,
+   "sha256": "611a7d110109437b70c08caf1d91328681d2e9a46798683b1cd8a496904b2387"
+  },
+  "results/v8c_r2/20261122-primary-lifecycle-qualification-v2/qualification-campaign/attempts/slot-01-05964dbafbbe4a888aee7a6eb5ce8b30/outputs/76ab8da6e37e4ea99ed21ad780db6dd8.event.json": {
+   "bytes": 114,
+   "sha256": "c261b1ee070215108a40e64e616bc1b791f4712e971b21ebbcc542f184b6e343"
+  },
+  "results/v8c_r2/20261122-primary-lifecycle-qualification-v2/qualification-campaign/attempts/slot-01-05964dbafbbe4a888aee7a6eb5ce8b30/outputs/89b6cb73d83c4088a484a19b2c715a7f.event.json": {
+   "bytes": 560,
+   "sha256": "495c7b9e91b95ccfa578f6874454fccd092eb4154fda8620f099bfbd42d8288d"
+  },
+  "results/v8c_r2/20261122-primary-lifecycle-qualification-v2/qualification-campaign/attempts/slot-01-05964dbafbbe4a888aee7a6eb5ce8b30/outputs/RAW_SEALED.json": {
+   "bytes": 445,
+   "sha256": "a346c383cefb5a5d2ee7957f45595f4d750c22f3457c9f8b576df9bb6cec8c30"
+  },
+  "results/v8c_r2/20261122-primary-lifecycle-qualification-v2/qualification-campaign/attempts/slot-01-05964dbafbbe4a888aee7a6eb5ce8b30/outputs/application-terminal.json": {
+   "bytes": 4502,
+   "sha256": "dee184c6dcd91ea2de60f0c18415f1d183883aabf40eebaf07aaf1763f0681e7"
+  },
+  "results/v8c_r2/20261122-primary-lifecycle-qualification-v2/qualification-campaign/attempts/slot-01-05964dbafbbe4a888aee7a6eb5ce8b30/outputs/b1a9b969b0dc4545a633f9cedb0d7739.event.json": {
+   "bytes": 560,
+   "sha256": "fcfcb104826d13d1b6ccb7af93fca962c2f83bf84866cb3ba58e56f6c6476947"
+  },
+  "results/v8c_r2/20261122-primary-lifecycle-qualification-v2/qualification-campaign/attempts/slot-01-05964dbafbbe4a888aee7a6eb5ce8b30/outputs/b2c274dab05b438398fd2c429f645adb.event.json": {
+   "bytes": 111,
+   "sha256": "a5b161a9452d3780346579c3ad0ba59c2c90bf7a14c08b65e83026c6fb547738"
+  },
+  "results/v8c_r2/20261122-primary-lifecycle-qualification-v2/qualification-campaign/attempts/slot-01-05964dbafbbe4a888aee7a6eb5ce8b30/outputs/cleanup.json": {
+   "bytes": 96,
+   "sha256": "d10512f3f11203e307e6e54dba75df3d515ca55341814efc2798f468cb532160"
+  },
+  "results/v8c_r2/20261122-primary-lifecycle-qualification-v2/qualification-campaign/attempts/slot-01-05964dbafbbe4a888aee7a6eb5ce8b30/outputs/clock_evidence_manifest.json": {
+   "bytes": 661,
+   "sha256": "6264b87f08fe4e7171bc966be25e180681816141573cf1126239f5e82c057614"
+  },
+  "results/v8c_r2/20261122-primary-lifecycle-qualification-v2/qualification-campaign/attempts/slot-01-05964dbafbbe4a888aee7a6eb5ce8b30/outputs/clock_observations.jsonl": {
+   "bytes": 2491927,
+   "sha256": "b3f8522e01f0246fe606d23be53889e341286b6383dbc1909652418ab2902de7"
+  },
+  "results/v8c_r2/20261122-primary-lifecycle-qualification-v2/qualification-campaign/attempts/slot-01-05964dbafbbe4a888aee7a6eb5ce8b30/outputs/clock_rejections.jsonl": {
+   "bytes": 0,
+   "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "results/v8c_r2/20261122-primary-lifecycle-qualification-v2/qualification-campaign/attempts/slot-01-05964dbafbbe4a888aee7a6eb5ce8b30/outputs/endpoint.json": {
+   "bytes": 12516,
+   "sha256": "5a958c5536cb42771153aff196f545d5dd5da946d6642a2327359fea23d584d9"
+  },
+  "results/v8c_r2/20261122-primary-lifecycle-qualification-v2/qualification-campaign/attempts/slot-01-05964dbafbbe4a888aee7a6eb5ce8b30/outputs/enforcement.jsonl": {
+   "bytes": 60952,
+   "sha256": "80bdd5657f8c134229571ca38a6baf72ee0a75d33c5af682e71dd42207094d3a"
+  },
+  "results/v8c_r2/20261122-primary-lifecycle-qualification-v2/qualification-campaign/attempts/slot-01-05964dbafbbe4a888aee7a6eb5ce8b30/outputs/environment.json": {
+   "bytes": 597,
+   "sha256": "21cdba76f487a9f3829f4d056bd4607c550c4fc4b9314b7887af6ae13ce05ec0"
+  },
+  "results/v8c_r2/20261122-primary-lifecycle-qualification-v2/qualification-campaign/attempts/slot-01-05964dbafbbe4a888aee7a6eb5ce8b30/outputs/f784d7acafbd4fb78d9e57bb8c6d4d04.event.json": {
+   "bytes": 561,
+   "sha256": "db833957378e9c3027a0c84527d77bd8053e7909467fb4e9e8d6fb26c1589ff5"
+  },
+  "results/v8c_r2/20261122-primary-lifecycle-qualification-v2/qualification-campaign/attempts/slot-01-05964dbafbbe4a888aee7a6eb5ce8b30/outputs/generator-resources.json": {
+   "bytes": 15716,
+   "sha256": "6f63f9fdbccdcac0712c01f519edfb63de9858e3e74dde90d0d4b10a946f5046"
+  },
+  "results/v8c_r2/20261122-primary-lifecycle-qualification-v2/qualification-campaign/attempts/slot-01-05964dbafbbe4a888aee7a6eb5ce8b30/outputs/generator-terminal.json": {
+   "bytes": 5012,
+   "sha256": "7f8aae3c1e0735a9171552862aa235829cf200c98182c9eeb6dea6e39aa72f71"
+  },
+  "results/v8c_r2/20261122-primary-lifecycle-qualification-v2/qualification-campaign/attempts/slot-01-05964dbafbbe4a888aee7a6eb5ce8b30/outputs/generator/DONE.json": {
+   "bytes": 559,
+   "sha256": "18dfac3bda37f123914036f8a0b9a51386ab61aca2a62e0b2c30cba1916d6946"
+  },
+  "results/v8c_r2/20261122-primary-lifecycle-qualification-v2/qualification-campaign/attempts/slot-01-05964dbafbbe4a888aee7a6eb5ce8b30/outputs/generator/START.json": {
+   "bytes": 760,
+   "sha256": "7d96ba0a92ba0a1182ef7cfa2da42b1c1fa3695f77e09f3d0ab156a3f0712ab6"
+  },
+  "results/v8c_r2/20261122-primary-lifecycle-qualification-v2/qualification-campaign/attempts/slot-01-05964dbafbbe4a888aee7a6eb5ce8b30/outputs/generator/requests.jsonl": {
+   "bytes": 26890452,
+   "sha256": "7ad3248ef04b5c45b0946f76f9a34fe0a4844686d8664b27d1e07096d6e42da9"
+  },
+  "results/v8c_r2/20261122-primary-lifecycle-qualification-v2/qualification-campaign/attempts/slot-01-05964dbafbbe4a888aee7a6eb5ce8b30/outputs/host_continuity.jsonl": {
+   "bytes": 3344356,
+   "sha256": "696d04aa4572958ef837f19da7e45495932de9711b236fb3879fb68ad226ff36"
+  },
+  "results/v8c_r2/20261122-primary-lifecycle-qualification-v2/qualification-campaign/attempts/slot-01-05964dbafbbe4a888aee7a6eb5ce8b30/outputs/host_continuity_failure.json": {
+   "bytes": 417,
+   "sha256": "c4a220b946ed973896354a01111923bbe349fbf4e89709269675d7ce36dacb4b"
+  },
+  "results/v8c_r2/20261122-primary-lifecycle-qualification-v2/qualification-campaign/attempts/slot-01-05964dbafbbe4a888aee7a6eb5ce8b30/outputs/host_continuity_summary.json": {
+   "bytes": 659,
+   "sha256": "07feb1040cc89fffdc73233f4a7d0475f59955e7636d65307ded4c01ef2eea0e"
+  },
+  "results/v8c_r2/20261122-primary-lifecycle-qualification-v2/qualification-campaign/attempts/slot-01-05964dbafbbe4a888aee7a6eb5ce8b30/outputs/image-aliases.json": {
+   "bytes": 418,
+   "sha256": "5b7450684dc18e4e5b0836385befabbe1d8c8e352d575a5a4eac661caa124a65"
+  },
+  "results/v8c_r2/20261122-primary-lifecycle-qualification-v2/qualification-campaign/attempts/slot-01-05964dbafbbe4a888aee7a6eb5ce8b30/outputs/kind.log": {
+   "bytes": 2696,
+   "sha256": "afefe359f413c2f7997dbe0d2529f34050892bc2752e7ee4404e5dce746e6af0"
+  },
+  "results/v8c_r2/20261122-primary-lifecycle-qualification-v2/qualification-campaign/attempts/slot-01-05964dbafbbe4a888aee7a6eb5ce8b30/outputs/lifecycle.jsonl": {
+   "bytes": 25033076,
+   "sha256": "0bf85e5da182bca6a01ad0b2379375397b11e3bd402fa5f9985b3f9e14645a84"
+  },
+  "results/v8c_r2/20261122-primary-lifecycle-qualification-v2/qualification-campaign/attempts/slot-01-05964dbafbbe4a888aee7a6eb5ce8b30/outputs/power_guard.json": {
+   "bytes": 1997,
+   "sha256": "5d9f99b97cb734b4a8feb652d0b7e9dc4f38b55a339bb8f3653e9f6853443b52"
+  },
+  "results/v8c_r2/20261122-primary-lifecycle-qualification-v2/qualification-campaign/attempts/slot-01-05964dbafbbe4a888aee7a6eb5ce8b30/outputs/resources.json": {
+   "bytes": 3599,
+   "sha256": "9b534a18e5417396cfa9cb8bbdf1e8b043ffd0b19da2839d25867901aafc4ef2"
+  },
+  "results/v8c_r2/20261122-primary-lifecycle-qualification-v2/qualification-campaign/attempts/slot-01-05964dbafbbe4a888aee7a6eb5ce8b30/outputs/runtime.json": {
+   "bytes": 276,
+   "sha256": "8937f07d8324db251fd6a0a9de11aba0f07535b5eedc1a3778e7c1c9c7f3c520"
+  },
+  "results/v8c_r2/20261122-primary-lifecycle-qualification-v2/qualification-campaign/attempts/slot-01-05964dbafbbe4a888aee7a6eb5ce8b30/outputs/service-terminal.json": {
+   "bytes": 858,
+   "sha256": "96a782cdb55f32c3eee7aa001484ac7a2aa970662b21ceb0b72c9870e756f68b"
+  },
+  "results/v8c_r2/20261122-primary-lifecycle-qualification-v2/qualification-campaign/attempts/slot-01-05964dbafbbe4a888aee7a6eb5ce8b30/outputs/snapshot-binding.json": {
+   "bytes": 236,
+   "sha256": "13d4c24df9a7db469900cfecb9d5bc10bc5c92b0ab9e9124e43cb91000a54600"
+  },
+  "results/v8c_r2/20261122-primary-lifecycle-qualification-v2/qualification-campaign/attempts/slot-01-05964dbafbbe4a888aee7a6eb5ce8b30/outputs/telemetry.jsonl": {
+   "bytes": 811577,
+   "sha256": "e44b008666d5c34cc159a683d458402d154cf85e3225ae4449eaacda19dd0878"
+  },
+  "results/v8c_r2/20261122-primary-lifecycle-qualification-v2/qualification-campaign/attempts/slot-01-05964dbafbbe4a888aee7a6eb5ce8b30/outputs/timing.json": {
+   "bytes": 1796,
+   "sha256": "35c536833379359b838ee7d364e68c43520d942df751eece812d1034b3fc2e6a"
+  },
+  "results/v8c_r2/20261122-primary-lifecycle-qualification-v2/qualification-campaign/attempts/slot-01-05964dbafbbe4a888aee7a6eb5ce8b30/recovery.json": {
+   "bytes": 1121,
+   "sha256": "abf3c3696e5887f3eadec4761c219cf7115ada71554331949b967843b5e428f7"
+  },
+  "results/v8c_r2/20261122-primary-lifecycle-qualification-v2/qualification-campaign/attempts/slot-01-05964dbafbbe4a888aee7a6eb5ce8b30/session.json": {
+   "bytes": 2626,
+   "sha256": "465eb95707f47c69698a468f635316a03ecf773dc63f56d91b72b868db199563"
+  },
+  "results/v8c_r2/20261122-primary-lifecycle-qualification-v2/qualification-campaign/checkpoint.json": {
+   "bytes": 9602,
+   "sha256": "71673e93e494e660e66540b54714c62d09b4c26be643536eb37e4537518d0892"
+  },
+  "results/v8c_r2/20261122-primary-lifecycle-qualification-v2/qualification-campaign/sessions/768c66bd7e1c42bfa8ea7c9bf0f5fa5a/outputs/host_continuity.jsonl": {
+   "bytes": 10656,
+   "sha256": "1856aac6a805d81a808550bd04c1c63d34b50ef7d134996c5788373b290bee2e"
+  },
+  "results/v8c_r2/20261122-primary-lifecycle-qualification-v2/qualification-campaign/sessions/768c66bd7e1c42bfa8ea7c9bf0f5fa5a/outputs/host_continuity_failure.json": {
+   "bytes": 272,
+   "sha256": "994f6808fa9bbcf0e850233382ddad8952d18dbbedbd29b33c467ed80e27adc4"
+  },
+  "results/v8c_r2/20261122-primary-lifecycle-qualification-v2/qualification-campaign/sessions/768c66bd7e1c42bfa8ea7c9bf0f5fa5a/outputs/host_continuity_summary.json": {
+   "bytes": 509,
+   "sha256": "7f683fc9ddd489d4a42daf699998bebb120404d9907c7a5faa88d18f05426e2a"
+  },
+  "results/v8c_r2/20261122-primary-lifecycle-qualification-v2/qualification-campaign/sessions/768c66bd7e1c42bfa8ea7c9bf0f5fa5a/outputs/power_guard.json": {
+   "bytes": 1852,
+   "sha256": "b7c7e8c899678b6f45f755e31cd348fbf1fd32ea13f24f8ddf1244c96fb16004"
+  },
+  "results/v8c_r2/20261122-primary-lifecycle-qualification-v2/qualification-campaign/sessions/768c66bd7e1c42bfa8ea7c9bf0f5fa5a/preflight.json": {
+   "bytes": 2540,
+   "sha256": "a74adb85961537e85546f24971dbf66002bc551e95b66b30c38fbbf685c63a45"
+  },
+  "results/v8c_r2/20261122-primary-lifecycle-qualification-v2/report.md": {
+   "bytes": 1662,
+   "sha256": "6b4a19c5a62dcdaee6d871336218e048f05dc1dadd5633f72799ef0581fa04a8"
+  }
+ },
+ "qualification_sha256": "8a87c578b4c44883da39d9ead7d9ac8ef7f9ada71b9f20addfafdd2a53b5e18b",
+ "schema": "v8-primary-lifecycle-evidence-manifest-v1"
+}
