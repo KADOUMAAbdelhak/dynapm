@@ -1,0 +1,63 @@
+{
+ "executor_commit": "738139b177cdb88f37be3e0207452b2ea2bf0510",
+ "files": {
+  "results/v8c_r2/20261122-primary-rebinding-v1/disposition.json": {
+   "bytes": 710,
+   "sha256": "6923f3e581c601c7c3b930d4e7c0cf4f6a2e24c59f9bdb896998abbda3934abd"
+  },
+  "results/v8c_r2/20261122-primary-rebinding-v1/executor-spec-rebound.json": {
+   "bytes": 5210,
+   "sha256": "d741b746c0ed13baf9fe2a058cc08c1370c0cbe31a0e59f403fe27bc89d17be9"
+  },
+  "results/v8c_r2/20261122-primary-rebinding-v1/focused-tests.log": {
+   "bytes": 179,
+   "sha256": "b66c531554d16675eee6776a252460605807be8d5bf51dca402747a76097ba93"
+  },
+  "results/v8c_r2/20261122-primary-rebinding-v1/full-tests.log": {
+   "bytes": 140759,
+   "sha256": "5d4da4545911d876eb6e377501e71009219417e8eada9fd847092bac128c2c07"
+  },
+  "results/v8c_r2/20261122-primary-rebinding-v1/make_spec.py": {
+   "bytes": 2019,
+   "sha256": "0e0619f8cedebee70dcf7c822a560e424de443ce6464028b26a71c62fd239ed1"
+  },
+  "results/v8c_r2/20261122-primary-rebinding-v1/prepared-step-b-command.json": {
+   "bytes": 1089,
+   "sha256": "53956f4425b3bf2e80be6aa7dffb1a1c6baa9b49084f0521ca389a4da046eade"
+  },
+  "results/v8c_r2/20261122-primary-rebinding-v1/report.md": {
+   "bytes": 1779,
+   "sha256": "e20e8238769a4fcc758f07b5b1aa0fd521dbdfdb2f88ba9e947337aca56fcf87"
+  },
+  "results/v8c_r2/20261122-primary-rebinding-v1/strict-preflight-result.json": {
+   "bytes": 4425,
+   "sha256": "fe3a6fa557217e81634f1c6c576abf289f338ae2c9c2000d66dad856c433122a"
+  },
+  "results/v8c_r2/20261122-primary-rebinding-v1/strict-preflight-session/outputs/host_continuity.jsonl": {
+   "bytes": 10634,
+   "sha256": "bae43a60ae74a60e61469dc6aa888901a901b6c92c432b31f764713af804b8eb"
+  },
+  "results/v8c_r2/20261122-primary-rebinding-v1/strict-preflight-session/outputs/host_continuity_failure.json": {
+   "bytes": 264,
+   "sha256": "eb3cbbee7a2da65b156078e9d21341b6549637210100bac8ebd2aa5e35dc10c6"
+  },
+  "results/v8c_r2/20261122-primary-rebinding-v1/strict-preflight-session/outputs/host_continuity_summary.json": {
+   "bytes": 501,
+   "sha256": "44dd662346503ef285cffb3ddab99868fb76be80875bd4702eeb321af94fb8f4"
+  },
+  "results/v8c_r2/20261122-primary-rebinding-v1/strict-preflight-session/outputs/power_guard.json": {
+   "bytes": 1844,
+   "sha256": "1bded30ce66ce07a1e70609a3f5cd88aba1595b9a0b14f14fd35fb60de0875fa"
+  },
+  "results/v8c_r2/20261122-primary-rebinding-v1/strict-preflight-session/preflight.json": {
+   "bytes": 2540,
+   "sha256": "65a0d393312faa9868b467042de7502d8b613c9558387147fe8431162d3e73c4"
+  },
+  "results/v8c_r2/20261122-primary-rebinding-v1/strict-preflight.log": {
+   "bytes": 19,
+   "sha256": "cc272982687daa127c5a8010b804b69603fcbc32a40f3ea63649eeb36ad474fa"
+  }
+ },
+ "schema": "v8-primary-rebinding-seal-v1",
+ "status": "PASS"
+}

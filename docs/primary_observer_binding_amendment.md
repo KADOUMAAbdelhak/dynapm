@@ -68,3 +68,22 @@ treatment or integration. The pending 18-slot checkpoint
 16c07107...) is verified byte-identical before and after. Because campaign
 identity includes executor provenance, a later 75-minute qualification under
 this binding uses a new campaign root; the old checkpoint stays as evidence.
+
+## Re-binding after reboot (2026-11-22)
+
+The Mac was shut down after amended claim campaign v1 halted at slot 5
+(storage floor), which invalidated boot 6C470F9C and, as designed, made this
+binding fail closed. A fresh, prospective three-hour task49 observation from the
+same observer 1b50282 then PASSED on boot 26051F76-7B84-4CBD-A25D-1418E39980A2
+(certificate SHA-256 b0d91ebcbe63144b67f78fb2174349bd3ebb776fd4ec4b0b04bc8fe07c852f38,
+sealed in evidence commit 46a6869, `results/v8c_r2/20261122-task49-current-boot-v2/`).
+
+This re-binding changes only the certificate path, hash, manifest, evidence
+commit and expected boot UUID in `primary_observer_binding.py`. The binding
+file set over 1b50282 is unchanged (same five files), every non-admission node
+of `service_primary.py` is still AST-identical to 67bfd37, and the observer,
+transport, scientific source, limits and power criteria are unchanged. The
+superseded certificate (594ba9a2..., boot 6C470F9C) is retained as evidence
+and is rejected by this binding. No partial or earlier observation interval is
+reused. Because the executor commit changes, Step B and the claim campaign run
+on new roots.

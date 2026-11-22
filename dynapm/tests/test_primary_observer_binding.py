@@ -300,3 +300,22 @@ def test_real_qualification_rejects_a_different_boot_without_new_observation():
         b.require_current_boot(cert, boot(uuid='00000000-0000-0000-0000-000000000000',
                                           ns=cert['boot_timeval_anchor_ns']))
     assert b.require_current_boot(cert, boot(ns=cert['boot_timeval_anchor_ns'])) == 0
+
+
+SUPERSEDED_PATH = REPO/'results/v8c_r2/20261111-task49-current-boot-v1/current-boot-qualification.json'
+
+
+@pytest.mark.skipif(not SUPERSEDED_PATH.is_file(), reason='superseded qualification absent')
+def test_superseded_pre_reboot_qualification_is_rejected():
+    old = read_json(SUPERSEDED_PATH)
+    assert file_sha256(SUPERSEDED_PATH) == b.SUPERSEDED_QUALIFICATION_SHA256
+    assert old['boot_uuid'] == b.SUPERSEDED_BOOT_UUID != b.BOOT_UUID
+    with pytest.raises(b.BindingError, match='current_boot_qualification_identity_mismatch'):
+        b.require_certificate(old)
+
+
+@pytest.mark.skipif(not (REPO/b.QUALIFICATION_PATH).is_file(), reason='sealed qualification absent')
+def test_rebound_qualification_rejects_the_pre_reboot_boot():
+    cert = read_json(REPO/b.QUALIFICATION_PATH)
+    with pytest.raises(b.BindingError, match='current_boot_incompatible'):
+        b.require_current_boot(cert, boot(uuid=b.SUPERSEDED_BOOT_UUID, ns=cert['boot_timeval_anchor_ns']))

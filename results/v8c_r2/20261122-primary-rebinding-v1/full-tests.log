@@ -1,0 +1,2276 @@
+........................................................................ [  7%]
+......................................................................s. [ 14%]
+........................................................................ [ 21%]
+.................EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE.....EEEEE. [ 28%]
+E.EEE........................................................ss......... [ 36%]
+........................................................................ [ 43%]
+........................................................................ [ 50%]
+........................................................................ [ 57%]
+........................................................................ [ 64%]
+........................................................................ [ 72%]
+........................................................................ [ 79%]
+........................................................................ [ 86%]
+........................................................................ [ 93%]
+..............................................................           [100%]
+==================================== ERRORS ====================================
+_______ ERROR at setup of test_secondary_freeze_does_not_change_primary ________
+
+    @pytest.fixture(scope='module')
+>   def spec():return cr.frozen_spec(REPO)
+                      ^^^^^^^^^^^^^^^^^^^^
+
+dynapm/tests/test_google_collection_robustness.py:21: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+dynapm/experiments/google_collection_robustness.py:77: in frozen_spec
+    if canonical_json(d)!=canonical_json(spec_document(repo)):raise ValueError('collection_spec_or_source_mismatch')
+                                         ^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_collection_robustness.py:28: in spec_document
+    repo=Path(repo);d=frozen_design(repo)
+                      ^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:86: in frozen_design
+    if canonical_json(d)!=canonical_json(design_document(repo)):raise ValueError('frozen_staged_design_or_scientific_source_mismatch')
+                                         ^^^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:45: in design_document
+    if canonical_json(binding)!=canonical_json(stage_e_binding(repo)):raise ValueError('e_binding_not_frozen')
+                                               ^^^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:36: in stage_e_binding
+    canonical_manifest_sha256=file_sha256(repo/generation/'manifest.json'),
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dynapm/core/provenance.py:75: in file_sha256
+    with Path(path).open("rb") as f:
+         ^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/Users/fgtek002/dynapm-v8c-frozen/data/google2019/canonical/generations/cell-e-unambiguous-v2-85c74588191efa0b/manifest.json')
+mode = 'rb', buffering = -1, encoding = None, errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/Users/fgtek002/dynapm-v8c-frozen/data/google2019/canonical/generations/cell-e-unambiguous-v2-85c74588191efa0b/manifest.json'
+
+/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py:537: FileNotFoundError
+_ ERROR at setup of test_aggregation_complete_pairs_and_primary_values_unchanged _
+
+    @pytest.fixture(scope='module')
+>   def spec():return cr.frozen_spec(REPO)
+                      ^^^^^^^^^^^^^^^^^^^^
+
+dynapm/tests/test_google_collection_robustness.py:21: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+dynapm/experiments/google_collection_robustness.py:77: in frozen_spec
+    if canonical_json(d)!=canonical_json(spec_document(repo)):raise ValueError('collection_spec_or_source_mismatch')
+                                         ^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_collection_robustness.py:28: in spec_document
+    repo=Path(repo);d=frozen_design(repo)
+                      ^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:86: in frozen_design
+    if canonical_json(d)!=canonical_json(design_document(repo)):raise ValueError('frozen_staged_design_or_scientific_source_mismatch')
+                                         ^^^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:45: in design_document
+    if canonical_json(binding)!=canonical_json(stage_e_binding(repo)):raise ValueError('e_binding_not_frozen')
+                                               ^^^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:36: in stage_e_binding
+    canonical_manifest_sha256=file_sha256(repo/generation/'manifest.json'),
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dynapm/core/provenance.py:75: in file_sha256
+    with Path(path).open("rb") as f:
+         ^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/Users/fgtek002/dynapm-v8c-frozen/data/google2019/canonical/generations/cell-e-unambiguous-v2-85c74588191efa0b/manifest.json')
+mode = 'rb', buffering = -1, encoding = None, errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/Users/fgtek002/dynapm-v8c-frozen/data/google2019/canonical/generations/cell-e-unambiguous-v2-85c74588191efa0b/manifest.json'
+
+/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py:537: FileNotFoundError
+__________________ ERROR at setup of test_shuffle_determinism __________________
+
+    @pytest.fixture(scope='module')
+>   def spec():return cr.frozen_spec(REPO)
+                      ^^^^^^^^^^^^^^^^^^^^
+
+dynapm/tests/test_google_collection_robustness.py:21: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+dynapm/experiments/google_collection_robustness.py:77: in frozen_spec
+    if canonical_json(d)!=canonical_json(spec_document(repo)):raise ValueError('collection_spec_or_source_mismatch')
+                                         ^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_collection_robustness.py:28: in spec_document
+    repo=Path(repo);d=frozen_design(repo)
+                      ^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:86: in frozen_design
+    if canonical_json(d)!=canonical_json(design_document(repo)):raise ValueError('frozen_staged_design_or_scientific_source_mismatch')
+                                         ^^^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:45: in design_document
+    if canonical_json(binding)!=canonical_json(stage_e_binding(repo)):raise ValueError('e_binding_not_frozen')
+                                               ^^^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:36: in stage_e_binding
+    canonical_manifest_sha256=file_sha256(repo/generation/'manifest.json'),
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dynapm/core/provenance.py:75: in file_sha256
+    with Path(path).open("rb") as f:
+         ^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/Users/fgtek002/dynapm-v8c-frozen/data/google2019/canonical/generations/cell-e-unambiguous-v2-85c74588191efa0b/manifest.json')
+mode = 'rb', buffering = -1, encoding = None, errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/Users/fgtek002/dynapm-v8c-frozen/data/google2019/canonical/generations/cell-e-unambiguous-v2-85c74588191efa0b/manifest.json'
+
+/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py:537: FileNotFoundError
+_ ERROR at setup of test_whole_cluster_bootstrap_matches_literal_repeated_member_resampling _
+
+    @pytest.fixture(scope='module')
+>   def spec():return cr.frozen_spec(REPO)
+                      ^^^^^^^^^^^^^^^^^^^^
+
+dynapm/tests/test_google_collection_robustness.py:21: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+dynapm/experiments/google_collection_robustness.py:77: in frozen_spec
+    if canonical_json(d)!=canonical_json(spec_document(repo)):raise ValueError('collection_spec_or_source_mismatch')
+                                         ^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_collection_robustness.py:28: in spec_document
+    repo=Path(repo);d=frozen_design(repo)
+                      ^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:86: in frozen_design
+    if canonical_json(d)!=canonical_json(design_document(repo)):raise ValueError('frozen_staged_design_or_scientific_source_mismatch')
+                                         ^^^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:45: in design_document
+    if canonical_json(binding)!=canonical_json(stage_e_binding(repo)):raise ValueError('e_binding_not_frozen')
+                                               ^^^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:36: in stage_e_binding
+    canonical_manifest_sha256=file_sha256(repo/generation/'manifest.json'),
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dynapm/core/provenance.py:75: in file_sha256
+    with Path(path).open("rb") as f:
+         ^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/Users/fgtek002/dynapm-v8c-frozen/data/google2019/canonical/generations/cell-e-unambiguous-v2-85c74588191efa0b/manifest.json')
+mode = 'rb', buffering = -1, encoding = None, errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/Users/fgtek002/dynapm-v8c-frozen/data/google2019/canonical/generations/cell-e-unambiguous-v2-85c74588191efa0b/manifest.json'
+
+/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py:537: FileNotFoundError
+_ ERROR at setup of test_weighted_entity_and_equal_collection_estimands_can_differ _
+
+    @pytest.fixture(scope='module')
+>   def spec():return cr.frozen_spec(REPO)
+                      ^^^^^^^^^^^^^^^^^^^^
+
+dynapm/tests/test_google_collection_robustness.py:21: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+dynapm/experiments/google_collection_robustness.py:77: in frozen_spec
+    if canonical_json(d)!=canonical_json(spec_document(repo)):raise ValueError('collection_spec_or_source_mismatch')
+                                         ^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_collection_robustness.py:28: in spec_document
+    repo=Path(repo);d=frozen_design(repo)
+                      ^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:86: in frozen_design
+    if canonical_json(d)!=canonical_json(design_document(repo)):raise ValueError('frozen_staged_design_or_scientific_source_mismatch')
+                                         ^^^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:45: in design_document
+    if canonical_json(binding)!=canonical_json(stage_e_binding(repo)):raise ValueError('e_binding_not_frozen')
+                                               ^^^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:36: in stage_e_binding
+    canonical_manifest_sha256=file_sha256(repo/generation/'manifest.json'),
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dynapm/core/provenance.py:75: in file_sha256
+    with Path(path).open("rb") as f:
+         ^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/Users/fgtek002/dynapm-v8c-frozen/data/google2019/canonical/generations/cell-e-unambiguous-v2-85c74588191efa0b/manifest.json')
+mode = 'rb', buffering = -1, encoding = None, errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/Users/fgtek002/dynapm-v8c-frozen/data/google2019/canonical/generations/cell-e-unambiguous-v2-85c74588191efa0b/manifest.json'
+
+/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py:537: FileNotFoundError
+_ ERROR at setup of test_singleton_members_are_retained_and_one_cluster_ci_unavailable _
+
+    @pytest.fixture(scope='module')
+>   def spec():return cr.frozen_spec(REPO)
+                      ^^^^^^^^^^^^^^^^^^^^
+
+dynapm/tests/test_google_collection_robustness.py:21: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+dynapm/experiments/google_collection_robustness.py:77: in frozen_spec
+    if canonical_json(d)!=canonical_json(spec_document(repo)):raise ValueError('collection_spec_or_source_mismatch')
+                                         ^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_collection_robustness.py:28: in spec_document
+    repo=Path(repo);d=frozen_design(repo)
+                      ^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:86: in frozen_design
+    if canonical_json(d)!=canonical_json(design_document(repo)):raise ValueError('frozen_staged_design_or_scientific_source_mismatch')
+                                         ^^^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:45: in design_document
+    if canonical_json(binding)!=canonical_json(stage_e_binding(repo)):raise ValueError('e_binding_not_frozen')
+                                               ^^^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:36: in stage_e_binding
+    canonical_manifest_sha256=file_sha256(repo/generation/'manifest.json'),
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dynapm/core/provenance.py:75: in file_sha256
+    with Path(path).open("rb") as f:
+         ^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/Users/fgtek002/dynapm-v8c-frozen/data/google2019/canonical/generations/cell-e-unambiguous-v2-85c74588191efa0b/manifest.json')
+mode = 'rb', buffering = -1, encoding = None, errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/Users/fgtek002/dynapm-v8c-frozen/data/google2019/canonical/generations/cell-e-unambiguous-v2-85c74588191efa0b/manifest.json'
+
+/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py:537: FileNotFoundError
+___ ERROR at setup of test_invalid_cluster_summaries_rejected[means0-sizes0] ___
+
+    @pytest.fixture(scope='module')
+>   def spec():return cr.frozen_spec(REPO)
+                      ^^^^^^^^^^^^^^^^^^^^
+
+dynapm/tests/test_google_collection_robustness.py:21: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+dynapm/experiments/google_collection_robustness.py:77: in frozen_spec
+    if canonical_json(d)!=canonical_json(spec_document(repo)):raise ValueError('collection_spec_or_source_mismatch')
+                                         ^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_collection_robustness.py:28: in spec_document
+    repo=Path(repo);d=frozen_design(repo)
+                      ^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:86: in frozen_design
+    if canonical_json(d)!=canonical_json(design_document(repo)):raise ValueError('frozen_staged_design_or_scientific_source_mismatch')
+                                         ^^^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:45: in design_document
+    if canonical_json(binding)!=canonical_json(stage_e_binding(repo)):raise ValueError('e_binding_not_frozen')
+                                               ^^^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:36: in stage_e_binding
+    canonical_manifest_sha256=file_sha256(repo/generation/'manifest.json'),
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dynapm/core/provenance.py:75: in file_sha256
+    with Path(path).open("rb") as f:
+         ^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/Users/fgtek002/dynapm-v8c-frozen/data/google2019/canonical/generations/cell-e-unambiguous-v2-85c74588191efa0b/manifest.json')
+mode = 'rb', buffering = -1, encoding = None, errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/Users/fgtek002/dynapm-v8c-frozen/data/google2019/canonical/generations/cell-e-unambiguous-v2-85c74588191efa0b/manifest.json'
+
+/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py:537: FileNotFoundError
+___ ERROR at setup of test_invalid_cluster_summaries_rejected[means1-sizes1] ___
+
+    @pytest.fixture(scope='module')
+>   def spec():return cr.frozen_spec(REPO)
+                      ^^^^^^^^^^^^^^^^^^^^
+
+dynapm/tests/test_google_collection_robustness.py:21: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+dynapm/experiments/google_collection_robustness.py:77: in frozen_spec
+    if canonical_json(d)!=canonical_json(spec_document(repo)):raise ValueError('collection_spec_or_source_mismatch')
+                                         ^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_collection_robustness.py:28: in spec_document
+    repo=Path(repo);d=frozen_design(repo)
+                      ^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:86: in frozen_design
+    if canonical_json(d)!=canonical_json(design_document(repo)):raise ValueError('frozen_staged_design_or_scientific_source_mismatch')
+                                         ^^^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:45: in design_document
+    if canonical_json(binding)!=canonical_json(stage_e_binding(repo)):raise ValueError('e_binding_not_frozen')
+                                               ^^^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:36: in stage_e_binding
+    canonical_manifest_sha256=file_sha256(repo/generation/'manifest.json'),
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dynapm/core/provenance.py:75: in file_sha256
+    with Path(path).open("rb") as f:
+         ^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/Users/fgtek002/dynapm-v8c-frozen/data/google2019/canonical/generations/cell-e-unambiguous-v2-85c74588191efa0b/manifest.json')
+mode = 'rb', buffering = -1, encoding = None, errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/Users/fgtek002/dynapm-v8c-frozen/data/google2019/canonical/generations/cell-e-unambiguous-v2-85c74588191efa0b/manifest.json'
+
+/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py:537: FileNotFoundError
+___ ERROR at setup of test_invalid_cluster_summaries_rejected[means2-sizes2] ___
+
+    @pytest.fixture(scope='module')
+>   def spec():return cr.frozen_spec(REPO)
+                      ^^^^^^^^^^^^^^^^^^^^
+
+dynapm/tests/test_google_collection_robustness.py:21: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+dynapm/experiments/google_collection_robustness.py:77: in frozen_spec
+    if canonical_json(d)!=canonical_json(spec_document(repo)):raise ValueError('collection_spec_or_source_mismatch')
+                                         ^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_collection_robustness.py:28: in spec_document
+    repo=Path(repo);d=frozen_design(repo)
+                      ^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:86: in frozen_design
+    if canonical_json(d)!=canonical_json(design_document(repo)):raise ValueError('frozen_staged_design_or_scientific_source_mismatch')
+                                         ^^^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:45: in design_document
+    if canonical_json(binding)!=canonical_json(stage_e_binding(repo)):raise ValueError('e_binding_not_frozen')
+                                               ^^^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:36: in stage_e_binding
+    canonical_manifest_sha256=file_sha256(repo/generation/'manifest.json'),
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dynapm/core/provenance.py:75: in file_sha256
+    with Path(path).open("rb") as f:
+         ^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/Users/fgtek002/dynapm-v8c-frozen/data/google2019/canonical/generations/cell-e-unambiguous-v2-85c74588191efa0b/manifest.json')
+mode = 'rb', buffering = -1, encoding = None, errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/Users/fgtek002/dynapm-v8c-frozen/data/google2019/canonical/generations/cell-e-unambiguous-v2-85c74588191efa0b/manifest.json'
+
+/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py:537: FileNotFoundError
+___ ERROR at setup of test_invalid_cluster_summaries_rejected[means3-sizes3] ___
+
+    @pytest.fixture(scope='module')
+>   def spec():return cr.frozen_spec(REPO)
+                      ^^^^^^^^^^^^^^^^^^^^
+
+dynapm/tests/test_google_collection_robustness.py:21: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+dynapm/experiments/google_collection_robustness.py:77: in frozen_spec
+    if canonical_json(d)!=canonical_json(spec_document(repo)):raise ValueError('collection_spec_or_source_mismatch')
+                                         ^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_collection_robustness.py:28: in spec_document
+    repo=Path(repo);d=frozen_design(repo)
+                      ^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:86: in frozen_design
+    if canonical_json(d)!=canonical_json(design_document(repo)):raise ValueError('frozen_staged_design_or_scientific_source_mismatch')
+                                         ^^^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:45: in design_document
+    if canonical_json(binding)!=canonical_json(stage_e_binding(repo)):raise ValueError('e_binding_not_frozen')
+                                               ^^^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:36: in stage_e_binding
+    canonical_manifest_sha256=file_sha256(repo/generation/'manifest.json'),
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dynapm/core/provenance.py:75: in file_sha256
+    with Path(path).open("rb") as f:
+         ^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/Users/fgtek002/dynapm-v8c-frozen/data/google2019/canonical/generations/cell-e-unambiguous-v2-85c74588191efa0b/manifest.json')
+mode = 'rb', buffering = -1, encoding = None, errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/Users/fgtek002/dynapm-v8c-frozen/data/google2019/canonical/generations/cell-e-unambiguous-v2-85c74588191efa0b/manifest.json'
+
+/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py:537: FileNotFoundError
+___ ERROR at setup of test_invalid_cluster_summaries_rejected[means4-sizes4] ___
+
+    @pytest.fixture(scope='module')
+>   def spec():return cr.frozen_spec(REPO)
+                      ^^^^^^^^^^^^^^^^^^^^
+
+dynapm/tests/test_google_collection_robustness.py:21: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+dynapm/experiments/google_collection_robustness.py:77: in frozen_spec
+    if canonical_json(d)!=canonical_json(spec_document(repo)):raise ValueError('collection_spec_or_source_mismatch')
+                                         ^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_collection_robustness.py:28: in spec_document
+    repo=Path(repo);d=frozen_design(repo)
+                      ^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:86: in frozen_design
+    if canonical_json(d)!=canonical_json(design_document(repo)):raise ValueError('frozen_staged_design_or_scientific_source_mismatch')
+                                         ^^^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:45: in design_document
+    if canonical_json(binding)!=canonical_json(stage_e_binding(repo)):raise ValueError('e_binding_not_frozen')
+                                               ^^^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:36: in stage_e_binding
+    canonical_manifest_sha256=file_sha256(repo/generation/'manifest.json'),
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dynapm/core/provenance.py:75: in file_sha256
+    with Path(path).open("rb") as f:
+         ^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/Users/fgtek002/dynapm-v8c-frozen/data/google2019/canonical/generations/cell-e-unambiguous-v2-85c74588191efa0b/manifest.json')
+mode = 'rb', buffering = -1, encoding = None, errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/Users/fgtek002/dynapm-v8c-frozen/data/google2019/canonical/generations/cell-e-unambiguous-v2-85c74588191efa0b/manifest.json'
+
+/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py:537: FileNotFoundError
+___ ERROR at setup of test_invalid_cluster_summaries_rejected[means5-sizes5] ___
+
+    @pytest.fixture(scope='module')
+>   def spec():return cr.frozen_spec(REPO)
+                      ^^^^^^^^^^^^^^^^^^^^
+
+dynapm/tests/test_google_collection_robustness.py:21: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+dynapm/experiments/google_collection_robustness.py:77: in frozen_spec
+    if canonical_json(d)!=canonical_json(spec_document(repo)):raise ValueError('collection_spec_or_source_mismatch')
+                                         ^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_collection_robustness.py:28: in spec_document
+    repo=Path(repo);d=frozen_design(repo)
+                      ^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:86: in frozen_design
+    if canonical_json(d)!=canonical_json(design_document(repo)):raise ValueError('frozen_staged_design_or_scientific_source_mismatch')
+                                         ^^^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:45: in design_document
+    if canonical_json(binding)!=canonical_json(stage_e_binding(repo)):raise ValueError('e_binding_not_frozen')
+                                               ^^^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:36: in stage_e_binding
+    canonical_manifest_sha256=file_sha256(repo/generation/'manifest.json'),
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dynapm/core/provenance.py:75: in file_sha256
+    with Path(path).open("rb") as f:
+         ^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/Users/fgtek002/dynapm-v8c-frozen/data/google2019/canonical/generations/cell-e-unambiguous-v2-85c74588191efa0b/manifest.json')
+mode = 'rb', buffering = -1, encoding = None, errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/Users/fgtek002/dynapm-v8c-frozen/data/google2019/canonical/generations/cell-e-unambiguous-v2-85c74588191efa0b/manifest.json'
+
+/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py:537: FileNotFoundError
+_ ERROR at setup of test_no_silent_exclusions_or_wrong_parent[missing_method] __
+
+    @pytest.fixture(scope='module')
+>   def spec():return cr.frozen_spec(REPO)
+                      ^^^^^^^^^^^^^^^^^^^^
+
+dynapm/tests/test_google_collection_robustness.py:21: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+dynapm/experiments/google_collection_robustness.py:77: in frozen_spec
+    if canonical_json(d)!=canonical_json(spec_document(repo)):raise ValueError('collection_spec_or_source_mismatch')
+                                         ^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_collection_robustness.py:28: in spec_document
+    repo=Path(repo);d=frozen_design(repo)
+                      ^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:86: in frozen_design
+    if canonical_json(d)!=canonical_json(design_document(repo)):raise ValueError('frozen_staged_design_or_scientific_source_mismatch')
+                                         ^^^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:45: in design_document
+    if canonical_json(binding)!=canonical_json(stage_e_binding(repo)):raise ValueError('e_binding_not_frozen')
+                                               ^^^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:36: in stage_e_binding
+    canonical_manifest_sha256=file_sha256(repo/generation/'manifest.json'),
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dynapm/core/provenance.py:75: in file_sha256
+    with Path(path).open("rb") as f:
+         ^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/Users/fgtek002/dynapm-v8c-frozen/data/google2019/canonical/generations/cell-e-unambiguous-v2-85c74588191efa0b/manifest.json')
+mode = 'rb', buffering = -1, encoding = None, errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/Users/fgtek002/dynapm-v8c-frozen/data/google2019/canonical/generations/cell-e-unambiguous-v2-85c74588191efa0b/manifest.json'
+
+/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py:537: FileNotFoundError
+_ ERROR at setup of test_no_silent_exclusions_or_wrong_parent[missing_entity] __
+
+    @pytest.fixture(scope='module')
+>   def spec():return cr.frozen_spec(REPO)
+                      ^^^^^^^^^^^^^^^^^^^^
+
+dynapm/tests/test_google_collection_robustness.py:21: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+dynapm/experiments/google_collection_robustness.py:77: in frozen_spec
+    if canonical_json(d)!=canonical_json(spec_document(repo)):raise ValueError('collection_spec_or_source_mismatch')
+                                         ^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_collection_robustness.py:28: in spec_document
+    repo=Path(repo);d=frozen_design(repo)
+                      ^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:86: in frozen_design
+    if canonical_json(d)!=canonical_json(design_document(repo)):raise ValueError('frozen_staged_design_or_scientific_source_mismatch')
+                                         ^^^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:45: in design_document
+    if canonical_json(binding)!=canonical_json(stage_e_binding(repo)):raise ValueError('e_binding_not_frozen')
+                                               ^^^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:36: in stage_e_binding
+    canonical_manifest_sha256=file_sha256(repo/generation/'manifest.json'),
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dynapm/core/provenance.py:75: in file_sha256
+    with Path(path).open("rb") as f:
+         ^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/Users/fgtek002/dynapm-v8c-frozen/data/google2019/canonical/generations/cell-e-unambiguous-v2-85c74588191efa0b/manifest.json')
+mode = 'rb', buffering = -1, encoding = None, errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/Users/fgtek002/dynapm-v8c-frozen/data/google2019/canonical/generations/cell-e-unambiguous-v2-85c74588191efa0b/manifest.json'
+
+/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py:537: FileNotFoundError
+____ ERROR at setup of test_no_silent_exclusions_or_wrong_parent[duplicate] ____
+
+    @pytest.fixture(scope='module')
+>   def spec():return cr.frozen_spec(REPO)
+                      ^^^^^^^^^^^^^^^^^^^^
+
+dynapm/tests/test_google_collection_robustness.py:21: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+dynapm/experiments/google_collection_robustness.py:77: in frozen_spec
+    if canonical_json(d)!=canonical_json(spec_document(repo)):raise ValueError('collection_spec_or_source_mismatch')
+                                         ^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_collection_robustness.py:28: in spec_document
+    repo=Path(repo);d=frozen_design(repo)
+                      ^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:86: in frozen_design
+    if canonical_json(d)!=canonical_json(design_document(repo)):raise ValueError('frozen_staged_design_or_scientific_source_mismatch')
+                                         ^^^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:45: in design_document
+    if canonical_json(binding)!=canonical_json(stage_e_binding(repo)):raise ValueError('e_binding_not_frozen')
+                                               ^^^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:36: in stage_e_binding
+    canonical_manifest_sha256=file_sha256(repo/generation/'manifest.json'),
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dynapm/core/provenance.py:75: in file_sha256
+    with Path(path).open("rb") as f:
+         ^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/Users/fgtek002/dynapm-v8c-frozen/data/google2019/canonical/generations/cell-e-unambiguous-v2-85c74588191efa0b/manifest.json')
+mode = 'rb', buffering = -1, encoding = None, errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/Users/fgtek002/dynapm-v8c-frozen/data/google2019/canonical/generations/cell-e-unambiguous-v2-85c74588191efa0b/manifest.json'
+
+/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py:537: FileNotFoundError
+_ ERROR at setup of test_no_silent_exclusions_or_wrong_parent[wrong_collection] _
+
+    @pytest.fixture(scope='module')
+>   def spec():return cr.frozen_spec(REPO)
+                      ^^^^^^^^^^^^^^^^^^^^
+
+dynapm/tests/test_google_collection_robustness.py:21: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+dynapm/experiments/google_collection_robustness.py:77: in frozen_spec
+    if canonical_json(d)!=canonical_json(spec_document(repo)):raise ValueError('collection_spec_or_source_mismatch')
+                                         ^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_collection_robustness.py:28: in spec_document
+    repo=Path(repo);d=frozen_design(repo)
+                      ^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:86: in frozen_design
+    if canonical_json(d)!=canonical_json(design_document(repo)):raise ValueError('frozen_staged_design_or_scientific_source_mismatch')
+                                         ^^^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:45: in design_document
+    if canonical_json(binding)!=canonical_json(stage_e_binding(repo)):raise ValueError('e_binding_not_frozen')
+                                               ^^^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:36: in stage_e_binding
+    canonical_manifest_sha256=file_sha256(repo/generation/'manifest.json'),
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dynapm/core/provenance.py:75: in file_sha256
+    with Path(path).open("rb") as f:
+         ^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/Users/fgtek002/dynapm-v8c-frozen/data/google2019/canonical/generations/cell-e-unambiguous-v2-85c74588191efa0b/manifest.json')
+mode = 'rb', buffering = -1, encoding = None, errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/Users/fgtek002/dynapm-v8c-frozen/data/google2019/canonical/generations/cell-e-unambiguous-v2-85c74588191efa0b/manifest.json'
+
+/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py:537: FileNotFoundError
+___ ERROR at setup of test_no_silent_exclusions_or_wrong_parent[mixed_cell] ____
+
+    @pytest.fixture(scope='module')
+>   def spec():return cr.frozen_spec(REPO)
+                      ^^^^^^^^^^^^^^^^^^^^
+
+dynapm/tests/test_google_collection_robustness.py:21: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+dynapm/experiments/google_collection_robustness.py:77: in frozen_spec
+    if canonical_json(d)!=canonical_json(spec_document(repo)):raise ValueError('collection_spec_or_source_mismatch')
+                                         ^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_collection_robustness.py:28: in spec_document
+    repo=Path(repo);d=frozen_design(repo)
+                      ^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:86: in frozen_design
+    if canonical_json(d)!=canonical_json(design_document(repo)):raise ValueError('frozen_staged_design_or_scientific_source_mismatch')
+                                         ^^^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:45: in design_document
+    if canonical_json(binding)!=canonical_json(stage_e_binding(repo)):raise ValueError('e_binding_not_frozen')
+                                               ^^^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:36: in stage_e_binding
+    canonical_manifest_sha256=file_sha256(repo/generation/'manifest.json'),
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dynapm/core/provenance.py:75: in file_sha256
+    with Path(path).open("rb") as f:
+         ^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/Users/fgtek002/dynapm-v8c-frozen/data/google2019/canonical/generations/cell-e-unambiguous-v2-85c74588191efa0b/manifest.json')
+mode = 'rb', buffering = -1, encoding = None, errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/Users/fgtek002/dynapm-v8c-frozen/data/google2019/canonical/generations/cell-e-unambiguous-v2-85c74588191efa0b/manifest.json'
+
+/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py:537: FileNotFoundError
+____ ERROR at setup of test_no_silent_exclusions_or_wrong_parent[nonfinite] ____
+
+    @pytest.fixture(scope='module')
+>   def spec():return cr.frozen_spec(REPO)
+                      ^^^^^^^^^^^^^^^^^^^^
+
+dynapm/tests/test_google_collection_robustness.py:21: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+dynapm/experiments/google_collection_robustness.py:77: in frozen_spec
+    if canonical_json(d)!=canonical_json(spec_document(repo)):raise ValueError('collection_spec_or_source_mismatch')
+                                         ^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_collection_robustness.py:28: in spec_document
+    repo=Path(repo);d=frozen_design(repo)
+                      ^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:86: in frozen_design
+    if canonical_json(d)!=canonical_json(design_document(repo)):raise ValueError('frozen_staged_design_or_scientific_source_mismatch')
+                                         ^^^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:45: in design_document
+    if canonical_json(binding)!=canonical_json(stage_e_binding(repo)):raise ValueError('e_binding_not_frozen')
+                                               ^^^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:36: in stage_e_binding
+    canonical_manifest_sha256=file_sha256(repo/generation/'manifest.json'),
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dynapm/core/provenance.py:75: in file_sha256
+    with Path(path).open("rb") as f:
+         ^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/Users/fgtek002/dynapm-v8c-frozen/data/google2019/canonical/generations/cell-e-unambiguous-v2-85c74588191efa0b/manifest.json')
+mode = 'rb', buffering = -1, encoding = None, errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/Users/fgtek002/dynapm-v8c-frozen/data/google2019/canonical/generations/cell-e-unambiguous-v2-85c74588191efa0b/manifest.json'
+
+/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py:537: FileNotFoundError
+_____ ERROR at setup of test_no_silent_exclusions_or_wrong_parent[failed] ______
+
+    @pytest.fixture(scope='module')
+>   def spec():return cr.frozen_spec(REPO)
+                      ^^^^^^^^^^^^^^^^^^^^
+
+dynapm/tests/test_google_collection_robustness.py:21: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+dynapm/experiments/google_collection_robustness.py:77: in frozen_spec
+    if canonical_json(d)!=canonical_json(spec_document(repo)):raise ValueError('collection_spec_or_source_mismatch')
+                                         ^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_collection_robustness.py:28: in spec_document
+    repo=Path(repo);d=frozen_design(repo)
+                      ^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:86: in frozen_design
+    if canonical_json(d)!=canonical_json(design_document(repo)):raise ValueError('frozen_staged_design_or_scientific_source_mismatch')
+                                         ^^^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:45: in design_document
+    if canonical_json(binding)!=canonical_json(stage_e_binding(repo)):raise ValueError('e_binding_not_frozen')
+                                               ^^^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:36: in stage_e_binding
+    canonical_manifest_sha256=file_sha256(repo/generation/'manifest.json'),
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dynapm/core/provenance.py:75: in file_sha256
+    with Path(path).open("rb") as f:
+         ^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/Users/fgtek002/dynapm-v8c-frozen/data/google2019/canonical/generations/cell-e-unambiguous-v2-85c74588191efa0b/manifest.json')
+mode = 'rb', buffering = -1, encoding = None, errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/Users/fgtek002/dynapm-v8c-frozen/data/google2019/canonical/generations/cell-e-unambiguous-v2-85c74588191efa0b/manifest.json'
+
+/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py:537: FileNotFoundError
+_ ERROR at setup of test_no_silent_exclusions_or_wrong_parent[missing_contrast] _
+
+    @pytest.fixture(scope='module')
+>   def spec():return cr.frozen_spec(REPO)
+                      ^^^^^^^^^^^^^^^^^^^^
+
+dynapm/tests/test_google_collection_robustness.py:21: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+dynapm/experiments/google_collection_robustness.py:77: in frozen_spec
+    if canonical_json(d)!=canonical_json(spec_document(repo)):raise ValueError('collection_spec_or_source_mismatch')
+                                         ^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_collection_robustness.py:28: in spec_document
+    repo=Path(repo);d=frozen_design(repo)
+                      ^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:86: in frozen_design
+    if canonical_json(d)!=canonical_json(design_document(repo)):raise ValueError('frozen_staged_design_or_scientific_source_mismatch')
+                                         ^^^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:45: in design_document
+    if canonical_json(binding)!=canonical_json(stage_e_binding(repo)):raise ValueError('e_binding_not_frozen')
+                                               ^^^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:36: in stage_e_binding
+    canonical_manifest_sha256=file_sha256(repo/generation/'manifest.json'),
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dynapm/core/provenance.py:75: in file_sha256
+    with Path(path).open("rb") as f:
+         ^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/Users/fgtek002/dynapm-v8c-frozen/data/google2019/canonical/generations/cell-e-unambiguous-v2-85c74588191efa0b/manifest.json')
+mode = 'rb', buffering = -1, encoding = None, errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/Users/fgtek002/dynapm-v8c-frozen/data/google2019/canonical/generations/cell-e-unambiguous-v2-85c74588191efa0b/manifest.json'
+
+/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py:537: FileNotFoundError
+_ ERROR at setup of test_no_silent_exclusions_or_wrong_parent[wrong_primary_mean] _
+
+    @pytest.fixture(scope='module')
+>   def spec():return cr.frozen_spec(REPO)
+                      ^^^^^^^^^^^^^^^^^^^^
+
+dynapm/tests/test_google_collection_robustness.py:21: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+dynapm/experiments/google_collection_robustness.py:77: in frozen_spec
+    if canonical_json(d)!=canonical_json(spec_document(repo)):raise ValueError('collection_spec_or_source_mismatch')
+                                         ^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_collection_robustness.py:28: in spec_document
+    repo=Path(repo);d=frozen_design(repo)
+                      ^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:86: in frozen_design
+    if canonical_json(d)!=canonical_json(design_document(repo)):raise ValueError('frozen_staged_design_or_scientific_source_mismatch')
+                                         ^^^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:45: in design_document
+    if canonical_json(binding)!=canonical_json(stage_e_binding(repo)):raise ValueError('e_binding_not_frozen')
+                                               ^^^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:36: in stage_e_binding
+    canonical_manifest_sha256=file_sha256(repo/generation/'manifest.json'),
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dynapm/core/provenance.py:75: in file_sha256
+    with Path(path).open("rb") as f:
+         ^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/Users/fgtek002/dynapm-v8c-frozen/data/google2019/canonical/generations/cell-e-unambiguous-v2-85c74588191efa0b/manifest.json')
+mode = 'rb', buffering = -1, encoding = None, errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/Users/fgtek002/dynapm-v8c-frozen/data/google2019/canonical/generations/cell-e-unambiguous-v2-85c74588191efa0b/manifest.json'
+
+/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py:537: FileNotFoundError
+_ ERROR at setup of test_cluster_sign_consistency_zero_and_endpoint_direction __
+
+    @pytest.fixture(scope='module')
+>   def spec():return cr.frozen_spec(REPO)
+                      ^^^^^^^^^^^^^^^^^^^^
+
+dynapm/tests/test_google_collection_robustness.py:21: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+dynapm/experiments/google_collection_robustness.py:77: in frozen_spec
+    if canonical_json(d)!=canonical_json(spec_document(repo)):raise ValueError('collection_spec_or_source_mismatch')
+                                         ^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_collection_robustness.py:28: in spec_document
+    repo=Path(repo);d=frozen_design(repo)
+                      ^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:86: in frozen_design
+    if canonical_json(d)!=canonical_json(design_document(repo)):raise ValueError('frozen_staged_design_or_scientific_source_mismatch')
+                                         ^^^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:45: in design_document
+    if canonical_json(binding)!=canonical_json(stage_e_binding(repo)):raise ValueError('e_binding_not_frozen')
+                                               ^^^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:36: in stage_e_binding
+    canonical_manifest_sha256=file_sha256(repo/generation/'manifest.json'),
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dynapm/core/provenance.py:75: in file_sha256
+    with Path(path).open("rb") as f:
+         ^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/Users/fgtek002/dynapm-v8c-frozen/data/google2019/canonical/generations/cell-e-unambiguous-v2-85c74588191efa0b/manifest.json')
+mode = 'rb', buffering = -1, encoding = None, errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/Users/fgtek002/dynapm-v8c-frozen/data/google2019/canonical/generations/cell-e-unambiguous-v2-85c74588191efa0b/manifest.json'
+
+/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py:537: FileNotFoundError
+_______ ERROR at setup of test_cross_cell_synthesis_separate_and_scoped ________
+
+    @pytest.fixture(scope='module')
+>   def spec():return cr.frozen_spec(REPO)
+                      ^^^^^^^^^^^^^^^^^^^^
+
+dynapm/tests/test_google_collection_robustness.py:21: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+dynapm/experiments/google_collection_robustness.py:77: in frozen_spec
+    if canonical_json(d)!=canonical_json(spec_document(repo)):raise ValueError('collection_spec_or_source_mismatch')
+                                         ^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_collection_robustness.py:28: in spec_document
+    repo=Path(repo);d=frozen_design(repo)
+                      ^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:86: in frozen_design
+    if canonical_json(d)!=canonical_json(design_document(repo)):raise ValueError('frozen_staged_design_or_scientific_source_mismatch')
+                                         ^^^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:45: in design_document
+    if canonical_json(binding)!=canonical_json(stage_e_binding(repo)):raise ValueError('e_binding_not_frozen')
+                                               ^^^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:36: in stage_e_binding
+    canonical_manifest_sha256=file_sha256(repo/generation/'manifest.json'),
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dynapm/core/provenance.py:75: in file_sha256
+    with Path(path).open("rb") as f:
+         ^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/Users/fgtek002/dynapm-v8c-frozen/data/google2019/canonical/generations/cell-e-unambiguous-v2-85c74588191efa0b/manifest.json')
+mode = 'rb', buffering = -1, encoding = None, errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/Users/fgtek002/dynapm-v8c-frozen/data/google2019/canonical/generations/cell-e-unambiguous-v2-85c74588191efa0b/manifest.json'
+
+/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py:537: FileNotFoundError
+_________ ERROR at setup of test_no_cloud_or_policy_calls_and_safe_cli _________
+
+    @pytest.fixture(scope='module')
+>   def spec():return cr.frozen_spec(REPO)
+                      ^^^^^^^^^^^^^^^^^^^^
+
+dynapm/tests/test_google_collection_robustness.py:21: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+dynapm/experiments/google_collection_robustness.py:77: in frozen_spec
+    if canonical_json(d)!=canonical_json(spec_document(repo)):raise ValueError('collection_spec_or_source_mismatch')
+                                         ^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_collection_robustness.py:28: in spec_document
+    repo=Path(repo);d=frozen_design(repo)
+                      ^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:86: in frozen_design
+    if canonical_json(d)!=canonical_json(design_document(repo)):raise ValueError('frozen_staged_design_or_scientific_source_mismatch')
+                                         ^^^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:45: in design_document
+    if canonical_json(binding)!=canonical_json(stage_e_binding(repo)):raise ValueError('e_binding_not_frozen')
+                                               ^^^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:36: in stage_e_binding
+    canonical_manifest_sha256=file_sha256(repo/generation/'manifest.json'),
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dynapm/core/provenance.py:75: in file_sha256
+    with Path(path).open("rb") as f:
+         ^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/Users/fgtek002/dynapm-v8c-frozen/data/google2019/canonical/generations/cell-e-unambiguous-v2-85c74588191efa0b/manifest.json')
+mode = 'rb', buffering = -1, encoding = None, errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/Users/fgtek002/dynapm-v8c-frozen/data/google2019/canonical/generations/cell-e-unambiguous-v2-85c74588191efa0b/manifest.json'
+
+/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py:537: FileNotFoundError
+_____ ERROR at setup of test_frozen_spec_rejects_param_or_source_mutation ______
+
+    @pytest.fixture(scope='module')
+>   def spec():return cr.frozen_spec(REPO)
+                      ^^^^^^^^^^^^^^^^^^^^
+
+dynapm/tests/test_google_collection_robustness.py:21: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+dynapm/experiments/google_collection_robustness.py:77: in frozen_spec
+    if canonical_json(d)!=canonical_json(spec_document(repo)):raise ValueError('collection_spec_or_source_mismatch')
+                                         ^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_collection_robustness.py:28: in spec_document
+    repo=Path(repo);d=frozen_design(repo)
+                      ^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:86: in frozen_design
+    if canonical_json(d)!=canonical_json(design_document(repo)):raise ValueError('frozen_staged_design_or_scientific_source_mismatch')
+                                         ^^^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:45: in design_document
+    if canonical_json(binding)!=canonical_json(stage_e_binding(repo)):raise ValueError('e_binding_not_frozen')
+                                               ^^^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:36: in stage_e_binding
+    canonical_manifest_sha256=file_sha256(repo/generation/'manifest.json'),
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dynapm/core/provenance.py:75: in file_sha256
+    with Path(path).open("rb") as f:
+         ^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/Users/fgtek002/dynapm-v8c-frozen/data/google2019/canonical/generations/cell-e-unambiguous-v2-85c74588191efa0b/manifest.json')
+mode = 'rb', buffering = -1, encoding = None, errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/Users/fgtek002/dynapm-v8c-frozen/data/google2019/canonical/generations/cell-e-unambiguous-v2-85c74588191efa0b/manifest.json'
+
+/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py:537: FileNotFoundError
+______ ERROR at setup of test_managed_secondary_on_synthetic_parent_only _______
+
+    @pytest.fixture(scope='module')
+>   def spec():return cr.frozen_spec(REPO)
+                      ^^^^^^^^^^^^^^^^^^^^
+
+dynapm/tests/test_google_collection_robustness.py:21: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+dynapm/experiments/google_collection_robustness.py:77: in frozen_spec
+    if canonical_json(d)!=canonical_json(spec_document(repo)):raise ValueError('collection_spec_or_source_mismatch')
+                                         ^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_collection_robustness.py:28: in spec_document
+    repo=Path(repo);d=frozen_design(repo)
+                      ^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:86: in frozen_design
+    if canonical_json(d)!=canonical_json(design_document(repo)):raise ValueError('frozen_staged_design_or_scientific_source_mismatch')
+                                         ^^^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:45: in design_document
+    if canonical_json(binding)!=canonical_json(stage_e_binding(repo)):raise ValueError('e_binding_not_frozen')
+                                               ^^^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:36: in stage_e_binding
+    canonical_manifest_sha256=file_sha256(repo/generation/'manifest.json'),
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dynapm/core/provenance.py:75: in file_sha256
+    with Path(path).open("rb") as f:
+         ^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/Users/fgtek002/dynapm-v8c-frozen/data/google2019/canonical/generations/cell-e-unambiguous-v2-85c74588191efa0b/manifest.json')
+mode = 'rb', buffering = -1, encoding = None, errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/Users/fgtek002/dynapm-v8c-frozen/data/google2019/canonical/generations/cell-e-unambiguous-v2-85c74588191efa0b/manifest.json'
+
+/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py:537: FileNotFoundError
+________________ ERROR at setup of test_yaml_and_schema_guards _________________
+
+    @pytest.fixture(scope='module')
+>   def spec():return cr.frozen_spec(REPO)
+                      ^^^^^^^^^^^^^^^^^^^^
+
+dynapm/tests/test_google_collection_robustness.py:21: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+dynapm/experiments/google_collection_robustness.py:77: in frozen_spec
+    if canonical_json(d)!=canonical_json(spec_document(repo)):raise ValueError('collection_spec_or_source_mismatch')
+                                         ^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_collection_robustness.py:28: in spec_document
+    repo=Path(repo);d=frozen_design(repo)
+                      ^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:86: in frozen_design
+    if canonical_json(d)!=canonical_json(design_document(repo)):raise ValueError('frozen_staged_design_or_scientific_source_mismatch')
+                                         ^^^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:45: in design_document
+    if canonical_json(binding)!=canonical_json(stage_e_binding(repo)):raise ValueError('e_binding_not_frozen')
+                                               ^^^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:36: in stage_e_binding
+    canonical_manifest_sha256=file_sha256(repo/generation/'manifest.json'),
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dynapm/core/provenance.py:75: in file_sha256
+    with Path(path).open("rb") as f:
+         ^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/Users/fgtek002/dynapm-v8c-frozen/data/google2019/canonical/generations/cell-e-unambiguous-v2-85c74588191efa0b/manifest.json')
+mode = 'rb', buffering = -1, encoding = None, errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/Users/fgtek002/dynapm-v8c-frozen/data/google2019/canonical/generations/cell-e-unambiguous-v2-85c74588191efa0b/manifest.json'
+
+/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py:537: FileNotFoundError
+_ ERROR at setup of test_primary_endpoint_ranges_preserved[cpu_class_accuracy-1.1] _
+
+    @pytest.fixture(scope='module')
+>   def spec():return cr.frozen_spec(REPO)
+                      ^^^^^^^^^^^^^^^^^^^^
+
+dynapm/tests/test_google_collection_robustness.py:21: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+dynapm/experiments/google_collection_robustness.py:77: in frozen_spec
+    if canonical_json(d)!=canonical_json(spec_document(repo)):raise ValueError('collection_spec_or_source_mismatch')
+                                         ^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_collection_robustness.py:28: in spec_document
+    repo=Path(repo);d=frozen_design(repo)
+                      ^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:86: in frozen_design
+    if canonical_json(d)!=canonical_json(design_document(repo)):raise ValueError('frozen_staged_design_or_scientific_source_mismatch')
+                                         ^^^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:45: in design_document
+    if canonical_json(binding)!=canonical_json(stage_e_binding(repo)):raise ValueError('e_binding_not_frozen')
+                                               ^^^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:36: in stage_e_binding
+    canonical_manifest_sha256=file_sha256(repo/generation/'manifest.json'),
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dynapm/core/provenance.py:75: in file_sha256
+    with Path(path).open("rb") as f:
+         ^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/Users/fgtek002/dynapm-v8c-frozen/data/google2019/canonical/generations/cell-e-unambiguous-v2-85c74588191efa0b/manifest.json')
+mode = 'rb', buffering = -1, encoding = None, errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/Users/fgtek002/dynapm-v8c-frozen/data/google2019/canonical/generations/cell-e-unambiguous-v2-85c74588191efa0b/manifest.json'
+
+/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py:537: FileNotFoundError
+_ ERROR at setup of test_primary_endpoint_ranges_preserved[memory_class_accuracy--0.1] _
+
+    @pytest.fixture(scope='module')
+>   def spec():return cr.frozen_spec(REPO)
+                      ^^^^^^^^^^^^^^^^^^^^
+
+dynapm/tests/test_google_collection_robustness.py:21: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+dynapm/experiments/google_collection_robustness.py:77: in frozen_spec
+    if canonical_json(d)!=canonical_json(spec_document(repo)):raise ValueError('collection_spec_or_source_mismatch')
+                                         ^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_collection_robustness.py:28: in spec_document
+    repo=Path(repo);d=frozen_design(repo)
+                      ^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:86: in frozen_design
+    if canonical_json(d)!=canonical_json(design_document(repo)):raise ValueError('frozen_staged_design_or_scientific_source_mismatch')
+                                         ^^^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:45: in design_document
+    if canonical_json(binding)!=canonical_json(stage_e_binding(repo)):raise ValueError('e_binding_not_frozen')
+                                               ^^^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:36: in stage_e_binding
+    canonical_manifest_sha256=file_sha256(repo/generation/'manifest.json'),
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dynapm/core/provenance.py:75: in file_sha256
+    with Path(path).open("rb") as f:
+         ^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/Users/fgtek002/dynapm-v8c-frozen/data/google2019/canonical/generations/cell-e-unambiguous-v2-85c74588191efa0b/manifest.json')
+mode = 'rb', buffering = -1, encoding = None, errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/Users/fgtek002/dynapm-v8c-frozen/data/google2019/canonical/generations/cell-e-unambiguous-v2-85c74588191efa0b/manifest.json'
+
+/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py:537: FileNotFoundError
+__ ERROR at setup of test_primary_endpoint_ranges_preserved[cpu_p95_mae--0.1] __
+
+    @pytest.fixture(scope='module')
+>   def spec():return cr.frozen_spec(REPO)
+                      ^^^^^^^^^^^^^^^^^^^^
+
+dynapm/tests/test_google_collection_robustness.py:21: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+dynapm/experiments/google_collection_robustness.py:77: in frozen_spec
+    if canonical_json(d)!=canonical_json(spec_document(repo)):raise ValueError('collection_spec_or_source_mismatch')
+                                         ^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_collection_robustness.py:28: in spec_document
+    repo=Path(repo);d=frozen_design(repo)
+                      ^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:86: in frozen_design
+    if canonical_json(d)!=canonical_json(design_document(repo)):raise ValueError('frozen_staged_design_or_scientific_source_mismatch')
+                                         ^^^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:45: in design_document
+    if canonical_json(binding)!=canonical_json(stage_e_binding(repo)):raise ValueError('e_binding_not_frozen')
+                                               ^^^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:36: in stage_e_binding
+    canonical_manifest_sha256=file_sha256(repo/generation/'manifest.json'),
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dynapm/core/provenance.py:75: in file_sha256
+    with Path(path).open("rb") as f:
+         ^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/Users/fgtek002/dynapm-v8c-frozen/data/google2019/canonical/generations/cell-e-unambiguous-v2-85c74588191efa0b/manifest.json')
+mode = 'rb', buffering = -1, encoding = None, errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/Users/fgtek002/dynapm-v8c-frozen/data/google2019/canonical/generations/cell-e-unambiguous-v2-85c74588191efa0b/manifest.json'
+
+/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py:537: FileNotFoundError
+_ ERROR at setup of test_primary_endpoint_ranges_preserved[n_refresh_events-1.5] _
+
+    @pytest.fixture(scope='module')
+>   def spec():return cr.frozen_spec(REPO)
+                      ^^^^^^^^^^^^^^^^^^^^
+
+dynapm/tests/test_google_collection_robustness.py:21: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+dynapm/experiments/google_collection_robustness.py:77: in frozen_spec
+    if canonical_json(d)!=canonical_json(spec_document(repo)):raise ValueError('collection_spec_or_source_mismatch')
+                                         ^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_collection_robustness.py:28: in spec_document
+    repo=Path(repo);d=frozen_design(repo)
+                      ^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:86: in frozen_design
+    if canonical_json(d)!=canonical_json(design_document(repo)):raise ValueError('frozen_staged_design_or_scientific_source_mismatch')
+                                         ^^^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:45: in design_document
+    if canonical_json(binding)!=canonical_json(stage_e_binding(repo)):raise ValueError('e_binding_not_frozen')
+                                               ^^^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:36: in stage_e_binding
+    canonical_manifest_sha256=file_sha256(repo/generation/'manifest.json'),
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dynapm/core/provenance.py:75: in file_sha256
+    with Path(path).open("rb") as f:
+         ^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/Users/fgtek002/dynapm-v8c-frozen/data/google2019/canonical/generations/cell-e-unambiguous-v2-85c74588191efa0b/manifest.json')
+mode = 'rb', buffering = -1, encoding = None, errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/Users/fgtek002/dynapm-v8c-frozen/data/google2019/canonical/generations/cell-e-unambiguous-v2-85c74588191efa0b/manifest.json'
+
+/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py:537: FileNotFoundError
+__ ERROR at setup of test_one_collection_keeps_points_and_serializes_null_cis __
+
+    @pytest.fixture(scope='module')
+>   def spec():return cr.frozen_spec(REPO)
+                      ^^^^^^^^^^^^^^^^^^^^
+
+dynapm/tests/test_google_collection_robustness.py:21: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+dynapm/experiments/google_collection_robustness.py:77: in frozen_spec
+    if canonical_json(d)!=canonical_json(spec_document(repo)):raise ValueError('collection_spec_or_source_mismatch')
+                                         ^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_collection_robustness.py:28: in spec_document
+    repo=Path(repo);d=frozen_design(repo)
+                      ^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:86: in frozen_design
+    if canonical_json(d)!=canonical_json(design_document(repo)):raise ValueError('frozen_staged_design_or_scientific_source_mismatch')
+                                         ^^^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:45: in design_document
+    if canonical_json(binding)!=canonical_json(stage_e_binding(repo)):raise ValueError('e_binding_not_frozen')
+                                               ^^^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:36: in stage_e_binding
+    canonical_manifest_sha256=file_sha256(repo/generation/'manifest.json'),
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dynapm/core/provenance.py:75: in file_sha256
+    with Path(path).open("rb") as f:
+         ^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/Users/fgtek002/dynapm-v8c-frozen/data/google2019/canonical/generations/cell-e-unambiguous-v2-85c74588191efa0b/manifest.json')
+mode = 'rb', buffering = -1, encoding = None, errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/Users/fgtek002/dynapm-v8c-frozen/data/google2019/canonical/generations/cell-e-unambiguous-v2-85c74588191efa0b/manifest.json'
+
+/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py:537: FileNotFoundError
+_______ ERROR at setup of test_prospective_frozen_design_and_statistics ________
+
+    @pytest.fixture(scope='module')
+>   def design():return frozen_design(REPO)
+                        ^^^^^^^^^^^^^^^^^^^
+
+dynapm/tests/test_google_staged_replication.py:27: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+dynapm/experiments/google_staged_design.py:86: in frozen_design
+    if canonical_json(d)!=canonical_json(design_document(repo)):raise ValueError('frozen_staged_design_or_scientific_source_mismatch')
+                                         ^^^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:45: in design_document
+    if canonical_json(binding)!=canonical_json(stage_e_binding(repo)):raise ValueError('e_binding_not_frozen')
+                                               ^^^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:36: in stage_e_binding
+    canonical_manifest_sha256=file_sha256(repo/generation/'manifest.json'),
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dynapm/core/provenance.py:75: in file_sha256
+    with Path(path).open("rb") as f:
+         ^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/Users/fgtek002/dynapm-v8c-frozen/data/google2019/canonical/generations/cell-e-unambiguous-v2-85c74588191efa0b/manifest.json')
+mode = 'rb', buffering = -1, encoding = None, errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/Users/fgtek002/dynapm-v8c-frozen/data/google2019/canonical/generations/cell-e-unambiguous-v2-85c74588191efa0b/manifest.json'
+
+/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py:537: FileNotFoundError
+______ ERROR at setup of test_configuration_is_bound_to_execution[period] ______
+
+    @pytest.fixture(scope='module')
+>   def design():return frozen_design(REPO)
+                        ^^^^^^^^^^^^^^^^^^^
+
+dynapm/tests/test_google_staged_replication.py:27: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+dynapm/experiments/google_staged_design.py:86: in frozen_design
+    if canonical_json(d)!=canonical_json(design_document(repo)):raise ValueError('frozen_staged_design_or_scientific_source_mismatch')
+                                         ^^^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:45: in design_document
+    if canonical_json(binding)!=canonical_json(stage_e_binding(repo)):raise ValueError('e_binding_not_frozen')
+                                               ^^^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:36: in stage_e_binding
+    canonical_manifest_sha256=file_sha256(repo/generation/'manifest.json'),
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dynapm/core/provenance.py:75: in file_sha256
+    with Path(path).open("rb") as f:
+         ^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/Users/fgtek002/dynapm-v8c-frozen/data/google2019/canonical/generations/cell-e-unambiguous-v2-85c74588191efa0b/manifest.json')
+mode = 'rb', buffering = -1, encoding = None, errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/Users/fgtek002/dynapm-v8c-frozen/data/google2019/canonical/generations/cell-e-unambiguous-v2-85c74588191efa0b/manifest.json'
+
+/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py:537: FileNotFoundError
+_____ ERROR at setup of test_configuration_is_bound_to_execution[methods] ______
+
+    @pytest.fixture(scope='module')
+>   def design():return frozen_design(REPO)
+                        ^^^^^^^^^^^^^^^^^^^
+
+dynapm/tests/test_google_staged_replication.py:27: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+dynapm/experiments/google_staged_design.py:86: in frozen_design
+    if canonical_json(d)!=canonical_json(design_document(repo)):raise ValueError('frozen_staged_design_or_scientific_source_mismatch')
+                                         ^^^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:45: in design_document
+    if canonical_json(binding)!=canonical_json(stage_e_binding(repo)):raise ValueError('e_binding_not_frozen')
+                                               ^^^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:36: in stage_e_binding
+    canonical_manifest_sha256=file_sha256(repo/generation/'manifest.json'),
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dynapm/core/provenance.py:75: in file_sha256
+    with Path(path).open("rb") as f:
+         ^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/Users/fgtek002/dynapm-v8c-frozen/data/google2019/canonical/generations/cell-e-unambiguous-v2-85c74588191efa0b/manifest.json')
+mode = 'rb', buffering = -1, encoding = None, errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/Users/fgtek002/dynapm-v8c-frozen/data/google2019/canonical/generations/cell-e-unambiguous-v2-85c74588191efa0b/manifest.json'
+
+/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py:537: FileNotFoundError
+____ ERROR at setup of test_configuration_is_bound_to_execution[statistics] ____
+
+    @pytest.fixture(scope='module')
+>   def design():return frozen_design(REPO)
+                        ^^^^^^^^^^^^^^^^^^^
+
+dynapm/tests/test_google_staged_replication.py:27: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+dynapm/experiments/google_staged_design.py:86: in frozen_design
+    if canonical_json(d)!=canonical_json(design_document(repo)):raise ValueError('frozen_staged_design_or_scientific_source_mismatch')
+                                         ^^^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:45: in design_document
+    if canonical_json(binding)!=canonical_json(stage_e_binding(repo)):raise ValueError('e_binding_not_frozen')
+                                               ^^^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:36: in stage_e_binding
+    canonical_manifest_sha256=file_sha256(repo/generation/'manifest.json'),
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dynapm/core/provenance.py:75: in file_sha256
+    with Path(path).open("rb") as f:
+         ^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/Users/fgtek002/dynapm-v8c-frozen/data/google2019/canonical/generations/cell-e-unambiguous-v2-85c74588191efa0b/manifest.json')
+mode = 'rb', buffering = -1, encoding = None, errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/Users/fgtek002/dynapm-v8c-frozen/data/google2019/canonical/generations/cell-e-unambiguous-v2-85c74588191efa0b/manifest.json'
+
+/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py:537: FileNotFoundError
+_____ ERROR at setup of test_configuration_is_bound_to_execution[cadence] ______
+
+    @pytest.fixture(scope='module')
+>   def design():return frozen_design(REPO)
+                        ^^^^^^^^^^^^^^^^^^^
+
+dynapm/tests/test_google_staged_replication.py:27: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+dynapm/experiments/google_staged_design.py:86: in frozen_design
+    if canonical_json(d)!=canonical_json(design_document(repo)):raise ValueError('frozen_staged_design_or_scientific_source_mismatch')
+                                         ^^^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:45: in design_document
+    if canonical_json(binding)!=canonical_json(stage_e_binding(repo)):raise ValueError('e_binding_not_frozen')
+                                               ^^^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:36: in stage_e_binding
+    canonical_manifest_sha256=file_sha256(repo/generation/'manifest.json'),
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dynapm/core/provenance.py:75: in file_sha256
+    with Path(path).open("rb") as f:
+         ^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/Users/fgtek002/dynapm-v8c-frozen/data/google2019/canonical/generations/cell-e-unambiguous-v2-85c74588191efa0b/manifest.json')
+mode = 'rb', buffering = -1, encoding = None, errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/Users/fgtek002/dynapm-v8c-frozen/data/google2019/canonical/generations/cell-e-unambiguous-v2-85c74588191efa0b/manifest.json'
+
+/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py:537: FileNotFoundError
+______ ERROR at setup of test_configuration_is_bound_to_execution[window] ______
+
+    @pytest.fixture(scope='module')
+>   def design():return frozen_design(REPO)
+                        ^^^^^^^^^^^^^^^^^^^
+
+dynapm/tests/test_google_staged_replication.py:27: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+dynapm/experiments/google_staged_design.py:86: in frozen_design
+    if canonical_json(d)!=canonical_json(design_document(repo)):raise ValueError('frozen_staged_design_or_scientific_source_mismatch')
+                                         ^^^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:45: in design_document
+    if canonical_json(binding)!=canonical_json(stage_e_binding(repo)):raise ValueError('e_binding_not_frozen')
+                                               ^^^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:36: in stage_e_binding
+    canonical_manifest_sha256=file_sha256(repo/generation/'manifest.json'),
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dynapm/core/provenance.py:75: in file_sha256
+    with Path(path).open("rb") as f:
+         ^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/Users/fgtek002/dynapm-v8c-frozen/data/google2019/canonical/generations/cell-e-unambiguous-v2-85c74588191efa0b/manifest.json')
+mode = 'rb', buffering = -1, encoding = None, errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/Users/fgtek002/dynapm-v8c-frozen/data/google2019/canonical/generations/cell-e-unambiguous-v2-85c74588191efa0b/manifest.json'
+
+/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py:537: FileNotFoundError
+__ ERROR at setup of test_configuration_is_bound_to_execution[initialization] __
+
+    @pytest.fixture(scope='module')
+>   def design():return frozen_design(REPO)
+                        ^^^^^^^^^^^^^^^^^^^
+
+dynapm/tests/test_google_staged_replication.py:27: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+dynapm/experiments/google_staged_design.py:86: in frozen_design
+    if canonical_json(d)!=canonical_json(design_document(repo)):raise ValueError('frozen_staged_design_or_scientific_source_mismatch')
+                                         ^^^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:45: in design_document
+    if canonical_json(binding)!=canonical_json(stage_e_binding(repo)):raise ValueError('e_binding_not_frozen')
+                                               ^^^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:36: in stage_e_binding
+    canonical_manifest_sha256=file_sha256(repo/generation/'manifest.json'),
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dynapm/core/provenance.py:75: in file_sha256
+    with Path(path).open("rb") as f:
+         ^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/Users/fgtek002/dynapm-v8c-frozen/data/google2019/canonical/generations/cell-e-unambiguous-v2-85c74588191efa0b/manifest.json')
+mode = 'rb', buffering = -1, encoding = None, errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/Users/fgtek002/dynapm-v8c-frozen/data/google2019/canonical/generations/cell-e-unambiguous-v2-85c74588191efa0b/manifest.json'
+
+/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py:537: FileNotFoundError
+_____ ERROR at setup of test_exact_five_method_matrix_and_factory_periods ______
+
+    @pytest.fixture(scope='module')
+>   def design():return frozen_design(REPO)
+                        ^^^^^^^^^^^^^^^^^^^
+
+dynapm/tests/test_google_staged_replication.py:27: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+dynapm/experiments/google_staged_design.py:86: in frozen_design
+    if canonical_json(d)!=canonical_json(design_document(repo)):raise ValueError('frozen_staged_design_or_scientific_source_mismatch')
+                                         ^^^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:45: in design_document
+    if canonical_json(binding)!=canonical_json(stage_e_binding(repo)):raise ValueError('e_binding_not_frozen')
+                                               ^^^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:36: in stage_e_binding
+    canonical_manifest_sha256=file_sha256(repo/generation/'manifest.json'),
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dynapm/core/provenance.py:75: in file_sha256
+    with Path(path).open("rb") as f:
+         ^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/Users/fgtek002/dynapm-v8c-frozen/data/google2019/canonical/generations/cell-e-unambiguous-v2-85c74588191efa0b/manifest.json')
+mode = 'rb', buffering = -1, encoding = None, errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/Users/fgtek002/dynapm-v8c-frozen/data/google2019/canonical/generations/cell-e-unambiguous-v2-85c74588191efa0b/manifest.json'
+
+/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py:537: FileNotFoundError
+________ ERROR at setup of test_accounting_and_identical_verified_reads ________
+
+    @pytest.fixture(scope='module')
+>   def design():return frozen_design(REPO)
+                        ^^^^^^^^^^^^^^^^^^^
+
+dynapm/tests/test_google_staged_replication.py:27: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+dynapm/experiments/google_staged_design.py:86: in frozen_design
+    if canonical_json(d)!=canonical_json(design_document(repo)):raise ValueError('frozen_staged_design_or_scientific_source_mismatch')
+                                         ^^^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:45: in design_document
+    if canonical_json(binding)!=canonical_json(stage_e_binding(repo)):raise ValueError('e_binding_not_frozen')
+                                               ^^^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:36: in stage_e_binding
+    canonical_manifest_sha256=file_sha256(repo/generation/'manifest.json'),
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dynapm/core/provenance.py:75: in file_sha256
+    with Path(path).open("rb") as f:
+         ^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/Users/fgtek002/dynapm-v8c-frozen/data/google2019/canonical/generations/cell-e-unambiguous-v2-85c74588191efa0b/manifest.json')
+mode = 'rb', buffering = -1, encoding = None, errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/Users/fgtek002/dynapm-v8c-frozen/data/google2019/canonical/generations/cell-e-unambiguous-v2-85c74588191efa0b/manifest.json'
+
+/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py:537: FileNotFoundError
+___________ ERROR at setup of test_availability_and_exact_288_slots ____________
+
+    @pytest.fixture(scope='module')
+>   def design():return frozen_design(REPO)
+                        ^^^^^^^^^^^^^^^^^^^
+
+dynapm/tests/test_google_staged_replication.py:27: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+dynapm/experiments/google_staged_design.py:86: in frozen_design
+    if canonical_json(d)!=canonical_json(design_document(repo)):raise ValueError('frozen_staged_design_or_scientific_source_mismatch')
+                                         ^^^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:45: in design_document
+    if canonical_json(binding)!=canonical_json(stage_e_binding(repo)):raise ValueError('e_binding_not_frozen')
+                                               ^^^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:36: in stage_e_binding
+    canonical_manifest_sha256=file_sha256(repo/generation/'manifest.json'),
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dynapm/core/provenance.py:75: in file_sha256
+    with Path(path).open("rb") as f:
+         ^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/Users/fgtek002/dynapm-v8c-frozen/data/google2019/canonical/generations/cell-e-unambiguous-v2-85c74588191efa0b/manifest.json')
+mode = 'rb', buffering = -1, encoding = None, errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/Users/fgtek002/dynapm-v8c-frozen/data/google2019/canonical/generations/cell-e-unambiguous-v2-85c74588191efa0b/manifest.json'
+
+/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py:537: FileNotFoundError
+__________ ERROR at setup of test_missing_read_and_commit_before_read __________
+
+    @pytest.fixture(scope='module')
+>   def design():return frozen_design(REPO)
+                        ^^^^^^^^^^^^^^^^^^^
+
+dynapm/tests/test_google_staged_replication.py:27: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+dynapm/experiments/google_staged_design.py:86: in frozen_design
+    if canonical_json(d)!=canonical_json(design_document(repo)):raise ValueError('frozen_staged_design_or_scientific_source_mismatch')
+                                         ^^^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:45: in design_document
+    if canonical_json(binding)!=canonical_json(stage_e_binding(repo)):raise ValueError('e_binding_not_frozen')
+                                               ^^^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:36: in stage_e_binding
+    canonical_manifest_sha256=file_sha256(repo/generation/'manifest.json'),
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dynapm/core/provenance.py:75: in file_sha256
+    with Path(path).open("rb") as f:
+         ^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/Users/fgtek002/dynapm-v8c-frozen/data/google2019/canonical/generations/cell-e-unambiguous-v2-85c74588191efa0b/manifest.json')
+mode = 'rb', buffering = -1, encoding = None, errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/Users/fgtek002/dynapm-v8c-frozen/data/google2019/canonical/generations/cell-e-unambiguous-v2-85c74588191efa0b/manifest.json'
+
+/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py:537: FileNotFoundError
+____ ERROR at setup of test_pw96_gate_and_delayed_grid_uses_completed_slots ____
+
+    @pytest.fixture(scope='module')
+>   def design():return frozen_design(REPO)
+                        ^^^^^^^^^^^^^^^^^^^
+
+dynapm/tests/test_google_staged_replication.py:27: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+dynapm/experiments/google_staged_design.py:86: in frozen_design
+    if canonical_json(d)!=canonical_json(design_document(repo)):raise ValueError('frozen_staged_design_or_scientific_source_mismatch')
+                                         ^^^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:45: in design_document
+    if canonical_json(binding)!=canonical_json(stage_e_binding(repo)):raise ValueError('e_binding_not_frozen')
+                                               ^^^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:36: in stage_e_binding
+    canonical_manifest_sha256=file_sha256(repo/generation/'manifest.json'),
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dynapm/core/provenance.py:75: in file_sha256
+    with Path(path).open("rb") as f:
+         ^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/Users/fgtek002/dynapm-v8c-frozen/data/google2019/canonical/generations/cell-e-unambiguous-v2-85c74588191efa0b/manifest.json')
+mode = 'rb', buffering = -1, encoding = None, errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/Users/fgtek002/dynapm-v8c-frozen/data/google2019/canonical/generations/cell-e-unambiguous-v2-85c74588191efa0b/manifest.json'
+
+/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py:537: FileNotFoundError
+_ ERROR at setup of test_e_g_selection_independent_no_backfill_and_outcomes_ignored _
+
+    @pytest.fixture(scope='module')
+>   def design():return frozen_design(REPO)
+                        ^^^^^^^^^^^^^^^^^^^
+
+dynapm/tests/test_google_staged_replication.py:27: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+dynapm/experiments/google_staged_design.py:86: in frozen_design
+    if canonical_json(d)!=canonical_json(design_document(repo)):raise ValueError('frozen_staged_design_or_scientific_source_mismatch')
+                                         ^^^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:45: in design_document
+    if canonical_json(binding)!=canonical_json(stage_e_binding(repo)):raise ValueError('e_binding_not_frozen')
+                                               ^^^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:36: in stage_e_binding
+    canonical_manifest_sha256=file_sha256(repo/generation/'manifest.json'),
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dynapm/core/provenance.py:75: in file_sha256
+    with Path(path).open("rb") as f:
+         ^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/Users/fgtek002/dynapm-v8c-frozen/data/google2019/canonical/generations/cell-e-unambiguous-v2-85c74588191efa0b/manifest.json')
+mode = 'rb', buffering = -1, encoding = None, errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/Users/fgtek002/dynapm-v8c-frozen/data/google2019/canonical/generations/cell-e-unambiguous-v2-85c74588191efa0b/manifest.json'
+
+/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py:537: FileNotFoundError
+____ ERROR at setup of test_real_g_unavailable_refused_before_any_execution ____
+
+    @pytest.fixture(scope='module')
+>   def design():return frozen_design(REPO)
+                        ^^^^^^^^^^^^^^^^^^^
+
+dynapm/tests/test_google_staged_replication.py:27: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+dynapm/experiments/google_staged_design.py:86: in frozen_design
+    if canonical_json(d)!=canonical_json(design_document(repo)):raise ValueError('frozen_staged_design_or_scientific_source_mismatch')
+                                         ^^^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:45: in design_document
+    if canonical_json(binding)!=canonical_json(stage_e_binding(repo)):raise ValueError('e_binding_not_frozen')
+                                               ^^^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:36: in stage_e_binding
+    canonical_manifest_sha256=file_sha256(repo/generation/'manifest.json'),
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dynapm/core/provenance.py:75: in file_sha256
+    with Path(path).open("rb") as f:
+         ^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/Users/fgtek002/dynapm-v8c-frozen/data/google2019/canonical/generations/cell-e-unambiguous-v2-85c74588191efa0b/manifest.json')
+mode = 'rb', buffering = -1, encoding = None, errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/Users/fgtek002/dynapm-v8c-frozen/data/google2019/canonical/generations/cell-e-unambiguous-v2-85c74588191efa0b/manifest.json'
+
+/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py:537: FileNotFoundError
+_ ERROR at setup of test_synthetic_stage_lineage_and_required_explicit_cohort __
+
+    @pytest.fixture(scope='module')
+>   def design():return frozen_design(REPO)
+                        ^^^^^^^^^^^^^^^^^^^
+
+dynapm/tests/test_google_staged_replication.py:27: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+dynapm/experiments/google_staged_design.py:86: in frozen_design
+    if canonical_json(d)!=canonical_json(design_document(repo)):raise ValueError('frozen_staged_design_or_scientific_source_mismatch')
+                                         ^^^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:45: in design_document
+    if canonical_json(binding)!=canonical_json(stage_e_binding(repo)):raise ValueError('e_binding_not_frozen')
+                                               ^^^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:36: in stage_e_binding
+    canonical_manifest_sha256=file_sha256(repo/generation/'manifest.json'),
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dynapm/core/provenance.py:75: in file_sha256
+    with Path(path).open("rb") as f:
+         ^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/Users/fgtek002/dynapm-v8c-frozen/data/google2019/canonical/generations/cell-e-unambiguous-v2-85c74588191efa0b/manifest.json')
+mode = 'rb', buffering = -1, encoding = None, errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/Users/fgtek002/dynapm-v8c-frozen/data/google2019/canonical/generations/cell-e-unambiguous-v2-85c74588191efa0b/manifest.json'
+
+/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py:537: FileNotFoundError
+_____________ ERROR at setup of test_superseded_canonical_rejected _____________
+
+    @pytest.fixture(scope='module')
+>   def design():return frozen_design(REPO)
+                        ^^^^^^^^^^^^^^^^^^^
+
+dynapm/tests/test_google_staged_replication.py:27: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+dynapm/experiments/google_staged_design.py:86: in frozen_design
+    if canonical_json(d)!=canonical_json(design_document(repo)):raise ValueError('frozen_staged_design_or_scientific_source_mismatch')
+                                         ^^^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:45: in design_document
+    if canonical_json(binding)!=canonical_json(stage_e_binding(repo)):raise ValueError('e_binding_not_frozen')
+                                               ^^^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:36: in stage_e_binding
+    canonical_manifest_sha256=file_sha256(repo/generation/'manifest.json'),
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dynapm/core/provenance.py:75: in file_sha256
+    with Path(path).open("rb") as f:
+         ^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/Users/fgtek002/dynapm-v8c-frozen/data/google2019/canonical/generations/cell-e-unambiguous-v2-85c74588191efa0b/manifest.json')
+mode = 'rb', buffering = -1, encoding = None, errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/Users/fgtek002/dynapm-v8c-frozen/data/google2019/canonical/generations/cell-e-unambiguous-v2-85c74588191efa0b/manifest.json'
+
+/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py:537: FileNotFoundError
+_____________ ERROR at setup of test_frozen_cohort_tamper_rejected _____________
+
+    @pytest.fixture(scope='module')
+>   def design():return frozen_design(REPO)
+                        ^^^^^^^^^^^^^^^^^^^
+
+dynapm/tests/test_google_staged_replication.py:27: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+dynapm/experiments/google_staged_design.py:86: in frozen_design
+    if canonical_json(d)!=canonical_json(design_document(repo)):raise ValueError('frozen_staged_design_or_scientific_source_mismatch')
+                                         ^^^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:45: in design_document
+    if canonical_json(binding)!=canonical_json(stage_e_binding(repo)):raise ValueError('e_binding_not_frozen')
+                                               ^^^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:36: in stage_e_binding
+    canonical_manifest_sha256=file_sha256(repo/generation/'manifest.json'),
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dynapm/core/provenance.py:75: in file_sha256
+    with Path(path).open("rb") as f:
+         ^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/Users/fgtek002/dynapm-v8c-frozen/data/google2019/canonical/generations/cell-e-unambiguous-v2-85c74588191efa0b/manifest.json')
+mode = 'rb', buffering = -1, encoding = None, errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/Users/fgtek002/dynapm-v8c-frozen/data/google2019/canonical/generations/cell-e-unambiguous-v2-85c74588191efa0b/manifest.json'
+
+/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py:537: FileNotFoundError
+____ ERROR at setup of test_managed_outputs_statistics_and_cache_integrity _____
+
+    @pytest.fixture(scope='module')
+>   def design():return frozen_design(REPO)
+                        ^^^^^^^^^^^^^^^^^^^
+
+dynapm/tests/test_google_staged_replication.py:27: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+dynapm/experiments/google_staged_design.py:86: in frozen_design
+    if canonical_json(d)!=canonical_json(design_document(repo)):raise ValueError('frozen_staged_design_or_scientific_source_mismatch')
+                                         ^^^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:45: in design_document
+    if canonical_json(binding)!=canonical_json(stage_e_binding(repo)):raise ValueError('e_binding_not_frozen')
+                                               ^^^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:36: in stage_e_binding
+    canonical_manifest_sha256=file_sha256(repo/generation/'manifest.json'),
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dynapm/core/provenance.py:75: in file_sha256
+    with Path(path).open("rb") as f:
+         ^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/Users/fgtek002/dynapm-v8c-frozen/data/google2019/canonical/generations/cell-e-unambiguous-v2-85c74588191efa0b/manifest.json')
+mode = 'rb', buffering = -1, encoding = None, errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/Users/fgtek002/dynapm-v8c-frozen/data/google2019/canonical/generations/cell-e-unambiguous-v2-85c74588191efa0b/manifest.json'
+
+/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py:537: FileNotFoundError
+__ ERROR at setup of test_production_managed_execute_on_synthetic_stage_only ___
+
+    @pytest.fixture(scope='module')
+>   def design():return frozen_design(REPO)
+                        ^^^^^^^^^^^^^^^^^^^
+
+dynapm/tests/test_google_staged_replication.py:27: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+dynapm/experiments/google_staged_design.py:86: in frozen_design
+    if canonical_json(d)!=canonical_json(design_document(repo)):raise ValueError('frozen_staged_design_or_scientific_source_mismatch')
+                                         ^^^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:45: in design_document
+    if canonical_json(binding)!=canonical_json(stage_e_binding(repo)):raise ValueError('e_binding_not_frozen')
+                                               ^^^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:36: in stage_e_binding
+    canonical_manifest_sha256=file_sha256(repo/generation/'manifest.json'),
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dynapm/core/provenance.py:75: in file_sha256
+    with Path(path).open("rb") as f:
+         ^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/Users/fgtek002/dynapm-v8c-frozen/data/google2019/canonical/generations/cell-e-unambiguous-v2-85c74588191efa0b/manifest.json')
+mode = 'rb', buffering = -1, encoding = None, errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/Users/fgtek002/dynapm-v8c-frozen/data/google2019/canonical/generations/cell-e-unambiguous-v2-85c74588191efa0b/manifest.json'
+
+/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py:537: FileNotFoundError
+________ ERROR at setup of test_scientific_source_freeze_rejects_change ________
+
+    @pytest.fixture(scope='module')
+>   def design():return frozen_design(REPO)
+                        ^^^^^^^^^^^^^^^^^^^
+
+dynapm/tests/test_google_staged_replication.py:27: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+dynapm/experiments/google_staged_design.py:86: in frozen_design
+    if canonical_json(d)!=canonical_json(design_document(repo)):raise ValueError('frozen_staged_design_or_scientific_source_mismatch')
+                                         ^^^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:45: in design_document
+    if canonical_json(binding)!=canonical_json(stage_e_binding(repo)):raise ValueError('e_binding_not_frozen')
+                                               ^^^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:36: in stage_e_binding
+    canonical_manifest_sha256=file_sha256(repo/generation/'manifest.json'),
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dynapm/core/provenance.py:75: in file_sha256
+    with Path(path).open("rb") as f:
+         ^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/Users/fgtek002/dynapm-v8c-frozen/data/google2019/canonical/generations/cell-e-unambiguous-v2-85c74588191efa0b/manifest.json')
+mode = 'rb', buffering = -1, encoding = None, errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/Users/fgtek002/dynapm-v8c-frozen/data/google2019/canonical/generations/cell-e-unambiguous-v2-85c74588191efa0b/manifest.json'
+
+/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py:537: FileNotFoundError
+________ ERROR at setup of test_preflight_cli_defaults_to_no_execution _________
+
+    @pytest.fixture(scope='module')
+>   def design():return frozen_design(REPO)
+                        ^^^^^^^^^^^^^^^^^^^
+
+dynapm/tests/test_google_staged_replication.py:27: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+dynapm/experiments/google_staged_design.py:86: in frozen_design
+    if canonical_json(d)!=canonical_json(design_document(repo)):raise ValueError('frozen_staged_design_or_scientific_source_mismatch')
+                                         ^^^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:45: in design_document
+    if canonical_json(binding)!=canonical_json(stage_e_binding(repo)):raise ValueError('e_binding_not_frozen')
+                                               ^^^^^^^^^^^^^^^^^^^^^
+dynapm/experiments/google_staged_design.py:36: in stage_e_binding
+    canonical_manifest_sha256=file_sha256(repo/generation/'manifest.json'),
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dynapm/core/provenance.py:75: in file_sha256
+    with Path(path).open("rb") as f:
+         ^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/Users/fgtek002/dynapm-v8c-frozen/data/google2019/canonical/generations/cell-e-unambiguous-v2-85c74588191efa0b/manifest.json')
+mode = 'rb', buffering = -1, encoding = None, errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/Users/fgtek002/dynapm-v8c-frozen/data/google2019/canonical/generations/cell-e-unambiguous-v2-85c74588191efa0b/manifest.json'
+
+/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py:537: FileNotFoundError
+=========================== short test summary info ============================
+ERROR dynapm/tests/test_google_collection_robustness.py::test_secondary_freeze_does_not_change_primary
+ERROR dynapm/tests/test_google_collection_robustness.py::test_aggregation_complete_pairs_and_primary_values_unchanged
+ERROR dynapm/tests/test_google_collection_robustness.py::test_shuffle_determinism
+ERROR dynapm/tests/test_google_collection_robustness.py::test_whole_cluster_bootstrap_matches_literal_repeated_member_resampling
+ERROR dynapm/tests/test_google_collection_robustness.py::test_weighted_entity_and_equal_collection_estimands_can_differ
+ERROR dynapm/tests/test_google_collection_robustness.py::test_singleton_members_are_retained_and_one_cluster_ci_unavailable
+ERROR dynapm/tests/test_google_collection_robustness.py::test_invalid_cluster_summaries_rejected[means0-sizes0]
+ERROR dynapm/tests/test_google_collection_robustness.py::test_invalid_cluster_summaries_rejected[means1-sizes1]
+ERROR dynapm/tests/test_google_collection_robustness.py::test_invalid_cluster_summaries_rejected[means2-sizes2]
+ERROR dynapm/tests/test_google_collection_robustness.py::test_invalid_cluster_summaries_rejected[means3-sizes3]
+ERROR dynapm/tests/test_google_collection_robustness.py::test_invalid_cluster_summaries_rejected[means4-sizes4]
+ERROR dynapm/tests/test_google_collection_robustness.py::test_invalid_cluster_summaries_rejected[means5-sizes5]
+ERROR dynapm/tests/test_google_collection_robustness.py::test_no_silent_exclusions_or_wrong_parent[missing_method]
+ERROR dynapm/tests/test_google_collection_robustness.py::test_no_silent_exclusions_or_wrong_parent[missing_entity]
+ERROR dynapm/tests/test_google_collection_robustness.py::test_no_silent_exclusions_or_wrong_parent[duplicate]
+ERROR dynapm/tests/test_google_collection_robustness.py::test_no_silent_exclusions_or_wrong_parent[wrong_collection]
+ERROR dynapm/tests/test_google_collection_robustness.py::test_no_silent_exclusions_or_wrong_parent[mixed_cell]
+ERROR dynapm/tests/test_google_collection_robustness.py::test_no_silent_exclusions_or_wrong_parent[nonfinite]
+ERROR dynapm/tests/test_google_collection_robustness.py::test_no_silent_exclusions_or_wrong_parent[failed]
+ERROR dynapm/tests/test_google_collection_robustness.py::test_no_silent_exclusions_or_wrong_parent[missing_contrast]
+ERROR dynapm/tests/test_google_collection_robustness.py::test_no_silent_exclusions_or_wrong_parent[wrong_primary_mean]
+ERROR dynapm/tests/test_google_collection_robustness.py::test_cluster_sign_consistency_zero_and_endpoint_direction
+ERROR dynapm/tests/test_google_collection_robustness.py::test_cross_cell_synthesis_separate_and_scoped
+ERROR dynapm/tests/test_google_collection_robustness.py::test_no_cloud_or_policy_calls_and_safe_cli
+ERROR dynapm/tests/test_google_collection_robustness.py::test_frozen_spec_rejects_param_or_source_mutation
+ERROR dynapm/tests/test_google_collection_robustness.py::test_managed_secondary_on_synthetic_parent_only
+ERROR dynapm/tests/test_google_collection_robustness.py::test_yaml_and_schema_guards
+ERROR dynapm/tests/test_google_collection_robustness.py::test_primary_endpoint_ranges_preserved[cpu_class_accuracy-1.1]
+ERROR dynapm/tests/test_google_collection_robustness.py::test_primary_endpoint_ranges_preserved[memory_class_accuracy--0.1]
+ERROR dynapm/tests/test_google_collection_robustness.py::test_primary_endpoint_ranges_preserved[cpu_p95_mae--0.1]
+ERROR dynapm/tests/test_google_collection_robustness.py::test_primary_endpoint_ranges_preserved[n_refresh_events-1.5]
+ERROR dynapm/tests/test_google_collection_robustness.py::test_one_collection_keeps_points_and_serializes_null_cis
+ERROR dynapm/tests/test_google_staged_replication.py::test_prospective_frozen_design_and_statistics
+ERROR dynapm/tests/test_google_staged_replication.py::test_configuration_is_bound_to_execution[period]
+ERROR dynapm/tests/test_google_staged_replication.py::test_configuration_is_bound_to_execution[methods]
+ERROR dynapm/tests/test_google_staged_replication.py::test_configuration_is_bound_to_execution[statistics]
+ERROR dynapm/tests/test_google_staged_replication.py::test_configuration_is_bound_to_execution[cadence]
+ERROR dynapm/tests/test_google_staged_replication.py::test_configuration_is_bound_to_execution[window]
+ERROR dynapm/tests/test_google_staged_replication.py::test_configuration_is_bound_to_execution[initialization]
+ERROR dynapm/tests/test_google_staged_replication.py::test_exact_five_method_matrix_and_factory_periods
+ERROR dynapm/tests/test_google_staged_replication.py::test_accounting_and_identical_verified_reads
+ERROR dynapm/tests/test_google_staged_replication.py::test_availability_and_exact_288_slots
+ERROR dynapm/tests/test_google_staged_replication.py::test_missing_read_and_commit_before_read
+ERROR dynapm/tests/test_google_staged_replication.py::test_pw96_gate_and_delayed_grid_uses_completed_slots
+ERROR dynapm/tests/test_google_staged_replication.py::test_e_g_selection_independent_no_backfill_and_outcomes_ignored
+ERROR dynapm/tests/test_google_staged_replication.py::test_real_g_unavailable_refused_before_any_execution
+ERROR dynapm/tests/test_google_staged_replication.py::test_synthetic_stage_lineage_and_required_explicit_cohort
+ERROR dynapm/tests/test_google_staged_replication.py::test_superseded_canonical_rejected
+ERROR dynapm/tests/test_google_staged_replication.py::test_frozen_cohort_tamper_rejected
+ERROR dynapm/tests/test_google_staged_replication.py::test_managed_outputs_statistics_and_cache_integrity
+ERROR dynapm/tests/test_google_staged_replication.py::test_production_managed_execute_on_synthetic_stage_only
+ERROR dynapm/tests/test_google_staged_replication.py::test_scientific_source_freeze_rejects_change
+ERROR dynapm/tests/test_google_staged_replication.py::test_preflight_cli_defaults_to_no_execution
+942 passed, 3 skipped, 53 errors in 142.28s (0:02:22)
