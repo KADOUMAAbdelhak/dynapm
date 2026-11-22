@@ -6,7 +6,8 @@ change. The amendment binds four identities separately and fails closed on each:
 1. primary executor   67bfd37 (its exact additions over the qualified transport)
 2. task49 observer    1b50282 (its exact delta over 67bfd37, unchanged at HEAD)
 3. observer amendment e4cbb223... (sealed in evidence commit 6004732)
-4. current-boot qualification 594ba9a2... (sealed in evidence commit 697c734)
+4. current-boot qualification b0d91ebc... (sealed in evidence commit 46a6869;
+   re-bound after reboot, superseding 594ba9a2... / boot 6C470F9C)
 
 and requires the exact qualified boot UUID on the current host. The three-hour
 qualification is verified in place, never rewritten, and is not repeated: this
@@ -31,11 +32,14 @@ OBSERVER_COMMIT = '1b5028284d6868a3e3e3fc0d04f58710256054a9'
 OBSERVER_AMENDMENT_PATH = 'results/v8c_r2/20261111-host-observer-amendment-v1/amendment.json'
 OBSERVER_AMENDMENT_SHA256 = 'e4cbb223c76fce09c4ac7141ba89ff9dc1a8d73a457bc8909c962268859e8b74'
 OBSERVER_EVIDENCE_COMMIT = '600473232847c015846bf4765f6005929e7d2377'
-QUALIFICATION_PATH = 'results/v8c_r2/20261111-task49-current-boot-v1/current-boot-qualification.json'
-QUALIFICATION_SHA256 = '594ba9a2a14145bc8bf28f5d3349953b9250cc437abf0f2bd12e547e12d07059'
-QUALIFICATION_MANIFEST = 'results/v8c_r2/20261111-task49-current-boot-v1/OUTPUT_MANIFEST.json'
-QUALIFICATION_EVIDENCE_COMMIT = '697c734c22ccfc8154dcd37744d475fdeb45cb3d'
-BOOT_UUID = '6C470F9C-9B15-4093-87C3-DDE6D713D7E6'
+QUALIFICATION_PATH = 'results/v8c_r2/20261122-task49-current-boot-v2/current-boot-qualification.json'
+QUALIFICATION_SHA256 = 'b0d91ebcbe63144b67f78fb2174349bd3ebb776fd4ec4b0b04bc8fe07c852f38'
+QUALIFICATION_MANIFEST = 'results/v8c_r2/20261122-task49-current-boot-v2/OUTPUT_MANIFEST.json'
+QUALIFICATION_EVIDENCE_COMMIT = '46a686958c0580d6685413727dbb61bd51e215b6'
+BOOT_UUID = '26051F76-7B84-4CBD-A25D-1418E39980A2'
+# Superseded by the reboot of 2026-11-22; kept only so tests can prove it is rejected.
+SUPERSEDED_QUALIFICATION_SHA256 = '594ba9a2a14145bc8bf28f5d3349953b9250cc437abf0f2bd12e547e12d07059'
+SUPERSEDED_BOOT_UUID = '6C470F9C-9B15-4093-87C3-DDE6D713D7E6'
 
 # Exact approved observer delta over the primary executor (git name-status).
 OBSERVER_DELTA = {
