@@ -1,0 +1,27 @@
+{
+ "authorization": "User: \"Updates off, start the 3-hour observation\" (2026-11-22)",
+ "battery": "Now drawing from 'AC Power'\n -InternalBattery-0 (id=7143523)\t100%; charged; 0:00 remaining present: true\n",
+ "boot": {
+  "timeval_raw": "{ sec = 1795335546, usec = 314376 } Sun Nov 22 10:19:06 2026\n",
+  "uuid_raw": "26051F76-7B84-4CBD-A25D-1418E39980A2\n"
+ },
+ "claim_authorized": false,
+ "command": [
+  "/Users/fgtek002/dynapm-v8c-frozen/.venv/bin/python",
+  "-m",
+  "dynapm.scripts.task49_host_uuid_observation",
+  "--repo",
+  "/Users/fgtek002/dynapm-v8c-frozen",
+  "--observe",
+  "--duration-seconds",
+  "10800"
+ ],
+ "duration_seconds": 10800,
+ "free_bytes": 43688677376,
+ "integration_authorized": false,
+ "lifecycle_authorized": false,
+ "observer_commit": "1b5028284d6868a3e3e3fc0d04f58710256054a9",
+ "pmset_custom": "Battery Power:\n Sleep On Power Button 1\n lowpowermode         0\n standby              1\n ttyskeepawake        1\n hibernatemode        3\n powernap             1\n hibernatefile        /var/vm/sleepimage\n displaysleep         0\n womp                 0\n networkoversleep     0\n sleep                1\n lessbright           1\n tcpkeepalive         1\n disksleep            10\nAC Power:\n Sleep On Power Button 1\n lowpowermode         0\n standby              1\n ttyskeepawake        1\n hibernatemode        3\n powernap             1\n hibernatefile        /var/vm/sleepimage\n displaysleep         0\n womp                 1\n networkoversleep     0\n sleep                0\n tcpkeepalive         1\n disksleep            10\n",
+ "purpose": "Fresh 3-hour task49 host observation on the new boot, after the 2026-11-22 restart invalidated boot 6C470F9C; prerequisite for re-binding, Step B and the fresh v2 claim campaign",
+ "started_at": "2026-11-22T15:18:08.460318+00:00"
+}
