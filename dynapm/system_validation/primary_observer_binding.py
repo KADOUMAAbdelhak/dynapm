@@ -9,7 +9,9 @@ change. The amendment binds four identities separately and fails closed on each:
 4. current-boot qualification b0d91ebc... (sealed in evidence commit 46a6869;
    re-bound after reboot, superseding 594ba9a2... / boot 6C470F9C)
 
-and requires the exact qualified boot UUID on the current host. The three-hour
+and requires the exact qualified boot UUID on the current host. Amendment v3
+(docs/primary_slot_replacement_amendment.md) additionally allows the checkpoint
+files listed in BINDING_DELTA, for approved host-power slot replacement only. The three-hour
 qualification is verified in place, never rewritten, and is not repeated: this
 binding leaves the pinned observer runtime, boot UUID and power policy unchanged.
 """
@@ -57,6 +59,12 @@ BINDING_DELTA = {
     'dynapm/system_validation/primary_observer_binding.py': 'A',
     'dynapm/system_validation/service_primary.py': 'M',
     'dynapm/tests/test_primary_observer_binding.py': 'A',
+    # Amendment v3: approved host-power slot replacement (checkpoint only; treatment unchanged).
+    'docs/primary_slot_replacement_amendment.md': 'A',
+    'dynapm/scripts/task51_primary_slot_replacement.py': 'A',
+    'dynapm/system_validation/primary_slot_replacement.py': 'A',
+    'dynapm/system_validation/service_checkpoint.py': 'M',
+    'dynapm/tests/test_primary_slot_replacement.py': 'A',
 }
 # Inside service_primary.py only these admission functions may differ from 67bfd37.
 BINDING_FUNCTIONS = ('source_binding', 'host_qualification')

@@ -2,6 +2,12 @@
 
 Campaign identity excludes the current host session. A new session must qualify
 before begin(), while a completed slot is verified against its original session.
+
+Amendment v3 (docs/primary_slot_replacement_amendment.md) adds only two explicit,
+lock-held operations: an executor-only identity transition, after which every
+earlier attempt is still verified against the identity it was sealed under, and
+the approved replacement of a host-power-invalidated slot, which keeps the
+invalid attempt in ``replaced_attempts``. Neither starts a treatment.
 """
 from contextlib import contextmanager
 from copy import deepcopy
@@ -14,6 +20,7 @@ import uuid
 
 from dynapm.core.provenance import canonical_json, file_sha256, fingerprint, utc_now
 from dynapm.system_validation.bounded_v8 import cells
+from dynapm.system_validation import primary_slot_replacement as replacement
 
 SCHEMA = 'v8-service-primary-checkpoint-v1'
 STATUSES = {'PENDING', 'RUNNING', 'SEALED_VALID', 'SEALED_INVALID', 'INTERRUPTED'}
@@ -67,6 +74,56 @@ def new_checkpoint(identity):
                 for c in cells()])
 
 
+def _verify_history(root, state, identity):
+    """Amendment v3: sealed executor-only identity transitions. Returns tid -> identity."""
+    history = state.get('identity_history', [])
+    if not isinstance(history, list):
+        raise ValueError('campaign_identity_history_malformed')
+    chain = [entry.get('identity') if isinstance(entry, dict) else None for entry in history] + [identity]
+    sealed_under = {}
+    for index, entry in enumerate(history):
+        old, new = chain[index], chain[index+1]
+        try:
+            replacement.identity_difference(old, new)
+        except ValueError as exc:
+            raise ValueError('campaign_identity_transition_invalid') from exc
+        if entry.get('identity_sha256') != fingerprint(old):
+            raise ValueError('campaign_identity_transition_invalid')
+        record_path = _evidence_path(root, entry.get('record'))
+        if file_sha256(record_path) != entry.get('record_sha256'):
+            raise ValueError('campaign_identity_transition_record_changed')
+        record = json.loads(record_path.read_text())
+        tids = entry.get('treatment_ids')
+        if (record.get('schema') != replacement.TRANSITION_SCHEMA
+                or record.get('from_identity_sha256') != fingerprint(old)
+                or record.get('to_identity_sha256') != fingerprint(new)
+                or not isinstance(tids, list) or record.get('treatment_ids') != tids):
+            raise ValueError('campaign_identity_transition_record_mismatch')
+        for tid in tids:
+            if not isinstance(tid, str) or tid in sealed_under:
+                raise ValueError('campaign_identity_transition_record_mismatch')
+            sealed_under[tid] = old
+    return sealed_under
+
+
+def _verify_replaced(root, slot, record, identity):
+    """Re-verify one replaced invalid attempt: sealed inventory, eligibility and approval."""
+    if not isinstance(record, dict) or record.get('status') != 'SEALED_INVALID':
+        raise ValueError('replaced_attempt_must_be_sealed_invalid')
+    bound = dict(record, cell=slot['cell'])
+    manifest = verify_slot(root, bound, identity)
+    tid = record['treatment_id']
+    failure = _evidence_path(root, replacement.failure_path(tid))
+    digest = file_sha256(failure)
+    invariant = replacement.require_eligible(manifest, json.loads(failure.read_text()), digest, tid)
+    approval = _evidence_path(root, record.get('approval'))
+    if file_sha256(approval) != record.get('approval_sha256'):
+        raise ValueError('replacement_approval_changed')
+    replacement.require_approval(json.loads(approval.read_text()), cell=slot['cell'], treatment_id=tid,
+                                 manifest_sha256=record['manifest_sha256'], failure_sha256=digest,
+                                 invariant=invariant)
+
+
 def verify_checkpoint(root, state, identity):
     if (state.get('schema') != SCHEMA or state.get('identity') != identity
             or state.get('identity_sha256') != fingerprint(identity)
@@ -75,13 +132,27 @@ def verify_checkpoint(root, state, identity):
     slots = state.get('slots', [])
     if len(slots) != 18:
         raise ValueError('exact_18_slots_required')
+    sealed_under = _verify_history(root, state, identity)
     pending_seen = False
     blocked = None
     treatment_ids = set()
+    replaced_counts = []
     for slot, cell in zip(slots, cells(), strict=True):
         status = slot.get('status')
         if slot.get('cell') != cell or status not in STATUSES:
             raise ValueError('frozen_slot_or_status_mismatch')
+        replaced = slot.get('replaced_attempts', [])
+        if not isinstance(replaced, list):
+            raise ValueError('replaced_attempts_malformed')
+        if replaced and (pending_seen or blocked is not None):
+            raise ValueError('noncontiguous_completed_prefix')
+        replaced_counts.append(len(replaced))
+        for record in replaced:
+            ident = record.get('treatment_id') if isinstance(record, dict) else None
+            if not ident or ident in treatment_ids or not record.get('started_at'):
+                raise ValueError('missing_or_reused_treatment_identity')
+            treatment_ids.add(ident)
+            _verify_replaced(root, slot, record, sealed_under.get(ident, identity))
         if status == 'PENDING':
             if any(slot.get(k) is not None for k in ('treatment_id', 'manifest', 'manifest_sha256',
                     'request_sha256', 'endpoint_sha256', 'continuity_sha256', 'started_at', 'ended_at')):
@@ -97,9 +168,12 @@ def verify_checkpoint(root, state, identity):
         if status in ('RUNNING', 'INTERRUPTED'):
             blocked = status
         elif status in ('SEALED_VALID', 'SEALED_INVALID'):
-            verify_slot(root, slot, identity)
+            verify_slot(root, slot, sealed_under.get(ident, identity))
             if status == 'SEALED_INVALID':
                 blocked = status
+    replacement.require_limits(replaced_counts)
+    if not set(sealed_under) <= treatment_ids:
+        raise ValueError('campaign_identity_transition_record_mismatch')
     attempts = Path(root) / 'attempts'
     if attempts.exists():
         for attempt in attempts.iterdir():
@@ -222,6 +296,84 @@ class Checkpoint:
                             ('continuity', 'continuity_sha256')]:
             slot[field] = value['files'][value[name+'_path']]
         self._commit(state)
+
+
+def _load(root, identity):
+    path = Path(root) / 'checkpoint.json'
+    state = json.loads(path.read_text())
+    verify_checkpoint(root, state, identity)
+    if any(slot['status'] in ('RUNNING', 'INTERRUPTED') for slot in state['slots']):
+        raise ValueError('running_or_interrupted_slot_requires_review')
+    return state
+
+
+def _write_once(path, value):
+    path = Path(path)
+    path.parent.mkdir(exist_ok=True)
+    if path.exists():
+        raise ValueError('immutable_record_exists:'+path.name)
+    atomic_record(path, value)
+    path.chmod(0o444)
+    return file_sha256(path)
+
+
+def transition_identity(root, old_identity, new_identity, *, reason):
+    """Amendment v3. Caller holds campaign_lock. Executor-only identity change, sealed once.
+
+    Every attempt sealed so far stays bound to the identity it was sealed under.
+    """
+    root = Path(root)
+    state = _load(root, old_identity)
+    replacement.identity_difference(old_identity, new_identity)
+    sealed_under = _verify_history(root, state, old_identity)
+    tids = [r['treatment_id'] for s in state['slots'] for r in s.get('replaced_attempts', [])]
+    tids += [s['treatment_id'] for s in state['slots'] if s['treatment_id'] is not None]
+    tids = [t for t in tids if t not in sealed_under]
+    index = len(state.get('identity_history', [])) + 1
+    relative = 'transitions/transition-%02d.json' % index
+    record = dict(schema=replacement.TRANSITION_SCHEMA, from_identity_sha256=fingerprint(old_identity),
+                  to_identity_sha256=fingerprint(new_identity), changed_fields=sorted(
+                  replacement.identity_difference(old_identity, new_identity)),
+                  treatment_ids=tids, reason=reason, recorded_at=utc_now())
+    digest = _write_once(root/relative, record)
+    new = deepcopy(state)
+    new.setdefault('identity_history', []).append(dict(identity=deepcopy(old_identity),
+        identity_sha256=fingerprint(old_identity), record=relative, record_sha256=digest,
+        treatment_ids=tids, transitioned_at=record['recorded_at']))
+    new.update(identity=deepcopy(new_identity), identity_sha256=fingerprint(new_identity),
+               revision=state['revision']+1, updated_at=utc_now())
+    verify_checkpoint(root, new, new_identity)
+    atomic_record(root/'checkpoint.json', new)
+    return new
+
+
+def replace_invalid_slot(root, identity, sequence, approval):
+    """Amendment v3. Caller holds campaign_lock. Returns an approved invalid slot to PENDING.
+
+    The invalid attempt is kept, moved into ``replaced_attempts`` and re-verified on
+    every later load. ``approval`` is a root-relative path to the sealed approval.
+    """
+    root = Path(root)
+    state = _load(root, identity)
+    if type(sequence) is not int or not 1 <= sequence <= 18:
+        raise ValueError('valid_stop_slot_required')
+    slot = state['slots'][sequence-1]
+    if slot['status'] != 'SEALED_INVALID':
+        raise ValueError('replacement_requires_sealed_invalid_slot')
+    fields = ('treatment_id', 'manifest', 'manifest_sha256', 'request_sha256', 'endpoint_sha256',
+              'continuity_sha256', 'started_at', 'ended_at')
+    record = {k: slot[k] for k in fields}
+    record.update(status='SEALED_INVALID', session=deepcopy(slot.get('session')), approval=approval,
+                  approval_sha256=file_sha256(_evidence_path(root, approval)), replaced_at=utc_now())
+    new = deepcopy(state)
+    target = new['slots'][sequence-1]
+    target.setdefault('replaced_attempts', []).append(record)
+    target.pop('session', None)
+    target.update(status='PENDING', **{k: None for k in fields})
+    new.update(revision=state['revision']+1, updated_at=utc_now())
+    verify_checkpoint(root, new, identity)
+    atomic_record(root/'checkpoint.json', new)
+    return new
 
 
 def stop_after_seal(completed_this_session, sequence, *, max_slots=None, stop_after_slot=None):
