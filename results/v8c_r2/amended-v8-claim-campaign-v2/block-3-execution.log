@@ -1,0 +1,31 @@
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/Users/fgtek002/dynapm-v8c-frozen/dynapm/scripts/task48_v8_service_primary.py", line 49, in <module>
+    if __name__=='__main__':main()
+                            ~~~~^^
+  File "/Users/fgtek002/dynapm-v8c-frozen/dynapm/scripts/task48_v8_service_primary.py", line 44, in main
+    state=campaign(Path.cwd(),a.root.resolve(),read_json(a.spec),a.scope,resume=a.resume,
+        max_slots=a.max_slots,stop_after_slot=a.stop_after_slot,qualification=qualification)
+  File "/Users/fgtek002/dynapm-v8c-frozen/dynapm/system_validation/service_primary.py", line 535, in campaign
+    session,design,bundle,environment=admit(repo,sessionroot,spec,19-cell['sequence'])
+                                      ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/fgtek002/dynapm-v8c-frozen/dynapm/system_validation/service_primary.py", line 212, in preflight
+    provenance=source_binding(repo,spec)
+  File "/Users/fgtek002/dynapm-v8c-frozen/dynapm/system_validation/service_primary.py", line 133, in source_binding
+    head=subprocess.check_output(['git','rev-parse','HEAD'],cwd=repo,text=True).strip()
+         ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/lib/python3.13/subprocess.py", line 474, in check_output
+    return run(*popenargs, stdout=PIPE, timeout=timeout, check=True,
+           ~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+               **kwargs).stdout
+               ^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/lib/python3.13/subprocess.py", line 558, in run
+    stdout, stderr = process.communicate(input, timeout=timeout)
+                     ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/lib/python3.13/subprocess.py", line 1208, in communicate
+    stdout = self.stdout.read()
+  File "/Users/fgtek002/dynapm-v8c-frozen/dynapm/scripts/task48_v8_service_primary.py", line 42, in interrupted
+    def interrupted(*_):raise KeyboardInterrupt('launcher_signal')
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+KeyboardInterrupt: launcher_signal

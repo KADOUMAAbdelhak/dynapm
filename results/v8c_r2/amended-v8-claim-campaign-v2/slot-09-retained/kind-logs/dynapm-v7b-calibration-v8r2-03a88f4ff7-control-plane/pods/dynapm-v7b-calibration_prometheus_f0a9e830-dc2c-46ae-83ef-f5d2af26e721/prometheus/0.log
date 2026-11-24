@@ -1,0 +1,21 @@
+2026-11-23T08:32:30.787054251Z stderr F time=2026-11-23T08:32:30.786Z level=INFO source=main.go:687 msg="Starting Prometheus Server" mode=server version="(version=3.2.1, branch=HEAD, revision=804c49d58f3f3784c77c9c8ec17c9062092cae27)"
+2026-11-23T08:32:30.787077042Z stderr F time=2026-11-23T08:32:30.786Z level=INFO source=main.go:692 msg="operational information" build_context="(go=go1.23.6, platform=linux/arm64, user=root@42fd9529152a, date=20250226-09:22:47, tags=netgo,builtinassets,stringlabels)" host_details="(Linux 6.10.14-linuxkit #1 SMP Mon Feb 24 16:35:16 UTC 2025 aarch64 prometheus (none))" fd_limits="(soft=1073741816, hard=1073741816)" vm_limits="(soft=unlimited, hard=unlimited)"
+2026-11-23T08:32:30.787987042Z stderr F time=2026-11-23T08:32:30.787Z level=INFO source=main.go:768 msg="Updating GOMAXPROCS=1: using minimum allowed GOMAXPROCS" component=automaxprocs
+2026-11-23T08:32:30.790306584Z stderr F time=2026-11-23T08:32:30.790Z level=INFO source=web.go:654 msg="Start listening for connections" component=web address=0.0.0.0:9090
+2026-11-23T08:32:30.790654751Z stderr F time=2026-11-23T08:32:30.790Z level=INFO source=main.go:1228 msg="Starting TSDB ..."
+2026-11-23T08:32:30.791960251Z stderr F time=2026-11-23T08:32:30.791Z level=INFO source=head.go:628 msg="Replaying on-disk memory mappable chunks if any" component=tsdb
+2026-11-23T08:32:30.791962834Z stderr F time=2026-11-23T08:32:30.791Z level=INFO source=head.go:715 msg="On-disk memory mappable chunks replay completed" component=tsdb duration=1µs
+2026-11-23T08:32:30.791963459Z stderr F time=2026-11-23T08:32:30.791Z level=INFO source=head.go:723 msg="Replaying WAL, this may take a while" component=tsdb
+2026-11-23T08:32:30.793517126Z stderr F time=2026-11-23T08:32:30.793Z level=INFO source=tls_config.go:347 msg="Listening on" component=web address=[::]:9090
+2026-11-23T08:32:30.793519626Z stderr F time=2026-11-23T08:32:30.793Z level=INFO source=tls_config.go:350 msg="TLS is disabled." component=web http2=false address=[::]:9090
+2026-11-23T08:32:30.793775751Z stderr F time=2026-11-23T08:32:30.793Z level=INFO source=head.go:795 msg="WAL segment loaded" component=tsdb segment=0 maxSegment=0
+2026-11-23T08:32:30.793777834Z stderr F time=2026-11-23T08:32:30.793Z level=INFO source=head.go:832 msg="WAL replay completed" component=tsdb checkpoint_replay_duration=26.375µs wal_replay_duration=1.787666ms wbl_replay_duration=42ns chunk_snapshot_load_duration=0s mmap_chunk_replay_duration=1µs total_replay_duration=1.823167ms
+2026-11-23T08:32:30.879847084Z stderr F time=2026-11-23T08:32:30.879Z level=INFO source=main.go:1249 msg="filesystem information" fs_type=EXT4_SUPER_MAGIC
+2026-11-23T08:32:30.879865417Z stderr F time=2026-11-23T08:32:30.879Z level=INFO source=main.go:1252 msg="TSDB started"
+2026-11-23T08:32:30.879868167Z stderr F time=2026-11-23T08:32:30.879Z level=INFO source=main.go:1437 msg="Loading configuration file" filename=/etc/prometheus/prometheus.yml
+2026-11-23T08:32:30.880235876Z stderr F time=2026-11-23T08:32:30.880Z level=INFO source=main.go:1476 msg="updated GOGC" old=100 new=75
+2026-11-23T08:32:30.880242751Z stderr F time=2026-11-23T08:32:30.880Z level=INFO source=main.go:1486 msg="Completed loading of configuration file" db_storage=1.041µs remote_storage=1.125µs web_handler=459ns query_engine=1µs scrape=188.959µs scrape_sd=16.125µs notify=750ns notify_sd=458ns rules=1.375µs tracing=11.708µs filename=/etc/prometheus/prometheus.yml totalDuration=482.333µs
+2026-11-23T08:32:30.880244334Z stderr F time=2026-11-23T08:32:30.880Z level=INFO source=main.go:1213 msg="Server is ready to receive web requests."
+2026-11-23T08:32:30.880366334Z stderr F time=2026-11-23T08:32:30.880Z level=INFO source=manager.go:175 msg="Starting rule manager..." component="rule manager"
+2026-11-23T11:37:55.812094001Z stderr F time=2026-11-23T11:37:55.811Z level=INFO source=compact.go:591 msg="write block" component=tsdb mint=1795422758528 maxt=1795428000000 ulid=01M8435J9H26T0Z4E3M59TTYX4 duration=50.763417ms ooo=false
+2026-11-23T11:37:55.814047126Z stderr F time=2026-11-23T11:37:55.813Z level=INFO source=head.go:1371 msg="Head GC completed" component=tsdb caller=truncateMemory duration=1.744333ms

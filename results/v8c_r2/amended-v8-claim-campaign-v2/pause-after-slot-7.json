@@ -1,0 +1,1 @@
+{"action": "SIGTERM_after_seal_before_next_begin", "next_status_after": "PENDING", "next_status_at_signal": "PENDING", "paused_after_slot": 7, "pids": [99602], "reason": "User asked to pause the experiments and resume later", "recorded_at": "2026-11-23T06:21:33.943944+00:00", "slot_status": "SEALED_VALID"}

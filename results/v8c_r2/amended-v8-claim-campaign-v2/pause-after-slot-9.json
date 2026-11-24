@@ -1,0 +1,1 @@
+{"action": "none", "next_status_after": "PENDING", "next_status_at_signal": "PENDING", "paused_after_slot": 9, "pids": [17963], "reason": "User asked to pause the experiments and resume later", "recorded_at": "2026-11-23T07:11:20.822118+00:00", "slot_status": "PENDING"}

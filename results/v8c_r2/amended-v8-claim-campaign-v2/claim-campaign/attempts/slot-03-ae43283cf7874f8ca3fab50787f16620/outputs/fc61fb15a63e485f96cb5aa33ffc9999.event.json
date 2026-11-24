@@ -1,0 +1,1 @@
+{"actuation":{"ack_monotonic_ns":53227319855791,"actuation_latency_seconds":0.883014667,"cpu_millicores":190,"enforced_monotonic_ns":53228085085333,"memory_request_mib":136,"status":"ENFORCED"},"event":"TARGET_ENFORCEMENT","host_monotonic_ns":53228085465125,"recorded_at":"2026-11-23T00:46:15.035339+00:00"}

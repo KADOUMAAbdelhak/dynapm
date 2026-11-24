@@ -1,0 +1,17 @@
+IMAGE                                           TAG                  IMAGE ID            SIZE
+docker.io/kindest/kindnetd                      v20260820-69b56db7   8e13ccc0aaa68       35.7MB
+docker.io/kindest/local-path-helper             v20260131-7181c60a   8f375e9f93513       2.74MB
+docker.io/kindest/local-path-provisioner        v20260820-69b56db7   0771a8a05619f       14.2MB
+docker.io/library/dynapm-system-prometheus      v7a                  966b588e7ab70       111MB
+docker.io/library/dynapm-system-workload        v7b-instrumented     26816ea4805a4       43.9MB
+registry.k8s.io/coredns/coredns                 v1.13.1              e08f4d9d2e6ed       21.2MB
+registry.k8s.io/etcd                            3.6.6-0              271e49a0ebc56       21.7MB
+registry.k8s.io/kube-apiserver-arm64            v1.35.8              845eb6ab50313       85.5MB
+registry.k8s.io/kube-apiserver                  v1.35.8              845eb6ab50313       85.5MB
+registry.k8s.io/kube-controller-manager-arm64   v1.35.8              f3b532419e11e       72.8MB
+registry.k8s.io/kube-controller-manager         v1.35.8              f3b532419e11e       72.8MB
+registry.k8s.io/kube-proxy-arm64                v1.35.8              b244ad040ab49       76.8MB
+registry.k8s.io/kube-proxy                      v1.35.8              b244ad040ab49       76.8MB
+registry.k8s.io/kube-scheduler-arm64            v1.35.8              83814780ed2e1       50.4MB
+registry.k8s.io/kube-scheduler                  v1.35.8              83814780ed2e1       50.4MB
+registry.k8s.io/pause                           3.10                 afb61768ce381       268kB

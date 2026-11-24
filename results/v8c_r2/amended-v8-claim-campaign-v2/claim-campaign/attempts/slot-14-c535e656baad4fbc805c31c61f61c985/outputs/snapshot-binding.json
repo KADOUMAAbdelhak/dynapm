@@ -1,0 +1,1 @@
+{"snapshot_sha256":"272a306397d842a8711c5f770aaa5c97507f17ad12f0171c8c11ba7eef90f607","t0_policy":"FROZEN_T0_INCLUDES_ENFORCEMENT_TRANSITION","target":{"limits":{"cpu":"70m","memory":"1024Mi"},"requests":{"cpu":"70m","memory":"64Mi"}}}
